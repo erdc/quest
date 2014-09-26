@@ -2,10 +2,22 @@
     api definition
 """
 
-def get_sources(config=None):
+from .config import available_services
+import json
+
+def get_sources(config=None, as_json=False):
     """Fetches list of data sources available in the data services library
     """
-    pass
+    if config:
+        raise NotImplementedError
+
+    services = available_services()
+
+    if as_json:
+        return json.dumps(services, sort_keys=True,
+                          indent=4, separators=(',', ': '))
+
+    return services
 
 
 def add_source(source_name, source_type, metadata):
