@@ -43,7 +43,9 @@ setup(
     packages=find_packages(),
     platforms='any',
     install_requires=[
+        'appdirs>=1.2.0',
         'numpy>=1.4.0',
+        'stevedore',
     ],
     classifiers=[
         'Development Status :: 3 - Alpha',
@@ -53,6 +55,21 @@ setup(
         'Programming Language :: Python',
         'Topic :: Software Development :: Libraries :: Python Modules'
     ],
+
+
+    include_package_data=True,
+
+    entry_points={
+        'data_services_library.services': [
+            'usgs-nwis-iv = data_services_library.services.usgs_nwis:UsgsNwisIV',
+            'usgs-nwis-dv = data_services_library.services.usgs_nwis:UsgsNwisDV',
+            'ncdc-ghcn = data_services_library.services.ncdc_ghcn:NcdcGhcn',
+            'ncdc-gsod = data_services_library.services.ncdc_gsod:NcdcGsod',
+        ],
+    },
+
+    zip_safe=False,
+
     tests_require=[
         'pytest>=2.3.2',
     ],

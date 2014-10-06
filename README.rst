@@ -3,6 +3,26 @@ Environmental Simulator Data Services Library
 
 Currently a stub implementation of API
 
+Installation
+============
+
+from the root dir type:
+
+python setup.py install
+
+OR
+
+python setup.py develop
+
+for development mode
+
+Usage Examples
+==============
+
+>>> import data_services as dsl
+>>> services = dsl.api.get_sources() #as python dict
+>>> services_json = dsl.api.get_sources(as_json=True) #as pretty printed json string
+
 Python API Description
 ======================
 

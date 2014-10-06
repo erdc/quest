@@ -4,6 +4,7 @@
 
 from .config import available_services
 import json
+from stevedore import extension
 
 def get_sources(config=None, as_json=False):
     """Fetches list of data sources available in the data services library
@@ -18,6 +19,17 @@ def get_sources(config=None, as_json=False):
                           indent=4, separators=(',', ': '))
 
     return services
+
+
+def get_services():
+    """ generates a list of available data services
+    """
+    mgr = extension.ExtensionManager(
+        namespace='data_services_library.services',
+        invoke_on_load=True,
+    )
+
+    return mgr.map(_metadata)
 
 
 def add_source(source_name, source_type, metadata):
@@ -71,4 +83,6 @@ def apply_filter(dataset, filter):
     pass
 
 
+def _metadata(ext):
+    return (ext.name, ext.obj.metadata)
 
