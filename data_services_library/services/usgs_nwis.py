@@ -1,5 +1,5 @@
 from data_services_library.services import base
-
+from ulmo.usgs import nwis
 
 class UsgsNwisIV(base.DataServiceBase):
     def register(self):
@@ -17,6 +17,11 @@ class UsgsNwisIV(base.DataServiceBase):
                     'type': 'timeseries' 
                 }
 
+
+    def get_locations(self, sites=None, state_code=None, site_type=None, service='iv'):
+        locations = nwis.get_sites(sites=sites, state_code=state_code, site_type=site_type, service=service)
+        return locations
+        
 
 class UsgsNwisDV(base.DataServiceBase):
     def register(self):

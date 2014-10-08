@@ -4,7 +4,9 @@
 
 from .config import available_services
 import json
-from stevedore import extension
+from stevedore import extension, driver
+
+SERVICES_NAMESPACE = 'data_services_library.services'
 
 def get_sources(config=None, as_json=False):
     """Fetches list of data sources available in the data services library
@@ -50,12 +52,13 @@ def delete_source(source_name):
     pass
 
 
-def get_locations(source, parameter=None, bounding_poly=None, 
-                  start_time=None, end_time=None, period=None):
+def get_locations(service_uid, **kwargs):
     """Fetches location data for a given source (points, lines, polygons)
     """
-    pass
+    service = driver.DriverManager(SERVICES_NAMESPACE, service_uid, invoke_on_load='True')
 
+    return service.driver.get_locations(**kwargs)
+    
 
 def get_data(source, identifiers, **kwargs):
     """Fetches data for a list of identifiers. Not sure what the kwargs 

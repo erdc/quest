@@ -14,3 +14,10 @@ class DataServiceBase(object):
     def register(self):
         """Register plugin by setting service name, source and uid 
         """
+
+
+    @abc.abstractmethod
+    def get_locations(self, *args, **kwargs):
+        """Take a series of query parameters and return a list of 
+        locations.
+        """
