@@ -16,19 +16,19 @@ class ExamplePoints(base.DataServiceBase):
                     'dataset_name': 'example points service',
                     'description': 'Instantaneous values at monitoring locations',
                     'geographical area': 'CONUS',
-                    'bounding box': [24., -128., 52., -64.],
+                    'bbox': [24., -128., 52., -64.],
                     'geotype': 'points',
                     'type': 'timeseries' 
                 }
 
 
-    def get_locations(self, bounding_box=None):
+    def get_locations(self, bbox=None):
         #get 100 random locations
-        if not bounding_box:
-            bounding_box = self.metadata['bounding_box']
+        if not bbox:
+            bbox = self.metadata['bbox']
 
-        x1, y1, x2, y2 = bounding_box
-        locations = [_random_point(bounding_box) for i in range(100)]
+        x1, y1, x2, y2 = bbox
+        locations = [_random_point(bbox) for i in range(100)]
 
 
 
@@ -44,7 +44,7 @@ class ExamplePolys(base.DataServiceBase):
                     'dataset_name': 'example polys service',
                     'description': 'Instantaneous values at monitoring locations',
                     'geographical area': 'CONUS',
-                    'bounding box': [24., -128., 52., -64.],
+                    'bbox': [24., -128., 52., -64.],
                     'geotype': 'polygons',
                     'type': 'timeseries' 
                 }
@@ -52,13 +52,13 @@ class ExamplePolys(base.DataServiceBase):
 
     def get_locations(self, bounding_box=None):
         #get 10 random triangle
-        if not bounding_box:
-            bounding_box = self.metadata['bounding_box']
+        if not bbox:
+            bbox = self.metadata['bbox']
 
-        x1, y1, x2, y2 = bounding_box
+        x1, y1, x2, y2 = bbox
         triangles = []
         for _ in range(10):
-            triangles.append([_random_point(bounding_box) for i in range(3)])
+            triangles.append([_random_point(bbox) for i in range(3)])
 
         return triangles
 
