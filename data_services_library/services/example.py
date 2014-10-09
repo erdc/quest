@@ -50,7 +50,7 @@ class ExamplePolys(base.DataServiceBase):
                 }
 
 
-    def get_locations(self, bounding_box=None):
+    def get_locations(self, bbox=None):
         #get 10 random triangle
         if not bbox:
             bbox = self.metadata['bbox']
