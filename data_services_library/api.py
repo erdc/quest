@@ -4,34 +4,37 @@
 
 from .config import available_services
 import json
+import itertools
 from stevedore import extension, driver
 
 SERVICES_NAMESPACE = 'data_services_library.services'
 
-def get_sources(config=None, as_json=False):
-    """Fetches list of data sources available in the data services library
-    """
-    if config:
-        raise NotImplementedError
 
-    services = available_services()
+def get_services(as_json=False, group=True):
+    """ generates a list of available data services
+    """
+    mgr = extension.ExtensionManager(
+        namespace=SERVICES_NAMESPACE,
+        invoke_on_load=True,
+    )
+
+    datasets = mgr.map(_metadata)
+
+    if not group:
+        services = sorted(datasets)
+    else:
+        #rearrange by service name
+        services = [{
+                        'service_name': name,
+                        'datasets': [_remove_key(item, 'service_name') for item in group],
+                    } for name, group in itertools.groupby(sorted(datasets), 
+                                                           lambda p:p['service_name'])]
 
     if as_json:
         return json.dumps(services, sort_keys=True,
                           indent=4, separators=(',', ': '))
 
     return services
-
-
-def get_services():
-    """ generates a list of available data services
-    """
-    mgr = extension.ExtensionManager(
-        namespace='data_services_library.services',
-        invoke_on_load=True,
-    )
-
-    return mgr.map(_metadata)
 
 
 def add_source(source_name, source_type, metadata):
@@ -58,7 +61,7 @@ def get_locations(service_uid, **kwargs):
     service = driver.DriverManager(SERVICES_NAMESPACE, service_uid, invoke_on_load='True')
 
     return service.driver.get_locations(**kwargs)
-    
+
 
 def get_data(source, identifiers, **kwargs):
     """Fetches data for a list of identifiers. Not sure what the kwargs 
@@ -87,5 +90,13 @@ def apply_filter(dataset, filter):
 
 
 def _metadata(ext):
-    return (ext.name, ext.obj.metadata)
+    metadata = ext.obj.metadata.copy()
+    metadata['uid'] = ext.name
 
+    return metadata
+
+
+def _remove_key(d, key):
+    r = dict(d)
+    del r[key]
+    return r

@@ -16,8 +16,8 @@ class DataServiceBase(object):
         """
 
 
-    @abc.abstractmethod
-    def get_locations(self, *args, **kwargs):
-        """Take a series of query parameters and return a list of 
-        locations.
-        """
+    # @abc.abstractmethod
+    # def get_locations(self, *args, **kwargs):
+    #     """Take a series of query parameters and return a list of 
+    #     locations.
+    #     """
