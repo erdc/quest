@@ -45,7 +45,8 @@ setup(
     install_requires=[
         'appdirs>=1.2.0',
         'geojson',
-        'numpy>=1.4.0',
+        'flask',
+        #'numpy>=1.4.0',
         'stevedore',
     ],
     classifiers=[
