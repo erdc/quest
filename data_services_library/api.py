@@ -3,6 +3,7 @@
 """
 
 from .config import available_services
+import geojson
 import json
 import itertools
 from stevedore import extension, driver
@@ -59,8 +60,9 @@ def get_locations(service_uid, **kwargs):
     """Fetches location data for a given source (points, lines, polygons)
     """
     service = driver.DriverManager(SERVICES_NAMESPACE, service_uid, invoke_on_load='True')
+    locations = service.driver.get_locations(**kwargs)
 
-    return service.driver.get_locations(**kwargs)
+    return geojson.dumps(locations, sort_keys=True)
 
 
 def get_data(source, identifiers, **kwargs):

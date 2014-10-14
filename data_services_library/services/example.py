@@ -3,7 +3,7 @@ Example Services
 """
 
 from data_services_library.services import base
-#from geojson import Point
+from geojson import Feature, FeatureCollection, Point, Polygon
 from random import random
 
 
@@ -30,9 +30,12 @@ class ExamplePoints(base.DataServiceBase):
         x1, y1, x2, y2 = bbox
         locations = [_random_point(bbox) for i in range(100)]
 
+        points = []
+        for location in locations:
+            properties = {'parameter': 'Temperature', 'units': 'degF', 'site_code': int(random()*1000000)}
+            points.append(Feature(geometry=Point(location), properties=properties))
 
-
-        return locations
+        return FeatureCollection(points)
 
 
 class ExamplePolys(base.DataServiceBase):
@@ -58,9 +61,13 @@ class ExamplePolys(base.DataServiceBase):
         x1, y1, x2, y2 = bbox
         triangles = []
         for _ in range(10):
-            triangles.append([_random_point(bbox) for i in range(3)])
+            properties = {'parameter': 'LandCover', 'covertype': 'foilage', 'area_number': int(random()*10000)}
+            triangle = [_random_point(bbox) for i in range(3)]
+            triangle.append(triangle[0])
+            triangles.append(Feature(geometry=Polygon([triangle]),
+                properties=properties))
 
-        return triangles
+        return FeatureCollection(triangles)
 
 
 def _random_point(bounding_box):
