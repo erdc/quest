@@ -68,7 +68,8 @@ setup(
             'ncdc-ghcn = data_services_library.services.ncdc_ghcn:NcdcGhcn',
             'ncdc-gsod = data_services_library.services.ncdc_gsod:NcdcGsod',
             'example-points = data_services_library.services.example:ExamplePoints',
-            'example-polys = data_services_library.services.example:ExamplePolys'
+            'example-polys = data_services_library.services.example:ExamplePolys',
+            'example-vitd = data_services_library.services.example:ExampleVITD'
         ],
     },
 
