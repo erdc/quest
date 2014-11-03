@@ -16,7 +16,7 @@ class ExamplePoints(base.DataServiceBase):
                     'dataset_name': 'example points service',
                     'description': 'Instantaneous values at monitoring locations',
                     'geographical area': 'CONUS',
-                    'bbox': [24., -128., 52., -64.],
+                    'bbox': [-128., 24., -64., 52.],
                     'geotype': 'points',
                     'type': 'timeseries' 
                 }
@@ -47,7 +47,7 @@ class ExamplePolys(base.DataServiceBase):
                     'dataset_name': 'example polys service',
                     'description': 'Instantaneous values at monitoring locations',
                     'geographical area': 'CONUS',
-                    'bbox': [24., -128., 52., -64.],
+                    'bbox': [-128., 24., -64., 52.],
                     'geotype': 'polygons',
                     'type': 'timeseries' 
                 }
