@@ -11,15 +11,19 @@ from stevedore import extension, driver
 SERVICES_NAMESPACE = 'data_services_library.services'
 
 
-def get_services(as_json=False, group=True):
+def get_services(uid=None, as_json=False, group=True):
     """ generates a list of available data services
     """
-    mgr = extension.ExtensionManager(
-        namespace=SERVICES_NAMESPACE,
-        invoke_on_load=True,
-    )
 
-    datasets = mgr.map(_metadata)
+    if uid:
+        service = driver.DriverManager(SERVICES_NAMESPACE, uid, invoke_on_load='True')
+        datasets = [_metadata(service.extensions[0])]
+    else:
+        mgr = extension.ExtensionManager(
+            namespace=SERVICES_NAMESPACE,
+            invoke_on_load=True,
+        )
+        datasets = mgr.map(_metadata)
 
     if not group:
         services = sorted(datasets)

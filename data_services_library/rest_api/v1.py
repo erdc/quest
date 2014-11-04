@@ -1,6 +1,6 @@
 import data_services_library as dsl
 
-from flask import Blueprint, render_template, abort
+from flask import Blueprint, Response, request, render_template, abort
 
 api = Blueprint('v1', __name__, template_folder='templates')
 
@@ -23,14 +23,27 @@ def index():
 
 
 @api.route("/services")
-def services():
-    js = dsl.api.get_services(as_json=True)
+@api.route("/services/<id>")
+def services(id=None):
+    js = dsl.api.get_services(id=id, as_json=True)
     return Response(js, status=200, mimetype='application/json')
 
 
-@api.route("/locations/<dataset>")
-@api.route("/locations/<dataset>/bbox/<bbox>")
-def locations(dataset, bbox=None):
+@api.route("/providers")
+@api.route("/providers/<id>")
+def providers(id=None):
+    pass
+
+
+@api.route("/collections/")
+@api.route("/collections/<id>")
+def collections(id=None):
+    pass
+
+
+@api.route("/services/<uid>/locations")
+def locations(dataset):
+    bbox = request.args.get('bbox')
     if bbox:
         bbox = [float(x) for x in bbox.split(',')]
     js = dsl.api.get_locations(dataset, bbox=bbox)
