@@ -23,9 +23,9 @@ def index():
 
 
 @api.route("/services")
-@api.route("/services/<id>")
-def services(id=None):
-    js = dsl.api.get_services(id=id, as_json=True)
+@api.route("/services/<uid>")
+def services(uid=None):
+    js = dsl.api.get_services(uid=uid, as_json=True)
     return Response(js, status=200, mimetype='application/json')
 
 
