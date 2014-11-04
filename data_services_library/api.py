@@ -11,12 +11,12 @@ from stevedore import extension, driver
 SERVICES_NAMESPACE = 'data_services_library.services'
 
 
-def get_services(uid=None, as_json=False, group=True):
+def get_services(id=None, as_json=False, group=True):
     """ generates a list of available data services
     """
 
-    if uid:
-        service = driver.DriverManager(SERVICES_NAMESPACE, uid, invoke_on_load='True')
+    if id:
+        service = driver.DriverManager(SERVICES_NAMESPACE, id, invoke_on_load='True')
         datasets = [_metadata(service.extensions[0])]
     else:
         mgr = extension.ExtensionManager(
