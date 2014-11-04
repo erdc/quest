@@ -4,6 +4,8 @@ import sys
 from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand
 
+import yaml
+
 
 class PyTest(TestCommand):
     def finalize_options(self):
@@ -28,6 +30,10 @@ with open('README.rst') as f:
     long_description = ''.join([
         line for line in f.readlines()
         if 'travis-ci' not in line])
+
+
+with open('services.yml') as f:
+    services = [' = '.join([k,v]) for k,v in yaml.load(f)['services'].iteritems()]
 
 
 setup(
@@ -62,14 +68,7 @@ setup(
     include_package_data=True,
 
     entry_points={
-        'data_services_library.services': [
-            'usgs-nwis-iv = data_services_library.services.usgs_nwis:UsgsNwisIV',
-            'usgs-nwis-dv = data_services_library.services.usgs_nwis:UsgsNwisDV',
-            'ncdc-ghcn = data_services_library.services.ncdc_ghcn:NcdcGhcn',
-            'ncdc-gsod = data_services_library.services.ncdc_gsod:NcdcGsod',
-            'example-points = data_services_library.services.example:ExamplePoints',
-            'example-polys = data_services_library.services.example:ExamplePolys'
-        ],
+        'data_services_library.services': services,
     },
 
     zip_safe=False,
