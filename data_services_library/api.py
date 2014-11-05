@@ -61,10 +61,10 @@ def get_filters(uid=None, as_json=False, group=True):
     else:
         #rearrange by geotype
         filters = [{
-                        'geotype': name,
-                        'filters': [_remove_key(item, 'geotype') for item in group],
+                        'type': name,
+                        'filters': [_remove_key(item, 'type') for item in group],
                     } for name, group in itertools.groupby(sorted(datasets), 
-                                                           lambda p:p['geotype'])]
+                                                           lambda p:p['type'])]
 
     if as_json:
         return json.dumps(filters, sort_keys=True,

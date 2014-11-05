@@ -87,7 +87,7 @@ class ExampleVITD(base.DataServiceBase):
                     'geographical area': 'IRAQ',
                     'bbox': [35., 30., 50., 40.],
                     'geotype': 'polygons',
-                    'type': 'vector'  #NEED TO FIGURE OUT HOW TO CLASSIFY DATA
+                    'type': 'vitd'  #NEED TO FIGURE OUT HOW TO CLASSIFY DATA
                 }
 
     def get_locations(self, bbox=None):

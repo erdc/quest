@@ -59,7 +59,6 @@ class Basic(base.DataFilterBase):
         self.metadata = {
                     'filter_name': 'Basic VITD Filter',
                     'description': 'Runs VITD processing algorithm',
-                    'geotype': 'vitd',
-                    'type': 'timeseries',
+                    'type': 'vitd',
                     'schema': schema, 
                 }
