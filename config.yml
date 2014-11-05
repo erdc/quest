@@ -9,3 +9,6 @@ services:
 
 collections:
     usgs: []
+
+filters:
+    vitd-basic: data_services_library.filters.vitd:Basic

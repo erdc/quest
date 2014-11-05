@@ -22,6 +22,13 @@ def index():
     return html
 
 
+@api.route("/filters")
+@api.route("/filters/<uid>")
+def filters(uid=None):
+    js = dsl.api.get_filters(uid=uid, as_json=True)
+    return Response(js, status=200, mimetype='application/json')
+
+
 @api.route("/services")
 @api.route("/services/<uid>")
 def services(uid=None):
@@ -42,9 +49,9 @@ def collections(id=None):
 
 
 @api.route("/services/<uid>/locations")
-def locations(dataset):
+def locations(uid):
     bbox = request.args.get('bbox')
     if bbox:
         bbox = [float(x) for x in bbox.split(',')]
-    js = dsl.api.get_locations(dataset, bbox=bbox)
+    js = dsl.api.get_locations(uid, bbox=bbox)
     return Response(js, status=200, mimetype='application/json')

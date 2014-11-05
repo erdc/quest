@@ -32,8 +32,10 @@ with open('README.rst') as f:
         if 'travis-ci' not in line])
 
 
-with open('services.yml') as f:
-    services = [' = '.join([k,v]) for k,v in yaml.load(f)['services'].iteritems()]
+with open('config.yml') as f:
+    config = yaml.load(f)
+    services = [' = '.join([k,v]) for k,v in config['services'].iteritems()]
+    filters = [' = '.join([k,v]) for k,v in config['filters'].iteritems()]
 
 
 setup(
@@ -69,6 +71,7 @@ setup(
 
     entry_points={
         'data_services_library.services': services,
+        'data_services_library.filters': filters,
     },
 
     zip_safe=False,

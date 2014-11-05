@@ -18,7 +18,7 @@ class ExamplePoints(base.DataServiceBase):
                     'geographical area': 'CONUS',
                     'bbox': [-128., 24., -64., 52.],
                     'geotype': 'points',
-                    'type': 'timeseries' 
+                    'type': 'timeseries'
                 }
 
 

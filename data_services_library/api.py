@@ -9,7 +9,7 @@ import itertools
 from stevedore import extension, driver
 
 SERVICES_NAMESPACE = 'data_services_library.services'
-
+FILTERS_NAMESPACE = 'data_services_library.filters'
 
 def get_services(uid=None, as_json=False, group=True):
     """ generates a list of available data services
@@ -40,6 +40,37 @@ def get_services(uid=None, as_json=False, group=True):
                           indent=4, separators=(',', ': '))
 
     return services
+
+
+def get_filters(uid=None, as_json=False, group=True):
+    """ generates a list of available data services
+    """
+
+    if uid:
+        filters = driver.DriverManager(FILTERS_NAMESPACE, uid, invoke_on_load='True')
+        datasets = [_metadata(filters.extensions[0])]
+    else:
+        mgr = extension.ExtensionManager(
+            namespace=FILTERS_NAMESPACE,
+            invoke_on_load=True,
+        )
+        datasets = mgr.map(_metadata)
+
+    if not group:
+        filters = sorted(datasets)
+    else:
+        #rearrange by geotype
+        filters = [{
+                        'geotype': name,
+                        'filters': [_remove_key(item, 'geotype') for item in group],
+                    } for name, group in itertools.groupby(sorted(datasets), 
+                                                           lambda p:p['geotype'])]
+
+    if as_json:
+        return json.dumps(filters, sort_keys=True,
+                          indent=4, separators=(',', ': '))
+
+    return filters
 
 
 def add_source(source_name, source_type, metadata):
