@@ -6,7 +6,7 @@ class NcdcGhcn(base.DataServiceBase):
         """Register NCDC GHCN plugin by setting service name, source and uid 
         """
         self.metadata = {
-                    'service_name': 'NCDC',
+                    'provider': {'name': 'National Climatic Data Center (NCDC)', 'id': 'ncdc'},
                     'dataset_name': 'Global Historic Climate Network',
                     'description': 'meteorological',
                     'geographical area': 'Worldwide',

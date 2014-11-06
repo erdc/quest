@@ -32,7 +32,9 @@ def filters(uid=None):
 @api.route("/services")
 @api.route("/services/<uid>")
 def services(uid=None):
-    js = dsl.api.get_services(uid=uid, as_json=True)
+    provider = request.args.get('provider')
+    group = request.args.get('group')
+    js = dsl.api.get_services(uid=uid, as_json=True, group=group, provider=provider)
     return Response(js, status=200, mimetype='application/json')
 
 

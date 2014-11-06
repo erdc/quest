@@ -6,7 +6,7 @@ class UsgsNwisIV(base.DataServiceBase):
         """Register USGS NWIS IV plugin by setting service name, source and uid 
         """
         self.metadata = {
-                    'service_name': 'USGS NWIS',
+                    'provider': {'name': 'United States Geological Survey NWIS', 'id': 'usgs-nwis'},
                     'dataset_name': 'instantaneous values service',
                     'description': 'instantaneous values at USGS monitoring locations',
                     'geographical area': 'USA',
@@ -25,7 +25,7 @@ class UsgsNwisDV(base.DataServiceBase):
         """Register USGS NWIS DV plugin by setting service name, source and uid 
         """
         self.metadata = {
-                    'service_name': 'USGS NWIS',
+                    'provider': {'name': 'United States Geological Survey NWIS', 'id': 'usgs-nwis'},
                     'dataset_name': 'daily values service',
                     'description': 'daily values at USGS monitoring locations',
                     'geographical area': 'USA',

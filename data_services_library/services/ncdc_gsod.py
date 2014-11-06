@@ -6,7 +6,7 @@ class NcdcGsod(base.DataServiceBase):
         """Register NCDC GSOD plugin by setting service name, source and uid 
         """
         self.metadata = {
-                    'service_name': 'NCDC',
+                    'provider': {'name': 'National Climatic Data Center (NCDC)', 'id': 'ncdc'},
                     'dataset_name': 'Global Summary of the Day',
                     'description': 'meteorological',
                     'geographical area': 'Worldwide',

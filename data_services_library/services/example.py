@@ -12,7 +12,7 @@ class ExamplePoints(base.DataServiceBase):
         """Register Example points service 
         """
         self.metadata = {
-                    'service_name': 'National Example Organization (NEO)',
+                    'provider': {'name': 'National Example Organization (NEO)', 'id': 'neo'},
                     'dataset_name': 'example points service',
                     'description': 'Instantaneous values at monitoring locations',
                     'geographical area': 'CONUS',
@@ -43,7 +43,7 @@ class ExamplePolys(base.DataServiceBase):
         """Register Example points service 
         """
         self.metadata = {
-                    'service_name': 'National Example Organization (NEO)',
+                    'provider': {'name': 'National Example Organization (NEO)', 'id': 'neo'},
                     'dataset_name': 'example polys service',
                     'description': 'Instantaneous values at monitoring locations',
                     'geographical area': 'CONUS',
@@ -81,7 +81,7 @@ class ExampleVITD(base.DataServiceBase):
         """Register Example points service 
         """
         self.metadata = {
-                    'service_name': 'National Example Organization (NEO)',
+                    'provider': {'name': 'National Example Organization (NEO)', 'id': 'neo'},
                     'dataset_name': 'example vitd service',
                     'description': 'Terrain data values, vector data',
                     'geographical area': 'IRAQ',

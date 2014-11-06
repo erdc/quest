@@ -11,7 +11,7 @@ from stevedore import extension, driver
 SERVICES_NAMESPACE = 'data_services_library.services'
 FILTERS_NAMESPACE = 'data_services_library.filters'
 
-def get_services(uid=None, as_json=False, group=True):
+def get_services(uid=None, as_json=False, group=False, provider=None):
     """ generates a list of available data services
     """
 
@@ -25,15 +25,18 @@ def get_services(uid=None, as_json=False, group=True):
         )
         datasets = mgr.map(_metadata)
 
+    if provider:
+        datasets = [dataset for dataset in datasets if dataset['provider']['id']==provider]
+
     if not group:
         services = sorted(datasets)
     else:
         #rearrange by service name
         services = [{
-                        'service_name': name,
-                        'datasets': [_remove_key(item, 'service_name') for item in group],
+                        'provider': name,
+                        'datasets': [_remove_key(item, 'provider') for item in group],
                     } for name, group in itertools.groupby(sorted(datasets), 
-                                                           lambda p:p['service_name'])]
+                                                           lambda p:p['provider'])]
 
     if as_json:
         return json.dumps(services, sort_keys=True,
