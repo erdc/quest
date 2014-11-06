@@ -41,7 +41,8 @@ def services(uid=None):
 @api.route("/providers")
 @api.route("/providers/<id>")
 def providers(id=None):
-    pass
+    js = dsl.api.get_providers(id=id, as_json=True)
+    return Response(js, status=200, mimetype='application/json')
 
 
 @api.route("/collections/")

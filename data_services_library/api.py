@@ -11,6 +11,29 @@ from stevedore import extension, driver
 SERVICES_NAMESPACE = 'data_services_library.services'
 FILTERS_NAMESPACE = 'data_services_library.filters'
 
+
+def get_providers(id=None, as_json=False):
+    """ generates a list of available data providers
+    """
+    mgr = extension.ExtensionManager(
+        namespace=SERVICES_NAMESPACE,
+        invoke_on_load=True,
+    )
+    datasets = mgr.map(_metadata)
+
+    providers = [dataset['provider'] for dataset in datasets]
+    providers = {provider['id']:provider for provider in providers}.values()
+
+    if id:
+        providers = [provider for provider in providers if provider['id']==id]
+
+    if as_json:
+        return json.dumps(providers, sort_keys=True,
+                          indent=4, separators=(',', ': '))
+
+    return providers
+
+
 def get_services(uid=None, as_json=False, group=False, provider=None):
     """ generates a list of available data services
     """
