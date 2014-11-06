@@ -13,6 +13,8 @@ def index():
                     <body>
                       <h1>Data Service Library Web API</h1>
                         <ul> 
+                          <li> <b>http://127.0.0.1:5000/v1/providers</b> : List of available providers</li>
+                          <li> <b>http://127.0.0.1:5000/v1/providers/&ltid&gt</b> : list particular provider</li>
                           <li> <b>http://127.0.0.1:5000/v1/services</b> : List of available services (use ?group=True to group by provider)</li>
                           <li> <b>http://127.0.0.1:5000/v1/services?provider=&ltprovider_id&gt</b> : filter list of available services by provider</li>
                           <li> <b>http://127.0.0.1:5000/v1/services/&ltid&gt</b> : list particular service</li>
