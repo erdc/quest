@@ -6,6 +6,10 @@ services:
     example-points: data_services_library.services.example:ExamplePoints
     example-polys: data_services_library.services.example:ExamplePolys
     example-vitd: data_services_library.services.example:ExampleVITD
+    iraq-vitd: data_services_library.services.iraq_demo:IraqVITD
+    iraq-agc-tlidar: data_services_library.services.iraq_demo:IraqAGCTLidar
+    iraq-agc-alidar: data_services_library.services.iraq_demo:IraqAGCALidar
+
 
 collections:
     usgs: []
