@@ -68,7 +68,7 @@ def get_services(uid=None, as_json=False, group=False, provider=None):
     return services
 
 
-def get_filters(uid=None, as_json=False, group=True):
+def get_filters(uid=None, as_json=False, group=False, datatype=None):
     """ generates a list of available data services
     """
 
@@ -81,6 +81,10 @@ def get_filters(uid=None, as_json=False, group=True):
             invoke_on_load=True,
         )
         datasets = mgr.map(_metadata)
+
+
+    if datatype:
+        datasets = [dataset for dataset in datasets if dataset['type']==datatype]
 
     if not group:
         filters = sorted(datasets)

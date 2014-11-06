@@ -13,9 +13,14 @@ def index():
                     <body>
                       <h1>Data Service Library Web API</h1>
                         <ul> 
-                          <li> <b>http://127.0.0.1:5000/services</b> : List of available services </li>
-                          <li> <b>http://127.0.0.1:5000/locations/&ltservice_uid&gt</b> : Get locations full bbox extent</li>
-                          <li> <b>http://127.0.0.1:5000/locations/&ltservice_uid&gt/bbox/&ltxmin,ymin,xmax,ymax&gt</b> : Get locations, specifying bbox extent</li>
+                          <li> <b>http://127.0.0.1:5000/services</b> : List of available services (use ?group=True to group by provider)</li>
+                          <li> <b>http://127.0.0.1:5000/services?provider=&ltprovider_id&gt</b> : filter list of available services by provider</li>
+                          <li> <b>http://127.0.0.1:5000/services/&ltid&gt</b> : list particular service</li>
+                          <li> <b>http://127.0.0.1:5000/services/&ltid&gt/locations</b> : Get locations full bbox extent</li>
+                          <li> <b>http://127.0.0.1:5000/services/&ltid&gt/locations?bbox=&ltxmin,ymin,xmax,ymax&gt</b> : Get locations, specifying bbox extent</li>
+                          <li> <b>http://127.0.0.1:5000/filters</b> : List of available filters
+                          <li> <b>http://127.0.0.1:5000/filters/&ltid&gt</b> : List particular filter
+                          <li> <b>http://127.0.0.1:5000/filters?datatype=&lttype&gt</b> : List of available filters for data type
                     </body>
                   </html>
             """
@@ -25,7 +30,8 @@ def index():
 @api.route("/filters")
 @api.route("/filters/<uid>")
 def filters(uid=None):
-    js = dsl.api.get_filters(uid=uid, as_json=True)
+    datatype = request.args.get('datatype')
+    js = dsl.api.get_filters(uid=uid, as_json=True, datatype=datatype)
     return Response(js, status=200, mimetype='application/json')
 
 
