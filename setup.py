@@ -52,6 +52,7 @@ setup(
     platforms='any',
     install_requires=[
         'appdirs>=1.2.0',
+        'fiona',
         'geojson',
         'flask',
         #'numpy>=1.4.0',
