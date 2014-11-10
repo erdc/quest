@@ -9,6 +9,7 @@ services:
     iraq-vitd: data_services_library.services.iraq_demo:IraqVITD
     iraq-agc-tlidar: data_services_library.services.iraq_demo:IraqAGCTLidar
     iraq-agc-alidar: data_services_library.services.iraq_demo:IraqAGCALidar
+    chesapeake-elevation: data_services_library.services.chesapeake_demo:ChesapeakeVTK
 
 
 collections:
