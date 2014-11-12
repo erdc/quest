@@ -3,6 +3,7 @@
 """
 
 from .config import available_services
+from collections import defaultdict
 import geojson
 import json
 import itertools
@@ -55,11 +56,16 @@ def get_services(uid=None, as_json=False, group=False, provider=None):
         services = sorted(datasets)
     else:
         #rearrange by service name
-        services = [{
-                        'provider': name,
-                        'datasets': [_remove_key(item, 'provider') for item in group],
-                    } for name, group in itertools.groupby(sorted(datasets), 
-                                                           lambda p:p['provider'])]
+        services = defaultdict(dict)
+        for dataset in datasets:
+            services[dataset['provider']['id']]['provider'] = {'id': dataset['provider']['id'], 'name': dataset['provider']['name']}
+            try:
+                services[dataset['provider']['id']]['services'].append(_remove_key(dataset, 'provider'))    
+            except:
+                services[dataset['provider']['id']]['services'] = []
+                services[dataset['provider']['id']]['services'].append(_remove_key(dataset, 'provider'))
+
+        services = sorted(services.values())
 
     if as_json:
         return json.dumps(services, sort_keys=True,
