@@ -29,6 +29,14 @@ def index():
     return html
 
 
+@api.route("/datasets")
+@api.route("/datasets/<uid>")
+def datasets(uid=None):
+    datatype = request.args.get('datatype')
+    js = dsl.api.get_datasets(uid=uid, as_json=True)
+    return Response(js, status=200, mimetype='application/json')
+
+
 @api.route("/filters")
 @api.route("/filters/<uid>")
 def filters(uid=None):
@@ -46,6 +54,29 @@ def services(uid=None):
     return Response(js, status=200, mimetype='application/json')
 
 
+@api.route("/services/<uid>/locations")
+def locations(uid):
+    bbox = request.args.get('bbox')
+    if bbox:
+        bbox = [float(x) for x in bbox.split(',')]
+    js = dsl.api.get_locations(uid, bbox=bbox)
+    return Response(js, status=200, mimetype='application/json')
+
+
+@api.route("/services/<uid>/download/options")
+def download_options(uid):
+    js = dsl.api.download(uid, options=True)
+
+    return Response(js, status=200, mimetype='application/json')
+
+
+@api.route("/services/<uid>/download")
+def download_data(uid):
+    js = dsl.api.download(uid, **request.args)
+
+    return Response(js, status=200, mimetype='application/json')
+
+
 @api.route("/providers")
 @api.route("/providers/<id>")
 def providers(id=None):
@@ -57,12 +88,3 @@ def providers(id=None):
 @api.route("/collections/<id>")
 def collections(id=None):
     pass
-
-
-@api.route("/services/<uid>/locations")
-def locations(uid):
-    bbox = request.args.get('bbox')
-    if bbox:
-        bbox = [float(x) for x in bbox.split(',')]
-    js = dsl.api.get_locations(uid, bbox=bbox)
-    return Response(js, status=200, mimetype='application/json')

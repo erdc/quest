@@ -4,7 +4,7 @@ Example Services
 
 from data_services_library.services import base
 import fiona
-from geojson import Feature, FeatureCollection, Point, Polygon
+from geojson import Feature, FeatureCollection, Point, Polygon, dump
 from random import random
 import os
 
@@ -44,7 +44,66 @@ class IraqVITD(base.DataServiceBase):
 
 
     def download(self, **kwargs):
-        pass
+
+        if 'options' in kwargs:
+            schema = { 
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "type": "object",
+            "title": "Download Options",
+            "properties": {
+                "options": {
+                    "type": "array",
+                    "items": [
+                        {
+                            "name": "name",
+                            "value": {
+                                "type": "string",
+                                "required": False,
+                            }   
+                        },
+                        {
+                            "name": "features",
+                            "type": "array",
+                            "minItems": 0,
+                            "items": { "type": "string" },
+                            "uniqueItems": False,
+                            "required": False,
+                        }
+                        ]
+                    }
+                }
+            }
+
+            return schema
+
+        features = self.get_locations()
+        if 'features' in kwargs.keys():
+            features['features'] = [feature for feature in features['features'] if feature['id'] in kwargs['features'][0].split(',')] 
+
+        #add in filename uri's
+        demo_dir = os.getenv('DSL_DEMO_DIR')
+        path = os.path.join(demo_dir, 'iraq', 'srtm-vitd-bboxes')
+        for feature in features['features']:
+            feature['properties']['uri'] = 'file://' + os.path.join(path, feature['id'] + '.tif')
+
+
+        dataset_name = kwargs.get('name')
+        if dataset_name:
+            dataset_name = dataset_name[0]
+        else:
+            dataset_name = 'iraq-vitd-' + str(hash(random()))
+
+        #add feature to datasets file
+        path = os.path.join(demo_dir, 'datasets', dataset_name + '.json')
+        if not os.path.exists(os.path.join(demo_dir, 'datasets')):
+            os.makedirs(os.path.join(demo_dir, 'datasets'))
+
+        with open(path, 'a') as f:
+            dump(features, f)
+
+        js = {'success': True, 'dataset_uid': dataset_name}
+        
+        return js
 
 
 class IraqAGCTLidar(base.DataServiceBase):

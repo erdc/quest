@@ -8,9 +8,39 @@ import geojson
 import json
 import itertools
 from stevedore import extension, driver
+import os
+import glob
 
 SERVICES_NAMESPACE = 'data_services_library.services'
 FILTERS_NAMESPACE = 'data_services_library.filters'
+
+
+def download(uid, **kwargs):
+    """downloads data from a given service and returns a reference to downloaded data
+    """
+    service = driver.DriverManager(SERVICES_NAMESPACE, uid, invoke_on_load='True')
+    response = service.driver.download(**kwargs)
+
+    return geojson.dumps(response, sort_keys=True)
+
+
+def get_datasets(uid=None, as_json=False):
+    """Get local datasets. 
+    """
+    demo_dir = os.getenv('DSL_DEMO_DIR')
+    
+
+    if uid:
+        with open(os.path.join(demo_dir, 'datasets', uid + '.json')) as f:
+            js = json.load(f)
+    else:
+        js = []
+        for filename in glob.glob(os.path.join(demo_dir, 'datasets', '*.json')):
+            root, ext = os.path.splitext(filename)
+            uid = os.path.split(root)[-1]
+            js.append({'id': uid})
+
+    return json.dumps(js)
 
 
 def get_providers(id=None, as_json=False):
@@ -55,7 +85,7 @@ def get_services(uid=None, as_json=False, group=False, provider=None):
     if not group:
         services = sorted(datasets)
     else:
-        #rearrange by service name
+        #group by provider
         services = defaultdict(dict)
         for dataset in datasets:
             services[dataset['provider']['id']]['provider'] = {'id': dataset['provider']['id'], 'name': dataset['provider']['name']}
