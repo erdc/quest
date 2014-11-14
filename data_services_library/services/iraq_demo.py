@@ -38,9 +38,13 @@ class IraqVITD(base.DataServiceBase):
             for line in f:
                 feature_id, x1, y1, x2, y2 = line.split()
                 properties = {'feature_id': feature_id}
-                polys.append(Feature(geometry=Polygon([_bbox2poly(x1, y1, x2, y2)]), properties=properties))
+                polys.append(Feature(geometry=Polygon([_bbox2poly(x1, y1, x2, y2)]), properties=properties, id=feature_id))
 
         return FeatureCollection(polys)
+
+
+    def download(self, **kwargs):
+        pass
 
 
 class IraqAGCTLidar(base.DataServiceBase):

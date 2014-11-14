@@ -33,7 +33,7 @@ class ExamplePoints(base.DataServiceBase):
         points = []
         for location in locations:
             properties = {'parameter': 'Temperature', 'units': 'degF', 'site_code': int(random()*1000000)}
-            points.append(Feature(geometry=Point(location), properties=properties))
+            points.append(Feature(geometry=Point(location), properties=properties, id=properties['site_code']))
 
         return FeatureCollection(points)
 
@@ -65,7 +65,7 @@ class ExamplePolys(base.DataServiceBase):
             triangle = [_random_point(bbox) for i in range(3)]
             triangle.append(triangle[0])
             triangles.append(Feature(geometry=Polygon([triangle]),
-                properties=properties))
+                properties=properties, id=properties['area_number']))
 
         return FeatureCollection(triangles)
 
@@ -105,7 +105,7 @@ class ExampleVITD(base.DataServiceBase):
             properties = {'parameter': 'VITD data', 'area_number': id}
             rectangle.append(rectangle[0])
             rectangles.append(Feature(geometry=Polygon([rectangle]),
-              properties=properties))
+              properties=properties, id=id))
             id = id + 1
 
         # Add a few more rectangles that overlap

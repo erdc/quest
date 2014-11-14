@@ -33,7 +33,7 @@ class ChesapeakeVTK(base.DataServiceBase):
         x1, y1, x2, y2 = self.metadata['bbox']
         polys = []
         properties = {'uri': 'file://' + path}
-        polys.append(Feature(geometry=Polygon([_bbox2poly(x1, y1, x2, y2)]), properties=properties))
+        polys.append(Feature(geometry=Polygon([_bbox2poly(x1, y1, x2, y2)]), properties=properties, id='1'))
 
         return FeatureCollection(polys)
 
