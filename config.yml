@@ -5,6 +5,8 @@ services:
     usgs-ned-13: data_services_library.services.usgs_ned:UsgsNed13ArcSecond
     usgs-ned-19: data_services_library.services.usgs_ned:UsgsNed19ArcSecond
     usgs-ned-2: data_services_library.services.usgs_ned:UsgsNed2ArcSecond
+    usgs-eros-nlcd2001: data_services_library.services.usgs_eros:UsgsErosNlcd2001
+    usgs-eros-nlcd2006: data_services_library.services.usgs_eros:UsgsErosNlcd2006
     ncdc-ghcn: data_services_library.services.ncdc_ghcn:NcdcGhcn
     ncdc-gsod: data_services_library.services.ncdc_gsod:NcdcGsod
     example-points: data_services_library.services.example:ExamplePoints
