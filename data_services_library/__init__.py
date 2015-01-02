@@ -8,4 +8,6 @@ from __future__ import absolute_import
 
 from .version import __version__
 
-from . import api
+from . import util
+
+from .api import collections
