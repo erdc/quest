@@ -2,8 +2,6 @@
     api definition
 """
 
-from .config import available_services
-from collections import defaultdict
 import geojson
 import json
 import itertools

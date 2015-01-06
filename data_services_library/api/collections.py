@@ -9,11 +9,11 @@ COLLECTIONS_FILE = 'collections.json'
 METADATA_FILE = 'dsl.json'
 
 
-def add_dataset(name, data):
+def add_to_collection(name, data):
 	pass
 
 
-def create(name, path=None, tags=None):
+def create_collection(name, path=None, tags=None):
 	collections = _load_collections()
 
 	if get(name=name):
@@ -33,7 +33,7 @@ def create(name, path=None, tags=None):
 	return collection
 
 
-def delete(name):
+def delete_collection(name):
 	collections = _load_collections()
 
 	if not get(name=name):
@@ -46,12 +46,20 @@ def delete(name):
 	return collections
 
 
-def list():
+def list_collections():
 	return _load_collections()
 
 
-def retrieve(name):
+def retrieve_collection(name):
 	return [collection for collection in _load_collections() if collection['name']==name]	
+
+
+def update_collection(name):
+    pass
+
+
+def delete_from_collection(name, feature_id):
+    pass
 
 
 def _load_collections():
