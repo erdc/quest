@@ -33,7 +33,7 @@ def create_collection(name, path=None, tags=None):
 
 	if name in collections.keys():
 		print 'Collection Already Exists'
-		return 
+		return retrieve_collection(name)
 
 	if not path:
 		path = util.get_dsl_dir()
@@ -50,7 +50,7 @@ def create_collection(name, path=None, tags=None):
 	collections[name] = collection
 	_write_collections(collections)
 
-	return collection
+	return collections
 
 
 def delete_collection(name):
