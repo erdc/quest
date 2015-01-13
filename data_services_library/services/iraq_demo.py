@@ -2,6 +2,7 @@
 Example Services
 """
 
+from .. import util
 from data_services_library.services import base
 import fiona
 from geojson import Feature, FeatureCollection, Point, Polygon, dump
@@ -28,7 +29,7 @@ class IraqVITD(base.DataServiceBase):
         if not bbox:
             bbox = self.metadata['bbox']
 
-        demo_dir = os.getenv('DSL_DEMO_DIR')
+        demo_dir = util.get_dsl_demo_dir()
         path = os.path.join(demo_dir, 'iraq', 'iraq-vitd.txt')
 
         polys = []
@@ -41,6 +42,14 @@ class IraqVITD(base.DataServiceBase):
                 polys.append(Feature(geometry=Polygon([_bbox2poly(x1, y1, x2, y2)]), properties=properties, id=feature_id))
 
         return FeatureCollection(polys)
+
+
+    def get_feature_locations(self, features):
+        if not isinstance(features, list):
+            features = [features]
+        locations = self.get_locations()
+        locations['features'] = [feature for feature in locations['features'] if feature['id'] in features]
+        return locations
 
 
     def download(self, **kwargs):

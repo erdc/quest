@@ -8,6 +8,7 @@ import itertools
 from stevedore import extension, driver
 import os
 import glob
+from .. import util
 
 SERVICES_NAMESPACE = 'data_services_library.services'
 FILTERS_NAMESPACE = 'data_services_library.filters'
@@ -25,20 +26,7 @@ def download(uid, **kwargs):
 def get_datasets(uid=None, as_json=False):
     """Get local datasets. 
     """
-    demo_dir = os.getenv('DSL_DEMO_DIR')
-    
-
-    if uid:
-        with open(os.path.join(demo_dir, 'datasets', uid + '.json')) as f:
-            js = json.load(f)
-    else:
-        js = []
-        for filename in glob.glob(os.path.join(demo_dir, 'datasets', '*.json')):
-            root, ext = os.path.splitext(filename)
-            uid = os.path.split(root)[-1]
-            js.append({'id': uid})
-
-    return json.dumps(js)
+    pass
 
 
 def get_providers(id=None, as_json=False):
@@ -155,11 +143,18 @@ def delete_source(source_name):
     pass
 
 
-def get_locations(service_uid, **kwargs):
+def get_locations(service_uid, as_json=True, features=None, **kwargs):
     """Fetches location data for a given source (points, lines, polygons)
     """
     service = driver.DriverManager(SERVICES_NAMESPACE, service_uid, invoke_on_load='True')
-    locations = service.driver.get_locations(**kwargs)
+
+    if features:
+        locations = service.driver.get_feature_locations(features, **kwargs)
+    else:
+        locations = service.driver.get_locations(**kwargs)
+
+    if as_json==False:
+        return locations
 
     return geojson.dumps(locations, sort_keys=True)
 
