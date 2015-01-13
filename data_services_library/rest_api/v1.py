@@ -1,6 +1,6 @@
 import data_services_library as dsl
 
-from flask import Blueprint, Response, request, render_template, abort
+from flask import Blueprint, Response, request, render_template, abort, jsonify
 
 api = Blueprint('v1', __name__, template_folder='templates')
 
@@ -84,7 +84,33 @@ def providers(id=None):
     return Response(js, status=200, mimetype='application/json')
 
 
-@api.route("/collections/")
-@api.route("/collections/<id>")
-def collections(id=None):
-    pass
+@api.route("/collections", methods=['GET', 'POST', 'DELETE'])
+def collections():
+  if request.method=='GET':
+      return jsonify(dsl.api.list_collections())
+
+  if request.method=='DELETE':
+      name = request.form.get('id')
+      return jsonify(dsl.api.delete_collection(name))
+
+  if request.method=='POST':
+      name = request.form.get('id')
+      return jsonify(dsl.api.create_collection(name))
+
+
+@api.route("/collections/<id>", methods=['GET', 'POST', 'DELETE'])
+def collection(id):
+  if request.method=='GET':
+      return jsonify(dsl.api.retrieve_collection(id))
+
+  if request.method=='DELETE':
+      service = request.form.get('service')
+      features = request.form.get('features').split(',')
+      return jsonify(dsl.api.delete_from_collection(id, service, features))
+
+  if request.method=='POST':
+      service = request.form.get('service')
+      features = request.form.get('features').split(',')
+      features = dsl.api.get_locations(service, features=features, as_json=False)
+      return jsonify(dsl.api.add_to_collection(id, service, features))
+
