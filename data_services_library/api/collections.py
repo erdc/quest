@@ -16,7 +16,7 @@ def add_to_collection(name, data):
 def create_collection(name, path=None, tags=None):
 	collections = _load_collections()
 
-	if get(name=name):
+	if name in collections.keys():
 		print 'Collection Already Exists'
 		return 
 
@@ -26,8 +26,8 @@ def create_collection(name, path=None, tags=None):
 	collection_path = os.path.join(path, name)
 	util.mkdir_if_doesnt_exist(collection_path)
 
-	collection = {'name': name, 'path': collection_path}
-	collections.append(collection)
+	collection = {'path': collection_path}
+	collections[name] = collection
 	_write_collections(collections)
 
 	return collection
@@ -36,12 +36,11 @@ def create_collection(name, path=None, tags=None):
 def delete_collection(name):
 	collections = _load_collections()
 
-	if not get(name=name):
+	if not name in collections.keys():
 		print 'Collection not found'
 		return
 
-	collections = [collection for collection in collections if collection['name']!=name]
-
+	del collections[name]
 	_write_collections(collections)
 	return collections
 
@@ -51,7 +50,7 @@ def list_collections():
 
 
 def retrieve_collection(name):
-	return [collection for collection in _load_collections() if collection['name']==name]	
+	pass
 
 
 def update_collection(name):
@@ -66,7 +65,7 @@ def _load_collections():
 	path = os.path.join(util.get_dsl_dir(), COLLECTIONS_FILE)
 
 	if not os.path.exists(path):
-		return []
+		return {}
 
 	with open(path) as f:
 		return json.load(f)
