@@ -26,7 +26,20 @@ def download(uid, **kwargs):
 def get_datasets(uid=None, as_json=False):
     """Get local datasets. 
     """
-    pass
+
+    demo_dir = util.get_dsl_demo_dir()
+
+    if uid:
+        with open(os.path.join(demo_dir, 'datasets', uid + '.json')) as f:
+            js = json.load(f)
+    else:
+        js = []
+        for filename in glob.glob(os.path.join(demo_dir, 'datasets', '*.json')):
+            root, ext = os.path.splitext(filename)
+            uid = os.path.split(root)[-1]
+            js.append({'id': uid})
+
+    return json.dumps(js)
 
 
 def get_providers(id=None, as_json=False):
