@@ -85,7 +85,7 @@ def get_services(uid=None, as_json=False, group=False, provider=None):
         services = sorted(datasets)
     else:
         #group by provider
-        services = defaultdict(dict)
+        services = data_service_library.defaultdict(dict)
         for dataset in datasets:
             services[dataset['provider']['id']]['provider'] = {'id': dataset['provider']['id'], 'name': dataset['provider']['name']}
             try:
