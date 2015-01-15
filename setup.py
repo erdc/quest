@@ -55,7 +55,6 @@ setup(
         'fiona',
         'geojson',
         'flask',
-        #'numpy>=1.4.0',
         'stevedore',
     ],
     classifiers=[
