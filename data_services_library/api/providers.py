@@ -1,6 +1,6 @@
 """API functions related to Providers
 
-Providers are inferred from 
+Providers are inferred by aggregating information from service plugins.
 """
 from .. import util
 

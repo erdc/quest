@@ -1,19 +1,13 @@
-"""
-    api definition
-"""
+"""API functions related to Services
 
+Providers are inferred by aggregating information from service plugins.
+"""
 from __future__ import absolute_import
-import geojson
 import json
-import itertools
-from stevedore import extension, driver
 import os
 import glob
 from .. import util
 from collections import defaultdict
-
-SERVICES_NAMESPACE = 'data_services_library.services'
-FILTERS_NAMESPACE = 'data_services_library.filters'
 
 
 @util.jsonify

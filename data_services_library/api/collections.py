@@ -1,5 +1,5 @@
-"""
-api functions related to handling collections
+"""API functions related to Collections
+
 """
 from .. import util
 import datetime

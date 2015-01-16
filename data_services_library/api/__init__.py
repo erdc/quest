@@ -2,7 +2,6 @@
 
 This file defines the Python API for the Environmental Simulator Data Services Library
 """
-from __future__ import absolute_import
 
 __version__ = 1.0
 
