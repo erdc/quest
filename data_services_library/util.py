@@ -31,17 +31,24 @@ def mkdir_if_doesnt_exist(dir_path):
         os.makedirs(dir_path)
 
 
-def load_drivers(namespace, names):
-    if isinstance(names, list):
-        drivers = extension.ExtensionManager(
-            namespace=FILTERS_NAMESPACE,
+def load_drivers(namespace, names=None):
+    namespace = 'data_services_library.' + namespace 
+    if not names:
+        mgr = extension.ExtensionManager(
+            namespace=namespace,
             invoke_on_load=True,
         )
-    else:
-        drivers = driver.DriverManager(namespace, name, invoke_on_load='True')
+        return dict((x.name, x.obj) for x in mgr)
 
-    return drivers
+    if not isinstance(names, list):
+        names = [names]
 
+    return {name: driver.DriverManager(namespace, name, invoke_on_load='True') for name in names} 
+    
+
+def get_driver_method(ext, method):
+    return ext.obj.get(method).copy()
+    
 
 def jsonify(f):
     def wrapped_f(*args, **kw):
