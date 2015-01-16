@@ -7,7 +7,7 @@ import fiona
 from geojson import Feature, FeatureCollection, Point, Polygon
 from random import random
 import os
-
+from .. import util
 
 class ChesapeakeVTK(base.DataServiceBase):
     def register(self):
@@ -28,7 +28,7 @@ class ChesapeakeVTK(base.DataServiceBase):
         if not bbox:
             bbox = self.metadata['bbox']
 
-        demo_dir = os.getenv('DSL_DEMO_DIR')
+        demo_dir = util.get_dsl_demo_dir()
         path = os.path.join(demo_dir, 'chesapeake', 'test_chesapeake.vtk')
         x1, y1, x2, y2 = self.metadata['bbox']
         polys = []

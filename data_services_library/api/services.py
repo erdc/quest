@@ -2,6 +2,7 @@
     api definition
 """
 
+from __future__ import absolute_import
 import geojson
 import json
 import itertools
@@ -9,6 +10,7 @@ from stevedore import extension, driver
 import os
 import glob
 from .. import util
+from collections import defaultdict
 
 SERVICES_NAMESPACE = 'data_services_library.services'
 FILTERS_NAMESPACE = 'data_services_library.filters'
@@ -85,7 +87,7 @@ def get_services(uid=None, as_json=False, group=False, provider=None):
         services = sorted(datasets)
     else:
         #group by provider
-        services = data_service_library.defaultdict(dict)
+        services = defaultdict(dict)
         for dataset in datasets:
             services[dataset['provider']['id']]['provider'] = {'id': dataset['provider']['id'], 'name': dataset['provider']['name']}
             try:

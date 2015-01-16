@@ -90,7 +90,7 @@ class IraqVITD(base.DataServiceBase):
             features['features'] = [feature for feature in features['features'] if feature['id'] in kwargs['features'][0].split(',')] 
 
         #add in filename uri's
-        demo_dir = os.getenv('DSL_DEMO_DIR')
+        demo_dir = util.get_dsl_demo_dir()
         path = os.path.join(demo_dir, 'iraq', 'srtm-vitd-bboxes')
         for feature in features['features']:
             feature['properties']['uri'] = 'file://' + os.path.join(path, feature['id'] + '.tif')
@@ -134,7 +134,7 @@ class IraqAGCTLidar(base.DataServiceBase):
         if not bbox:
             bbox = self.metadata['bbox']
 
-        demo_dir = os.getenv('DSL_DEMO_DIR')
+        demo_dir = util.get_dsl_demo_dir()
         path = os.path.join(demo_dir, 'iraq', 'TLIDAR_20101015_Index.shp')
 
         features = []
@@ -165,7 +165,7 @@ class IraqAGCALidar(base.DataServiceBase):
         if not bbox:
             bbox = self.metadata['bbox']
 
-        demo_dir = os.getenv('DSL_DEMO_DIR')
+        demo_dir = util.get_dsl_demo_dir()
         path = os.path.join(demo_dir, 'iraq', 'ALIDAR_20101015_Index.shp')
 
         features = []
