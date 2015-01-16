@@ -16,72 +16,58 @@ SERVICES_NAMESPACE = 'data_services_library.services'
 FILTERS_NAMESPACE = 'data_services_library.filters'
 
 
-def download(uid, **kwargs):
+@util.jsonify
+def download(name, **kwargs):
     """downloads data from a given service and returns a reference to downloaded data
     """
-    service = driver.DriverManager(SERVICES_NAMESPACE, uid, invoke_on_load='True')
-    response = service.driver.download(**kwargs)
-
-    return geojson.dumps(response, sort_keys=True)
+    service = util.load_drivers('services', name)
+    return service.driver.download(**kwargs)
 
 
-def get_datasets(uid=None, as_json=False):
+@util.jsonify
+def get_datasets(name=None):
     """Get local datasets. 
     """
 
     demo_dir = util.get_dsl_demo_dir()
 
-    if uid:
-        with open(os.path.join(demo_dir, 'datasets', uid + '.json')) as f:
-            js = json.load(f)
+    if name:
+        with open(os.path.join(demo_dir, 'datasets', name + '.json')) as f:
+            datasets = json.load(f)
     else:
-        js = []
+        datasets = []
         for filename in glob.glob(os.path.join(demo_dir, 'datasets', '*.json')):
             root, ext = os.path.splitext(filename)
-            uid = os.path.split(root)[-1]
-            js.append({'id': uid})
+            name = os.path.split(root)[-1]
+            datasets.append({'id': uid})
 
-    return js
-
-
+    return name
 
 
 @util.jsonify
-def get_services(uid=None, group=False, provider=None, **kwargs):
+def get_services(names=None, group=False, provider=None, **kwargs):
     """ generates a list of available data services
     """
 
-    if uid:
-        service = driver.DriverManager(SERVICES_NAMESPACE, uid, invoke_on_load='True')
-        datasets = [_metadata(service.extensions[0])]
-    else:
-        mgr = extension.ExtensionManager(
-            namespace=SERVICES_NAMESPACE,
-            invoke_on_load=True,
-        )
-        datasets = mgr.map(_metadata)
+    services = [v.metadata for v in util.load_drivers('services', names=names).itervalues()]
 
     if provider:
-        datasets = [dataset for dataset in datasets if dataset['provider']['id']==provider]
+        services = [service for service in services if service['provider']['id']==provider]
 
     if not group:
-        services = sorted(datasets)
+        services = sorted(services)
     else:
         #group by provider
-        services = defaultdict(dict)
-        for dataset in datasets:
-            services[dataset['provider']['id']]['provider'] = {'id': dataset['provider']['id'], 'name': dataset['provider']['name']}
+        grouped = defaultdict(dict)
+        for service in services:
+            grouped[service['provider']['id']]['provider'] = {'id': service['provider']['id'], 'name': service['provider']['name']}
             try:
-                services[dataset['provider']['id']]['services'].append(_remove_key(dataset, 'provider'))    
+                grouped[service['provider']['id']]['services'].append(_remove_key(service, 'provider'))    
             except:
-                services[dataset['provider']['id']]['services'] = []
-                services[dataset['provider']['id']]['services'].append(_remove_key(dataset, 'provider'))
+                grouped[service['provider']['id']]['services'] = []
+                grouped[service['provider']['id']]['services'].append(_remove_key(service, 'provider'))
 
-        services = sorted(services.values())
-
-    if as_json:
-        return json.dumps(services, sort_keys=True,
-                          indent=4, separators=(',', ': '))
+        services = sorted(grouped.values())
 
     return services
 
