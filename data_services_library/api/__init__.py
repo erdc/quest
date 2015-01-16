@@ -6,6 +6,7 @@ from __future__ import absolute_import
 
 __version__ = 1.0
 
+from .providers import get_providers
 from .services import *
 from .collections import (
         new_collection,
