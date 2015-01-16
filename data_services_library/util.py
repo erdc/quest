@@ -40,15 +40,17 @@ def load_drivers(namespace, names=None):
         )
         return dict((x.name, x.obj) for x in mgr)
 
-    if not isinstance(ids, list):
+    if not isinstance(names, list):
         names = [names]
 
     return {name: driver.DriverManager(namespace, name, invoke_on_load='True') for name in names} 
     
 
-def get_driver_method(ext, method):
-    return ext.obj.get(method).copy()
-    
+def remove_key(d, key):
+    r = dict(d)
+    del r[key]
+    return r
+
 
 def jsonify(f):
     def wrapped_f(*args, **kw):
