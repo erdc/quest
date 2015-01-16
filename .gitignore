@@ -1,2 +1,3 @@
 data_services_library.egg-info/
 *.pyc
+data_services_library/.DS_Store
