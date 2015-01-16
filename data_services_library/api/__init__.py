@@ -1,8 +1,15 @@
+"""Define Python API for DSL
+
+This file defines the Python API for the Environmental Simulator Data Services Library
+"""
 from __future__ import absolute_import
+
+__version__ = 1.0
+
 from .services import *
 from .collections import (
-        create_collection,
-        retrieve_collection,
+        new_collection,
+        get_collection,
         add_to_collection,
         delete_collection,
         delete_from_collection,

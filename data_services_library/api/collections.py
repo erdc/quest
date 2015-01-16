@@ -28,7 +28,7 @@ def add_to_collection(name, service, features):
 	return collection
 
 
-def create_collection(name, path=None, tags=None):
+def new_collection(name, path=None, tags=None):
 	collections = _load_collections()
 
 	if name in collections.keys():
@@ -69,7 +69,7 @@ def list_collections():
 	return _load_collections()
 
 
-def retrieve_collection(name):
+def get_collection(name):
 	collection = _load_collections()[name]
 	with open(os.path.join(collection['path'], COLLECTION_METADATA_FILE)) as f:
 		collection.update(json.load(f))
@@ -79,7 +79,7 @@ def retrieve_collection(name):
 
 
 def update_collection(name):
-    pass
+    raise NotImplementedError('Updating Collections has not been implemented')
 
 
 def delete_from_collection(name, service, feature_ids):
