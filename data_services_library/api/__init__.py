@@ -7,7 +7,12 @@ __version__ = 1.0
 
 from .filters import get_filters
 from .providers import get_providers
-from .services import *
+from .services import (
+        download,
+        get_datasets,
+        get_locations,
+        get_services,
+    )
 from .collections import (
         new_collection,
         get_collection,
