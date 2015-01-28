@@ -32,7 +32,7 @@ def mkdir_if_doesnt_exist(dir_path):
 
 
 def load_drivers(namespace, names=None):
-    namespace = 'data_services_library.' + namespace 
+    namespace = 'dsl.' + namespace 
     if not names:
         mgr = extension.ExtensionManager(
             namespace=namespace,

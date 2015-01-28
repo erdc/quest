@@ -1,25 +1,25 @@
 services:
-    usgs-nwis-iv: data_services_library.services.usgs_nwis:UsgsNwisIV
-    usgs-nwis-dv: data_services_library.services.usgs_nwis:UsgsNwisDV
-    usgs-ned-1: data_services_library.services.usgs_ned:UsgsNed1ArcSecond
-    usgs-ned-13: data_services_library.services.usgs_ned:UsgsNed13ArcSecond
-    usgs-ned-19: data_services_library.services.usgs_ned:UsgsNed19ArcSecond
-    usgs-ned-2: data_services_library.services.usgs_ned:UsgsNed2ArcSecond
-    usgs-eros-nlcd2001: data_services_library.services.usgs_eros:UsgsErosNlcd2001
-    usgs-eros-nlcd2006: data_services_library.services.usgs_eros:UsgsErosNlcd2006
-    ncdc-ghcn: data_services_library.services.ncdc_ghcn:NcdcGhcn
-    ncdc-gsod: data_services_library.services.ncdc_gsod:NcdcGsod
-    example-points: data_services_library.services.example:ExamplePoints
-    example-polys: data_services_library.services.example:ExamplePolys
-    example-vitd: data_services_library.services.example:ExampleVITD
-    iraq-vitd: data_services_library.services.iraq_demo:IraqVITD
-    iraq-agc-tlidar: data_services_library.services.iraq_demo:IraqAGCTLidar
-    iraq-agc-alidar: data_services_library.services.iraq_demo:IraqAGCALidar
-    chesapeake-elevation: data_services_library.services.chesapeake_demo:ChesapeakeVTK
+    usgs-nwis-iv: dsl.services.usgs_nwis:UsgsNwisIV
+    usgs-nwis-dv: dsl.services.usgs_nwis:UsgsNwisDV
+    usgs-ned-1: dsl.services.usgs_ned:UsgsNed1ArcSecond
+    usgs-ned-13: dsl.services.usgs_ned:UsgsNed13ArcSecond
+    usgs-ned-19: dsl.services.usgs_ned:UsgsNed19ArcSecond
+    usgs-ned-2: dsl.services.usgs_ned:UsgsNed2ArcSecond
+    usgs-eros-nlcd2001: dsl.services.usgs_eros:UsgsErosNlcd2001
+    usgs-eros-nlcd2006: dsl.services.usgs_eros:UsgsErosNlcd2006
+    ncdc-ghcn: dsl.services.ncdc_ghcn:NcdcGhcn
+    ncdc-gsod: dsl.services.ncdc_gsod:NcdcGsod
+    example-points: dsl.services.example:ExamplePoints
+    example-polys: dsl.services.example:ExamplePolys
+    example-vitd: dsl.services.example:ExampleVITD
+    iraq-vitd: dsl.services.iraq_demo:IraqVITD
+    iraq-agc-tlidar: dsl.services.iraq_demo:IraqAGCTLidar
+    iraq-agc-alidar: dsl.services.iraq_demo:IraqAGCALidar
+    chesapeake-elevation: dsl.services.chesapeake_demo:ChesapeakeVTK
 
 
 collections:
     usgs: []
 
 filters:
-    vitd-basic: data_services_library.filters.vitd:Basic
+    vitd-basic: dsl.filters.vitd:Basic

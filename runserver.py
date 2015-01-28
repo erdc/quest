@@ -1,4 +1,4 @@
-from data_services_library.rest_api import v1
+from dsl.rest_api import v1
 
 from flask import Flask
 

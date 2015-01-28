@@ -3,7 +3,7 @@ Example Services
 """
 
 from .. import util
-from data_services_library.services import base
+from dsl.services import base
 import fiona
 from geojson import Feature, FeatureCollection, Point, Polygon, dump
 from random import random

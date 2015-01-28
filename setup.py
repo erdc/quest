@@ -20,7 +20,7 @@ class PyTest(TestCommand):
         sys.exit(errno)
 # this sets __version__
 info = {}
-execfile(os.path.join('data_services_library', 'version.py'), info)
+execfile(os.path.join('dsl', 'version.py'), info)
 
 
 with open('README.rst') as f:
@@ -39,7 +39,7 @@ with open('config.yml') as f:
 
 
 setup(
-    name='data_services_library',
+    name='dsl',
     version=info['__version__'],
     license='',
     author='Dharhas Pothina',
@@ -70,8 +70,8 @@ setup(
     include_package_data=True,
 
     entry_points={
-        'data_services_library.services': services,
-        'data_services_library.filters': filters,
+        'dsl.services': services,
+        'dsl.filters': filters,
     },
 
     zip_safe=False,

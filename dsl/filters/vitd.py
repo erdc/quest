@@ -2,7 +2,7 @@
 Example Services
 """
 
-from data_services_library.filters import base
+from dsl.filters import base
 from geojson import Feature, FeatureCollection, Point, Polygon
 from random import random
 

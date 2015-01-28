@@ -1,4 +1,4 @@
-from data_services_library.services import base
+from dsl.services import base
 
 
 class NcdcGhcn(base.DataServiceBase):

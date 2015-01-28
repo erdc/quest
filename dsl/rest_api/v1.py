@@ -1,4 +1,4 @@
-import data_services_library as dsl
+import dsl as dsl
 
 from flask import Blueprint, Response, request, render_template, abort, jsonify
 

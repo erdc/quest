@@ -2,7 +2,7 @@
 Example Services
 """
 
-from data_services_library.services import base
+from dsl.services import base
 from ulmo.usgs import ned
 from geojson import Feature, FeatureCollection, Point, Polygon, dump
 import os
