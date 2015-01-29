@@ -1,6 +1,20 @@
-"""Define Python API for DSL
+"""Python API for Environmental Simulator Data Services Library (DSL)
 
-This file defines the Python API for the Environmental Simulator Data Services Library
+This module defines the Python API for the Environmental Simulator 
+Data Services Library. 
+
+
+Nomenclature:
+
+Services
+Filters
+Readers
+
+
+
+
+
+
 """
 
 __version__ = 1.0

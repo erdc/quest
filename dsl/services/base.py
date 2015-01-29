@@ -14,7 +14,7 @@ class DataServiceBase(object):
     def register(self):
         """Register plugin
 
-        Plugins must contain a service name, source and bounding box
+        Plugins must contain a service name, provider and bounding box
         """
 
 
@@ -23,10 +23,13 @@ class DataServiceBase(object):
         """Get Locations associated with service.
 
         Take a series of query parameters and return a list of 
-        locations.
+        locations as a geojson python dictionary
         """
 
     @abc.abstractmethod
     def get_data(self, *args, **kwargs):
         """Download/Transfer data associated with service
+
+        This must either a path varable and query parameters and download 
+        the data to the provided path
         """
