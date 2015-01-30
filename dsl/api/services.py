@@ -43,10 +43,10 @@ def get_services(names=None, group=False, provider=None, **kwargs):
     """ generates a list of available data services
     """
 
-    services = [v.metadata for v in util.load_drivers('services', names=names).itervalues()]
+    services = [dict(service_code=k, parameters=v.provides(), **v.metadata) for k,v in util.load_drivers('services', names=names).iteritems()]
 
     if provider:
-        services = [service for service in services if service['provider']['id']==provider]
+        services = [service for service in services if service['provider']['code']==provider]
 
     if not group:
         services = sorted(services)
@@ -54,12 +54,12 @@ def get_services(names=None, group=False, provider=None, **kwargs):
         #group by provider
         grouped = defaultdict(dict)
         for service in services:
-            grouped[service['provider']['id']]['provider'] = {'id': service['provider']['id'], 'name': service['provider']['name']}
+            grouped[service['provider']['abbr']]['provider'] = {'abbr': service['provider']['abbr'], 'name': service['provider']['name']}
             try:
-                grouped[service['provider']['id']]['services'].append(_remove_key(service, 'provider'))    
+                grouped[service['provider']['abbr']]['services'].append(util.remove_key(service, 'provider'))    
             except:
-                grouped[service['provider']['id']]['services'] = []
-                grouped[service['provider']['id']]['services'].append(_remove_key(service, 'provider'))
+                grouped[service['provider']['abbr']]['services'] = []
+                grouped[service['provider']['abbr']]['services'].append(util.remove_key(service, 'provider'))
 
         services = sorted(grouped.values())
 

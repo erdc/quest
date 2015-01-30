@@ -1,6 +1,6 @@
 services = {
-        'usgs-nwis-iv': 'dsl.services.usgs_nwis:UsgsNwisIv',
-        'usgs-nwis-dv': 'dsl.services.usgs_nwis:UsgsNwisDv',
+        'usgs-nwis-iv': 'dsl.services.usgs_nwis:NwisIv',
+        'usgs-nwis-dv': 'dsl.services.usgs_nwis:NwisDv',
         #usgs-ned-1: dsl.services.usgs_ned:UsgsNed1ArcSecond
         #usgs-ned-13: dsl.services.usgs_ned:UsgsNed13ArcSecond
         #usgs-ned-19: dsl.services.usgs_ned:UsgsNed19ArcSecond

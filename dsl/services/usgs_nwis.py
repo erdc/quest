@@ -3,26 +3,26 @@ import jsonschema
 from ulmo.usgs import nwis
 
 
-class NwisBase(DataServiceBase)
+class NwisBase(DataServiceBase):
     def register(self):
         self.metadata = {
                     'provider': {
-                        'code': 'usgs',
+                        'abbr': 'USGS',
                         'name': 'United States Geological Survey', 
                         },
                     
-                    'geographical_areas': ['Alaska', 'USA', 'Hawaii']
+                    'geographical_areas': ['Alaska', 'USA', 'Hawaii'],
                     'bounding_boxes' : [
-                            (-178.19453125, 51.6036621094, -130.0140625, 71.4076660156)
-                            (-124.709960938, 24.5423339844, -66.9870117187, 49.3696777344)
-                            (-160.243457031, 18.9639160156, -154.804199219, 22.2231445312)
+                            (-178.19453125, 51.6036621094, -130.0140625, 71.4076660156),
+                            (-124.709960938, 24.5423339844, -66.9870117187, 49.3696777344),
+                            (-160.243457031, 18.9639160156, -154.804199219, 22.2231445312),
                         ],
                     'geotype': 'points',
                     'datatype': 'timeseries',
                 }
 
-    def get_locations(self, locations=None, bounding_box=None, parameters=None, service=self.service):
-        locations = nwis.get_sites(sites=locations, bounding_box=bounding_box, parameter=parameters, service=service)
+    def get_locations(self, locations=None, bounding_box=None, parameters=None):
+        locations = nwis.get_sites(sites=locations, bounding_box=bounding_box, parameter=parameters, service=self.service)
         return locations
 
     def get_location_filters(self): 
@@ -32,17 +32,17 @@ class NwisBase(DataServiceBase)
             "properties": {
                 "locations": {
                     "type": "string",
-                    "description": "Optional single or comma delimited list of location identifiers"
+                    "description": "Optional single or comma delimited list of location identifiers",
                     },
                 "bounding_box": {
                     "type": "string",
-                    "description": "bounding box should be a comma delimited set of 4 numbers "
-                    }
+                    "description": "bounding box should be a comma delimited set of 4 numbers ",
+                    },
                 "parameters": {
-                    "type": "string"
-                    "description": "comma delimited list of parameter names"
-                    }
-            }
+                    "type": "string",
+                    "description": "comma delimited list of parameter names",
+                    },
+            },
             "required": None,
         }
         return schema
@@ -51,11 +51,15 @@ class NwisBase(DataServiceBase)
         schema = {} #todo
         return schema
 
+    def get_data(self):
+        pass #todo
 
-class UsgsNwisIv(NwisBase):
+
+class NwisIv(NwisBase):
     def register(self):
         """Register USGS NWIS IV plugin by setting service name, source and uid 
         """
+        super(NwisIv, self).register()
         self.service = 'iv'
         self.metadata.update({
                 'display_name': 'NWIS Instantaneous Values',
@@ -67,10 +71,11 @@ class UsgsNwisIv(NwisBase):
         return ['Streamflow', 'Temperature', 'Precipitation']
 
 
-class UsgsNwisDv(NwisBase):
+class NwisDv(NwisBase):
     def register(self):
         """Register USGS NWIS DV plugin by setting service name, source and uid 
         """
+        super(NwisDv, self).register()
         self.service = 'dv'
         self.metadata.update({
                 'display_name': 'NWIS Daily Values',

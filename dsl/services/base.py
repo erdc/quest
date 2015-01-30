@@ -46,7 +46,7 @@ class DataServiceBase(object):
         Response defined as JSON-Schema
         """
 
-    @abstractmethod
+    @abc.abstractmethod
     def provides(self, bounding_box=None, **kwargs):
         """List parameters that the service potentially provides
 
