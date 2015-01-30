@@ -50,11 +50,12 @@ setup(
     packages=find_packages(),
     platforms='any',
     install_requires=[
-        'appdirs>=1.2.0',
+        'numpy',
         'fiona',
         'geojson',
-        'flask',
+        'jsonschema',
         'stevedore',
+        'ulmo',
     ],
     classifiers=[
         'Development Status :: 3 - Alpha',
