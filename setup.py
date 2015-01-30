@@ -4,7 +4,7 @@ import sys
 from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand
 
-import yaml
+from config import services, filters
 
 
 class PyTest(TestCommand):
@@ -32,10 +32,9 @@ with open('README.rst') as f:
         if 'travis-ci' not in line])
 
 
-with open('config.yml') as f:
-    config = yaml.load(f)
-    services = [' = '.join([k,v]) for k,v in config['services'].iteritems()]
-    filters = [' = '.join([k,v]) for k,v in config['filters'].iteritems()]
+# create plugin entrypoint strings
+services = [' = '.join([k,v]) for k,v in services.iteritems()]
+filters = [' = '.join([k,v]) for k,v in filters.iteritems()]
 
 
 setup(
