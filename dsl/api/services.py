@@ -11,11 +11,11 @@ from collections import defaultdict
 
 
 @util.jsonify
-def download(name, **kwargs):
+def get_data(name, locations, **kwargs):
     """downloads data from a given service and returns a reference to downloaded data
     """
-    service = util.load_drivers('services', name)
-    return service.driver.download(**kwargs)
+    service = util.load_drivers('services', name)[name]
+    return service.driver.get_data(locations, **kwargs)
 
 
 @util.jsonify
