@@ -4,7 +4,9 @@
 from .base import DataServiceBase
 from geojson import Feature, Point, FeatureCollection
 import numpy as np
+import pandas as pd
 import re
+import os
 from ulmo.usgs import nwis
 from .. import util
 
@@ -145,25 +147,35 @@ class NwisBase(DataServiceBase):
 
     def get_data(self, locations, parameters=None, path=None, start=None, end=None, period=None):
         if not parameters:
-            parameters = self.provides()
+            parameters = ','.join(self.provides())
 
         if not path:
             path = util.get_dsl_dir()
 
+        if not isinstance(locations, list):
+            locations = [locations]
+
         path = os.path.join(path, DEFAULT_FILE_PATH)
-        io = util.load_drivers('io', 'ts-geojson')
+        io = util.load_drivers('io', 'ts-geojson')['ts-geojson'].driver
 
         parameters = _as_nwis(parameters)
+        files = {}
         for location in locations:
             datasets = nwis.get_site_data(location, parameter_code=parameters, 
                                       start=start, end=end, period=period,
                                       service=self.service)
 
             for parameter, data in datasets.iteritems():
+                df = pd.DataFrame(data['values'])
+                df.index = self._make_index(df)
+                df = df['value']
                 parameter = _as_nwis(parameter.split(':')[0], invert=True)
-                filename = path + '_%s_%s.json' % (location, parameter, self.service)
-                io.write(path, )
-
+                filename = path + '_%s_%s_%s.json' % (self.service, location, parameter)
+                io.write(path, data['site']['code'], data['site']['name'],
+                            data['site']['location']['longitude'], 
+                            data['site']['location']['latitude'], 
+                            parameter, data['variable']['units']['code'], self.statistic, df)
+                print 'file written to: ', filename
 
 
 class NwisIv(NwisBase):
@@ -172,6 +184,7 @@ class NwisIv(NwisBase):
         """
         super(NwisIv, self).register()
         self.service = 'iv'
+        self.statistic = 'instantaneous'
         self.metadata.update({
                 'display_name': 'NWIS Instantaneous Values',
                 'service': 'NWIS Instantaneous Values Web Service', 
@@ -181,6 +194,9 @@ class NwisIv(NwisBase):
     def provides(self, bounding_box=None):
         return ['Streamflow', 'Gage Height']
 
+    def _make_index(self, df):
+        return pd.to_datetime(df.datetime)
+
 
 class NwisDv(NwisBase):
     def register(self):
@@ -188,6 +204,7 @@ class NwisDv(NwisBase):
         """
         super(NwisDv, self).register()
         self.service = 'dv'
+        self.statistic = 'mean'
         self.metadata.update({
                 'display_name': 'NWIS Daily Values',
                 'service': 'NWIS Daily Values Web Service', 
@@ -196,6 +213,9 @@ class NwisDv(NwisBase):
 
     def provides(self, bounding_box=None):
         return ['Streamflow', 'Gage Height']
+
+    def _make_index(self, df):
+        return pd.PeriodIndex(df.datetime, freq='D')
 
 
 def _as_nwis(parameters, invert=False):
