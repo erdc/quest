@@ -3,8 +3,10 @@
 
 """
 from .base import IoBase
+from .. import util
 from geojson import Feature, Point, dump
 import json
+import os
 import pandas as pd
 
 
@@ -30,7 +32,7 @@ class TsGeojson(IoBase):
 
         return data
 
-    def write(self, path, location, name, longitude, latitude, parameter, unit, statistic, df, metadata=None):
+    def write(self, path, location, name, longitude, latitude, parameter, unit, df, metadata=None):
         """Write data to format
         """
 
@@ -40,17 +42,19 @@ class TsGeojson(IoBase):
                         properties={
                             'name': name,
                             'parameter': parameter,
-                            'statistic': statistic,
                             'metadata': metadata,
                             'unit_of_measurement': unit,
-                            'statistic': statistic,
                             'time': df.index.to_native_types(),
                             'values': df.values.tolist(),
                         },
                     )
         if not path.endswith('.json'):
             path += '.json'
-        with open(path+'.json', 'w') as f:
+
+        base, fname = os.path.split(path)
+        util.mkdir_if_doesnt_exist(base)
+
+        with open(path, 'w') as f:
             dump(feature, f)
 
-        print 'file written to %s' % path
+        print 'file written to: %s' % path

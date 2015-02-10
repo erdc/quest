@@ -11,7 +11,7 @@ from ulmo.usgs import nwis
 from .. import util
 
 # default file path (appended to collection path)
-DEFAULT_FILE_PATH = 'nwis'
+DEFAULT_FILE_PATH = 'nwis/'
 
 class NwisBase(DataServiceBase):
     def register(self):
@@ -51,8 +51,7 @@ class NwisBase(DataServiceBase):
         if not parameters:
             parameters = ','.join(self.provides())
 
-        parameters = _as_nwis(parameters)
-        parameters = parameters.split(',')
+        parameters = [_as_nwis(p)[0] for p in parameters.split(',')]
 
         sites = {}
         site_parameters = {}
@@ -69,7 +68,7 @@ class NwisBase(DataServiceBase):
             provides = []
             for parameter in parameters:
                 if site['code'] in site_parameters[parameter]:
-                    provides.append(_as_nwis(parameter, invert=True))
+                    provides.append(_as_nwis(parameter, invert=True)[0])
 
             feature = Feature(id=site['code'],
                             geometry=Point((float(site['location']['longitude']),
@@ -146,6 +145,10 @@ class NwisBase(DataServiceBase):
         return schema
 
     def get_data(self, locations, parameters=None, path=None, start=None, end=None, period=None):
+
+        if not filter(None, [start, end, period]):
+            period = 'P365D' #default to past 1yr of data
+
         if not parameters:
             parameters = ','.join(self.provides())
 
@@ -158,24 +161,45 @@ class NwisBase(DataServiceBase):
         path = os.path.join(path, DEFAULT_FILE_PATH)
         io = util.load_drivers('io', 'ts-geojson')['ts-geojson'].driver
 
-        parameters = _as_nwis(parameters)
-        files = {}
-        for location in locations:
-            datasets = nwis.get_site_data(location, parameter_code=parameters, 
-                                      start=start, end=end, period=period,
-                                      service=self.service)
+        parameter_codes = []
+        statistic_codes = []
+        for parameter in parameters.split(','):
+            p, s = _as_nwis(parameter)
+            parameter_codes.append(p)
+            statistic_codes.append(s)
 
-            for parameter, data in datasets.iteritems():
+        parameter_codes = ','.join(set(parameter_codes))
+        statistic_codes = filter(None, set(statistic_codes))
+        if statistic_codes:
+            ','.join(statistic_codes)
+        else:
+            statistic_codes=None
+
+        data_locations = {}
+        for location in locations:
+            datasets = nwis.get_site_data(location, parameter_code=parameter_codes,
+                                        statistic_code=statistic_codes,
+                                        start=start, end=end, period=period,
+                                        service=self.service)
+
+            for code, data in datasets.iteritems():
                 df = pd.DataFrame(data['values'])
                 df.index = self._make_index(df)
                 df = df['value']
-                parameter = _as_nwis(parameter.split(':')[0], invert=True)
-                filename = path + '_%s_%s_%s.json' % (self.service, location, parameter)
-                io.write(path, data['site']['code'], data['site']['name'],
+                p, s = _as_nwis(code, invert=True)
+                if s:
+                    parameter = ':'.join([p,s])
+                else:
+                    parameter = p
+
+                filename = path + 'nwis:%s_stn:%s_%s.json' % (self.service, location, parameter)
+                data_locations[parameter] = filename
+                io.write(filename, data['site']['code'], data['site']['name'],
                             data['site']['location']['longitude'], 
                             data['site']['location']['latitude'], 
-                            parameter, data['variable']['units']['code'], self.statistic, df)
-                print 'file written to: ', filename
+                            parameter, data['variable']['units']['code'], df)
+
+        return data_locations
 
 
 class NwisIv(NwisBase):
@@ -184,7 +208,6 @@ class NwisIv(NwisBase):
         """
         super(NwisIv, self).register()
         self.service = 'iv'
-        self.statistic = 'instantaneous'
         self.metadata.update({
                 'display_name': 'NWIS Instantaneous Values',
                 'service': 'NWIS Instantaneous Values Web Service', 
@@ -192,7 +215,7 @@ class NwisIv(NwisBase):
             })
 
     def provides(self, bounding_box=None):
-        return ['Streamflow', 'Gage Height']
+        return ['streamflow', 'gageheight']
 
     def _make_index(self, df):
         return pd.to_datetime(df.datetime)
@@ -204,7 +227,6 @@ class NwisDv(NwisBase):
         """
         super(NwisDv, self).register()
         self.service = 'dv'
-        self.statistic = 'mean'
         self.metadata.update({
                 'display_name': 'NWIS Daily Values',
                 'service': 'NWIS Daily Values Web Service', 
@@ -212,21 +234,35 @@ class NwisDv(NwisBase):
             })
 
     def provides(self, bounding_box=None):
-        return ['Streamflow', 'Gage Height']
+        return ['streamflow:dailymin', 'streamflow:dailymean', 'streamflow:dailymax', 
+                'gageheight:dailymin', 'gageheight:dailymean', 'gageheight:dailymax']
 
     def _make_index(self, df):
         return pd.PeriodIndex(df.datetime, freq='D')
 
 
-def _as_nwis(parameters, invert=False):
-    if not parameters:
-        return None
+def _as_nwis(parameter, invert=False):
+    
+    if ':' in parameter:
+        p, s = parameter.split(':')
+    else:
+        p, s = parameter, None
 
-    nwis = {
-        'Streamflow': '00060',
-        'Gage Height': '00065',
+    codes = {
+            'streamflow': '00060',
+            'gageheight': '00065',
+        }
+
+    stats = {
+        'dailymax': '00001',
+        'dailymin': '00002',
+        'dailymean': '00003',
+        None: None,
     }
-    if invert:
-        nwis = {v: k for k, v in nwis.items()}
 
-    return ','.join([nwis[parameter.strip()] for parameter in parameters.split(',')])
+    if invert:
+        codes = {v: k for k, v in codes.items()}
+        stats = {v: k for k, v in stats.items()}
+        stats['00011'] = None
+
+    return codes[p], stats[s]
