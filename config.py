@@ -21,3 +21,7 @@ services = {
 filters = {
         'vitd-basic': 'dsl.filters.vitd:Basic',
     }
+
+io = {
+        'ts-geojson': 'dsl.io.ts_geojson:TsGeojson',
+    }
