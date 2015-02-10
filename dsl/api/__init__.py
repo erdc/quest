@@ -22,7 +22,7 @@ __version__ = 1.0
 from .filters import get_filters
 from .providers import get_providers
 from .services import (
-        download,
+        get_data,
         get_datasets,
         get_locations,
         get_services,
