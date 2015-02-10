@@ -4,7 +4,7 @@ import sys
 from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand
 
-from config import services, filters
+from config import services, filters, io
 
 
 class PyTest(TestCommand):
@@ -35,7 +35,7 @@ with open('README.rst') as f:
 # create plugin entrypoint strings
 services = [' = '.join([k,v]) for k,v in services.iteritems()]
 filters = [' = '.join([k,v]) for k,v in filters.iteritems()]
-
+io = [' = '.join([k,v]) for k,v in io.iteritems()]
 
 setup(
     name='dsl',
@@ -72,6 +72,7 @@ setup(
     entry_points={
         'dsl.services': services,
         'dsl.filters': filters,
+        'dsl.io': io,
     },
 
     zip_safe=False,

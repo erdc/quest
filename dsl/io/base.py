@@ -2,7 +2,6 @@
 
 
 """
-
 import abc
 
 class IoBase(object):
@@ -17,13 +16,15 @@ class IoBase(object):
 
     @abc.abstractmethod
     def register(self):
-        """Register plugin by setting filter name, geotype and uid 
+        """Register plugin by setting description and io type 
         """
 
+    @abc.abstractmethod
     def read(self):
         """Read data from format
         """
 
+    @abc.abstractmethod
     def write(self):
         """Write data to format
         """
