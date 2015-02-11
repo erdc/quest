@@ -12,7 +12,7 @@ services = {
         #example-points: dsl.services.example:ExamplePoints
         #example-polys: dsl.services.example:ExamplePolys
         #example-vitd: dsl.services.example:ExampleVITD
-        #iraq-vitd: dsl.services.iraq_demo:IraqVITD
+        'iraq-vitd': 'dsl.services.iraq_demo:IraqVITD',
         #iraq-agc-tlidar: dsl.services.iraq_demo:IraqAGCTLidar
         #iraq-agc-alidar: dsl.services.iraq_demo:IraqAGCALidar
         #chesapeake-elevation: dsl.services.chesapeake_demo:ChesapeakeVTK

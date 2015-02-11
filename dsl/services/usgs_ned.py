@@ -37,7 +37,7 @@ class UsgsNedBase(DataServiceBase):
 
     def get_locations(self, locations=None, bounding_box=None):
         if locations:
-            if not isinstance(bounding_box, list):
+            if isinstance(locations, basestring):
                 locations = [loc.strip() for loc in locations.split(',')]
 
             with open(self.cache_file) as f:
@@ -48,7 +48,7 @@ class UsgsNedBase(DataServiceBase):
         if not bounding_box:
             bounding_box = self.metadata['bounding_boxes'][0]
 
-        if not isinstance(bounding_box, list):
+        if isinstance(bounding_box, basestring):
             bounding_box = [float(p) for p in bounding_box.split(',')]
 
         xmin, ymin, xmax, ymax = bounding_box

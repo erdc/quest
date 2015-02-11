@@ -3,34 +3,43 @@ Example Services
 """
 
 from .. import util
-from dsl.services import base
+from .base import DataServiceBase
 import fiona
 from geojson import Feature, FeatureCollection, Point, Polygon, dump
 from random import random
-import os
+import os, shutil
 
+DEFAULT_FILE_PATH_VITD = 'agc/iraq/vitd'
+DEFAULT_FILE_PATH_LIDAR = 'agc/iraq/lidar'
 
-class IraqVITD(base.DataServiceBase):
+class IraqVITD(DataServiceBase):
     def register(self):
         """Register Iraq Demo VITD service 
         """
+        self.demo_dir = util.get_dsl_demo_dir()
         self.metadata = {
-                    'provider': {'name': 'Iraq VITD', 'id': 'iraq-vitd'},
-                    'dataset_name': 'Iraq VITD',
+                    'provider': {
+                        'abbr': 'AGC',
+                        'name': 'Army Geospatial Center', 
+                        },
+                    'display_name': 'Iraq Terrain Data - VITD',
+                    'service': 'Iraq Terrain Data - VITD',
                     'description': 'Iraq VITD Dataset',
                     'geographical area': 'IRAQ',
-                    'bbox': [38.782, 28.833, 49.433, 37.358],
+                    'bounding_boxes': [[38.782, 28.833, 49.433, 37.358]],
                     'geotype': 'polygons',
-                    'type': 'vitd'
+                    'datatype': 'vitd'
                 }
 
 
-    def get_locations(self, bbox=None):
-        if not bbox:
-            bbox = self.metadata['bbox']
+    def get_locations(self, locations=None, bounding_box=None):
+        if locations:
+            return self.get_feature_locations(locations)
 
-        demo_dir = util.get_dsl_demo_dir()
-        path = os.path.join(demo_dir, 'iraq', 'iraq-vitd.txt')
+        if not bounding_box:
+            bounding_box = self.metadata['bounding_boxes'][0]
+
+        path = os.path.join(self.demo_dir, 'iraq', 'iraq-vitd.txt')
 
         polys = []
         with open(path) as f:
@@ -43,85 +52,92 @@ class IraqVITD(base.DataServiceBase):
 
         return FeatureCollection(polys)
 
-
     def get_feature_locations(self, features):
         if not isinstance(features, list):
             features = [features]
         locations = self.get_locations()
         locations['features'] = [feature for feature in locations['features'] if feature['id'] in features]
+       
         return locations
 
+    def get_data(self, locations, parameters=None, path=None):
+        """parameter ignored, always equal to terrain-vitd
+        """
+        parameters = 'terrain-vitd'
 
-    def download(self, **kwargs):
+        if isinstance(locations, basestring):
+            locations = [loc.strip() for loc in locations.split(',')]
 
-        if 'options' in kwargs:
-            schema = { 
-            "$schema": "http://json-schema.org/draft-04/schema#",
+        if not path:
+            path = util.get_dsl_dir()
+
+        path = os.path.join(path, DEFAULT_FILE_PATH_VITD)
+        util.mkdir_if_doesnt_exist(path)
+
+        #fake download
+        src_path = os.path.join(self.demo_dir, 'iraq', 'srtm-vitd-bboxes')
+        data_files = {}
+        for location in locations:
+            data_files[location] = {}
+            fname = location + '.tif'
+            src = os.path.join(src_path, fname)
+            dest = os.path.join(path, fname)
+            print 'downloading file for %s from agc' % location
+            shutil.copy(src, dest)
+            data_files[location][parameters] = dest
+
+        return data_files
+
+    def get_location_filters(self):
+        schema = {
+            "title": "Location Filters",
             "type": "object",
-            "title": "Download Options",
             "properties": {
-                "options": {
-                    "type": "array",
-                    "items": [
-                        {
-                            "name": "name",
-                            "value": {
-                                "type": "string",
-                                "required": False,
-                            }   
-                        },
-                        {
-                            "name": "features",
-                            "type": "array",
-                            "minItems": 0,
-                            "items": { "type": "string" },
-                            "uniqueItems": False,
-                            "required": False,
-                        }
-                        ]
-                    }
-                }
-            }
+                "locations": {
+                    "type": "string",
+                    "description": "Optional single or comma delimited list of location identifiers",
+                    },
+                "bounding_box": {
+                    "type": "string",
+                    "description": "bounding box should be a comma delimited set of 4 numbers ",
+                    },
+            },
+            "required": None,
+        }
+        return schema
 
-            return schema
+    def get_data_filters(self):
+        schema = {
+            "title": "Download Options",
+            "type": "Object",
+            "properties": {
+                "locations": {
+                    "type": "string",
+                    "description": "single or comma delimited list of location identifiers to download data for",
+                },
+                "path": {
+                    "type": "string",
+                    "description": "base file path to store data"
+                },
+            },
+            "required": ["locations"],
+        }
+        return schema
 
-        features = self.get_locations()
-        if 'features' in kwargs.keys():
-            features['features'] = [feature for feature in features['features'] if feature['id'] in kwargs['features'][0].split(',')] 
-
-        #add in filename uri's
-        demo_dir = util.get_dsl_demo_dir()
-        path = os.path.join(demo_dir, 'iraq', 'srtm-vitd-bboxes')
-        for feature in features['features']:
-            feature['properties']['uri'] = 'file://' + os.path.join(path, feature['id'] + '.tif')
-
-
-        dataset_name = kwargs.get('name')
-        if dataset_name:
-            dataset_name = dataset_name[0]
-        else:
-            dataset_name = 'iraq-vitd-' + str(hash(random()))
-
-        #add feature to datasets file
-        path = os.path.join(demo_dir, 'datasets', dataset_name + '.json')
-        if not os.path.exists(os.path.join(demo_dir, 'datasets')):
-            os.makedirs(os.path.join(demo_dir, 'datasets'))
-
-        with open(path, 'a') as f:
-            dump(features, f)
-
-        js = {'success': True, 'dataset_uid': dataset_name}
-        
-        return js
+    def provides(self):
+        return ['terrain-vitd']
 
 
-class IraqAGCTLidar(base.DataServiceBase):
+class IraqAGCTLidar(DataServiceBase):
     def register(self):
         """Register Iraq Demo AGC Lidar service 
         """
         self.metadata = {
-                    'provider': {'name': 'Army Geospatial Center (AGC)', 'id': 'agc'},
-                    'dataset_name': 'Iraq AGC T-Lidar',
+                    'provider': {
+                        'abbr': 'AGC',
+                        'name': 'Army Geospatial Center', 
+                        },
+                    'display_name': 'Iraq AGC T-Lidar',
                     'description': 'Iraq AGC T-Lidar Data',
                     'geographical area': 'IRAQ',
                     'bbox': [38.782, 28.833, 49.433, 37.358],
@@ -145,8 +161,10 @@ class IraqAGCTLidar(base.DataServiceBase):
 
         return FeatureCollection(features)
 
-
-class IraqAGCALidar(base.DataServiceBase):
+##########################################################################
+# WARNING: AGC LIDAR CLASSES BELOW HAVE NOT BEEN REFACTORED TO NEW API YET 
+##########################################################################
+class IraqAGCALidar(DataServiceBase):
     def register(self):
         """Register Iraq Demo AGC Lidar service 
         """
