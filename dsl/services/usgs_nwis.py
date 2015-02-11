@@ -245,7 +245,7 @@ class NwisDv(NwisBase):
             })
 
     def provides(self, bounding_box=None):
-        return ['streamflow:dailymin', 'streamflow:dailymean', 'streamflow:dailymax', 
+        return ['streamflow:dailymean', 
                 'gageheight:dailymin', 'gageheight:dailymean', 'gageheight:dailymax']
 
     def _make_index(self, df):
