@@ -88,7 +88,7 @@ class IraqVITD(DataServiceBase):
 
         return data_files
 
-    def get_location_filters(self):
+    def get_locations_filters(self):
         schema = {
             "title": "Location Filters",
             "type": "object",

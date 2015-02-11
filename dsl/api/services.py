@@ -56,7 +56,7 @@ def get_data_filters(name):
 
 
 @util.jsonify
-def get_location_filters(name):
+def get_locations_filters(name):
     """get available filter options for get_locations call
 
     Parameters
@@ -70,7 +70,7 @@ def get_location_filters(name):
         A python representation of a json-schema
     """
     service = util.load_drivers('services', name)[name]
-    return service.driver.get_location_filters()
+    return service.driver.get_locations_filters()
 
 
 @util.jsonify

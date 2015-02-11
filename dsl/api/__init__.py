@@ -2,19 +2,6 @@
 
 This module defines the Python API for the Environmental Simulator 
 Data Services Library. 
-
-
-Nomenclature:
-
-Services
-Filters
-Readers
-
-
-
-
-
-
 """
 
 __version__ = 1.0
@@ -26,6 +13,8 @@ from .services import (
         get_locations,
         get_parameters,
         get_services,
+        get_data_filters,
+        get_locations_filters,
     )
 from .collections import (
         new_collection,
