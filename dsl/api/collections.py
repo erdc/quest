@@ -7,8 +7,8 @@ import datetime
 import json
 import os
 
-COLLECTIONS_FILE = 'collections.json'
-COLLECTION_METADATA_FILE = 'collection.json'
+COLLECTIONS_FILE = 'collections/collections.json' #master file
+COLLECTION_METADATA_FILE = 'dsl_metadata.json' #individual collection metadata
 METADATA_FILE = 'dsl.json'
 
 
@@ -29,7 +29,7 @@ def add_to_collection(name, service, locations, parameters=None):
 	dataset = collection['datasets'][service]
 
 	features = get_locations(service, locations)
-	dataset['locations'] = _append_features(dataset['locations'], features)
+	dataset['locations'] = util.append_features(dataset['locations'], features)
 	
 	if parameters:
 		parameters = parameters.split(',')
@@ -55,9 +55,8 @@ def download_in_collection(name):
 	for service, dataset in collection['datasets'].iteritems():
 		for location, parameters in dataset['data'].iteritems():
 			path = collection['path']
-			data_locations = get_data(service, location, path=path, parameters=','.join(parameters.keys()))
-			for k, v in data_locations.iteritems():
-				print '%s:%s' % (k,v)
+			data_files = get_data(service, location, path=path, parameters=','.join(parameters.keys()))
+			for k, v in data_files[location].iteritems():
 				parameters[k]['relative_path'] = os.path.relpath(v, path)
 	_write_collection(collection)
 	return collection
@@ -71,7 +70,7 @@ def new_collection(name, path=None, tags=None):
 		return get_collection(name)
 
 	if not path:
-		path = util.get_dsl_dir()
+		path = os.path.join(util.get_dsl_dir(), 'collections')
 
 	collection_path = os.path.join(path, name)
 	util.mkdir_if_doesnt_exist(collection_path)
@@ -134,18 +133,6 @@ def delete_from_collection(name, service, feature_ids):
 		_write_collection(collection)
 
 	return collection
-
-
-def _append_features(old, new):
-	if not old:
-		return new
-
-	existing_features = [feature['id'] for feature in old['features']]
-	for feature in new['features']:
-		if feature['id'] not in existing_features:
-			old['features'].append(feature)
-
-	return old
 
 
 def _load_collections():

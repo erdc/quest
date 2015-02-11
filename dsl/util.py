@@ -7,6 +7,18 @@ except ImportError:
     import json
 
 
+def append_features(old, new):
+    if not old:
+        return new
+
+    existing_features = [feature['id'] for feature in old['features']]
+    for feature in new['features']:
+        if feature['id'] not in existing_features:
+            old['features'].append(feature)
+
+    return old
+
+
 def get_dsl_dir(sub_dir=None):
     return_dir = os.environ.get('ENVSIM_DSL_DIR')
     if not return_dir:

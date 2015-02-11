@@ -11,7 +11,7 @@ from ulmo.usgs import nwis
 from .. import util
 
 # default file path (appended to collection path)
-DEFAULT_FILE_PATH = 'nwis/'
+DEFAULT_FILE_PATH = 'usgs/nwis/'
 
 class NwisBase(DataServiceBase):
     def register(self):
@@ -146,8 +146,12 @@ class NwisBase(DataServiceBase):
                     "type": "string",
                     "description": "period date",
                 },
+                "path": {
+                    "type": "string",
+                    "description": "base file path to store data"
+                },
             },
-            "required": ["locations", "parameters"],
+            "required": ["locations"],
         }
         return schema
 
@@ -182,8 +186,9 @@ class NwisBase(DataServiceBase):
         else:
             statistic_codes=None
 
-        data_locations = {}
+        data_files = {}
         for location in locations:
+            data_files[location] = {}
             datasets = nwis.get_site_data(location, parameter_code=parameter_codes,
                                         statistic_code=statistic_codes,
                                         start=start, end=end, period=period,
@@ -204,13 +209,13 @@ class NwisBase(DataServiceBase):
                     parameter = p
 
                 filename = path + 'nwis:%s_stn:%s_%s.json' % (self.service, location, parameter)
-                data_locations[parameter] = filename
+                data_files[location][parameter] = filename
                 io.write(filename, data['site']['code'], data['site']['name'],
                             data['site']['location']['longitude'], 
                             data['site']['location']['latitude'], 
                             parameter, data['variable']['units']['code'], df)
 
-        return data_locations
+        return data_files
 
 
 class NwisIv(NwisBase):
