@@ -39,6 +39,13 @@ def get_datasets(name=None):
 
 
 @util.jsonify
+def get_parameters(name):
+    service = util.load_drivers('services', name)[name].driver
+
+    return service.provides()
+
+
+@util.jsonify
 def get_services(names=None, group=False, provider=None, **kwargs):
     """ generates a list of available data services
     """
