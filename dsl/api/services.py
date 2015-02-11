@@ -19,26 +19,6 @@ def get_data(name, locations, **kwargs):
 
 
 @util.jsonify
-def get_datasets(name=None):
-    """Get local datasets. 
-    """
-
-    demo_dir = util.get_dsl_demo_dir()
-
-    if name:
-        with open(os.path.join(demo_dir, 'datasets', name + '.json')) as f:
-            datasets = json.load(f)
-    else:
-        datasets = []
-        for filename in glob.glob(os.path.join(demo_dir, 'datasets', '*.json')):
-            root, ext = os.path.splitext(filename)
-            name = os.path.split(root)[-1]
-            datasets.append({'id': name})
-
-    return datasets
-
-
-@util.jsonify
 def get_parameters(name):
     service = util.load_drivers('services', name)[name].driver
 
