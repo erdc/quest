@@ -13,21 +13,103 @@ from collections import defaultdict
 @util.jsonify
 def get_data(name, locations, **kwargs):
     """downloads data from a given service and returns a reference to downloaded data
+
+    Parameters
+    ----------
+    name : str,
+        The name of the service to be used
+    locations : str or list of str,
+        Comma separated list of location codes to retrieve data from
+    parameters : ``None`` or str
+        Comma separated list of parameters to download data for, if ``None``
+        get all available parameters
+
+    Note:
+        additional kwargs (keyword arguments) are passed along to the plugins
+
+    Returns
+    -------
+    data_files : dict,
+        A python dict representation of the downloaded data file locations keyed by
+        location and parameter.
     """
     service = util.load_drivers('services', name)[name]
     return service.driver.get_data(locations, **kwargs)
 
 
 @util.jsonify
-def get_parameters(name):
-    service = util.load_drivers('services', name)[name].driver
+def get_data_filters(name):
+    """get available filter options for get_data call
 
+    Parameters
+    ----------
+    name : str,
+        The name of the service to be used
+
+    Returns
+    -------
+    schema : dict,
+        A python representation of a json-schema
+    """
+    service = util.load_drivers('services', name)[name]
+    return service.driver.get_data_filters()
+
+
+@util.jsonify
+def get_location_filters(name):
+    """get available filter options for get_locations call
+
+    Parameters
+    ----------
+    name : str,
+        The name of the service to be used
+
+    Returns
+    -------
+    schema : dict,
+        A python representation of a json-schema
+    """
+    service = util.load_drivers('services', name)[name]
+    return service.driver.get_location_filters()
+
+
+@util.jsonify
+def get_parameters(name):
+    """get list of available parameters for a service
+
+    Parameters
+    ----------
+    name : str,
+        The name of the service to be used
+
+    Returns
+    -------
+    parameters : list of str,
+        list of parameters available
+    """
+    service = util.load_drivers('services', name)[name].driver
     return service.provides()
 
 
 @util.jsonify
-def get_services(names=None, group=False, provider=None, **kwargs):
-    """ generates a list of available data services
+def get_services(names=None, group=False, provider=None):
+    """get metadata for available data services
+
+    Parameters
+    ----------
+    names : ``None`` or list of str,
+        List of names of the services to be fetched
+
+    group : bool,
+        If True, group the metadata by provider. Default is False.
+
+    provider : ``None`` or str,
+        Filter list by provider. 
+
+    Returns
+    -------
+    services : list of dict,
+        list of services metadata
     """
 
     services = [dict(service_code=k, parameters=v.provides(), **v.metadata) for k,v in util.load_drivers('services', names=names).iteritems()]
@@ -54,9 +136,30 @@ def get_services(names=None, group=False, provider=None, **kwargs):
 
 
 @util.jsonify
-def get_locations(service_name, locations=None, **kwargs):
-    """Fetches location data for a given source (points, lines, polygons)
+def get_locations(name, locations=None, bounding_box=None, **kwargs):
+    """Fetches location metadata for a given service
+
+    Parameters
+    ----------
+    name: str,
+        names of the service to be queried
+
+    locations : ``None`` or str,
+        comma separated list of location codes to fetch
+
+    bounding_box : ``None or str,
+        comma delimited set of 4 numbers
+
+    Note: 
+        Additional kwargs are passed through to plugins
+        bounding_box is ignored when locations are passed
+
+    Returns
+    -------
+    feature_collection : dict,
+        a python dict representation of a geojson feature collection,
     """
-    service = util.load_drivers('services', service_name)[service_name].driver
+
+    service = util.load_drivers('services', name)[name].driver
     
-    return service.get_locations(locations=locations, **kwargs)
+    return service.get_locations(locations=locations, bounding_box=bounding_box **kwargs)

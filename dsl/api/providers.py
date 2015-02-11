@@ -15,6 +15,8 @@ def get_providers(name=None):
     name : ``None`` or str,
         The name of the provider. If ``None`` then return all.
 
+    Returns
+    -------
     providers : list,
         A python list representation of the providers
     """
