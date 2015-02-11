@@ -67,12 +67,9 @@ def get_services(names=None, group=False, provider=None, **kwargs):
 
 
 @util.jsonify
-def get_locations(service_name, features=None, **kwargs):
+def get_locations(service_name, locations=None, **kwargs):
     """Fetches location data for a given source (points, lines, polygons)
     """
     service = util.load_drivers('services', service_name)[service_name].driver
-
-    if features:
-        return  service.get_feature_locations(features, **kwargs)
     
-    return service.get_locations(**kwargs)
+    return service.get_locations(locations=locations, **kwargs)
