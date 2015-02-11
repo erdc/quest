@@ -23,8 +23,8 @@ from .filters import get_filters
 from .providers import get_providers
 from .services import (
         get_data,
-        get_datasets,
         get_locations,
+        get_parameters,
         get_services,
     )
 from .collections import (
@@ -33,6 +33,7 @@ from .collections import (
         add_to_collection,
         delete_collection,
         delete_from_collection,
+        download_in_collection,
         update_collection,
         list_collections,
     )
