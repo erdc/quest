@@ -55,7 +55,7 @@ setup(
         'geojson',
         'jsonschema',
         'stevedore',
-        'ulmo',
+        #'ulmo', #install from git branch specified in requirements.txt
     ],
     classifiers=[
         'Development Status :: 3 - Alpha',
@@ -65,7 +65,6 @@ setup(
         'Programming Language :: Python',
         'Topic :: Software Development :: Libraries :: Python Modules'
     ],
-
 
     include_package_data=True,
 
