@@ -5,7 +5,7 @@ Example Services
 from .base import DataServiceBase
 from .. import util
 from ulmo.usgs import ned
-from geojson import Feature, FeatureCollection, Point, Polygon, dump
+from geojson import FeatureCollection, dump
 import json
 import os
 

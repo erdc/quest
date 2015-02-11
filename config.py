@@ -5,8 +5,8 @@ services = {
         'usgs-ned-13': 'dsl.services.usgs_ned:UsgsNed13ArcSecond',
         'usgs-ned-19': 'dsl.services.usgs_ned:UsgsNed19ArcSecond',
         'usgs-ned-2': 'dsl.services.usgs_ned:UsgsNed2ArcSecond',
-        #usgs-eros-nlcd2001: dsl.services.usgs_eros:UsgsErosNlcd2001
-        #usgs-eros-nlcd2006: dsl.services.usgs_eros:UsgsErosNlcd2006
+        'usgs-eros-nlcd2001': 'dsl.services.usgs_eros:UsgsErosNlcd2001',
+        'usgs-eros-nlcd2006': 'dsl.services.usgs_eros:UsgsErosNlcd2006',
         #ncdc-ghcn: dsl.services.ncdc_ghcn:NcdcGhcn
         #ncdc-gsod: dsl.services.ncdc_gsod:NcdcGsod
         #example-points: dsl.services.example:ExamplePoints
