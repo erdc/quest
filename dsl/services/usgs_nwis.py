@@ -178,7 +178,7 @@ class NwisBase(DataServiceBase):
         parameter_codes = ','.join(set(parameter_codes))
         statistic_codes = filter(None, set(statistic_codes))
         if statistic_codes:
-            ','.join(statistic_codes)
+            statistic_codes = ','.join(statistic_codes)
         else:
             statistic_codes=None
 
@@ -191,6 +191,10 @@ class NwisBase(DataServiceBase):
 
             for code, data in datasets.iteritems():
                 df = pd.DataFrame(data['values'])
+                if df.empty:
+                    print 'No data found, try different time period'
+                    continue
+                    
                 df.index = self._make_index(df)
                 df = df['value']
                 p, s = _as_nwis(code, invert=True)
