@@ -40,9 +40,12 @@ class NwisBase(DataServiceBase):
             if not bounding_box:
                 bounding_box = '-124.7099609, 24.54233398, -66.98701171, 49.36967773'
 
-            #clean up bounding box
-            xmin, ymin, xmax, ymax = [float(x) for x in bounding_box.split(',')]
-
+            if isinstance(bounding_box, basestring):
+                #clean up bounding box
+                xmin, ymin, xmax, ymax = [float(x) for x in bounding_box.split(',')]
+            else:
+                xmin, ymin, xmax, ymax = bounding_box
+                
             #limit boxes < 5x5 decimal degree size
             boxes = []
             x = np.linspace(xmin, xmax, np.ceil((xmax-xmin)/5.0)+1)

@@ -162,4 +162,4 @@ def get_locations(name, locations=None, bounding_box=None, **kwargs):
 
     service = util.load_drivers('services', name)[name].driver
     
-    return service.get_locations(locations=locations, bounding_box=bounding_box **kwargs)
+    return service.get_locations(locations=locations, bounding_box=bounding_box, **kwargs)
