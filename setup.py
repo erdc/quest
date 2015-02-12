@@ -55,7 +55,7 @@ setup(
         'geojson',
         'jsonschema',
         'stevedore',
-        #'ulmo', #install from git branch specified in requirements.txt
+        'ulmo',
     ],
     classifiers=[
         'Development Status :: 3 - Alpha',
