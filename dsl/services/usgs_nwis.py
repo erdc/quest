@@ -45,7 +45,7 @@ class NwisBase(DataServiceBase):
                 xmin, ymin, xmax, ymax = [float(x) for x in bounding_box.split(',')]
             else:
                 xmin, ymin, xmax, ymax = bounding_box
-                
+
             #limit boxes < 5x5 decimal degree size
             boxes = []
             x = np.linspace(xmin, xmax, np.ceil((xmax-xmin)/5.0)+1)
@@ -253,7 +253,7 @@ class NwisDv(NwisBase):
             })
 
     def provides(self, bounding_box=None):
-        return ['streamflow:dailymean', 
+        return ['streamflow:dailymin','streamflow:dailymean','streamflow:dailymax', 
                 'gageheight:dailymin', 'gageheight:dailymean', 'gageheight:dailymax']
 
     def _make_index(self, df):
