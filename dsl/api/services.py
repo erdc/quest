@@ -38,7 +38,7 @@ def get_data(name, locations, **kwargs):
 
 
 @util.jsonify
-def get_data_filters(name):
+def get_data_filters(name, **kwargs):
     """get available filter options for get_data call
 
     Parameters
@@ -56,7 +56,7 @@ def get_data_filters(name):
 
 
 @util.jsonify
-def get_locations_filters(name):
+def get_locations_filters(name, **kwargs):
     """get available filter options for get_locations call
 
     Parameters
@@ -74,7 +74,7 @@ def get_locations_filters(name):
 
 
 @util.jsonify
-def get_parameters(name):
+def get_parameters(name, **kwargs):
     """get list of available parameters for a service
 
     Parameters
@@ -92,7 +92,7 @@ def get_parameters(name):
 
 
 @util.jsonify
-def get_services(names=None, group=False, provider=None):
+def get_services(names=None, group=False, provider=None, **kwargs):
     """get metadata for available data services
 
     Parameters

@@ -12,7 +12,8 @@ COLLECTION_METADATA_FILE = 'dsl_metadata.json' #individual collection metadata
 METADATA_FILE = 'dsl.json'
 
 
-def add_to_collection(name, service, locations, parameters=None):
+@util.jsonify
+def add_to_collection(name, service, locations, parameters=None, **kwargs):
     """adds locations from a service to a collection
 
     Note: Data is not downloaded in this function call. Placeholders
@@ -68,7 +69,8 @@ def add_to_collection(name, service, locations, parameters=None):
     return collection
 
 
-def download_in_collection(name):
+@util.jsonify
+def download_in_collection(name, **kwargs):
     """download data for services/locations/parameters present in collection
 
     Currently *all* datasets present in a collection will be downloaded with 
@@ -99,7 +101,8 @@ def download_in_collection(name):
     return collection
 
 
-def new_collection(name, path=None, tags=None):
+@util.jsonify
+def new_collection(name, path=None, tags=None, **kwargs):
     """create a new collection
 
     Create a new collection by creating a new folder and placing a json
@@ -144,7 +147,8 @@ def new_collection(name, path=None, tags=None):
     return collections
 
 
-def delete_collection(name):
+@util.jsonify
+def delete_collection(name, **kwargs):
     """delete a collection
 
     Deletes a collection from the collections metadata file.
@@ -175,7 +179,8 @@ def delete_collection(name):
     return collections
 
 
-def list_collections():
+@util.jsonify
+def list_collections(**kwargs):
     """list all available collections
 
     Returns
@@ -187,7 +192,8 @@ def list_collections():
     return _load_collections()
 
 
-def get_collection(name):
+@util.jsonify
+def get_collection(name, **kwargs):
     """get a collection
 
     Retreives collection metadata as a python dict
@@ -211,7 +217,8 @@ def get_collection(name):
     return collection
 
 
-def update_collection(name):
+@util.jsonify
+def update_collection(name, **kwargs):
     """Not sure of function, maybe allow moving to different path etc
 
     NOT IMPLEMENTED
@@ -219,7 +226,8 @@ def update_collection(name):
     raise NotImplementedError('Updating Collections has not been implemented')
 
 
-def delete_from_collection(name, service, feature_ids):
+@util.jsonify
+def delete_from_collection(name, service, feature_ids, **kwargs):
     """delete locations? from collection
 
     NOT IMPLEMENTED 
