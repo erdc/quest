@@ -7,7 +7,7 @@ from .base import DataServiceBase
 import fiona
 from geojson import Feature, FeatureCollection, Point, Polygon, dump
 from random import random
-import os, shutil
+import os, shutil, string
 
 DEFAULT_FILE_PATH_VITD = 'agc/iraq/vitd'
 DEFAULT_FILE_PATH_LIDAR = 'agc/iraq/lidar'
@@ -105,6 +105,13 @@ class IraqVITD(DataServiceBase):
             "required": None,
         }
         return schema
+
+    def get_categories(self, filename):
+        with open(filename) as f:
+            s = filter(lambda x: x in string.printable, f.read())
+        
+        s = s.split(';')[-1]
+        return {s[x:x+58][:3]:s[x:x+58][3:].strip() for x in range(0, len(s), 58)}
 
     def get_data_filters(self):
         schema = {
