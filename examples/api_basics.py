@@ -26,8 +26,8 @@ else:
 bounding_box = raw_input('Enter a bounding box (lon_min, lat_min, lon_max, lat_max) OR Press Enter to use default:')
 
 if not bounding_box:
-    bounding_box = ' -106.6460, 25.8371, -93.5083, 36.5007'
-    print '\tUsing default bounding box (Texas): %s' % bounding_box
+    bounding_box = '-98.173286,30.023451,-97.369926,30.62817'
+    print '\tUsing default bounding box Travis County (Austin): %s' % bounding_box
 
 bounding_box = [float(p) for p in bounding_box.split(',')]
 
@@ -57,6 +57,9 @@ print '~~~adding first 2 locations (all parameters) from each chosen service to 
 
 for svc in chosen_services:
     locs = [p['id'] for p in locations[svc]['features'][:2]]
+    if len(locs)==0:
+        print 'No locations available for ', svc_dict[svc]
+        continue
     locs = ','.join(locs) # convert from list to csv
     print '\t adding locs: [%s] from %s' % (locs, svc_dict[svc])
     dsl.api.add_to_collection(collection_name, svc_dict[svc],locs)
