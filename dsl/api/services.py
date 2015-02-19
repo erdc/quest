@@ -11,7 +11,7 @@ from collections import defaultdict
 
 
 @util.jsonify
-def get_data(name, locations, **kwargs):
+def get_data(name, locations, parameters=None, **kwargs):
     """downloads data from a given service and returns a reference to downloaded data
 
     Parameters
@@ -33,8 +33,10 @@ def get_data(name, locations, **kwargs):
         A python dict representation of the downloaded data file locations keyed by
         location and parameter.
     """
+    locations = util.listify(locations)
+    parameters = util.listify(parameters)
     service = util.load_drivers('services', name)[name]
-    return service.driver.get_data(locations, **kwargs)
+    return service.driver.get_data(locations, parameters=parameters, **kwargs)
 
 
 @util.jsonify
@@ -111,13 +113,13 @@ def get_services(names=None, group=False, provider=None, **kwargs):
     services : list of dict,
         list of services metadata
     """
-
+    names = util.listify(names)
     services = [dict(service_code=k, parameters=v.provides(), **v.metadata) for k,v in util.load_drivers('services', names=names).iteritems()]
 
-    if provider:
+    if provider is not None:
         services = [service for service in services if service['provider']['code']==provider]
 
-    if not group:
+    if group is False:
         services = sorted(services)
     else:
         #group by provider
@@ -159,7 +161,8 @@ def get_locations(name, locations=None, bounding_box=None, **kwargs):
     feature_collection : dict,
         a python dict representation of a geojson feature collection,
     """
-
+    locations = util.listify(locations)
+    bounding_box = util.listify(bounding_box)
     service = util.load_drivers('services', name)[name].driver
     
     return service.get_locations(locations=locations, bounding_box=bounding_box, **kwargs)

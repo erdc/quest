@@ -34,18 +34,14 @@ class NwisBase(DataServiceBase):
     def get_locations(self, locations=None, bounding_box=None, parameters=None):
 
         if locations:
-            sites = nwis.get_sites(sites=locations, service=self.service)
+            sites = nwis.get_sites(sites=util.stringify(locations), service=self.service)
             parameters = None
         else:
-            if not bounding_box:
-                bounding_box = '-124.7099609, 24.54233398, -66.98701171, 49.36967773'
+            if bounding_box is None:
+                bounding_box = [-124.7099609, 24.54233398, -66.98701171, 49.36967773]
 
-            if isinstance(bounding_box, basestring):
-                #clean up bounding box
-                xmin, ymin, xmax, ymax = [float(x) for x in bounding_box.split(',')]
-            else:
-                xmin, ymin, xmax, ymax = bounding_box
-
+            xmin, ymin, xmax, ymax = [float(x) for x in bounding_box]
+            
             #limit boxes < 5x5 decimal degree size
             boxes = []
             x = np.linspace(xmin, xmax, np.ceil((xmax-xmin)/5.0)+1)
@@ -56,17 +52,17 @@ class NwisBase(DataServiceBase):
                     y1, y2 = y[j], y[j+1]
                     boxes.append(','.join([str(round(n,7)) for n in [x1,y1,x2,y2]]))
 
-            if not parameters:
-                parameters = ','.join(self.provides())
+            if parameters is None:
+                parameters = self.provides()
 
-            parameters = [_as_nwis(p)[0] for p in parameters.split(',')]
+            parameters = [_as_nwis(p)[0] for p in parameters]
 
             sites = {}
             site_parameters = {}
             for parameter in parameters:
                 site_parameters[parameter] = []
                 for box in boxes:
-                    sites_in_box = nwis.get_sites(sites=locations, bounding_box=box, 
+                    sites_in_box = nwis.get_sites(sites=util.stringify(locations), bounding_box=box, 
                             parameter_code=parameter, service=self.service)
                     sites.update(sites_in_box)
                     site_parameters[parameter].extend([site['code'] for site in sites_in_box.values()])
@@ -160,24 +156,21 @@ class NwisBase(DataServiceBase):
 
     def get_data(self, locations, parameters=None, path=None, start=None, end=None, period=None):
 
-        if not filter(None, [start, end, period]):
+        if filter(None, [start, end, period]) is None:
             period = 'P365D' #default to past 1yr of data
 
-        if not parameters:
-            parameters = ','.join(self.provides())
+        if parameters is None:
+            parameters = self.provides()
 
-        if not path:
+        if path is None:
             path = util.get_dsl_dir()
-
-        if not isinstance(locations, list):
-            locations = [locations]
 
         path = os.path.join(path, DEFAULT_FILE_PATH)
         io = util.load_drivers('io', 'ts-geojson')['ts-geojson'].driver
 
         parameter_codes = []
         statistic_codes = []
-        for parameter in parameters.split(','):
+        for parameter in parameters:
             p, s = _as_nwis(parameter)
             parameter_codes.append(p)
             statistic_codes.append(s)

@@ -43,6 +43,15 @@ def mkdir_if_doesnt_exist(dir_path):
         os.makedirs(dir_path)
 
 
+def listify(liststr, delimiter=','):
+    """If input is a string, split on comma and convert to python list
+    """
+    if liststr is None:
+        return None
+
+    return isinstance(liststr, list) and liststr or [s.strip() for s in liststr.split(delimiter)] 
+
+
 def load_drivers(namespace, names=None):
     namespace = 'dsl.' + namespace 
     if not names:
@@ -74,3 +83,7 @@ def jsonify(f):
         else:
             return f(*args, **kw)
     return wrapped_f  # the wrapped function gets returned.
+
+
+def stringify(args):
+    return isinstance(args, list) and ','.join(args) or None

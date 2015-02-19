@@ -40,6 +40,12 @@ def add_to_collection(name, service, locations, parameters=None, **kwargs):
         A python dict representation of the collection, the collection is also 
         written to a json file.
     """
+
+    locations = util.listify(locations)
+    parameters = util.listify(parameters)
+    if parameters is None:
+        parameters = get_parameters(service)
+
     collection = get_collection(name)
     
     if 'datasets' not in collection.keys():
@@ -53,12 +59,8 @@ def add_to_collection(name, service, locations, parameters=None, **kwargs):
     features = get_locations(service, locations)
     dataset['locations'] = util.append_features(dataset['locations'], features)
     
-    if parameters:
-        parameters = parameters.split(',')
-    else:
-        parameters = get_parameters(service)
 
-    for loc in locations.split(','):
+    for loc in locations:
         if loc not in dataset['data'].keys():
             dataset['data'][loc] = {p:{'relative_path': None} for p in parameters} 
         else:

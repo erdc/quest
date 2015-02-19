@@ -33,10 +33,10 @@ class IraqVITD(DataServiceBase):
 
 
     def get_locations(self, locations=None, bounding_box=None):
-        if locations:
+        if locations is not None:
             return self.get_feature_locations(locations)
 
-        if not bounding_box:
+        if bounding_box is None:
             bounding_box = self.metadata['bounding_boxes'][0]
 
         path = os.path.join(self.demo_dir, 'iraq', 'iraq-vitd.txt')

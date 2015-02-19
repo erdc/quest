@@ -36,22 +36,20 @@ class UsgsNedBase(DataServiceBase):
 
 
     def get_locations(self, locations=None, bounding_box=None):
-        if locations:
-            if isinstance(locations, basestring):
-                locations = [loc.strip() for loc in locations.split(',')]
+        if locations is not None:
+            try:
+                with open(self.cache_file) as f:
+                    metadata = json.load(f)
+            except:
+                metadata = self.get_locations()
 
-            with open(self.cache_file) as f:
-                metadata = json.load(f)
-                selected = [feature for feature in metadata['features'] if feature['id'] in locations]
-                return FeatureCollection(selected)
+            selected = [feature for feature in metadata['features'] if feature['id'] in locations]
+            return FeatureCollection(selected)
 
-        if not bounding_box:
-            bounding_box = self.metadata['bounding_boxes'][0]
+        if bounding_box is None:
+            bounding_box = self.metadata['bounding_boxes'][0] 
 
-        if isinstance(bounding_box, basestring):
-            bounding_box = [float(p) for p in bounding_box.split(',')]
-
-        xmin, ymin, xmax, ymax = bounding_box
+        xmin, ymin, xmax, ymax = [float(p) for p in bounding_box]
 
         locations = ned.get_raster_availability(self.layer, xmin, ymin, xmax, ymax)
 
