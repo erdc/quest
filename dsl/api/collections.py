@@ -146,7 +146,7 @@ def new_collection(name, path=None, tags=None, **kwargs):
     collections[name] = collection
     _write_collections(collections)
 
-    return collections
+    return collection
 
 
 @util.jsonify
