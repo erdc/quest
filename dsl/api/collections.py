@@ -58,7 +58,6 @@ def add_to_collection(name, service, locations, parameters=None, **kwargs):
 
     features = get_locations(service, locations)
     dataset['locations'] = util.append_features(dataset['locations'], features)
-    
 
     for loc in locations:
         if loc not in dataset['data'].keys():
@@ -137,7 +136,7 @@ def new_collection(name, path=None, tags=None, **kwargs):
     collection_path = os.path.join(path, name)
     util.mkdir_if_doesnt_exist(collection_path)
 
-    collection = {'path': collection_path}
+    collection = {'name': name, 'path': collection_path}
     metadata = {'created_on' : datetime.datetime.now().isoformat(), 'datasets': {}}
 
     with open(os.path.join(collection['path'], COLLECTION_METADATA_FILE), 'w') as f:
@@ -215,7 +214,6 @@ def get_collection(name, **kwargs):
     with open(os.path.join(collection['path'], COLLECTION_METADATA_FILE)) as f:
         collection.update(json.load(f))
 
-    collection['name'] = name
     return collection
 
 
