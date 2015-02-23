@@ -1,6 +1,6 @@
 import abc
 
-class DataFilterBase(object):
+class FilterBase(object):
     """Base class for data filters
     """
 

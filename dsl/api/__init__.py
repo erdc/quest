@@ -6,7 +6,7 @@ Data Services Library.
 
 __version__ = 1.0
 
-from .filters import get_filters
+from .filters import get_filters, apply_filter
 from .providers import get_providers
 from .services import (
         get_data,

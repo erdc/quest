@@ -25,3 +25,8 @@ def get_filters(names=None, group=False, datatype=None, **kwargs):
                                                            lambda p:p['type'])]
 
     return filters
+
+
+@util.jsonify
+def apply_filter(names, **kwargs):
+    pass
