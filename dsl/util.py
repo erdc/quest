@@ -19,6 +19,15 @@ def append_features(old, new):
     return old
 
 
+def bbox2poly(x1, y1, x2, y2):
+    xmin, xmax = sorted([float(x1), float(x2)])
+    ymin, ymax = sorted([float(y1), float(y2)])
+    poly = [(xmin, ymin), (xmin, ymax), (xmax, ymax), (xmax, ymin)]
+    poly.append(poly[0])
+
+    return poly
+
+
 def get_dsl_dir(sub_dir=None):
     return_dir = os.environ.get('ENVSIM_DSL_DIR')
     if not return_dir:

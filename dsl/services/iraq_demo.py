@@ -9,7 +9,7 @@ from geojson import Feature, FeatureCollection, Point, Polygon, dump
 from random import random
 import os, shutil, string
 
-DEFAULT_FILE_PATH_VITD = 'agc/iraq/vitd'
+DEFAULT_FILE_PATH_VITD = 'nga/iraq/vitd'
 DEFAULT_FILE_PATH_LIDAR = 'agc/iraq/lidar'
 
 class IraqVITD(DataServiceBase):
@@ -19,8 +19,8 @@ class IraqVITD(DataServiceBase):
         self.demo_dir = util.get_dsl_demo_dir()
         self.metadata = {
                     'provider': {
-                        'abbr': 'AGC',
-                        'name': 'Army Geospatial Center', 
+                        'abbr': 'NGA',
+                        'name': 'National Geospatial-Intelligence Agency', 
                         },
                     'display_name': 'Iraq Terrain Data - VITD',
                     'service': 'Iraq Terrain Data - VITD',
@@ -28,7 +28,7 @@ class IraqVITD(DataServiceBase):
                     'geographical area': 'IRAQ',
                     'bounding_boxes': [[38.782, 28.833, 49.433, 37.358]],
                     'geotype': 'polygons',
-                    'datatype': 'vitd'
+                    'datatype': 'terrain-vitd'
                 }
 
 
@@ -39,7 +39,7 @@ class IraqVITD(DataServiceBase):
         if bounding_box is None:
             bounding_box = self.metadata['bounding_boxes'][0]
 
-        path = os.path.join(self.demo_dir, 'iraq', 'iraq-vitd.txt')
+        path = os.path.join(self.demo_dir, 'iraq', 'tads', 'mbr.txt')
 
         polys = []
         with open(path) as f:
@@ -74,16 +74,23 @@ class IraqVITD(DataServiceBase):
         path = os.path.join(path, DEFAULT_FILE_PATH_VITD)
         util.mkdir_if_doesnt_exist(path)
 
-        #fake download
-        src_path = os.path.join(self.demo_dir, 'iraq', 'srtm-vitd-bboxes')
+        #fake download        
+        src_path = os.path.join(self.demo_dir, 'iraq', 'tads')
+
+        #copy common files
+        common_files = [f for f in os.listdir(src_path) if os.path.isfile(f)]
+        for f in common_files:
+            shutil.copy(f, path)
+
+        #copy vitd data folder
         data_files = {}
         for location in locations:
             data_files[location] = {}
-            fname = location + '.tif'
+            fname = location
             src = os.path.join(src_path, fname)
             dest = os.path.join(path, fname)
-            print 'downloading file for %s from agc' % location
-            shutil.copy(src, dest)
+            print 'downloading file for %s from NGA' % location
+            shutil.copytree(src, dest)
             data_files[location][parameters] = dest
 
         return data_files

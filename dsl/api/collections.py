@@ -41,7 +41,13 @@ def add_to_collection(name, service, locations, parameters=None, **kwargs):
         written to a json file.
     """
 
-    locations = util.listify(locations)
+    if isinstance(locations, dict):
+        features = locations
+        locations = [loc['id'] for loc in features['features']]
+    else:
+        locations = util.listify(locations)
+        features = get_locations(service, locations)
+
     parameters = util.listify(parameters)
     if parameters is None:
         parameters = get_parameters(service)
@@ -56,7 +62,7 @@ def add_to_collection(name, service, locations, parameters=None, **kwargs):
 
     dataset = collection['datasets'][service]
 
-    features = get_locations(service, locations)
+
     dataset['locations'] = util.append_features(dataset['locations'], features)
 
     for loc in locations:
