@@ -8,14 +8,11 @@ from .. import util
 def get_filters(names=None, group=False, datatype=None, **kwargs):
     """List available filter plugins
     """
-
-    filters = [v.metadata for v in util.load_drivers('filters', names=names).itervalues()]
-
-    if datatype:
-        filters = [f for f in filters if f['type']==datatype]
+    names = util.listify(names)
+    filters = [dict(name=k, **v.metadata) for k,v in util.load_drivers('filters', names=names).iteritems()]
 
     if not group:
-        filters = sorted(datasets)
+        filters = sorted(filters)
     else:
         #rearrange by geotype
         filters = [{
@@ -28,5 +25,12 @@ def get_filters(names=None, group=False, datatype=None, **kwargs):
 
 
 @util.jsonify
-def apply_filter(names, **kwargs):
-    pass
+def apply_filter(name, **kwargs):
+    driver = util.load_drivers('filters', name)[name].driver
+    return driver.apply_filter(**kwargs)
+
+
+@util.jsonify
+def apply_filter_options(name, **kwargs):
+    driver = util.load_drivers('filters', name)[name].driver
+    return driver.apply_filter_options()

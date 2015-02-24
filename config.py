@@ -19,7 +19,7 @@ services = {
     }
 
 filters = {
-        'vitd-basic': 'dsl.filters.vitd:Basic',
+        'vitd2nrmm': 'dsl.filters.nrmm:NrmmFromVITD',
     }
 
 io = {

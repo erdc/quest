@@ -4,9 +4,11 @@
 
 from .base import FilterBase
 from ..api import get_collection, add_to_collection
+from .. import util
 from geojson import Polygon, Feature, FeatureCollection
 import numpy as np
 import os
+import time
 
 class NrmmFromVITD(FilterBase):
     def register(self):
@@ -15,35 +17,37 @@ class NrmmFromVITD(FilterBase):
         """
         self.schema = {}
 
-        self.operates_on = {
-            'datatype': ['terrain-vitd'],
-            'geotype': ['polygon'],
-            'parameters': ['terrain-nrmm'],
-        }
-        self.produces = {
-            'datatype': 'terrain-nrmm',
-            'geotype': 'polygon',
-            'parameters': 'nrmm',
+        self.metadata = {
+            'operates_on': {
+                'datatype': ['terrain-vitd'],
+                'geotype': ['polygon'],
+                'parameters': ['terrain-nrmm'],
+            },
+            'produces': {
+                'datatype': 'terrain-nrmm',
+                'geotype': 'polygon',
+                'parameters': 'nrmm',
+            },
         }
 
 
-    def apply_filter(collection_name, **kwargs):
+    def apply_filter(self, collection_name, **kwargs):
         available_themes = self.get_themes().keys()
 
         themes = []
-        for k, v in kwargs.keys():
+        for k, v in kwargs.items():
             if k in available_themes:
                 if v:
-                    themes.append(v)
+                    themes.append(k)
 
-        if themes = []:
+        if themes == []:
             themes = available_themes
 
         themes = ','.join(themes)
         collection = get_collection(collection_name)
 
         #calculate bounding box
-        locations = collection['dataset']['iraq-vitd']['locations']['features']
+        locations = collection['datasets']['iraq-vitd']['locations']['features']
         locs = np.hstack([loc['geometry']['coordinates'] for loc in locations]).squeeze()
         lons = locs[:,0]
         lats = locs[:,1]
@@ -51,16 +55,18 @@ class NrmmFromVITD(FilterBase):
         ymin, ymax = lats.min(), lats.max()
         bounding_box = ','.join([str(n) for n in [xmin, ymin, xmax, ymax]])
         properties = {'metadata': 'generated using vitd2nrmm plugin'}
-        new_locs = FeatureCollection([Feature(geometry=Polygon([util.bbox2poly(xmin, ymin, xmax, ymax)]), properties=properties, id=hash(bounding_box))])
+        nrmm_id = 'nrmm-%s' % (bounding_box)
+        new_locs = FeatureCollection([Feature(geometry=Polygon([util.bbox2poly(xmin, ymin, xmax, ymax)]), properties=properties, id=nrmm_id)])
 
         path = collection['path']        
         vitd_dir = os.path.join(path, 'nga/iraq/vitd')
         #call plugin.
         print 'calling VITD to NRMM plugin for bounding box - %s, with themes - %s' % (bounding_box, themes)
+        time.sleep(10)
         collection = add_to_collection(collection_name, 'local', new_locs, parameters='terrain-nrmm')
         return collection
 
-    def apply_filter_options(**kwargs):
+    def apply_filter_options(self, **kwargs):
         themes = self.get_themes()
         properties = {
             "collection_name": {
