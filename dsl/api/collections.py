@@ -65,9 +65,10 @@ def add_to_collection(name, service, locations, parameters=None, **kwargs):
 
     dataset['locations'] = util.append_features(dataset['locations'], features)
 
-    for loc in locations:
+    for loc, feature in zip(locations, features['features']):
         if loc not in dataset['data'].keys():
-            dataset['data'][loc] = {p:{'relative_path': None} for p in parameters} 
+            relative_path = feature['properties'].get('relative_path')
+            dataset['data'][loc] = {p:{'relative_path': relative_path} for p in parameters} 
         else:
             params = dataset['data'][loc]['parameters']
             dataset['data'][loc]['parameters'] = list(set(params + parameters))

@@ -54,15 +54,18 @@ class NrmmFromVITD(FilterBase):
         xmin, xmax = lons.min(), lons.max()
         ymin, ymax = lats.min(), lats.max()
         bounding_box = ','.join([str(n) for n in [xmin, ymin, xmax, ymax]])
-        properties = {'metadata': 'generated using vitd2nrmm plugin'}
         nrmm_id = 'nrmm-%s' % (bounding_box)
+        util.mkdir_if_doesnt_exist(os.path.join(collection['path'], 'nrmm'))
+        dest = 'nrmm/data-%s.dat' % nrmm_id
+        open(os.path.join(collection['path'], dest), 'w').close() #make fake empty file
+        properties = {'metadata': 'generated using vitd2nrmm plugin', 'relative_path': dest}
         new_locs = FeatureCollection([Feature(geometry=Polygon([util.bbox2poly(xmin, ymin, xmax, ymax)]), properties=properties, id=nrmm_id)])
-
         path = collection['path']        
         vitd_dir = os.path.join(path, 'nga/iraq/vitd')
         #call plugin.
         print 'calling VITD to NRMM plugin for bounding box - %s, with themes - %s' % (bounding_box, themes)
         time.sleep(10)
+        print 'nrmm file written to: %s' % os.path.join(path, dest)
         collection = add_to_collection(collection_name, 'local', new_locs, parameters='terrain-nrmm')
         return collection
 
