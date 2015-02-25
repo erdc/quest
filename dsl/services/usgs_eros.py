@@ -117,7 +117,7 @@ class UsgsErosBase(DataServiceBase):
 
 class UsgsErosNlcd2001(UsgsErosBase):
     def register(self):
-        self.set_layer('L1L', 'nlcd2006', 'NLCD 2006')
+        self.set_layer('L1L', 'nlcd2001', 'NLCD 2001')
         
 
 class UsgsErosNlcd2006(UsgsErosBase):
