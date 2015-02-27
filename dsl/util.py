@@ -85,9 +85,11 @@ def remove_key(d, key):
 def jsonify(f):
     def wrapped_f(*args, **kw):
         if 'json' in kw.keys():
-            kw = json.loads(kw)
+            kw = json.loads(kw['json'])
 
-        if 'as_json' in kw.keys():
+        as_json = kw.get('as_json')
+        if as_json:
+            del kw['as_json']
             return json.dumps(f(*args, **kw), sort_keys=True, indent=4, separators=(',', ': '))
         else:
             return f(*args, **kw)
