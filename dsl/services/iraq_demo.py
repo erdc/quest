@@ -113,7 +113,7 @@ class IraqSrtm(DataServiceBase):
     def get_data_filters(self):
         schema = {
             "title": "Download Options",
-            "type": "Object",
+            "type": "object",
             "properties": {
                 "locations": {
                     "type": "string",
@@ -243,7 +243,7 @@ class IraqVitd(DataServiceBase):
     def get_data_filters(self):
         schema = {
             "title": "Download Options",
-            "type": "Object",
+            "type": "object",
             "properties": {
                 "locations": {
                     "type": "string",
@@ -262,6 +262,9 @@ class IraqVitd(DataServiceBase):
         return ['terrain-vitd']
 
 
+##########################################################################
+# WARNING: AGC LIDAR CLASSES BELOW HAVE NOT BEEN REFACTORED TO NEW API YET 
+##########################################################################
 class IraqAGCTLidar(DataServiceBase):
     def register(self):
         """Register Iraq Demo AGC Lidar service 
@@ -295,9 +298,7 @@ class IraqAGCTLidar(DataServiceBase):
 
         return FeatureCollection(features)
 
-##########################################################################
-# WARNING: AGC LIDAR CLASSES BELOW HAVE NOT BEEN REFACTORED TO NEW API YET 
-##########################################################################
+
 class IraqAGCALidar(DataServiceBase):
     def register(self):
         """Register Iraq Demo AGC Lidar service 

@@ -122,7 +122,7 @@ class NwisBase(DataServiceBase):
     def get_data_filters(self):
         schema = {
             "title": "Download Options",
-            "type": "Object",
+            "type": "object",
             "properties": {
                 "locations": {
                     "type": "string",
