@@ -87,7 +87,7 @@ class NrmmFromVITD(FilterBase):
 
         schema = {
             "title": "Download Options",
-            "type": "Object",
+            "type": "object",
             "properties": properties,
             "required": ["collection_name"],
         }
