@@ -8,7 +8,9 @@ from .. import util
 from geojson import Polygon, Feature, FeatureCollection
 import numpy as np
 import os
+import subprocess
 import time
+
 
 class NrmmFromVITD(FilterBase):
     def register(self):
@@ -40,10 +42,7 @@ class NrmmFromVITD(FilterBase):
                 if v:
                     themes.append(k)
 
-        if themes == []:
-            themes = available_themes
-
-        themes = ','.join(themes)
+        themes = ' '.join(themes)
         collection = get_collection(collection_name)
 
         #calculate bounding box
@@ -51,22 +50,48 @@ class NrmmFromVITD(FilterBase):
         locs = np.hstack([loc['geometry']['coordinates'] for loc in locations]).squeeze()
         lons = locs[:,0]
         lats = locs[:,1]
-        xmin, xmax = lons.min(), lons.max()
-        ymin, ymax = lats.min(), lats.max()
-        bounding_box = ','.join([str(n) for n in [xmin, ymin, xmax, ymax]])
+        south, north = lons.min(), lons.max()
+        west, east = lats.min(), lats.max()
+        bounding_box = ','.join([str(n) for n in [south, west, north, east]])
+        
         nrmm_id = 'nrmm-%s' % (bounding_box)
-        util.mkdir_if_doesnt_exist(os.path.join(collection['path'], 'nrmm'))
-        dest = 'nrmm/data-%s.dat' % nrmm_id
-        open(os.path.join(collection['path'], dest), 'w').close() #make fake empty file
-        properties = {'metadata': 'generated using vitd2nrmm plugin', 'relative_path': dest}
-        new_locs = FeatureCollection([Feature(geometry=Polygon([util.bbox2poly(xmin, ymin, xmax, ymax)]), properties=properties, id=nrmm_id)])
+        plugin_dir = os.path.join(collection['path'], 'vitd2nrmm')
+        util.mkdir_if_doesnt_exist(plugin_dir)
+        #dest = 'nrmm/data-%s.dat' % nrmm_id
+        nrmm_file = 'vitd2nrmm/NRMM/NRMM.grd'
+        #open(os.path.join(collection['path'], dest), 'w').close() #make fake empty file
+        properties = {'metadata': 'generated using vitd2nrmm plugin', 'relative_path': nrmm_file}
+        new_locs = FeatureCollection([Feature(geometry=Polygon([util.bbox2poly(south, west, north, east)]), properties=properties, id=nrmm_id)])
         path = collection['path']        
         vitd_dir = os.path.join(path, 'nga/iraq/vitd')
         #call plugin.
         print 'calling VITD to NRMM plugin for bounding box - %s, with themes - %s' % (bounding_box, themes)
-        time.sleep(10)
-        print 'nrmm file written to: %s' % os.path.join(path, dest)
-        collection = add_to_collection(collection_name, 'local', new_locs, parameters='terrain-nrmm')
+        args = [
+            'vitd2nrmm',
+            '-i', '"%s"' % vitd_dir,
+            '-o', '"%s"' % plugin_dir,
+            '-n', str(north),
+            '-s', str(south),
+            '-e', str(east),
+            '-w', str(west),
+        ]
+
+        if len(themes) > 0:
+            args += ['-t', themes]
+
+        resolution = kwargs.get('resolution')
+        if resolution is not None:
+            args += ['-r', str(resolution)]
+
+        print '--> %s' % (' '.join(args))
+        try:
+            subprocess.call(' '.join(args))
+            print 'success'
+            print 'nrmm file written to: %s' % os.path.join(path, nrmm_file)
+            collection = add_to_collection(collection_name, 'local', new_locs, parameters='terrain-nrmm')
+        except:
+            print 'plugin call failed'
+
         return collection
 
     def apply_filter_options(self, **kwargs):
@@ -84,6 +109,9 @@ class NrmmFromVITD(FilterBase):
                         "description": v,    
                     } 
                 })
+
+        properties.update({"resolution": {"type": { "enum": [ 1, 2, 3, 4, 5 ], "default": 5 },
+                                          "description": "resolution of output"}})
 
         schema = {
             "title": "Download Options",
