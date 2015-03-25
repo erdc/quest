@@ -35,7 +35,7 @@ class LejeuneGhcn(DataServiceBase):
         if locations:
             return self.get_feature_locations(locations)
 
-        path = os.path.join(self.demo_dir, 'Lejeune', 'ghcn_daily/stations.json')
+        path = os.path.join(self.demo_dir, 'lejeune', 'ghcn_daily/stations.json')
 
         with open(path) as f:
             fc = load(f)
