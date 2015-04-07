@@ -14,6 +14,7 @@ services = {
         #example-vitd: dsl.services.example:ExampleVITD
         'iraq-vitd': 'dsl.services.iraq_demo:IraqVitd',
         'iraq-srtm': 'dsl.services.iraq_demo:IraqSrtm',
+        'coops-pyoos': 'dsl.services.coops_pyoos:CoopsPyoos',
         #iraq-agc-tlidar: dsl.services.iraq_demo:IraqAGCTLidar
         #iraq-agc-alidar: dsl.services.iraq_demo:IraqAGCALidar
         #chesapeake-elevation: dsl.services.chesapeake_demo:ChesapeakeVTK
