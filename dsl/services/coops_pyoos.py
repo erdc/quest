@@ -1,18 +1,19 @@
-import csv
+
 import cStringIO
 import os
 from geojson import Feature, FeatureCollection, Point
 from datetime import datetime
-import dateutil.parser as duparser
 from .. import util
 from pyoos.collectors.coops.coops_sos import CoopsSos
 
+collectorCOOPS = CoopsSos()   
+
 class CoopsPyoos():
+    
     def register(self):
         """Register CO-OPS SOS plugin  
         """
         
-        self.collectorCOOPS = CoopsSos()
         self.metadata = {
                     'provider': {
                          'abbr': 'CO-OPS',
@@ -38,10 +39,10 @@ class CoopsPyoos():
                     station_ids = locations.split(',')        
 
                     for station_id in station_ids:
-                        features.append(_getFeature(self, station_id.strip()))
+                        features.append(_getFeature(station_id.strip()))
 
                 else:
-                    features.append(_getFeature(self, locations))
+                    features.append(_getFeature(locations))
     
                 return FeatureCollection(features)   
                 
@@ -52,13 +53,13 @@ class CoopsPyoos():
                 
                 xmin, ymin, xmax, ymax = [float(p) for p in bounding_box]
         
-                for offeringID in self.collectorCOOPS.server.contents.keys():
+                for offeringID in collectorCOOPS.server.contents.keys():
                     if not 'network' in offeringID:        
                         stationID = offeringID.split('-')[1]
                     
                         offeringid = 'station-%s' % stationID            
             
-                        station = self.collectorCOOPS.server.contents[offeringid]
+                        station = collectorCOOPS.server.contents[offeringid]
             
                         x, y = station.bbox[:2]
 
@@ -94,10 +95,10 @@ class CoopsPyoos():
         
             if start_date is not None:
                 # date is in Year-Month-Day format, (Ex: 2012-10-01)
-                self.collectorCOOPS.start_time = datetime.strptime(start_date, "%Y-%m-%d")
+                collectorCOOPS.start_time = datetime.strptime(start_date, "%Y-%m-%d")
             
             if end_date is not None:
-                self.collectorCOOPS.end_time = datetime.strptime(end_date, "%Y-%m-%d")
+                collectorCOOPS.end_time = datetime.strptime(end_date, "%Y-%m-%d")
 
             if locations is None:
                 raise ValueError("A location needs to be supplied.")
@@ -105,14 +106,14 @@ class CoopsPyoos():
             if variable is None:   
                 raise ValueError("An observed property or variable needs to be supplied.")
             
-            self.collectorCOOPS.features  = [locations]  #station id or network id 
-            self.collectorCOOPS.variables = ['http://mmisw.org/ont/cf/parameter/' + variable]
+            collectorCOOPS.features  = [locations]  #station id or network id 
+            collectorCOOPS.variables = ['http://mmisw.org/ont/cf/parameter/' + variable]
         
-            self.collectorCOOPS.dataType = dataType
+            collectorCOOPS.dataType = dataType
             
-            self.collectorCOOPS.datum = datum           
+            collectorCOOPS.datum = datum           
                     
-            response = self.collectorCOOPS.raw(responseFormat="text/csv")
+            response = collectorCOOPS.raw(responseFormat="text/csv")
         
             filename = 'station-' + locations + '_' + variable + '.csv'
     
@@ -173,14 +174,14 @@ class CoopsPyoos():
     def provides(self):
         return ['tidal elevation']
         
-def _getFeature(self, stationID):
+def _getFeature(stationID):
         
     offeringid = 'station-%s' % stationID
         #print offeringid in collectorndbc.server.contents.keys()
     
     variables_list = []
     
-    station = self.collectorCOOPS.server.contents[offeringid]
+    station = collectorCOOPS.server.contents[offeringid]
         #print 'ofr.id = %s, ofr.bbox = %s, ofr.c41012.observed_properties = %s' % (ofr.id, ofr.bbox, ofr.observed_properties) 
     
     for op in station.observed_properties:
