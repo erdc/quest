@@ -9,12 +9,15 @@ from pyoos.collectors.coops.coops_sos import CoopsSos
 
 class CoopsPyoos():
     def register(self):
-        """Register COOPS SOS plugin  
+        """Register CO-OPS SOS plugin  
         """
         
         self.collectorCOOPS = CoopsSos()
         self.metadata = {
-                    'provider': {'name': 'NOAA Center for Operational Oceanographic Products and Services (CO-OPS) SOS', 'id': 'coops'},
+                    'provider': {
+                         'abbr': 'CO-OPS',
+                         'name': 'NOAA Center for Operational Oceanographic Products and Services (CO-OPS) SOS',
+                        },
                     'dataset_name': 'NOAA CO-OPS Sensor Observation Service',
                     'description': 'NOAA CO-OPS Sensor Obersvation Service',
                     'geographical area': 'Worldwide',
@@ -190,7 +193,7 @@ def _getFeature(self, stationID):
                   'data_offered': variables_list,
                   }
        
-    feature = Feature(geometry=Point(station.bbox[:2]), properties=properties, id=offeringid)
+    feature = Feature(geometry=Point(station.bbox[:2]), properties=properties, id=stationID)
         
     return feature    
  
