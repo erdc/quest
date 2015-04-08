@@ -16,7 +16,8 @@ class CoopsPyoos(DataServiceBase):
                          'abbr': 'CO-OPS',
                          'name': 'NOAA Center for Operational Oceanographic Products and Services (CO-OPS) SOS',
                         },
-                    'dataset_name': 'NOAA CO-OPS Sensor Observation Service',
+                    'display_name': 'NOAA CO-OPS Sensor Observation Service',
+                    'service': 'NOAA CO-OPS Sensor Observation Service',
                     'description': 'NOAA CO-OPS Sensor Obersvation Service',
                     'geographical area': 'Worldwide',
                     'bounding_boxes': [[-177.372, -18.1333, 178.425, 71.3601]], 
@@ -36,7 +37,7 @@ class CoopsPyoos(DataServiceBase):
             if locations:
                 
                 for location in locations:
-                    features.append(_getFeature(location))
+                    features.append(self._getFeature(location))
                     
                 return FeatureCollection(features)   
                 
@@ -58,7 +59,7 @@ class CoopsPyoos(DataServiceBase):
                         x, y = station.bbox[:2]
 
                         if x >= xmin and x <= xmax and y >= ymin and y <= ymax:
-                            features.append(_getFeature(stationID))
+                            features.append(self._getFeature(stationID))
                             
                 return FeatureCollection(features)
                 
@@ -172,27 +173,27 @@ class CoopsPyoos(DataServiceBase):
     def provides(self):
         return ['tidal elevation']
         
-def _getFeature(self, stationID):
+    def _getFeature(self, stationID):
         
-    offeringid = 'station-%s' % stationID
+        offeringid = 'station-%s' % stationID
     
-    variables_list = []
+        variables_list = []
     
-    station = self.collectorCOOPS.server.contents[offeringid]
+        station = self.collectorCOOPS.server.contents[offeringid]
     
-    for op in station.observed_properties:
-        variables = op.split("/")
-        variables_list.append(variables[len(variables) - 1])
+        for op in station.observed_properties:
+            variables = op.split("/")
+            variables_list.append(variables[len(variables) - 1])
        
-    properties = {
-                  'station_name': station.name,
-                  'station_description': station.description,
-                  'data_offered': variables_list,
-                  }
+        properties = {
+                      'station_name': station.name,
+                      'station_description': station.description,
+                      'data_offered': variables_list,
+                    }
        
-    feature = Feature(geometry=Point(station.bbox[:2]), properties=properties, id=stationID)
+        feature = Feature(geometry=Point(station.bbox[:2]), properties=properties, id=stationID)
         
-    return feature    
+        return feature    
  
      
       
