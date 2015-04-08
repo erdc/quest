@@ -84,7 +84,7 @@ class CoopsPyoos(DataServiceBase):
         }
         return schema        
         
-    def get_data(self, locations, variable, start_date=None, end_date=None, data_type=None, datum=None, path=None):
+    def get_data(self, locations, parameters=None, start_date=None, end_date=None, data_type=None, datum=None, path=None):
        
         try:        
             
@@ -100,12 +100,11 @@ class CoopsPyoos(DataServiceBase):
 
             if locations is None:
                 raise ValueError("A location needs to be supplied.")
-               
-            if variable is None:   
-                raise ValueError("An observed property or variable needs to be supplied.")
+            
+            parameters = 'water_surface_height_above_reference_datum'
             
             self.collectorCOOPS.features  = [locations]  #station id or network id 
-            self.collectorCOOPS.variables = ['http://mmisw.org/ont/cf/parameter/' + variable]
+            self.collectorCOOPS.variables = ['http://mmisw.org/ont/cf/parameter/' + parameters]
         
             self.collectorCOOPS.dataType = data_type
             
@@ -113,7 +112,7 @@ class CoopsPyoos(DataServiceBase):
                     
             response = self.collectorCOOPS.raw(responseFormat="text/csv")
         
-            filename = 'station-' + locations + '_' + variable + '.csv'
+            filename = 'station-' + locations + '_' + parameters + '.csv'
     
             if not path:
                 path = util.get_dsl_dir()
@@ -140,9 +139,9 @@ class CoopsPyoos(DataServiceBase):
                     "type": "string",
                     "description": "single or comma delimited list of location identifiers to download data for",
                 },
-                "variable": {
-                    "type": "string",
-                    "description": "the variable or observed property used for the data search"
+                "parameters": {
+                     "type": "string",
+                    "description": "single or comma delimited list of parameters to download data for"
                 },
                 "start_date": {
                     "type": "string",
@@ -171,7 +170,7 @@ class CoopsPyoos(DataServiceBase):
         return schema
         
     def provides(self):
-        return ['tidal elevation']
+        return ['water_surface_height_above_reference_datum']
         
     def _getFeature(self, stationID):
         
