@@ -1,15 +1,12 @@
 
-import cStringIO
+from .base import DataServiceBase
 import os
 from geojson import Feature, FeatureCollection, Point
 from datetime import datetime
 from .. import util
 from pyoos.collectors.coops.coops_sos import CoopsSos
 
-collectorCOOPS = CoopsSos()   
-
-class CoopsPyoos():
-    
+class CoopsPyoos(DataServiceBase):
     def register(self):
         """Register CO-OPS SOS plugin  
         """
@@ -31,19 +28,16 @@ class CoopsPyoos():
         
         try :
             
+            if not hasattr(self, 'collectorCOOPS'):
+                self.collectorCOOPS = CoopsSos()
+            
             features = []            
             
             if locations:
                 
-                if ',' in locations: 
-                    station_ids = locations.split(',')        
-
-                    for station_id in station_ids:
-                        features.append(_getFeature(station_id.strip()))
-
-                else:
-                    features.append(_getFeature(locations))
-    
+                for location in locations:
+                    features.append(_getFeature(location))
+                    
                 return FeatureCollection(features)   
                 
             else:
@@ -53,13 +47,13 @@ class CoopsPyoos():
                 
                 xmin, ymin, xmax, ymax = [float(p) for p in bounding_box]
         
-                for offeringID in collectorCOOPS.server.contents.keys():
+                for offeringID in self.collectorCOOPS.server.contents.keys():
                     if not 'network' in offeringID:        
                         stationID = offeringID.split('-')[1]
                     
                         offeringid = 'station-%s' % stationID            
             
-                        station = collectorCOOPS.server.contents[offeringid]
+                        station = self.collectorCOOPS.server.contents[offeringid]
             
                         x, y = station.bbox[:2]
 
@@ -89,16 +83,19 @@ class CoopsPyoos():
         }
         return schema        
         
-    def get_data(self, locations, variable, start_date=None, end_date=None, dataType=None, datum=None, path=None):
+    def get_data(self, locations, variable, start_date=None, end_date=None, data_type=None, datum=None, path=None):
        
         try:        
+            
+            if not hasattr(self, 'collectorCOOPS'):
+                self.collectorCOOPS = CoopsSos()
         
             if start_date is not None:
                 # date is in Year-Month-Day format, (Ex: 2012-10-01)
-                collectorCOOPS.start_time = datetime.strptime(start_date, "%Y-%m-%d")
+                self.collectorCOOPS.start_time = datetime.strptime(start_date, "%Y-%m-%d")
             
             if end_date is not None:
-                collectorCOOPS.end_time = datetime.strptime(end_date, "%Y-%m-%d")
+                self.collectorCOOPS.end_time = datetime.strptime(end_date, "%Y-%m-%d")
 
             if locations is None:
                 raise ValueError("A location needs to be supplied.")
@@ -106,14 +103,14 @@ class CoopsPyoos():
             if variable is None:   
                 raise ValueError("An observed property or variable needs to be supplied.")
             
-            collectorCOOPS.features  = [locations]  #station id or network id 
-            collectorCOOPS.variables = ['http://mmisw.org/ont/cf/parameter/' + variable]
+            self.collectorCOOPS.features  = [locations]  #station id or network id 
+            self.collectorCOOPS.variables = ['http://mmisw.org/ont/cf/parameter/' + variable]
         
-            collectorCOOPS.dataType = dataType
+            self.collectorCOOPS.dataType = data_type
             
-            collectorCOOPS.datum = datum           
+            self.collectorCOOPS.datum = datum           
                     
-            response = collectorCOOPS.raw(responseFormat="text/csv")
+            response = self.collectorCOOPS.raw(responseFormat="text/csv")
         
             filename = 'station-' + locations + '_' + variable + '.csv'
     
@@ -155,11 +152,12 @@ class CoopsPyoos():
                     "description": "end date to end the data search"
                 },
                 "data_type": {
-                    "enum": [ "PreliminarySixMinute", "PreliminaryOneMinute", "VerifiedSixMinute", "VerifiedHourlyHeight", "VerifiedHighLow", "VerifiedDailyMean"],
+                    "enum": [ "PreliminarySixMinute", "PreliminaryOneMinute", "VerifiedSixMinute", "VerifiedHourlyHeight", "VerifiedHighLow",
+                              "VerifiedDailyMean", "SixMinuteTidePredictions", "HourlyTidePredictions", "HighLowTidePredictions"],
                     "description": "Optional value for data type"
                 },   
-                "datum": {
-                    "enum": [ "IGLD", "MHHW", "MHW", "MLLW", "MLW", "MSL", "MTL", "NAVD", "STND" ],
+                "datum": {   
+                    "enum": [ "MLLW", "MSL", "MHW", "STND", "IGLD", "NAVD" ],
                     "description": "Optional value for datum"
                 },                             
                 "path": {
@@ -174,15 +172,13 @@ class CoopsPyoos():
     def provides(self):
         return ['tidal elevation']
         
-def _getFeature(stationID):
+def _getFeature(self, stationID):
         
     offeringid = 'station-%s' % stationID
-        #print offeringid in collectorndbc.server.contents.keys()
     
     variables_list = []
     
-    station = collectorCOOPS.server.contents[offeringid]
-        #print 'ofr.id = %s, ofr.bbox = %s, ofr.c41012.observed_properties = %s' % (ofr.id, ofr.bbox, ofr.observed_properties) 
+    station = self.collectorCOOPS.server.contents[offeringid]
     
     for op in station.observed_properties:
         variables = op.split("/")
