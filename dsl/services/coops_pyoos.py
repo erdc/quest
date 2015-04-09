@@ -102,30 +102,32 @@ class CoopsPyoos(DataServiceBase):
                 raise ValueError("A location needs to be supplied.")
             
             parameters = 'water_surface_height_above_reference_datum'
-            
-            self.collectorCOOPS.features  = [locations]  #station id or network id 
+                        
             self.collectorCOOPS.variables = ['http://mmisw.org/ont/cf/parameter/' + parameters]
         
             self.collectorCOOPS.dataType = data_type
             
             self.collectorCOOPS.datum = datum           
-                    
-            response = self.collectorCOOPS.raw(responseFormat="text/csv")
-        
-            filename = 'station-' + locations + '_' + parameters + '.csv'
-    
+                                        
             if not path:
                 path = util.get_dsl_dir()
-    
+                    
             if not os.path.exists(path):
                 os.makedirs(path)
-            
-            #write out a csv file for now but create a plugin to write out this data
+                    
+            for location in locations:                            
+                self.collectorCOOPS.features = [location]  #station id or network id                     
+                    
+                response = self.collectorCOOPS.raw(responseFormat="text/csv")
+        
+                filename = 'station-' + location + '_' + parameters + '.csv'
+                       
+                #write out a csv file for now but create a plugin to write out this data
                 
-            csvFile_path = os.path.join(path, filename)
+                csvFile_path = os.path.join(path, filename)
 
-            with open(csvFile_path, 'w') as f:
-                f.write(response)        
+                with open(csvFile_path, 'w') as f:
+                    f.write(response)        
         
         except Exception, e: 
             print str(e)
