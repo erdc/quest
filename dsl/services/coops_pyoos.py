@@ -115,12 +115,17 @@ class CoopsPyoos(DataServiceBase):
             if not os.path.exists(path):
                 os.makedirs(path)
                     
-            for location in locations:                            
+            data_files = {}
+
+            for location in locations:    
+                
+                data_files[location] = {}
+                       
                 self.collectorCOOPS.features = [location]  #station id or network id                     
                     
                 response = self.collectorCOOPS.raw(responseFormat="text/csv")
         
-                filename = 'station-' + location + '_' + parameters + '.csv'
+                filename = 'station-%s_%s.csv' % (location, parameters)
                        
                 #write out a csv file for now but create a plugin to write out this data
                 
@@ -129,6 +134,10 @@ class CoopsPyoos(DataServiceBase):
                 with open(csvFile_path, 'w') as f:
                     f.write(response)        
         
+                data_files[location][parameters] = filename        
+        
+            return data_files        
+            
         except Exception, e: 
             print str(e)
             
