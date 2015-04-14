@@ -6,8 +6,9 @@ from __future__ import absolute_import
 import json
 import os
 import glob
-from .. import util
+from .. import settings, util
 from collections import defaultdict
+from stevedore import driver
 
 
 @util.jsonify
@@ -35,8 +36,8 @@ def get_data(name, locations, parameters=None, **kwargs):
     """
     locations = util.listify(locations)
     parameters = util.listify(parameters)
-    service = util.load_drivers('services', name)[name]
-    return service.driver.get_data(locations, parameters=parameters, **kwargs)
+    service = _load_services()[name]
+    return service.get_data(locations, parameters=parameters, **kwargs)
 
 
 @util.jsonify
@@ -53,8 +54,8 @@ def get_data_filters(name, **kwargs):
     schema : dict,
         A python representation of a json-schema
     """
-    service = util.load_drivers('services', name)[name]
-    return service.driver.get_data_filters()
+    service = _load_services()[name]
+    return service.get_data_filters()
 
 
 @util.jsonify
@@ -71,8 +72,8 @@ def get_locations_filters(name, **kwargs):
     schema : dict,
         A python representation of a json-schema
     """
-    service = util.load_drivers('services', name)[name]
-    return service.driver.get_locations_filters()
+    service = _load_services()[name]
+    return service.get_locations_filters()
 
 
 @util.jsonify
@@ -89,7 +90,7 @@ def get_parameters(name, **kwargs):
     parameters : list of str,
         list of parameters available
     """
-    service = util.load_drivers('services', name)[name].driver
+    service = _load_services()[name]
     return service.provides()
 
 
@@ -114,7 +115,7 @@ def get_services(names=None, group=False, provider=None, **kwargs):
         list of services metadata
     """
     names = util.listify(names)
-    services = [dict(service_code=k, parameters=v.provides(), **v.metadata) for k,v in util.load_drivers('services', names=names).iteritems()]
+    services = [dict(service_code=k, parameters=v.provides(), **v.metadata) for k,v in _load_services().iteritems()]
 
     if provider is not None:
         services = [service for service in services if service['provider']['code']==provider]
@@ -163,6 +164,30 @@ def get_locations(name, locations=None, bounding_box=None, **kwargs):
     """
     locations = util.listify(locations)
     bounding_box = util.listify(bounding_box)
-    service = util.load_drivers('services', name)[name].driver
+    service = _load_services()[name]
     
     return service.get_locations(locations=locations, bounding_box=bounding_box, **kwargs)
+
+
+def _load_services(names=None):
+    #add web services
+    web_services = util.list_drivers('services')
+    web_services.remove('local')
+    enabled_services = settings.WEB_SERVICES
+    if len(enabled_services) > 0:
+        web_services = list(set(web_services).intersection(enabled_services))
+
+    services = {name: driver.DriverManager('dsl.services', name, invoke_on_load='True').driver for name in web_services}
+
+    if len(settings.LOCAL_SERVICES) > 0:
+        for path in settings.LOCAL_SERVICES:
+            try:
+                drv = driver.DriverManager('dsl.services', 'local', invoke_on_load='True', invoke_kwds={'path':path}).driver
+                services['local' + drv.name] = drv
+            except:
+                pass
+
+    if names is not None:
+        services = services[names]
+
+    return services

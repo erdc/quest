@@ -18,6 +18,7 @@ services = {
         #iraq-agc-alidar: dsl.services.iraq_demo:IraqAGCALidar
         #chesapeake-elevation: dsl.services.chesapeake_demo:ChesapeakeVTK
         'lejeune-precip': 'dsl.services.lejeune_demo:LejeuneGhcn',
+        'local': 'dsl.services.local:LocalService',
     }
 
 filters = {

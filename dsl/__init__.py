@@ -12,4 +12,4 @@ from .init import init
 
 from . import util, api
 
-
+init()

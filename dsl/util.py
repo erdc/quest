@@ -72,17 +72,24 @@ def listify(liststr, delimiter=','):
     return isinstance(liststr, list) and liststr or [s.strip() for s in liststr.split(delimiter)] 
 
 
+def list_drivers(namespace):
+    namespace = 'dsl.' + namespace
+    mgr = extension.ExtensionManager(
+            namespace=namespace,
+            invoke_on_load=False,
+        )
+    return [x.name for x in mgr]
+
+
 def load_drivers(namespace, names=None):
-    namespace = 'dsl.' + namespace 
-    if not names:
+    namespace = 'dsl.' + namespace
+
+    if names is None:
         mgr = extension.ExtensionManager(
             namespace=namespace,
             invoke_on_load=True,
         )
         return dict((x.name, x.obj) for x in mgr)
-
-    if not isinstance(names, list):
-        names = [names]
 
     return {name: driver.DriverManager(namespace, name, invoke_on_load='True') for name in names} 
     
