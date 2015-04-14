@@ -6,10 +6,7 @@ from .services import get_locations, get_data, get_parameters
 import datetime
 import json
 import os
-
-COLLECTIONS_FILE = 'collections/collections.json' #master file
-COLLECTION_METADATA_FILE = 'dsl_metadata.json' #individual collection metadata
-METADATA_FILE = 'dsl.json'
+from ..settings import COLLECTION_METADATA_FILE
 
 
 @util.jsonify
@@ -261,7 +258,7 @@ def _load_collections():
     """load list of collections
 
     """
-    path = os.path.join(util.get_dsl_dir(), COLLECTIONS_FILE)
+    path = util.get_collections_index()
 
     if not os.path.exists(path):
         return {}
@@ -281,6 +278,6 @@ def _write_collection(collection):
 def _write_collections(collections):
     """write list of collections to json file 
     """
-    path = os.path.join(util.get_dsl_dir(), COLLECTIONS_FILE)
+    path = util.get_collections_index()
     with open(path, 'w') as f:
         json.dump(collections, f)

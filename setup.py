@@ -56,6 +56,7 @@ setup(
         'jsonschema',
         'stevedore',
         'ulmo',
+        'pyyaml',
     ],
     classifiers=[
         'Development Status :: 3 - Alpha',
