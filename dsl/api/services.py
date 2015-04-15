@@ -41,7 +41,7 @@ def get_data(name, locations, parameters=None, **kwargs):
 
 
 @util.jsonify
-def get_data_filters(name, **kwargs):
+def get_data_options(name, **kwargs):
     """get available filter options for get_data call
 
     Parameters
@@ -55,11 +55,11 @@ def get_data_filters(name, **kwargs):
         A python representation of a json-schema
     """
     service = _load_services()[name]
-    return service.get_data_filters()
+    return service.get_data_options(**kwargs)
 
 
 @util.jsonify
-def get_locations_filters(name, **kwargs):
+def get_locations_options(name, **kwargs):
     """get available filter options for get_locations call
 
     Parameters
@@ -73,7 +73,7 @@ def get_locations_filters(name, **kwargs):
         A python representation of a json-schema
     """
     service = _load_services()[name]
-    return service.get_locations_filters()
+    return service.get_locations_options()
 
 
 @util.jsonify

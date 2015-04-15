@@ -75,7 +75,7 @@ def add_to_collection(name, service, locations, parameters=None, **kwargs):
 
 
 @util.jsonify
-def download_in_collection(name, **kwargs):
+def download_in_collection(name, service=None, location=None, parameter=None, options=None):
     """download data for services/locations/parameters present in collection
 
     Currently *all* datasets present in a collection will be downloaded with 
@@ -96,12 +96,24 @@ def download_in_collection(name, **kwargs):
 
     """
     collection = get_collection(name)
-    for service, dataset in collection['datasets'].iteritems():
-        for location, parameters in dataset['data'].iteritems():
-            path = collection['path']
-            data_files = get_data(service, location, path=path, parameters=','.join(parameters.keys()))
-            for k, v in data_files[location].iteritems():
-                parameters[k]['relative_path'] = os.path.relpath(v, path)
+
+    if not any([service, location, parameter]):
+        for service, dataset in collection['datasets'].iteritems():
+            for location, parameters in dataset['data'].iteritems():
+                path = collection['path']
+                data_files = get_data(service, location, path=path, parameters=','.join(parameters.keys()))
+                for k, v in data_files[location].iteritems():
+                    parameters[k]['relative_path'] = os.path.relpath(v, path)
+    else:
+        dataset = collection['datasets'][service]['data']
+        path = collection['path']
+        if options is not None:
+            data_file = get_data(service, location, path=path, parameters=parameter, **options)
+        else:
+            data_file = get_data(service, location, path=path, parameters=parameter)
+
+        dataset[location][parameter]['relative_path'] = os.path.relpath(data_file[location][parameter], path)
+
     _write_collection(collection)
     return collection
 

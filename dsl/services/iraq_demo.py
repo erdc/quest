@@ -92,7 +92,7 @@ class IraqSrtm(DataServiceBase):
 
         return data_files
 
-    def get_locations_filters(self):
+    def get_locations_options(self):
         schema = {
             "title": "Location Filters",
             "type": "object",
@@ -110,7 +110,7 @@ class IraqSrtm(DataServiceBase):
         }
         return schema
 
-    def get_data_filters(self):
+    def get_data_options(self):
         schema = {
             "title": "Download Options",
             "type": "object",
@@ -215,7 +215,7 @@ class IraqVitd(DataServiceBase):
 
         return data_files
 
-    def get_locations_filters(self):
+    def get_locations_options(self):
         schema = {
             "title": "Location Filters",
             "type": "object",
@@ -240,7 +240,7 @@ class IraqVitd(DataServiceBase):
         s = s.split(';')[-1]
         return {s[x:x+58][:3]:s[x:x+58][3:].strip() for x in range(0, len(s), 58)}
 
-    def get_data_filters(self):
+    def get_data_options(self):
         schema = {
             "title": "Download Options",
             "type": "object",

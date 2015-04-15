@@ -62,7 +62,7 @@ class UsgsErosBase(DataServiceBase):
 
         return locations
 
-    def get_locations_filters(self):
+    def get_locations_options(self):
         schema = {
             "title": "Location Filters",
             "type": "object",
@@ -93,7 +93,7 @@ class UsgsErosBase(DataServiceBase):
         tiles = eros.download_tiles(locations, path=path)
         return {tile['id']: {parameters: tile['properties']['file']} for tile in tiles['features']}
 
-    def get_data_filters(self):
+    def get_data_options(self, **kwargs):
         schema = {
             "title": "Download Options",
             "type": "object",

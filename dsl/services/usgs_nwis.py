@@ -93,7 +93,7 @@ class NwisBase(DataServiceBase):
 
         return FeatureCollection(features)
 
-    def get_locations_filters(self): 
+    def get_locations_options(self): 
         schema = {
             "title": "Location Filters",
             "type": "object",
@@ -119,7 +119,7 @@ class NwisBase(DataServiceBase):
         }
         return schema
 
-    def get_data_filters(self):
+    def get_data_options(self, **kwargs):
         schema = {
             "title": "Download Options",
             "type": "object",

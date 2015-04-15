@@ -17,8 +17,8 @@ from .services import (
         get_locations,
         get_parameters,
         get_services,
-        get_data_filters,
-        get_locations_filters,
+        get_data_options,
+        get_locations_options,
     )
 from .collections import (
         new_collection,
