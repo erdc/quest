@@ -63,21 +63,7 @@ class UsgsErosBase(DataServiceBase):
         return locations
 
     def get_locations_options(self):
-        schema = {
-            "title": "Location Filters",
-            "type": "object",
-            "properties": {
-                "locations": {
-                    "type": "string",
-                    "description": "Optional single or comma delimited list of location identifiers",
-                    },
-                "bounding_box": {
-                    "type": "string",
-                    "description": "bounding box should be a comma delimited set of 4 numbers ",
-                    },
-            },
-            "required": None,
-        }
+        schema = None
         return schema
         
     def get_data(self, locations, path=None, parameters=None):

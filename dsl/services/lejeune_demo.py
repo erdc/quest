@@ -99,22 +99,8 @@ class LejeuneGhcn(DataServiceBase):
         }
         return schema
 
-    def get_data_options(self):
-        schema = {
-            "title": "Download Options",
-            "type": "object",
-            "properties": {
-                "locations": {
-                    "type": "string",
-                    "description": "single or comma delimited list of location identifiers to download data for",
-                },
-                "path": {
-                    "type": "string",
-                    "description": "base file path to store data"
-                },
-            },
-            "required": ["locations"],
-        }
+    def get_data_options(self, **kwargs):
+        schema = None
         return schema
 
     def provides(self):

@@ -240,22 +240,8 @@ class IraqVitd(DataServiceBase):
         s = s.split(';')[-1]
         return {s[x:x+58][:3]:s[x:x+58][3:].strip() for x in range(0, len(s), 58)}
 
-    def get_data_options(self):
-        schema = {
-            "title": "Download Options",
-            "type": "object",
-            "properties": {
-                "locations": {
-                    "type": "string",
-                    "description": "single or comma delimited list of location identifiers to download data for",
-                },
-                "path": {
-                    "type": "string",
-                    "description": "base file path to store data"
-                },
-            },
-            "required": ["locations"],
-        }
+    def get_data_options(self, **kwargs):
+        schema = None
         return schema
 
     def provides(self):

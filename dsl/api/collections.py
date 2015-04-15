@@ -2,7 +2,7 @@
 
 """
 from .. import util
-from .services import get_locations, get_data, get_parameters
+from .services import get_locations, get_data, get_data_options, get_parameters
 import datetime
 import json
 import os
@@ -112,6 +112,27 @@ def download_in_collection(name, service=None, location=None, parameter=None, **
 
     _write_collection(collection)
     return collection
+
+
+@util.jsonify
+def download_in_collection_options(name, service=None, location=None, parameter=None):
+    collection = get_collection(name)
+
+    options = {}
+    if not any([service, location, parameter]):
+        for service, dataset in collection['datasets'].iteritems():
+            options[service] = {}
+            for location, parameters in dataset['data'].iteritems():
+                options[service][location] = {}
+                for parameter in parameters:
+                    print service, location, parameter
+                    options[service][location][parameter] = get_data_options(service, locations=location, parameters=parameter)
+    else:
+        options[service] = {}
+        options[service][location] = {}
+        options[service][location][parameter] = get_data_options(service, locations=location, parameters=parameter)
+
+    return options
 
 
 @util.jsonify

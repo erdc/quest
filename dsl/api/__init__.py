@@ -27,6 +27,7 @@ from .collections import (
         delete_collection,
         delete_from_collection,
         download_in_collection,
+        download_in_collection_options,
         update_collection,
         list_collections,
     )
