@@ -82,6 +82,7 @@ def list_drivers(namespace):
 
 
 def load_drivers(namespace, names=None):
+    names = listify(names)
     namespace = 'dsl.' + namespace
 
     if names is None:
