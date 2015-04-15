@@ -7,16 +7,8 @@ services = {
         'usgs-ned-2': 'dsl.services.usgs_ned:UsgsNed2ArcSecond',
         'usgs-eros-nlcd2001': 'dsl.services.usgs_eros:UsgsErosNlcd2001',
         'usgs-eros-nlcd2006': 'dsl.services.usgs_eros:UsgsErosNlcd2006',
-        #ncdc-ghcn: dsl.services.ncdc_ghcn:NcdcGhcn
-        #ncdc-gsod: dsl.services.ncdc_gsod:NcdcGsod
-        #example-points: dsl.services.example:ExamplePoints
-        #example-polys: dsl.services.example:ExamplePolys
-        #example-vitd: dsl.services.example:ExampleVITD
         'iraq-vitd': 'dsl.services.iraq_demo:IraqVitd',
         'iraq-srtm': 'dsl.services.iraq_demo:IraqSrtm',
-        #iraq-agc-tlidar: dsl.services.iraq_demo:IraqAGCTLidar
-        #iraq-agc-alidar: dsl.services.iraq_demo:IraqAGCALidar
-        #chesapeake-elevation: dsl.services.chesapeake_demo:ChesapeakeVTK
         'lejeune-precip': 'dsl.services.lejeune_demo:LejeuneGhcn',
         'local': 'dsl.services.local:LocalService',
     }
