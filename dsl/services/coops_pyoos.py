@@ -2,9 +2,16 @@
 from .base import DataServiceBase
 import os
 from geojson import Feature, FeatureCollection, Point
-from datetime import datetime
+from datetime import date, datetime, timedelta
 from .. import util
 from pyoos.collectors.coops.coops_sos import CoopsSos
+
+
+parameters_dict = {
+        'air pressure': 'air_pressure',
+        'tidal elevation': 'water_surface_height_above_reference_datum',
+        'winds': 'winds',
+    }
 
 class CoopsPyoos(DataServiceBase):
     def register(self):
@@ -68,6 +75,7 @@ class CoopsPyoos(DataServiceBase):
         
     def get_locations_filters(self):
         schema = {
+        
             "title": "Location Filters",
             "type": "object",
             "properties": {
@@ -91,24 +99,36 @@ class CoopsPyoos(DataServiceBase):
             if not hasattr(self, 'collectorCOOPS'):
                 self.collectorCOOPS = CoopsSos()
         
-            if start_date is not None:
-                # date is in Year-Month-Day format, (Ex: 2012-10-01)
-                self.collectorCOOPS.start_time = datetime.strptime(start_date, "%Y-%m-%d")
+            ## come back for parameters check
+            if parameters is None:
+                parameters = self.provides()    
+        
+            times = [start_date, end_date]    
+    
+            #if all(time is None for time in times): 
+             #   print 'All time is none'        
+        
+            if start_date is None and end_date is None:
+                lastMonth_date = date.today() - timedelta(days=30)
+                self.collectorCOOPS.start_time = datetime.strptime(str(lastMonth_date), "%Y-%m-%d")
+                self.collectorCOOPS.end_time = datetime.strptime(str(date.today()), "%Y-%m-%d")
+            elif any(time is None for time in times):
+                 raise ValueError("must use either a date range with start/end OR use the default date")
+            else:
+                if start_date is not None:
+                    # date is in Year-Month-Day format, (Ex: 2012-10-01)
+                    self.collectorCOOPS.start_time = datetime.strptime(start_date, "%Y-%m-%d")
             
-            if end_date is not None:
-                self.collectorCOOPS.end_time = datetime.strptime(end_date, "%Y-%m-%d")
+                if end_date is not None:
+                    self.collectorCOOPS.end_time = datetime.strptime(end_date, "%Y-%m-%d")
 
             if locations is None:
                 raise ValueError("A location needs to be supplied.")
             
-            parameters = 'water_surface_height_above_reference_datum'
-                        
-            self.collectorCOOPS.variables = ['http://mmisw.org/ont/cf/parameter/' + parameters]
-        
-            self.collectorCOOPS.dataType = data_type
+            #print self.collectorCOOPS.start_time, self.collectorCOOPS.end_time
             
-            self.collectorCOOPS.datum = datum           
-                                        
+            #parameters = 'water_surface_height_above_reference_datum'
+            
             if not path:
                 path = util.get_dsl_dir()
                     
@@ -119,22 +139,44 @@ class CoopsPyoos(DataServiceBase):
 
             for location in locations:    
                 
+                #print 'Location = %s' % location                
+                
                 data_files[location] = {}
                        
                 self.collectorCOOPS.features = [location]  #station id or network id                     
-                    
-                response = self.collectorCOOPS.raw(responseFormat="text/csv")
-        
-                filename = 'station-%s_%s.csv' % (location, parameters)
-                       
-                #write out a csv file for now but create a plugin to write out this data
                 
-                csvFile_path = os.path.join(path, filename)
+                for parameter in parameters:                
 
-                with open(csvFile_path, 'w') as f:
-                    f.write(response)        
+                    #print 'Parameter = %s' % parameter
+
+                    if (parameters_dict.has_key(parameter)):
+                        
+                        parameter_value = parameters_dict.get(parameter)                       
+
+                        #print 'parameter_value = %s' % parameter_value
+                    
+                        if (self._checkParameter(location, parameter_value)):                             
+                
+                            self.collectorCOOPS.variables = ['http://mmisw.org/ont/cf/parameter/' + parameter_value]                    
+                            
+                            if parameter_value == 'water_surface_height_above_reference_datum':              
+                                self.collectorCOOPS.dataType = data_type
+                                self.collectorCOOPS.datum = datum                                   
+                            
+                            response = self.collectorCOOPS.raw(responseFormat="text/csv")
         
-                data_files[location][parameters] = filename        
+                            filename = 'station-%s_%s.csv' % (location, parameter.replace(" ", ""))
+                       
+                           #write out a csv file for now but create a plugin to write out this data
+                
+                            csvFile_path = os.path.join(path, filename)
+
+                            with open(csvFile_path, 'w') as f:
+                                f.write(response)        
+        
+                            data_files[location][parameter] = filename        
+                    else:
+                         data_files[location][parameter] = 'None'   
         
             return data_files        
             
@@ -181,7 +223,7 @@ class CoopsPyoos(DataServiceBase):
         return schema
         
     def provides(self):
-        return ['water_surface_height_above_reference_datum']
+        return ['air pressure', 'tidal elevation', 'winds']
         
     def _getFeature(self, stationID):
         
@@ -205,5 +247,20 @@ class CoopsPyoos(DataServiceBase):
         
         return feature    
  
-     
+    def _checkParameter(self, stationID, parameter):
+
+        offeringid = 'station-%s' % stationID
+
+        station = self.collectorCOOPS.server.contents[offeringid]
+    
+        parameterCheck = False      
+    
+        if any(parameter in op for op in station.observed_properties):    
+            parameterCheck = True
+        else: 
+            parameterCheck = False
+            
+        #print 'parameterCheck = %s' % str(parameterCheck)
+            
+        return parameterCheck
       
