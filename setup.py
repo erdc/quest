@@ -51,7 +51,7 @@ setup(
     platforms='any',
     install_requires=[
         'numpy',
-        'fiona',
+        #'fiona',
         'geojson',
         'jsonschema',
         'stevedore',
