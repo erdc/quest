@@ -4,7 +4,7 @@
 
 from .. import util
 from .base import DataServiceBase
-import fiona
+#import fiona
 from geojson import Feature, FeatureCollection, Point, Polygon, dump
 from random import random
 import os
