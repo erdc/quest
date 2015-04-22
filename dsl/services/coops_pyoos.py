@@ -6,6 +6,7 @@ from datetime import date, datetime, timedelta
 from .. import util
 from pyoos.collectors.coops.coops_sos import CoopsSos
 
+DEFAULT_FILE_PATH = 'coops'
 
 parameters_dict = {
         'air pressure': 'air_pressure',
@@ -132,8 +133,8 @@ class CoopsPyoos(DataServiceBase):
             if not path:
                 path = util.get_dsl_dir()
                     
-            if not os.path.exists(path):
-                os.makedirs(path)
+            path = os.path.join(path, DEFAULT_FILE_PATH)
+            util.mkdir_if_doesnt_exist(path)
                     
             data_files = {}
 
