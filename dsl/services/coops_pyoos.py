@@ -73,7 +73,7 @@ class CoopsPyoos(DataServiceBase):
         except Exception, e:
             print str(e)
         
-    def get_locations_filters(self):
+    def get_locations_options(self):
         schema = {
         
             "title": "Location Filters",
@@ -183,7 +183,7 @@ class CoopsPyoos(DataServiceBase):
         except Exception, e: 
             print str(e)
             
-    def get_data_filters(self):
+    def get_data_options(self):
         schema = {
             "title": "Download Options",
             "type": "object",
