@@ -62,7 +62,7 @@ class UsgsNedBase(DataServiceBase):
 
         return locations
 
-    def get_locations_filters(self):
+    def get_locations_options(self):
         schema = {
             "title": "Location Filters",
             "type": "object",
@@ -93,22 +93,8 @@ class UsgsNedBase(DataServiceBase):
         tiles = ned.download_tiles(locations, path=path)
         return {tile['id']: {parameters: tile['properties']['file']} for tile in tiles['features']}
 
-    def get_data_filters(self):
-        schema = {
-            "title": "Download Options",
-            "type": "object",
-            "properties": {
-                "locations": {
-                    "type": "string",
-                    "description": "single or comma delimited list of location identifiers to download data for",
-                },
-                "path": {
-                    "type": "string",
-                    "description": "base file path to store data"
-                },
-            },
-            "required": ["locations"],
-        }
+    def get_data_options(self, **kwargs):
+        schema = None
         return schema
 
     def provides(self):

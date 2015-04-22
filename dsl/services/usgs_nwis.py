@@ -93,7 +93,7 @@ class NwisBase(DataServiceBase):
 
         return FeatureCollection(features)
 
-    def get_locations_filters(self): 
+    def get_locations_options(self): 
         schema = {
             "title": "Location Filters",
             "type": "object",
@@ -119,20 +119,11 @@ class NwisBase(DataServiceBase):
         }
         return schema
 
-    def get_data_filters(self):
+    def get_data_options(self, **kwargs):
         schema = {
-            "title": "Download Options",
+            "title": "USGS NWIS Download Options",
             "type": "object",
             "properties": {
-                "locations": {
-                    "type": "string",
-                    "description": "single or comma delimited list of location identifiers to download data for",
-                },
-                "parameters": {
-                    "type": "string",
-                    "description": "single or comma delimited list of parameters to download data for"
-
-                },
                 "start": {
                     "type": "string",
                     "description": "start date",
@@ -145,12 +136,7 @@ class NwisBase(DataServiceBase):
                     "type": "string",
                     "description": "period date",
                 },
-                "path": {
-                    "type": "string",
-                    "description": "base file path to store data"
-                },
             },
-            "required": ["locations"],
         }
         return schema
 

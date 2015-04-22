@@ -2,14 +2,11 @@
 
 """
 from .. import util
-from .services import get_locations, get_data, get_parameters
+from .services import get_locations, get_data, get_data_options, get_parameters
 import datetime
 import json
 import os
-
-COLLECTIONS_FILE = 'collections/collections.json' #master file
-COLLECTION_METADATA_FILE = 'dsl_metadata.json' #individual collection metadata
-METADATA_FILE = 'dsl.json'
+from ..settings import COLLECTION_METADATA_FILE
 
 
 @util.jsonify
@@ -78,7 +75,7 @@ def add_to_collection(name, service, locations, parameters=None, **kwargs):
 
 
 @util.jsonify
-def download_in_collection(name, **kwargs):
+def download_in_collection(name, service=None, location=None, parameter=None, **kwargs):
     """download data for services/locations/parameters present in collection
 
     Currently *all* datasets present in a collection will be downloaded with 
@@ -99,14 +96,43 @@ def download_in_collection(name, **kwargs):
 
     """
     collection = get_collection(name)
-    for service, dataset in collection['datasets'].iteritems():
-        for location, parameters in dataset['data'].iteritems():
-            path = collection['path']
-            data_files = get_data(service, location, path=path, parameters=','.join(parameters.keys()))
-            for k, v in data_files[location].iteritems():
-                parameters[k]['relative_path'] = os.path.relpath(v, path)
+
+    if not any([service, location, parameter]):
+        for service, dataset in collection['datasets'].iteritems():
+            for location, parameters in dataset['data'].iteritems():
+                path = collection['path']
+                data_files = get_data(service, location, path=path, parameters=','.join(parameters.keys()))
+                for k, v in data_files[location].iteritems():
+                    parameters[k]['relative_path'] = os.path.relpath(v, path)
+    else:
+        dataset = collection['datasets'][service]['data']
+        path = collection['path']
+        data_file = get_data(service, location, path=path, parameters=parameter, **kwargs)
+        dataset[location][parameter]['relative_path'] = os.path.relpath(data_file[location][parameter], path)
+
     _write_collection(collection)
     return collection
+
+
+@util.jsonify
+def download_in_collection_options(name, service=None, location=None, parameter=None):
+    collection = get_collection(name)
+
+    options = {}
+    if not any([service, location, parameter]):
+        for service, dataset in collection['datasets'].iteritems():
+            options[service] = {}
+            for location, parameters in dataset['data'].iteritems():
+                options[service][location] = {}
+                for parameter in parameters:
+                    print service, location, parameter
+                    options[service][location][parameter] = get_data_options(service, locations=location, parameters=parameter)
+    else:
+        options[service] = {}
+        options[service][location] = {}
+        options[service][location][parameter] = get_data_options(service, locations=location, parameters=parameter)
+
+    return options
 
 
 @util.jsonify
@@ -261,7 +287,7 @@ def _load_collections():
     """load list of collections
 
     """
-    path = os.path.join(util.get_dsl_dir(), COLLECTIONS_FILE)
+    path = util.get_collections_index()
 
     if not os.path.exists(path):
         return {}
@@ -281,6 +307,6 @@ def _write_collection(collection):
 def _write_collections(collections):
     """write list of collections to json file 
     """
-    path = os.path.join(util.get_dsl_dir(), COLLECTIONS_FILE)
+    path = util.get_collections_index()
     with open(path, 'w') as f:
         json.dump(collections, f)

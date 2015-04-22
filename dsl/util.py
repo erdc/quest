@@ -1,5 +1,7 @@
 import appdirs
 import os
+from . import settings
+from . import init
 from stevedore import extension, driver
 try:
     import simplejson as json
@@ -28,14 +30,23 @@ def bbox2poly(x1, y1, x2, y2):
     return poly
 
 
-def get_dsl_dir(sub_dir=None):
-    return_dir = os.environ.get('ENVSIM_DSL_DIR')
-    if not return_dir:
-        return_dir = appdirs.user_data_dir('data-services-library', 'envsim')
-    if sub_dir:
-        return_dir = os.path.join(return_dir, sub_dir)
-    mkdir_if_doesnt_exist(return_dir)
-    return return_dir
+def get_dsl_dir():
+    if settings.DSL_DIR is None:
+        init()
+
+    return settings.DSL_DIR
+
+
+def get_collections_dir():
+    return _abs_path(settings.COLLECTIONS_DIR)
+
+
+def get_collections_index():
+    return os.path.join(get_collections_dir(), settings.COLLECTIONS_INDEX_FILE)
+
+
+def get_cache_dir():
+    return _abs_path(settings.CACHE_DIR)
 
 
 def get_dsl_demo_dir():
@@ -43,7 +54,7 @@ def get_dsl_demo_dir():
     if not return_dir:
         raise 'Please Set environment variable ENVSIM_DSL_DEMO_DIR'
     mkdir_if_doesnt_exist(return_dir)
-    return return_dir
+    return return_dir   
 
 
 def mkdir_if_doesnt_exist(dir_path):
@@ -61,17 +72,25 @@ def listify(liststr, delimiter=','):
     return isinstance(liststr, list) and liststr or [s.strip() for s in liststr.split(delimiter)] 
 
 
+def list_drivers(namespace):
+    namespace = 'dsl.' + namespace
+    mgr = extension.ExtensionManager(
+            namespace=namespace,
+            invoke_on_load=False,
+        )
+    return [x.name for x in mgr]
+
+
 def load_drivers(namespace, names=None):
-    namespace = 'dsl.' + namespace 
-    if not names:
+    names = listify(names)
+    namespace = 'dsl.' + namespace
+
+    if names is None:
         mgr = extension.ExtensionManager(
             namespace=namespace,
             invoke_on_load=True,
         )
         return dict((x.name, x.obj) for x in mgr)
-
-    if not isinstance(names, list):
-        names = [names]
 
     return {name: driver.DriverManager(namespace, name, invoke_on_load='True') for name in names} 
     
@@ -98,3 +117,9 @@ def jsonify(f):
 
 def stringify(args):
     return isinstance(args, list) and ','.join(args) or None
+
+
+def _abs_path(path):
+    if not os.path.isabs(path):
+        path = os.path.join(get_dsl_dir(), path)
+    return path

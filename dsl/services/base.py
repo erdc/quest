@@ -25,7 +25,7 @@ class DataServiceBase(object):
         """
 
     @abc.abstractmethod
-    def get_locations_filters(self):
+    def get_locations_options(self):
         """Get Filters that can be applied to get_locations call
 
         Response defined as JSON-Schema
@@ -40,7 +40,7 @@ class DataServiceBase(object):
         """
 
     @abc.abstractmethod
-    def get_data_filters(self):
+    def get_data_options(self):
         """Get filters that can be applied to the get_data call
 
         Response defined as JSON-Schema
