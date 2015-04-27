@@ -5,6 +5,7 @@ Example Services
 from .base import DataServiceBase
 from .. import util
 from ulmo.usgs import ned
+from ulmo.usgs.ned.core import _download_tiles as download_tiles
 from geojson import FeatureCollection, dump
 import json
 import os
@@ -49,9 +50,9 @@ class UsgsNedBase(DataServiceBase):
         if bounding_box is None:
             bounding_box = self.metadata['bounding_boxes'][0] 
 
-        xmin, ymin, xmax, ymax = [float(p) for p in bounding_box]
+        bbox = [float(p) for p in bounding_box]
 
-        locations = ned.get_raster_availability(self.layer, xmin, ymin, xmax, ymax)
+        locations = ned.get_raster_availability(self.layer, bbox)
 
         if os.path.exists(self.cache_file):
             existing = json.load(open(self.cache_file))
@@ -90,7 +91,7 @@ class UsgsNedBase(DataServiceBase):
 
         path = os.path.join(path, DEFAULT_FILE_PATH)
         locations = self.get_locations(locations=locations)
-        tiles = ned.download_tiles(locations, path=path)
+        tiles = download_tiles(locations, path=path)
         return {tile['id']: {parameters: tile['properties']['file']} for tile in tiles['features']}
 
     def get_data_options(self, **kwargs):
