@@ -5,6 +5,7 @@ Example Services
 from .base import DataServiceBase
 from .. import util
 from ulmo.usgs import eros
+from ulmo.usgs.eros.core import _download_tiles as download_tiles
 from geojson import FeatureCollection, dump
 import json
 import os
@@ -49,9 +50,9 @@ class UsgsErosBase(DataServiceBase):
         if bounding_box is None:
             bounding_box = self.metadata['bounding_boxes'][0] 
 
-        xmin, ymin, xmax, ymax = [float(p) for p in bounding_box]
+        bbox = [float(p) for p in bounding_box]
 
-        locations = eros.get_raster_availability(self.product_key, xmin, ymin, xmax, ymax)
+        locations = eros.get_raster_availability(self.product_key, bbox)
 
         if os.path.exists(self.cache_file):
             existing = json.load(open(self.cache_file))
@@ -76,7 +77,7 @@ class UsgsErosBase(DataServiceBase):
 
         path = os.path.join(path, DEFAULT_FILE_PATH)
         locations = self.get_locations(locations=locations)
-        tiles = eros.download_tiles(locations, path=path)
+        tiles = download_tiles(locations, path=path)
         return {tile['id']: {parameters: tile['properties']['file']} for tile in tiles['features']}
 
     def get_data_options(self, **kwargs):
