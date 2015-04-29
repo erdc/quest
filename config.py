@@ -12,6 +12,10 @@ services = {
         'coops-pyoos': 'dsl.services.coops_pyoos:CoopsPyoos',
         'lejeune-precip': 'dsl.services.lejeune_demo:LejeuneGhcn',
         'local': 'dsl.services.local:LocalService',
+        'ndbc-pyoos': 'dsl.services.ndbc_pyoos:NdbcPyoos',
+        #iraq-agc-tlidar: dsl.services.iraq_demo:IraqAGCTLidar
+        #iraq-agc-alidar: dsl.services.iraq_demo:IraqAGCALidar
+        #chesapeake-elevation: dsl.services.chesapeake_demo:ChesapeakeVTK
     }
 
 filters = {
