@@ -7,6 +7,7 @@ import datetime
 import json
 import os
 from ..settings import COLLECTION_METADATA_FILE
+import warnings
 
 
 @util.jsonify
@@ -108,7 +109,12 @@ def download_in_collection(name, service=None, location=None, parameter=None, **
         dataset = collection['datasets'][service]['data']
         path = collection['path']
         data_file = get_data(service, location, path=path, parameters=parameter, **kwargs)
-        dataset[location][parameter]['relative_path'] = os.path.relpath(data_file[location][parameter], path)
+        data_path = data_file[location].get(parameter)
+        if data_path is None:
+            msg = "Warning: No data available for (service: %s, location: %s, parameter: %s)" % (service, location, parameter)
+            warnings.warn(msg)
+        else:
+            dataset[location][parameter]['relative_path'] = os.path.relpath(data_path, path)
 
     _write_collection(collection)
     return collection
