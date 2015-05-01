@@ -7,6 +7,8 @@ import yaml
 def init(config_file=None):
     """Setup DSL directories, web and local services
     """
+    import sys
+    sys.argv = ()
 
     if config_file is None:
         dsl_dir = os.environ.get('ENVSIM_DSL_DIR')
