@@ -59,8 +59,7 @@ class NdbcPyoos(DataServiceBase):
 
                         offeringid = 'station-%s' % stationID
 
-                        station = self.NDBC.server.contents
-                        [offeringid]
+                        station = self.NDBC.server.contents[offeringid]
 
                         x, y = station.bbox[:2]
 
@@ -72,7 +71,7 @@ class NdbcPyoos(DataServiceBase):
         except Exception, e:
             print str(e)
 
-    def get_locations_filters(self):
+    def get_locations_options(self):
         schema = {
             "title": "Location Filters",
             "type": "object",
@@ -180,7 +179,7 @@ class NdbcPyoos(DataServiceBase):
         except Exception, e:
             print str(e)
 
-    def get_data_filters(self):
+    def get_data_options(self):
         schema = {
             "title": "Download Options",
             "type": "object",
