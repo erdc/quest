@@ -107,22 +107,18 @@ class NdbcPyoos(DataServiceBase):
 
             if start_date is None and end_date is None:
                 lastMonth_date = date.today() - timedelta(days=30)
-                self.NDBC.start_time = datetime.strptime
-                (str(lastMonth_date), "%Y-%m-%d")
-                self.NDBC.end_time = datetime.strptime
-                (str(date.today()), "%Y-%m-%d")
+                self.NDBC.start_time = datetime.strptime(str(lastMonth_date), "%Y-%m-%d")
+                self.NDBC.end_time = datetime.strptime(str(date.today()), "%Y-%m-%d")
             elif any(time is None for time in times):
                 raise ValueError("must use either a date range with start/end \
                 OR use the default date")
             else:
                 if start_date is not None:
                     # date is in Year-Month-Day format, (Ex: 2012-10-01)
-                    self.NDBC.start_time = datetime.strptime
-                    (start_date, "%Y-%m-%d")
+                    self.NDBC.start_time = datetime.strptime(start_date, "%Y-%m-%d")
 
                 if end_date is not None:
-                    self.NDBC.end_time = datetime.strptime
-                    (end_date, "%Y-%m-%d")
+                    self.NDBC.end_time = datetime.strptime(end_date, "%Y-%m-%d")
 
             if locations is None:
                 raise ValueError("A location needs to be supplied.")
