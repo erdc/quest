@@ -5,6 +5,9 @@ from datetime import date, datetime, timedelta
 from .. import util
 from pyoos.collectors.ndbc.ndbc_sos import NdbcSos
 
+DEFAULT_FILE_PATH = 'ndbc'
+DEFAULT_TIMEOUT = 120 #in seconds
+
 parameters_dict = {
     'air pressure': 'air_pressure_at_sea_level',
     'winds': 'winds',
@@ -31,45 +34,28 @@ class NdbcPyoos(DataServiceBase):
         }
 
     def get_locations(self, locations=None, bounding_box=None):
+        if not hasattr(self, 'NDBC'):
+            self.NDBC = NdbcSos()
 
-        try:
+        features = []
+        if locations:
+            for location in locations:
+                features.append(self._getFeature(location))
+        else:
+            if bounding_box is None:
+                bounding_box = self.metadata['bounding_boxes'][0]
 
-            if not hasattr(self, 'NDBC'):
-                self.NDBC = NdbcSos()
-
-            features = []
-
-            if locations:
-
-                for location in locations:
-                    features.append(self._getFeature(location))
-
-                return FeatureCollection(features)
-
-            else:
-
-                if bounding_box is None:
-                    bounding_box = self.metadata['bounding_boxes'][0]
-
-                xmin, ymin, xmax, ymax = [float(p) for p in bounding_box]
-
-                for offeringID in self.NDBC.server.contents.keys():
-                    if 'network' not in offeringID:
-                        stationID = offeringID.split('-')[1]
-
-                        offeringid = 'station-%s' % stationID
-
-                        station = self.NDBC.server.contents[offeringid]
-
-                        x, y = station.bbox[:2]
-
-                        if x >= xmin and x <= xmax and y >= ymin and y <= ymax:
-                            features.append(self._getFeature(stationID))
-
-                return FeatureCollection(features)
-
-        except Exception, e:
-            print str(e)
+            xmin, ymin, xmax, ymax = [float(p) for p in bounding_box]
+            for offeringID in self.NDBC.server.contents.keys():
+                if 'network' not in offeringID:
+                    stationID = offeringID.split('-')[1]
+                    offeringid = 'station-%s' % stationID
+                    station = self.NDBC.server.contents[offeringid]
+                    x, y = station.bbox[:2]
+                    if x >= xmin and x <= xmax and y >= ymin and y <= ymax:
+                        features.append(self._getFeature(stationID))
+        
+        return FeatureCollection(features)
 
     def get_locations_options(self):
         schema = {
@@ -94,86 +80,64 @@ class NdbcPyoos(DataServiceBase):
     def get_data(self, locations, parameters=None, start_date=None,
                  end_date=None, path=None):
 
-        try:
+        if not hasattr(self, 'NDBC'):
+            self.NDBC = NdbcSos()
 
-            if not hasattr(self, 'NDBC'):
-                self.NDBC = NdbcSos()
+        # come back for parameters check
+        if parameters is None:
+            parameters = self.provides()
 
-            # come back for parameters check
-            if parameters is None:
-                parameters = self.provides()
+        times = [start_date, end_date]
 
-            times = [start_date, end_date]
+        if start_date is None and end_date is None:
+            lastMonth_date = date.today() - timedelta(days=30)
+            self.NDBC.start_time = datetime.strptime(str(lastMonth_date), "%Y-%m-%d")
+            self.NDBC.end_time = datetime.strptime(str(date.today()), "%Y-%m-%d")
+        elif any(time is None for time in times):
+            raise ValueError("must use either a date range with start/end OR use the default date")
+        else:
+            if start_date is not None:
+                # date is in Year-Month-Day format, (Ex: 2012-10-01)
+                self.NDBC.start_time = datetime.strptime(start_date, "%Y-%m-%d")
 
-            if start_date is None and end_date is None:
-                lastMonth_date = date.today() - timedelta(days=30)
-                self.NDBC.start_time = datetime.strptime(str(lastMonth_date), "%Y-%m-%d")
-                self.NDBC.end_time = datetime.strptime(str(date.today()), "%Y-%m-%d")
-            elif any(time is None for time in times):
-                raise ValueError("must use either a date range with start/end \
-                OR use the default date")
-            else:
-                if start_date is not None:
-                    # date is in Year-Month-Day format, (Ex: 2012-10-01)
-                    self.NDBC.start_time = datetime.strptime(start_date, "%Y-%m-%d")
+            if end_date is not None:
+                self.NDBC.end_time = datetime.strptime(end_date, "%Y-%m-%d")
 
-                if end_date is not None:
-                    self.NDBC.end_time = datetime.strptime(end_date, "%Y-%m-%d")
+        if locations is None:
+            raise ValueError("A location needs to be supplied.")
 
-            if locations is None:
-                raise ValueError("A location needs to be supplied.")
+        if not path:
+            path = util.get_dsl_dir()
 
-            if not path:
-                path = util.get_dsl_dir()
+        path = os.path.join(path, DEFAULT_FILE_PATH)
+        util.mkdir_if_doesnt_exist(path)
+        data_files = {}
+        for location in locations:
+            print 'Location = %s' % location
+            data_files[location] = {}
+            # station id or network id
+            self.NDBC.features = [location]
+            for parameter in parameters:
+                print 'Parameter = %s' % parameter
+                if (parameter in parameters_dict):
+                    parameter_value = parameters_dict.get(parameter)
+                    print 'parameter_value = %s' % parameter_value
+                    if (self._checkParameter(location, parameter_value)):
+                        self.NDBC.variables = [parameter_value]
+                        response = self.NDBC.raw(responseFormat="text/csv", timeout=DEFAULT_TIMEOUT)
+                        filename = 'station-%s_%s.csv' % (location, parameter.replace(" ", ""))
 
-            if not os.path.exists(path):
-                os.makedirs(path)
+                        # write out a csv file for now but create a plugin
+                        # to write out this data
+                        csvFile_path = os.path.join(path, filename)
+                        with open(csvFile_path, 'w') as f:
+                            f.write(response)
 
-            data_files = {}
+                        data_files[location][parameter] = filename
+                else:
+                    data_files[location][parameter] = None
 
-            for location in locations:
-
-                print 'Location = %s' % location
-
-                data_files[location] = {}
-
-                # station id or network id
-                self.NDBC.features = [location]
-                for parameter in parameters:
-
-                    print 'Parameter = %s' % parameter
-
-                    if (parameter in parameters_dict):
-
-                        parameter_value = parameters_dict.get(parameter)
-
-                        print 'parameter_value = %s' % parameter_value
-
-                        if (self._checkParameter(location, parameter_value)):
-
-                            self.NDBC.variables = [parameter_value]
-
-                            response = self.NDBC.raw(responseFormat="text/csv")
-
-                            filename = 'station-%s_%s.csv' % (
-                                location, parameter.replace(" ", ""))
-
-                            # write out a csv file for now but create a plugin
-                            # to write out this data
-
-                            csvFile_path = os.path.join(path, filename)
-
-                            with open(csvFile_path, 'w') as f:
-                                f.write(response)
-
-                            data_files[location][parameter] = filename
-                    else:
-                        data_files[location][parameter] = 'None'
-
-            return data_files
-
-        except Exception, e:
-            print str(e)
+        return data_files
 
     def get_data_options(self):
         schema = {
