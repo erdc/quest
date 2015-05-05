@@ -9,10 +9,10 @@ services = {
         'usgs-eros-nlcd2006': 'dsl.services.usgs_eros:UsgsErosNlcd2006',
         'iraq-vitd': 'dsl.services.iraq_demo:IraqVitd',
         'iraq-srtm': 'dsl.services.iraq_demo:IraqSrtm',
-        'coops-pyoos': 'dsl.services.coops_pyoos:CoopsPyoos',
+        'noaa-coops': 'dsl.services.coops_pyoos:CoopsPyoos',
         'lejeune-precip': 'dsl.services.lejeune_demo:LejeuneGhcn',
         'local': 'dsl.services.local:LocalService',
-        'ndbc-pyoos': 'dsl.services.ndbc_pyoos:NdbcPyoos',
+        'noaa-ndbc': 'dsl.services.ndbc_pyoos:NdbcPyoos',
         #iraq-agc-tlidar: dsl.services.iraq_demo:IraqAGCTLidar
         #iraq-agc-alidar: dsl.services.iraq_demo:IraqAGCALidar
         #chesapeake-elevation: dsl.services.chesapeake_demo:ChesapeakeVTK
