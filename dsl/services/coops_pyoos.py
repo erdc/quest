@@ -23,12 +23,12 @@ class CoopsPyoos(DataServiceBase):
 
         self.metadata = {
             'provider': {
-                'abbr': 'CO-OPS',
-                'name': 'NOAA Center for Operational Oceanographic Products and Services (CO-OPS) SOS',
+                'abbr': 'NOAA',
+                'name': 'National Oceanic and Atmospheric Administration',
                 },
-            'display_name': 'NOAA CO-OPS Sensor Observation Service',
-            'service': 'NOAA CO-OPS Sensor Observation Service',
-            'description': 'NOAA CO-OPS Sensor Obersvation Service',
+            'display_name': 'Center for Operational Oceanographic Products and Services (COOPS)',
+            'service': 'NOAA COOPS Sensor Observation Service',
+            'description': 'NOAA COOPS Sensor Observation Service',
             'geographical area': 'Worldwide',
             'bounding_boxes': [[-177.372, -18.1333, 178.425, 71.3601]],
             'geotype': 'points',

@@ -21,10 +21,10 @@ class NdbcPyoos(DataServiceBase):
 
         self.metadata = {
             'provider': {
-                'abbr': 'NDBC',
-                'name': 'NOAA National Data Buoy Center (NDBC) SOS',
+                'abbr': 'NOAA',
+                'name': 'National Oceanic and Atmospheric Administration',
             },
-            'display_name': 'NOAA NDBC Sensor Observation Service',
+            'display_name': 'National Data Buoy Center (NDBC)',
             'service': 'NOAA NDBC Sensor Observation Service',
             'description': 'NOAA NDBC Sensor Obersvation Service',
             'geographical area': 'Worldwide',
