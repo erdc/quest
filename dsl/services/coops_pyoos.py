@@ -7,7 +7,7 @@ from .. import util
 from pyoos.collectors.coops.coops_sos import CoopsSos
 
 DEFAULT_FILE_PATH = 'coops'
-DEFAULT_TIMEOUT = 120 #in seconds
+DEFAULT_TIMEOUT = 150 #in seconds
 
 parameters_dict = {
     'air pressure': 'air_pressure',

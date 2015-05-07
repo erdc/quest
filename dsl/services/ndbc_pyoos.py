@@ -113,15 +113,15 @@ class NdbcPyoos(DataServiceBase):
         util.mkdir_if_doesnt_exist(path)
         data_files = {}
         for location in locations:
-            print 'Location = %s' % location
+            # print 'Location = %s' % location
             data_files[location] = {}
             # station id or network id
             self.NDBC.features = [location]
             for parameter in parameters:
-                print 'Parameter = %s' % parameter
+                # print 'Parameter = %s' % parameter
                 if (parameter in parameters_dict):
                     parameter_value = parameters_dict.get(parameter)
-                    print 'parameter_value = %s' % parameter_value
+                    # print 'parameter_value = %s' % parameter_value
                     if (self._checkParameter(location, parameter_value)):
                         self.NDBC.variables = [parameter_value]
                         response = self.NDBC.raw(responseFormat="text/csv", timeout=DEFAULT_TIMEOUT)
