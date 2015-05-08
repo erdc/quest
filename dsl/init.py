@@ -38,7 +38,19 @@ def _load_dsl_config(config_file):
 
     local_services = config.get('local_services')
     if local_services is not None:
-        settings.LOCAL_SERVICES = local_services
+        settings.LOCAL_SERVICES = _expand_dirs(local_services)
 
 
+def _expand_dirs(local_services):
+    "if any dir ends in * then walk the subdirectories looking for dsl.yml"
+    expanded = []
+    for path in local_services:
+        head, tail = os.path.split(path)
+        if tail=='*':
+            for root, dirs, files in os.walk(head):
+                if os.path.exists(os.path.join(root, 'dsl.yml')):
+                    expanded.append(root)
+        else:
+            expanded.append(path)
 
+    return expanded
