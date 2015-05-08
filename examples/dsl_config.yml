@@ -1,0 +1,14 @@
+#list of enabled web services. use 'all' if you want to use all available
+web_services:
+
+#list of enabled local services. use 'none' or a list of directories
+local_services:
+    - /Users/dharhas/data/dsl-demo-data/*
+
+#define paths and other variables
+
+# if dsl_dir is not defined then the current directory will be used.
+settings:
+    dsl_dir:
+    collections: 
+
