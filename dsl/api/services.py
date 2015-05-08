@@ -183,9 +183,9 @@ def _load_services(names=None):
         for path in settings.LOCAL_SERVICES:
             try:
                 drv = driver.DriverManager('dsl.services', 'local', invoke_on_load='True', invoke_kwds={'path':path}).driver
-                services['local' + drv.name] = drv
-            except:
-                pass
+                services['local-' + drv.name] = drv
+            except Exception, e:
+                print 'Failed to load local service from %s, with exception: %s' % (path, str(e))
 
     if names is not None:
         services = services[names]
