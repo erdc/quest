@@ -5,13 +5,15 @@ from geojson import Feature, FeatureCollection, Point
 from datetime import date, datetime, timedelta
 from .. import util
 from pyoos.collectors.coops.coops_sos import CoopsSos
+import pandas as pd
+from StringIO import StringIO
 
 DEFAULT_FILE_PATH = 'coops'
 DEFAULT_TIMEOUT = 150 #in seconds
 
 parameters_dict = {
-    'air pressure': 'air_pressure',
-    'tidal elevation': 'water_surface_height_above_reference_datum',
+    'air_pressure': 'air_pressure',
+    'tidal_elevation': 'water_surface_height_above_reference_datum',
     'winds': 'winds',
     }
 
@@ -115,6 +117,7 @@ class CoopsPyoos(DataServiceBase):
         path = os.path.join(path, DEFAULT_FILE_PATH)
         util.mkdir_if_doesnt_exist(path)
 
+        io = util.load_drivers('io', 'ts-geojson')['ts-geojson'].driver
         data_files = {}
         for location in locations:
             # print 'Location = %s' % location
@@ -132,14 +135,22 @@ class CoopsPyoos(DataServiceBase):
                             self.COOPS.dataType = data_type
                             self.COOPS.datum = datum
                         response = self.COOPS.raw(responseFormat="text/csv", timeout=DEFAULT_TIMEOUT)
-                        filename = 'station-%s_%s.csv' % (location, parameter.replace(" ", ""))
-                        # write out a csv file for now but create a plugin
-                        # to write out this data
-                        csvFile_path = os.path.join(path, filename)
-                        with open(csvFile_path, 'w') as f:
-                            f.write(response)
+                        df = pd.read_csv(StringIO(response))
+                        row = df.ix[0]
+                        geometry = Point((float(row['longitude (degree)']),
+                                        float(row['latitude (degree)'])))
+                        station_id = row['station_id']
+                        location_id = station_id.split(':')[-1]
 
-                        data_files[location][parameter] = csvFile_path
+                        metadata = {'noaa_station_id': station_id,
+                                    'noaa_sensor_id': row['sensor_id']
+                                    }
+                        df.index = pd.to_datetime(df['date_time'])
+                        df.drop(df.columns[:5], axis=1, inplace=True)
+
+                        filename = os.path.join(path, 'coops_stn:%s_%s.json' % (location, parameter))
+                        data_files[location][parameter] = filename
+                        io.write(filename, location_id=location_id, geometry=geometry, dataframe=df, metadata=metadata)
                 else:
                     data_files[location][parameter] = None
 

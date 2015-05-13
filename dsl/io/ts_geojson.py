@@ -20,33 +20,35 @@ class TsGeojson(IoBase):
         self.description = 'Reader/Writer for Geojson with timeseries in properties field'
         self.iotype = 'timeseries' 
 
-    def read(self, path, as_dataframe=False):
+    def read(self, path, as_dataframe=True):
         """Read data from format
         """
         with open(path) as f:
             data = json.load(f)
 
         if as_dataframe:
-            data['values'] = pd.Series(data=data['values'], index=data['time'])
-            del data['time']
+            properties = data['properties']
+            metadata = properties.pop('metadata', None)
+            time = properties.pop('time')
+            data = pd.DataFrame(data=properties, index=pd.to_datetime(time))
 
         return data
 
-    def write(self, path, location, name, longitude, latitude, parameter, unit, df, metadata=None):
+    def write(self, path, location_id, geometry, dataframe, metadata=None):
         """Write data to format
         """
 
-        feature = Feature(id=location,
-                        geometry=Point((float(longitude),
-                                        float(latitude))),
-                        properties={
-                            'name': name,
-                            'parameter': parameter,
-                            'metadata': metadata,
-                            'unit_of_measurement': unit,
-                            'time': df.index.to_native_types(),
-                            'values': df.values.tolist(),
-                        },
+        properties={
+            'time': dataframe.index.to_native_types(),
+            'metadata': metadata,
+        }
+
+        for parameter in dataframe.columns:
+            properties.update({parameter: dataframe[parameter].tolist()})
+
+        feature = Feature(id=location_id,
+                        geometry=geometry,
+                        properties=properties,
                     )
         if not path.endswith('.json'):
             path += '.json'

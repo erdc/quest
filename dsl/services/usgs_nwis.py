@@ -183,19 +183,20 @@ class NwisBase(DataServiceBase):
                     continue
                     
                 df.index = self._make_index(df)
-                df = df['value']
                 p, s = _as_nwis(code, invert=True)
                 if s:
                     parameter = ':'.join([p,s])
                 else:
                     parameter = p
 
+                df = df[['value']]
+                df.columns = [parameter + '(%s)' % data['variable']['units']['code']]
                 filename = path + 'nwis:%s_stn:%s_%s.json' % (self.service, location, parameter)
                 data_files[location][parameter] = filename
-                io.write(filename, data['site']['code'], data['site']['name'],
-                            data['site']['location']['longitude'], 
-                            data['site']['location']['latitude'], 
-                            parameter, data['variable']['units']['code'], df)
+                location_id = data['site']['code']
+                geometry = Point((float(data['site']['location']['longitude']), float(data['site']['location']['latitude'])))
+                metadata = data['site']
+                io.write(filename, location_id=location_id, geometry=geometry, dataframe=df, metadata=metadata)
 
         return data_files
 

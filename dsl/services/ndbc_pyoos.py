@@ -125,15 +125,22 @@ class NdbcPyoos(DataServiceBase):
                     if (self._checkParameter(location, parameter_value)):
                         self.NDBC.variables = [parameter_value]
                         response = self.NDBC.raw(responseFormat="text/csv", timeout=DEFAULT_TIMEOUT)
-                        filename = 'station-%s_%s.csv' % (location, parameter.replace(" ", ""))
+                        df = pd.read_csv(StringIO(response))
+                        row = df.ix[0]
+                        geometry = Point((float(row['longitude (degree)']),
+                                        float(row['latitude (degree)'])))
+                        station_id = row['station_id']
+                        location_id = station_id.split(':')[-1]
 
-                        # write out a csv file for now but create a plugin
-                        # to write out this data
-                        csvFile_path = os.path.join(path, filename)
-                        with open(csvFile_path, 'w') as f:
-                            f.write(response)
+                        metadata = {'noaa_station_id': station_id,
+                                    'noaa_sensor_id': row['sensor_id']
+                                    }
+                        df.index = pd.to_datetime(df['date_time'])
+                        df.drop(df.columns[:5], axis=1, inplace=True)
 
-                        data_files[location][parameter] = csvFile_path
+                        filename = os.path.join(path, 'ndbc_stn:%s_%s.json' % (location, parameter))
+                        data_files[location][parameter] = filename
+                        io.write(filename, location_id=location_id, geometry=geometry, dataframe=df, metadata=metadata)
                 else:
                     data_files[location][parameter] = None
 
