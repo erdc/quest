@@ -139,7 +139,7 @@ class CoopsPyoos(DataServiceBase):
                         with open(csvFile_path, 'w') as f:
                             f.write(response)
 
-                        data_files[location][parameter] = filename
+                        data_files[location][parameter] = csvFile_path
                 else:
                     data_files[location][parameter] = None
 
