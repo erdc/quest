@@ -145,7 +145,7 @@ class CoopsPyoos(DataServiceBase):
 
         return data_files
 
-    def get_data_options(self):
+    def get_data_options(self, **kwargs):
         schema = {
             "title": "Download Options",
             "type": "object",
