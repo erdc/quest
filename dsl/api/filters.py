@@ -4,12 +4,19 @@ This will eventually hold filter related functionality
 """
 from .. import util
 
+
 @util.jsonify
-def get_filters(names=None, group=False, datatype=None, **kwargs):
+def get_filters(names=None, group=False, datatype=None, level=None, **kwargs):
     """List available filter plugins
     """
     names = util.listify(names)
     filters = [dict(name=k, **v.metadata) for k,v in util.load_drivers('filters', names=names).iteritems()]
+
+    if datatype is not None:
+        filters = [f for f in filters if datatype in f['operates_on']['datatype']]
+
+    if level is not None:
+        filters = [f for f in filters if level in f['operates_on']['level']]
 
     if not group:
         filters = sorted(filters)

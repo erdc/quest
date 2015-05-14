@@ -27,10 +27,13 @@ class TsGeojson(IoBase):
             data = json.load(f)
 
         if as_dataframe:
-            properties = data['properties']
+            properties = data.pop('properties')
             metadata = properties.pop('metadata', None)
             time = properties.pop('time')
-            data = pd.DataFrame(data=properties, index=pd.to_datetime(time))
+            df = pd.DataFrame(data=properties, index=pd.to_datetime(time))
+            df.metadata = metadata
+            df.feature = data
+            data = df
 
         return data
 

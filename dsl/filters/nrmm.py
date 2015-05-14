@@ -24,6 +24,7 @@ class NrmmFromVITD(FilterBase):
                 'datatype': ['terrain-vitd'],
                 'geotype': ['polygon'],
                 'parameters': ['terrain-nrmm'],
+                'level': ['collection'],
             },
             'produces': {
                 'datatype': 'terrain-nrmm',

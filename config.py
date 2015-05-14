@@ -14,6 +14,7 @@ services = {
 
 filters = {
         'vitd2nrmm': 'dsl.filters.nrmm:NrmmFromVITD',
+        'ts-resample': 'dsl.filters.timeseries:TsResample',
     }
 
 io = {
