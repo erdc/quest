@@ -2,7 +2,7 @@
 
 """
 from .. import util
-from .services import get_locations, get_data, get_data_options, get_parameters
+from .services import get_services, get_locations, get_data, get_data_options, get_parameters
 import datetime
 import json
 import os
@@ -100,6 +100,7 @@ def download_in_collection(name, service=None, location=None, parameter=None, **
 
     if not any([service, location, parameter]):
         for service, dataset in collection['datasets'].iteritems():
+            datatype = get_services(names=service)[0].get('datatype')
             for location, parameters in dataset['data'].iteritems():
                 path = collection['path']
                 data_files = get_data(service, location, path=path, parameters=','.join(parameters.keys()))
@@ -109,16 +110,19 @@ def download_in_collection(name, service=None, location=None, parameter=None, **
                         warnings.warn(msg)
                     else:
                         parameters[k]['relative_path'] = os.path.relpath(v, path)
+                        dataset[location][parameter]['datatype'] = datatype
     else:
         dataset = collection['datasets'][service]['data']
         path = collection['path']
         data_file = get_data(service, location, path=path, parameters=parameter, **kwargs)
+        datatype = get_services(names=service)[0].get('datatype')
         data_path = data_file[location].get(parameter)
         if data_path is None:
             msg = "Warning: No data available for (service: %s, location: %s, parameter: %s)" % (service, location, parameter)
             warnings.warn(msg)
         else:
             dataset[location][parameter]['relative_path'] = os.path.relpath(data_path, path)
+            dataset[location][parameter]['datatype'] = datatype
 
     _write_collection(collection)
     return collection
