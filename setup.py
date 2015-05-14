@@ -51,7 +51,8 @@ setup(
     platforms='any',
     install_requires=[
         'numpy',
-        'fiona',
+        'fiona>=1.5.1',
+        'rasterio>=0.23.0'
         'geojson',
         'jsonschema',
         'stevedore',
