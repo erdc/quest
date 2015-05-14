@@ -47,7 +47,12 @@ class NrmmFromVITD(FilterBase):
         collection = get_collection(collection_name)
 
         #calculate bounding box
-        locations = collection['datasets']['iraq-vitd']['locations']['features']
+        service = self.find_vitd_service_name(collection)
+        if service is None:
+            print 'no terrain-vitd data available in collection: %s' % collection_name
+            return collection
+
+        locations = collection['datasets'][service]['locations']['features']
         locs = np.hstack([loc['geometry']['coordinates'] for loc in locations]).squeeze()
         lons = locs[:,0]
         lats = locs[:,1]
@@ -139,3 +144,13 @@ class NrmmFromVITD(FilterBase):
         }
 
         return themes
+
+    def find_vitd_service_name(self, collection):
+        for service, dataset in collection['datasets'].iteritems():
+            row = dataset['data'].itervalues().next() #get first element of dict
+            if 'elevation' in row.keys():
+                datatype = row['elevation'].get('datatype')
+                if datatype=='terrain-vitd':
+                    return service
+
+        return None

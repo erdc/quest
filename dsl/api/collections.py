@@ -106,13 +106,13 @@ def download_in_collection(name, service=None, location=None, parameter=None, **
             for location, parameters in dataset['data'].iteritems():
                 path = collection['path']
                 data_files = get_data(service, location, path=path, parameters=','.join(parameters.keys()))
-                for k, v in data_files[location].iteritems():
+                for parameter, v in data_files[location].iteritems():
                     if v is None:
                         msg = "Warning: No data available for (service: %s, location: %s, parameter: %s)" % (service, location, parameter)
                         warnings.warn(msg)
                     else:
-                        parameters[k]['relative_path'] = os.path.relpath(v, path)
-                        dataset[location][parameter]['datatype'] = datatype
+                        parameters[parameter]['relative_path'] = os.path.relpath(v, path)
+                        dataset['data'][location][parameter]['datatype'] = datatype
     else:
         dataset = collection['datasets'][service]['data']
         path = collection['path']
