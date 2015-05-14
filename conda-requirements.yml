@@ -7,7 +7,7 @@ channels:
 
 dependencies:
     - fiona=1.5.1=py27_0
-    - gdal=1.11.0=np19py27_0
+    - gdal=1.11.2=np19py27_0
     - geojson=1.0.9=py27_0
     - jsonschema=2.4.0=py27_0
     - ulmo=0.7.6=py27_0
