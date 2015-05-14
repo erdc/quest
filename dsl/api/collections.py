@@ -5,6 +5,8 @@ from .. import util
 from .services import get_services, get_locations, get_data, get_data_options, get_parameters
 import datetime
 import json
+import matplotlib.pyplot as plt
+from matplotlib import style
 import os
 from ..settings import COLLECTION_METADATA_FILE
 import warnings
@@ -147,6 +149,51 @@ def download_in_collection_options(name, service=None, location=None, parameter=
         options[service][location][parameter] = get_data_options(service, locations=location, parameters=parameter)
 
     return options
+
+
+@util.jsonify
+def view_in_collection(name, service, location, parameter, **kwargs):
+    """view dataset in collection 
+
+    """
+    collection = get_collection(name)
+    path = collection['path']
+    dataset = collection['datasets'][service]['data']
+    datafile_relpath = dataset[location][parameter]['relative_path']
+    datafile = os.path.join(path, datafile_relpath)
+    datatype = dataset[location][parameter]['datatype']
+    view = dataset[location][parameter].get('view')
+    
+    if view is not None:
+        return os.path.join(path, view)
+
+    view_file_base, ext = os.path.splitext(datafile_relpath)
+    view_file = None
+    if datatype=='timeseries':
+        view_file_relpath = view_file_base + '.png'
+        io = util.load_drivers('io', 'ts-geojson')['ts-geojson'].driver       
+        df = io.read(datafile)
+        style.use('fivethirtyeight')
+        df.plot()
+        view_file = os.path.join(path, view_file_relpath)
+        plt.savefig(view_file)
+        dataset[location][parameter]['view'] = view_file_relpath
+        _write_collection(collection)
+
+    if datatype=='raster':
+        if ext.lower()=='tif' or ext.lower()=='tiff':
+            view_file_relpath = datafile_relpath
+        else:
+            view_file_relpath = view_file_base + '.tif'
+            view_file = os.path.join(path, view_file_relpath)
+            import rasterio
+            with rasterio.drivers():
+                rasterio.copy(datafile, view_file, driver='GTIFF')
+
+        dataset[location][parameter]['view'] = view_file_relpath
+        _write_collection(collection)        
+
+    return view_file
 
 
 @util.jsonify

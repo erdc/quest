@@ -30,5 +30,6 @@ from .collections import (
         download_in_collection_options,
         update_collection,
         list_collections,
+        view_in_collection,
     )
 
