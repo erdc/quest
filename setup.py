@@ -58,6 +58,8 @@ setup(
         'ulmo>=0.7.6',
         'pyyaml',
         'pyoos',
+        'matplotlib',
+        'prettyplotlib',
     ],
     classifiers=[
         'Development Status :: 3 - Alpha',
