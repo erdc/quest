@@ -7,12 +7,10 @@ from ..api import get_collection, add_to_collection
 from .. import util
 from geojson import Polygon, Feature, FeatureCollection
 import numpy as np
+import pandas as pd
 import os
-import subprocess
-import time
 
-
-class NrmmFromVITD(FilterBase):
+class TsBase(FilterBase):
     def register(self):
         """Register VITD to NRMM Filter
 
@@ -21,20 +19,20 @@ class NrmmFromVITD(FilterBase):
 
         self.metadata = {
             'operates_on': {
-                'datatype': ['terrain-vitd'],
-                'geotype': ['polygon'],
-                'parameters': ['terrain-nrmm'],
+                'datatype': ['timeseries'],
+                'geotype': ['polygon', 'point', 'line'],
+                'parameters': None,
             },
             'produces': {
-                'datatype': 'terrain-nrmm',
-                'geotype': 'polygon',
-                'parameters': 'nrmm',
+                'datatype': ['timeseries'],
+                'geotype': ['polygon', 'point', 'line'],
+                'parameters': None,
             },
         }
 
 
-    def apply_filter(self, collection_name, **kwargs):
-        available_themes = self.get_themes().keys()
+    def apply_filter(self, collection_name, service=None, location=None, parameters=None):
+        
 
         themes = []
         for k, v in kwargs.items():
