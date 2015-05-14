@@ -31,6 +31,8 @@ class TsGeojson(IoBase):
             metadata = properties.pop('metadata', None)
             time = properties.pop('time')
             df = pd.DataFrame(data=properties, index=pd.to_datetime(time))
+            df = df.astype('float')
+            df.sort(inplace=True)
             df.metadata = metadata
             df.feature = data
             data = df
