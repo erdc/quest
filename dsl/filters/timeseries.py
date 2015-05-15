@@ -254,11 +254,7 @@ class ToAdh(FilterBase):
                 'parameters': ['streamflow'],
                 'level': ['parameter']
             },
-            'produces': {
-                'datatype': ['timeseries'],
-                'geotype': ['polygon', 'point', 'line'],
-                'parameters': None,
-            },
+            'produces': None,
         }
 
 

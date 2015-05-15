@@ -99,13 +99,16 @@ images.update({'usgs-ned-1/9arc-second': dsl.api.view_in_collection(collection_n
 dsl.api.apply_filter('ts-remove-outliers', collection_name=collection_name, service="usgs-nwis-iv", location="02093000", parameter="streamflow")
 images.update({'usgs-streamflow-outliers-removed': dsl.api.view_in_collection(collection_name, service="local", location="02093000", parameter="streamflow (outliers removed)")})
 
+# demo calculating monthly max streamflow
+dsl.api.apply_filter('ts-resample', collection_name=collection_name, service="local", location="02093000", parameter="streamflow (outliers removed)", period='monthly', method='max')
+images.update({'usgs-streamflow-outliers-removed-monthly-max': dsl.api.view_in_collection(collection_name, service="local", location="02093000", parameter="streamflow (outliers removed) monthly max")})
+
 # export clean data to adh after clipping to 1 year ago
 dsl.api.apply_filter('ts-2-adh', collection_name=collection_name, service="local", location="02093000", parameter="streamflow (outliers removed)", start_time=start_365, export_path=save_path, filename='usgs_streamflow')
 dsl.api.apply_filter('ts-2-adh', collection_name=collection_name, service="noaa-coops", location="8658163", parameter="tidal_elevation", start_time=start_365, export_path=save_path, filename='noaa_tides')
 
-# demo calculating monthly max streamflow
-dsl.api.apply_filter('ts-resample', collection_name=collection_name, service="local", location="02093000", parameter="streamflow (outliers removed)", period='monthly', method='max')
-images.update({'usgs-streamflow-outliers-removed': dsl.api.view_in_collection(collection_name, service="local", location="02093000", parameter="streamflow (outliers removed) monthly max")})
+# export ned 1/9 arc second to USGSDEM format
+dsl.api.apply_filter('export-raster', collection_name=collection_name, service="usgs-ned-19", location="53174dbde4b0cd4cd83c4421", parameter="elevation", export_path=save_path, filename='usgs_ned', fmt='USGSDEM')
 
 print 'copying image files to %s' % save_path
 for name, path in images.iteritems():
