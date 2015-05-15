@@ -31,7 +31,7 @@ class TsGeojson(IoBase):
             metadata = properties.pop('metadata', None)
             time = properties.pop('time')
             df = pd.DataFrame(data=properties, index=pd.to_datetime(time))
-            df = df.astype('float')
+            df.convert_objects(convert_numeric=True)
             df.sort(inplace=True)
             df.metadata = metadata
             df.feature = data
@@ -43,8 +43,11 @@ class TsGeojson(IoBase):
         """Write data to format
         """
 
+        # replace NaN values with None
+        dataframe = dataframe.where(pd.notnull(dataframe), None)
+        
         properties={
-            'time': dataframe.index.to_native_types(),
+            'time': dataframe.index.to_native_types().tolist(),
             'metadata': metadata,
         }
 

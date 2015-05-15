@@ -9,12 +9,12 @@ import pandas as pd
 from StringIO import StringIO
 
 DEFAULT_FILE_PATH = 'coops'
-DEFAULT_TIMEOUT = 150 #in seconds
+DEFAULT_TIMEOUT = 300 #in seconds
 
 parameters_dict = {
     'air_pressure': 'air_pressure',
     'tidal_elevation': 'water_surface_height_above_reference_datum',
-    'winds': 'winds',
+    'wind': 'winds',
     }
 
 
@@ -136,6 +136,11 @@ class CoopsPyoos(DataServiceBase):
                             self.COOPS.datum = datum
                         response = self.COOPS.raw(responseFormat="text/csv", timeout=DEFAULT_TIMEOUT)
                         df = pd.read_csv(StringIO(response))
+                        if df.empty:
+                            print 'No data found'
+                            data_files[location][parameter] = None
+                            continue
+                            
                         row = df.ix[0]
                         geometry = Point((float(row['longitude (degree)']),
                                         float(row['latitude (degree)'])))
@@ -161,16 +166,16 @@ class CoopsPyoos(DataServiceBase):
             "title": "Download Options",
             "type": "object",
             "properties": {
-                "locations": {
-                    "type": "string",
-                    "description": "single or comma delimited list of location \
-                        identifiers to download data for",
-                },
-                "parameters": {
-                    "type": "string",
-                    "description": "single or comma delimited list of parameters \
-                        to download data for"
-                },
+                # "locations": {
+                #     "type": "string",
+                #     "description": "single or comma delimited list of location \
+                #         identifiers to download data for",
+                # },
+                # "parameters": {
+                #     "type": "string",
+                #     "description": "single or comma delimited list of parameters \
+                #         to download data for"
+                # },
                 "start_date": {
                     "type": "string",
                     "description": "start date to begin the data search"
@@ -192,17 +197,17 @@ class CoopsPyoos(DataServiceBase):
                     "enum": ["MLLW", "MSL", "MHW", "STND", "IGLD", "NAVD"],
                     "description": "Optional value for datum"
                 },
-                "path": {
-                    "type": "string",
-                    "description": "base file path to store data"
-                },
+                # "path": {
+                #     "type": "string",
+                #     "description": "base file path to store data"
+                # },
             },
-            "required": ["locations", "variable"],
+            #"required": ["locations", "variable"],
         }
         return schema
 
     def provides(self):
-        return ['air pressure', 'tidal elevation', 'winds']
+        return ['air_pressure', 'tidal_elevation', 'wind']
 
     def _getFeature(self, stationID):
         offeringid = 'station-%s' % stationID

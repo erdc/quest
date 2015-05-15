@@ -4,13 +4,15 @@ from geojson import Feature, FeatureCollection, Point
 from datetime import date, datetime, timedelta
 from .. import util
 from pyoos.collectors.ndbc.ndbc_sos import NdbcSos
+import pandas as pd
+from StringIO import StringIO
 
 DEFAULT_FILE_PATH = 'ndbc'
-DEFAULT_TIMEOUT = 120 #in seconds
+DEFAULT_TIMEOUT = 300 #in seconds
 
 parameters_dict = {
-    'air pressure': 'air_pressure_at_sea_level',
-    'winds': 'winds',
+    'air_pressure': 'air_pressure_at_sea_level',
+    'wind': 'winds',
     }
 
 
@@ -112,6 +114,7 @@ class NdbcPyoos(DataServiceBase):
         path = os.path.join(path, DEFAULT_FILE_PATH)
         util.mkdir_if_doesnt_exist(path)
         data_files = {}
+        io = util.load_drivers('io', ['ts-geojson'])['ts-geojson'].driver
         for location in locations:
             # print 'Location = %s' % location
             data_files[location] = {}
@@ -126,6 +129,11 @@ class NdbcPyoos(DataServiceBase):
                         self.NDBC.variables = [parameter_value]
                         response = self.NDBC.raw(responseFormat="text/csv", timeout=DEFAULT_TIMEOUT)
                         df = pd.read_csv(StringIO(response))
+                        if df.empty:
+                            print 'No data found'
+                            data_files[location][parameter] = None
+                            continue
+
                         row = df.ix[0]
                         geometry = Point((float(row['longitude (degree)']),
                                         float(row['latitude (degree)'])))
@@ -151,16 +159,16 @@ class NdbcPyoos(DataServiceBase):
             "title": "Download Options",
             "type": "object",
             "properties": {
-                "locations": {
-                    "type": "string",
-                    "description": "single or comma delimited list of location \
-                    identifiers to download data for",
-                },
-                "parameters": {
-                    "type": "string",
-                    "description": "single or comma delimited list of parameters \
-                    to download data for"
-                },
+                # "locations": {
+                #     "type": "string",
+                #     "description": "single or comma delimited list of location \
+                #     identifiers to download data for",
+                # },
+                # "parameters": {
+                #     "type": "string",
+                #     "description": "single or comma delimited list of parameters \
+                #     to download data for"
+                # },
                 "start_date": {
                     "type": "string",
                     "description": "start date to begin the data search"
@@ -169,17 +177,17 @@ class NdbcPyoos(DataServiceBase):
                     "type": "string",
                     "description": "end date to end the data search"
                 },
-                "path": {
-                    "type": "string",
-                    "description": "base file path to store data"
-                },
+                # "path": {
+                #     "type": "string",
+                #     "description": "base file path to store data"
+                # },
             },
-            "required": ["locations", "variable"],
+            #"required": ["locations", "variable"],
         }
         return schema
 
     def provides(self):
-        return ['air pressure', 'winds']
+        return ['air_pressure', 'wind']
 
     def _getFeature(self, stationID):
 

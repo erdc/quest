@@ -190,6 +190,7 @@ class NwisBase(DataServiceBase):
                     parameter = p
 
                 df = df[['value']]
+                df.value = df.value.apply(np.float)
                 df.columns = [parameter + '(%s)' % data['variable']['units']['code']]
                 filename = path + 'nwis:%s_stn:%s_%s.json' % (self.service, location, parameter)
                 data_files[location][parameter] = filename

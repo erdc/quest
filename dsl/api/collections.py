@@ -66,12 +66,12 @@ def add_to_collection(name, service, locations, parameters=None, **kwargs):
     dataset['locations'] = util.append_features(dataset['locations'], features)
 
     for loc, feature in zip(locations, features['features']):
-        if loc not in dataset['data'].keys():
-            relative_path = feature['properties'].get('relative_path')
-            dataset['data'][loc] = {p:{'relative_path': relative_path} for p in parameters} 
-        else:
-            params = dataset['data'][loc]['parameters']
-            dataset['data'][loc]['parameters'] = list(set(params + parameters))
+        if loc in dataset['data'].keys():
+            parameters = list(set(parameters) - set(dataset['data'][loc].keys()))
+            
+        relative_path = feature['properties'].get('relative_path') #required for adding locally generated datasets from filters
+        datatype = feature['properties'].get('datatype')
+        dataset['data'][loc] = {p:{'relative_path': relative_path, 'datatype': datatype} for p in parameters}
     
     _write_collection(collection)
     return collection
