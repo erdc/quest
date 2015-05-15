@@ -152,7 +152,7 @@ def download_in_collection_options(name, service=None, location=None, parameter=
 
 
 @util.jsonify
-def view_in_collection(name, service, location, parameter, **kwargs):
+def view_in_collection(name, service, location, parameter, use_cache=True, **kwargs):
     """view dataset in collection 
 
     """
@@ -164,7 +164,7 @@ def view_in_collection(name, service, location, parameter, **kwargs):
     datatype = dataset[location][parameter]['datatype']
     view = dataset[location][parameter].get('view')
     
-    if view is not None:
+    if view is not None and use_cache:
         return os.path.join(path, view)
 
     view_file_base, ext = os.path.splitext(datafile_relpath)
@@ -173,8 +173,12 @@ def view_in_collection(name, service, location, parameter, **kwargs):
         view_file_relpath = view_file_base + '.png'
         io = util.load_drivers('io', 'ts-geojson')['ts-geojson'].driver       
         df = io.read(datafile)
-        style.use('fivethirtyeight')
-        df.plot()
+        plt.style.use('ggplot')
+        title='%s: station %s' % (service, location)
+        if len(df.columns)>1:
+            df.plot(subplots=True, title=title, layout=(3, -1), figsize=(8, 10), color='r', sharex=True)
+        else:
+            df.plot(title=title, figsize=(8, 6))
         view_file = os.path.join(path, view_file_relpath)
         plt.savefig(view_file)
         dataset[location][parameter]['view'] = view_file_relpath
