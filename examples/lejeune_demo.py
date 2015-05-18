@@ -35,7 +35,7 @@ dsl.api.new_collection(collection_name)
 print 'adding sites to collection'
 
 # ndbc
-dsl.api.add_to_collection(collection_name, 'noaa-ndbc', ['41036','41037'])
+#dsl.api.add_to_collection(collection_name, 'noaa-ndbc', ['41036','41037'])
 
 # usgs nwis iv
 dsl.api.add_to_collection(collection_name, 'usgs-nwis-iv', '02093000')
