@@ -6,6 +6,7 @@ from datetime import date, datetime, timedelta
 from .. import util
 from pyoos.collectors.coops.coops_sos import CoopsSos
 import pandas as pd
+import time
 from StringIO import StringIO
 
 DEFAULT_FILE_PATH = 'coops'
@@ -38,6 +39,7 @@ class CoopsPyoos(DataServiceBase):
             }
 
     def get_locations(self, locations=None, bounding_box=None):
+        time.sleep(.0001)
         if not hasattr(self, 'COOPS'):
             self.COOPS = CoopsSos()
 
@@ -185,16 +187,16 @@ class CoopsPyoos(DataServiceBase):
                     "description": "end date to end the data search"
                 },
                 "data_type": {
-                    "enum": ["PreliminarySixMinute", "PreliminaryOneMinute",
+                    "type": {"enum": ["PreliminarySixMinute", "PreliminaryOneMinute",
                              "VerifiedSixMinute", "VerifiedHourlyHeight",
                              "VerifiedHighLow", "VerifiedDailyMean",
                              "SixMinuteTidePredictions",
                              "HourlyTidePredictions",
-                             "HighLowTidePredictions"],
+                             "HighLowTidePredictions"],"default":"VerifiedHourlyHeight"},
                     "description": "Optional value for data type"
                 },
                 "datum": {
-                    "enum": ["MLLW", "MSL", "MHW", "STND", "IGLD", "NAVD"],
+                    "type": {"enum": ["MLLW", "MSL", "MHW", "STND", "IGLD", "NAVD"],"default": "MSL"},
                     "description": "Optional value for datum"
                 },
                 # "path": {
