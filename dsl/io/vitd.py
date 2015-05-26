@@ -143,21 +143,7 @@ class Vitd(IoBase):
         return data_files
 
     def get_data_options(self, **kwargs):
-        schema = {
-            "title": "Download Options",
-            "type": "object",
-            "properties": {
-                "locations": {
-                    "type": "string",
-                    "description": "single or comma delimited list of location identifiers to download data for",
-                },
-                "path": {
-                    "type": "string",
-                    "description": "base file path to store data"
-                },
-            },
-            "required": ["locations"],
-        }
+        schema = None 
         return schema
 
     def provides(self, **kwargs):
