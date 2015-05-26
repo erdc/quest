@@ -112,6 +112,16 @@ class Generic(IoBase):
         path = os.path.join(path, save_folder)
         util.mkdir_if_doesnt_exist(path)
 
+        #copy common files
+        print 'value =', kwargs.get('copy_common')
+        print 'src=', src_path
+        if kwargs.get('copy_common'):
+            common_files = [f for f in os.listdir(src_path) if os.path.isfile(os.path.join(src_path,f))]
+            print 'files=', common_files
+            for f in common_files:
+                print 'copying common file: ', f
+                shutil.copy(os.path.join(src_path,f), path)
+
         #copy vitd data folder
         mapping = kwargs['mapping']
         data_files = {}
@@ -122,29 +132,17 @@ class Generic(IoBase):
                 fname = fname.replace('<parameter>', parameter)
                 src = os.path.join(src_path, fname)
                 dest = os.path.join(path, fname)
-                print src, dest
                 print 'downloading file for %s, %s' % (location, parameter)
-                shutil.copy(src, dest)
+                if os.path.isdir(src):
+                    shutil.copytree(src, dest)
+                else:
+                    shutil.copy(src, dest)
                 data_files[location][parameter] = dest
 
         return data_files
 
     def get_data_options(self, **kwargs):
-        schema = {
-            "title": "Download Options",
-            "type": "object",
-            "properties": {
-                "locations": {
-                    "type": "string",
-                    "description": "single or comma delimited list of location identifiers to download data for",
-                },
-                "path": {
-                    "type": "string",
-                    "description": "base file path to store data"
-                },
-            },
-            "required": ["locations"],
-        }
+        schema = None
         return schema
 
     def provides(self, **kwargs):

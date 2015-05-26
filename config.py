@@ -13,7 +13,8 @@ services = {
     }
 
 filters = {
-        'vitd2nrmm': 'dsl.filters.nrmm:NrmmFromVITD',
+        'vitd2nrmm': 'dsl.filters.nrmm:NrmmFromVitd',
+        'ffd2nrmm': 'dsl.filters.nrmm:NrmmFromFfd',
         'ts-resample': 'dsl.filters.timeseries:TsResample',
         'ts-remove-outliers': 'dsl.filters.timeseries:TsRemoveOutliers',
         'ts-2-adh': 'dsl.filters.timeseries:ToAdh',
