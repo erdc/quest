@@ -141,8 +141,8 @@ class NwisBase(DataServiceBase):
         return schema
 
     def get_data(self, locations, parameters=None, path=None, start=None, end=None, period=None):
-
-        if filter(None, [start, end, period]) is None:
+        
+        if not any([start, end, period]):
             period = 'P365D' #default to past 1yr of data
 
         if parameters is None:

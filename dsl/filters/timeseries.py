@@ -220,7 +220,7 @@ class TsResample(FilterBase):
             #     "description": "Name of parameter",
             # },
             "period": {
-                "type": { "enum": [ 'daily', 'weekly', 'monthly', 'annual' ], "default": 'M' },
+                "type": { "enum": [ 'daily', 'weekly', 'monthly', 'annual' ], "default": 'daily' },
                 "description": "resample frequency",    
             },
             "method": {
