@@ -36,7 +36,7 @@ class UsgsNedBase(DataServiceBase):
                 }
 
 
-    def get_locations(self, locations=None, bounding_box=None):
+    def get_locations(self, locations=None, bounding_box=None, **kwargs):
         if locations is not None:
             try:
                 with open(self.cache_file) as f:
@@ -63,7 +63,7 @@ class UsgsNedBase(DataServiceBase):
 
         return locations
 
-    def get_locations_options(self):
+    def get_locations_options(self, **kwargs):
         schema = {
             "title": "Location Filters",
             "type": "object",
@@ -81,7 +81,7 @@ class UsgsNedBase(DataServiceBase):
         }
         return schema
         
-    def get_data(self, locations, path=None, parameters=None):
+    def get_data(self, locations, path=None, parameters=None, **kwargs):
         """parameter is always set to elevation
         """
         parameters = 'elevation'

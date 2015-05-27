@@ -2,9 +2,11 @@
 
 """
 from .. import util
-from .services import get_locations, get_data, get_data_options, get_parameters
+from .services import get_services, get_locations, get_data, get_data_options, get_parameters
 import datetime
 import json
+import matplotlib.pyplot as plt
+from matplotlib import style
 import os
 from ..settings import COLLECTION_METADATA_FILE
 import warnings
@@ -64,12 +66,14 @@ def add_to_collection(name, service, locations, parameters=None, **kwargs):
     dataset['locations'] = util.append_features(dataset['locations'], features)
 
     for loc, feature in zip(locations, features['features']):
-        if loc not in dataset['data'].keys():
-            relative_path = feature['properties'].get('relative_path')
-            dataset['data'][loc] = {p:{'relative_path': relative_path} for p in parameters} 
+        if loc in dataset['data'].keys():
+            parameters = list(set(parameters) - set(dataset['data'][loc].keys()))
         else:
-            params = dataset['data'][loc]['parameters']
-            dataset['data'][loc]['parameters'] = list(set(params + parameters))
+            dataset['data'][loc] = {}
+
+        relative_path = feature['properties'].get('relative_path') #required for adding locally generated datasets from filters
+        datatype = feature['properties'].get('datatype')
+        dataset['data'][loc].update({p:{'relative_path': relative_path, 'datatype': datatype} for p in parameters})
     
     _write_collection(collection)
     return collection
@@ -100,21 +104,29 @@ def download_in_collection(name, service=None, location=None, parameter=None, **
 
     if not any([service, location, parameter]):
         for service, dataset in collection['datasets'].iteritems():
+            datatype = get_services(names=service)[0].get('datatype')
             for location, parameters in dataset['data'].iteritems():
                 path = collection['path']
                 data_files = get_data(service, location, path=path, parameters=','.join(parameters.keys()))
-                for k, v in data_files[location].iteritems():
-                    parameters[k]['relative_path'] = os.path.relpath(v, path)
+                for parameter, v in data_files[location].iteritems():
+                    if v is None:
+                        msg = "Warning: No data available for (service: %s, location: %s, parameter: %s)" % (service, location, parameter)
+                        warnings.warn(msg)
+                    else:
+                        parameters[parameter]['relative_path'] = os.path.relpath(v, path)
+                        dataset['data'][location][parameter]['datatype'] = datatype
     else:
         dataset = collection['datasets'][service]['data']
         path = collection['path']
         data_file = get_data(service, location, path=path, parameters=parameter, **kwargs)
+        datatype = get_services(names=service)[0].get('datatype')
         data_path = data_file[location].get(parameter)
         if data_path is None:
             msg = "Warning: No data available for (service: %s, location: %s, parameter: %s)" % (service, location, parameter)
             warnings.warn(msg)
         else:
             dataset[location][parameter]['relative_path'] = os.path.relpath(data_path, path)
+            dataset[location][parameter]['datatype'] = datatype
 
     _write_collection(collection)
     return collection
@@ -139,6 +151,55 @@ def download_in_collection_options(name, service=None, location=None, parameter=
         options[service][location][parameter] = get_data_options(service, locations=location, parameters=parameter)
 
     return options
+
+
+@util.jsonify
+def view_in_collection(name, service, location, parameter, use_cache=True, **kwargs):
+    """view dataset in collection 
+
+    """
+    collection = get_collection(name)
+    path = collection['path']
+    dataset = collection['datasets'][service]['data']
+    datafile_relpath = dataset[location][parameter]['relative_path']
+    datafile = os.path.join(path, datafile_relpath)
+    datatype = dataset[location][parameter]['datatype']
+    view = dataset[location][parameter].get('view')
+    
+    if view is not None and use_cache:
+        return os.path.join(path, view)
+
+    view_file_base, ext = os.path.splitext(datafile_relpath)
+    view_file = None
+    if datatype=='timeseries':
+        view_file_relpath = view_file_base + '.png'
+        io = util.load_drivers('io', 'ts-geojson')['ts-geojson'].driver       
+        df = io.read(datafile)
+        plt.style.use('ggplot')
+        title='%s: station %s' % (service, location)
+        if len(df.columns)>1:
+            df.plot(subplots=True, title=title, layout=(3, -1), figsize=(8, 10), color='r', sharex=True)
+        else:
+            df.plot(title=title, figsize=(8, 6))
+        view_file = os.path.join(path, view_file_relpath)
+        plt.savefig(view_file)
+        dataset[location][parameter]['view'] = view_file_relpath
+        _write_collection(collection)
+
+    if datatype=='raster':
+        if ext.lower()=='tif' or ext.lower()=='tiff':
+            view_file_relpath = datafile_relpath
+        else:
+            view_file_relpath = view_file_base + '.tif'
+            view_file = os.path.join(path, view_file_relpath)
+            import rasterio
+            with rasterio.drivers():
+                rasterio.copy(datafile, view_file, driver='GTIFF')
+
+        dataset[location][parameter]['view'] = view_file_relpath
+        _write_collection(collection)        
+
+    return view_file
 
 
 @util.jsonify

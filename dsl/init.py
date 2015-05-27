@@ -7,6 +7,8 @@ import yaml
 def init(config_file=None):
     """Setup DSL directories, web and local services
     """
+    import sys
+    sys.argv = ()
 
     if config_file is None:
         dsl_dir = os.environ.get('ENVSIM_DSL_DIR')
@@ -38,7 +40,19 @@ def _load_dsl_config(config_file):
 
     local_services = config.get('local_services')
     if local_services is not None:
-        settings.LOCAL_SERVICES = local_services
+        settings.LOCAL_SERVICES = _expand_dirs(local_services)
 
 
+def _expand_dirs(local_services):
+    "if any dir ends in * then walk the subdirectories looking for dsl.yml"
+    expanded = []
+    for path in local_services:
+        head, tail = os.path.split(path)
+        if tail=='*':
+            for root, dirs, files in os.walk(head):
+                if os.path.exists(os.path.join(root, 'dsl.yml')):
+                    expanded.append(root)
+        else:
+            expanded.append(path)
 
+    return expanded

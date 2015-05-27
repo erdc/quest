@@ -1,4 +1,5 @@
 services = {
+        'local': 'dsl.services.local:LocalService',
         'usgs-nwis-iv': 'dsl.services.usgs_nwis:NwisIv',
         'usgs-nwis-dv': 'dsl.services.usgs_nwis:NwisDv',
         'usgs-ned-1': 'dsl.services.usgs_ned:UsgsNed1ArcSecond',
@@ -7,16 +8,21 @@ services = {
         'usgs-ned-2': 'dsl.services.usgs_ned:UsgsNed2ArcSecond',
         'usgs-eros-nlcd2001': 'dsl.services.usgs_eros:UsgsErosNlcd2001',
         'usgs-eros-nlcd2006': 'dsl.services.usgs_eros:UsgsErosNlcd2006',
-        'iraq-vitd': 'dsl.services.iraq_demo:IraqVitd',
-        'iraq-srtm': 'dsl.services.iraq_demo:IraqSrtm',
-        'lejeune-precip': 'dsl.services.lejeune_demo:LejeuneGhcn',
-        'local': 'dsl.services.local:LocalService',
+        'noaa-coops': 'dsl.services.coops_pyoos:CoopsPyoos',
+        'noaa-ndbc': 'dsl.services.ndbc_pyoos:NdbcPyoos',
     }
 
 filters = {
-        'vitd2nrmm': 'dsl.filters.nrmm:NrmmFromVITD',
+        'vitd2nrmm': 'dsl.filters.nrmm:NrmmFromVitd',
+        'ffd2nrmm': 'dsl.filters.nrmm:NrmmFromFfd',
+        'ts-resample': 'dsl.filters.timeseries:TsResample',
+        'ts-remove-outliers': 'dsl.filters.timeseries:TsRemoveOutliers',
+        'ts-2-adh': 'dsl.filters.timeseries:ToAdh',
+        'export-raster': 'dsl.filters.export_raster:ExportRaster',
     }
 
 io = {
         'ts-geojson': 'dsl.io.ts_geojson:TsGeojson',
+        'vitd': 'dsl.io.vitd:Vitd',
+        'generic': 'dsl.io.generic:Generic',
     }

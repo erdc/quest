@@ -51,12 +51,15 @@ setup(
     platforms='any',
     install_requires=[
         'numpy',
-        #'fiona',
+        'fiona>=1.5.1',
+        'rasterio>=0.23.0',
         'geojson',
         'jsonschema',
         'stevedore',
         'ulmo>=0.7.6',
         'pyyaml',
+        'pyoos',
+        'matplotlib>=1.4.0',
     ],
     classifiers=[
         'Development Status :: 3 - Alpha',

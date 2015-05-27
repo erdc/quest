@@ -115,7 +115,7 @@ def get_services(names=None, group=False, provider=None, **kwargs):
         list of services metadata
     """
     names = util.listify(names)
-    services = [dict(service_code=k, parameters=v.provides(), **v.metadata) for k,v in _load_services().iteritems()]
+    services = [dict(service_code=k, parameters=v.provides(), **v.metadata) for k,v in _load_services(names=names).iteritems()]
 
     if provider is not None:
         services = [service for service in services if service['provider']['code']==provider]
@@ -183,11 +183,11 @@ def _load_services(names=None):
         for path in settings.LOCAL_SERVICES:
             try:
                 drv = driver.DriverManager('dsl.services', 'local', invoke_on_load='True', invoke_kwds={'path':path}).driver
-                services['local' + drv.name] = drv
-            except:
-                pass
+                services['local-' + drv.name] = drv
+            except Exception, e:
+                print 'Failed to load local service from %s, with exception: %s' % (path, str(e))
 
     if names is not None:
-        services = services[names]
+        services = {k:v for k,v in services.iteritems() if k in names}
 
     return services
