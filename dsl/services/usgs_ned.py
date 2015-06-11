@@ -55,11 +55,11 @@ class UsgsNedBase(DataServiceBase):
         locations = ned.get_raster_availability(self.layer, bbox)
 
         if os.path.exists(self.cache_file):
-            existing = json.load(open(self.cache_file))
-            locations = util.append_features(existing, locations)
+            cached = json.load(open(self.cache_file))
+            cached = util.append_features(cached, locations)
 
         with open(self.cache_file, 'w') as f:
-            dump(locations, f)
+            dump(cached, f)
 
         return locations
 
