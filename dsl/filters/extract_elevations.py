@@ -48,11 +48,14 @@ class ExtractElevations(FilterBase):
             return
 
         coords = line['coordinates']
-        polygon = Polygon([coords + list(reversed(coords))[1:]])
+        #polygon = Polygon([coords + list(reversed(coords))[1:]])
+        
         coords = pd.DataFrame(coords, columns=['lon','lat'])
 
         buf = 0.0001
         bbox = [coords.lon.min()-buf, coords.lat.min()-buf, coords.lon.max()+buf, coords.lat.max()+buf]
+        x1, y1, x2, y2 = bbox
+        polygon = Polygon([_bbox2poly(x1, y1, x2, y2)])
         print 'calculated bounding box: ', str(bbox)
 
         # identify and download the required raster tiles
@@ -62,7 +65,7 @@ class ExtractElevations(FilterBase):
         if len(locs)==0:
             print 'no tiles found'
             return
-            
+
         tiles = api.get_data(service, locs)
         tiles = [v['elevation'] for v in tiles.values()]
 
@@ -144,3 +147,12 @@ class ExtractElevations(FilterBase):
         }
         
         return schema
+
+
+def _bbox2poly(x1, y1, x2, y2):
+    xmin, xmax = sorted([float(x1), float(x2)])
+    ymin, ymax = sorted([float(y1), float(y2)])
+    poly = [(xmin, ymin), (xmin, ymax), (xmax, ymax), (xmax, ymin)]
+    poly.append(poly[0])
+
+    return poly
