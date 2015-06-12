@@ -47,7 +47,7 @@ class TsGeojson(IoBase):
         dataframe = dataframe.where(pd.notnull(dataframe), None)
         
         properties={
-            'time': dataframe.index.to_native_types().tolist(),
+            'time': dataframe.index.to_native_types(),
             'metadata': metadata,
         }
 
