@@ -90,8 +90,8 @@ class ExtractElevations(FilterBase):
                         r, c = int(r), int(c)
                         window = ((r, r+2), (c, c+2))
                         data = src.read(None, window=window, masked=False, boundless=True)
-                        q11, q21, q12, q22 = data[0,0,0], data[0,0,1], data[0,1,0], data[0,1,1]
-                        z = (1-yf)*((1-xf)*q11 + xf*q21) + yf*((1-xf)*q12 + xf*q22)
+                        q00, q01, q10, q11 = data[0,0,0], data[0,1,0], data[0,0,1], data[0,1,1]
+                        z = (1-yf)*((1-xf)*q00 + xf*q10) + yf*((1-xf)*q01 + xf*q11)
                         coords.append([x, y, z.tolist()])
 
         line['coordinates'] = coords
