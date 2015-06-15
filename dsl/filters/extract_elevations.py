@@ -117,7 +117,7 @@ class ExtractElevations(FilterBase):
             'datatype': 'linestring'
         }
 
-        new_locs = FeatureCollection([Feature(geometry=polygon, properties=properties, id=hash(str(line)))])
+        new_locs = FeatureCollection([Feature(geometry=polygon, properties=properties, id=str(hash(str(line))))])
         collection = api.add_to_collection(collection_name, 'local', new_locs, parameters='elevation')
         return collection
 
