@@ -45,9 +45,12 @@ class TsGeojson(IoBase):
 
         # replace NaN values with None
         dataframe = dataframe.where(pd.notnull(dataframe), None)
-        
+        time = dataframe.index.to_native_types()
+        if not isinstance(time, list):
+            time = time.tolist()
+            
         properties={
-            'time': dataframe.index.to_native_types(),
+            'time': time,
             'metadata': metadata,
         }
 
