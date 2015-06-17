@@ -7,9 +7,11 @@ from dsl import api
 from .. import util
 import geojson
 from geojson import Polygon, Feature, FeatureCollection
+import math
 import pandas as pd
 import os
 import subprocess
+
 
 class ExtractElevations(FilterBase):
     def register(self):
