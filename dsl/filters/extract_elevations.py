@@ -22,9 +22,9 @@ class ExtractElevations(FilterBase):
 
         self.metadata = {
             'operates_on': {
-                'datatype': ['raster'],
-                'geotype': ['polygon'],
-                'parameters': ['elevation'],
+                'datatype': None,
+                'geotype': None,
+                'parameters': None,
                 'level': ['collection'],
             },
             'produces': {
