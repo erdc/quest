@@ -8,6 +8,7 @@ import json
 import matplotlib.pyplot as plt
 from matplotlib import style
 import os
+import shutil
 from ..settings import COLLECTION_METADATA_FILE
 import warnings
 
@@ -257,19 +258,19 @@ def new_collection(name, path=None, tags=None, **kwargs):
 
 
 @util.jsonify
-def delete_collection(name, **kwargs):
+def delete_collection(name, delete_data=True, **kwargs):
     """delete a collection
 
     Deletes a collection from the collections metadata file.
-
-    Note: This currently does not delete folders and/or data present 
-    in the collection folder, it just removes the reference from the
-    master metadata file.
+    Optionally deletes all data under collection.
 
     Parameters
     ----------
     name : str,
         The name of the collection
+
+    delete_data : bool,
+        if True all data in the collection will be deleted
 
     Returns
     -------
@@ -281,7 +282,14 @@ def delete_collection(name, **kwargs):
 
     if not name in collections.keys():
         print 'Collection not found'
-        return
+        return collections
+
+    if delete_data:
+        path = get_collection(name)[path]
+        print 'deleting all data under path:', path
+        shutil.rmtree(path)
+
+    print 'removing %s from collections' % name
 
     del collections[name]
     _write_collections(collections)
