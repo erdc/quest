@@ -95,12 +95,12 @@ class ExtractElevations(FilterBase):
                             elif method=='bilinear':
                                 coordinates = []
                                 for x,y in points:
-                                    a, b, c, d, e, f, _, _, _ = src.affine
+                                    a, b, c, d, e, f, _, _, _ = raster.affine
                                     yf, r = math.modf((y-f)/e)
                                     xf, c = math.modf((x-c)/a)
                                     r, c = int(r), int(c)
                                     window = ((r, r+2), (c, c+2))
-                                    data = src.read(None, window=window, masked=False, boundless=True)
+                                    data = raster.read(None, window=window, masked=False, boundless=True)
                                     q00, q01, q10, q11 = data[0,0,0], data[0,1,0], data[0,0,1], data[0,1,1]
                                     z = (1-yf)*((1-xf)*q00 + xf*q10) + yf*((1-xf)*q01 + xf*q11)
                                     coordinates.append((x, y, z))
