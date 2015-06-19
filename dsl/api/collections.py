@@ -73,7 +73,15 @@ def add_to_collection(name, service, locations, parameters=None, **kwargs):
 
         relative_path = feature['properties'].get('relative_path') #required for adding locally generated datasets from filters
         datatype = feature['properties'].get('datatype')
-        dataset['data'][loc].update({p:{'relative_path': relative_path, 'datatype': datatype} for p in parameters})
+        view = feature['properties'].get('view')
+        dataset['data'][loc].update(
+            {p:{
+                'relative_path': relative_path, 
+                'datatype': datatype,
+                'view': view,
+                } for p in parameters
+            }
+        )
     
     _write_collection(collection)
     return collection

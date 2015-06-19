@@ -2,12 +2,14 @@
 
 """
 
+from affine import Affine
 from .base import FilterBase
 from dsl import api
 from .. import util
 import geojson
 from geojson import Polygon, Feature, FeatureCollection
 import math
+import numpy as np
 import pandas as pd
 import os
 import subprocess
@@ -38,6 +40,7 @@ class ExtractElevations(FilterBase):
 
     def apply_filter(self, collection_name, service=None, method='nearest', input_file=None, **kwargs):
         import rasterio
+        import rasterio.features
         import fiona
 
         # convert service name to service code
@@ -79,11 +82,13 @@ class ExtractElevations(FilterBase):
             print 'extracting elevations along feature'
             with rasterio.drivers():
                 with rasterio.open(raster_file, 'r') as raster:
+                    masks = []
                     if os.path.isfile(filename):
                         os.remove(filename) #fiona can't write to an existing file
                     with fiona.open(filename,'w',driver=vector.driver, crs=vector.crs, schema=vector.schema) as output:
                         for feature in vector:
                             points = feature['geometry']['coordinates']
+                            masks.append((feature['geometry'], 0))
                             if method=='nearest':
                                 elevations = list(raster.sample(points))
                                 coordinates = [xy + tuple(z.tolist()) for xy, z in zip(points, elevations)]
@@ -103,6 +108,25 @@ class ExtractElevations(FilterBase):
                             feature['geometry']['coordinates'] = coordinates
                             output.write(feature)
 
+                    # create visualization
+                    ul = raster.index(bbox[0], bbox[1])
+                    lr = raster.index(bbox[2], bbox[3])
+                    window = ((lr[0], ul[0]+1), (ul[1], lr[1]+1))
+                    data = raster.read(1, window=window)
+                    t = raster.affine
+                    shifted_affine = Affine(t.a, t.b, t.c+ul[1]*t.a, t.d, t.e, t.f+lr[0]*t.e)
+                    mask = rasterio.features.rasterize(masks, out_shape=data.shape, transform=shifted_affine, fill=1, all_touched=True, dtype=np.uint8)
+                    masked_data = np.ma.array(data=data, mask=mask.astype(bool))
+                    kwargs = raster.meta
+                    kwargs['transform'] = shifted_affine
+                    kwargs['affine'] = shifted_affine
+                    kwargs['driver'] = 'GTIFF'
+                    kwargs['width'] = masked_data.shape[0]
+                    kwargs['height'] = masked_data.shape[1]
+                    view_file = filename.split('.')[0] + '.tif'
+                    with rasterio.open(view_file, 'w', **kwargs) as dst:
+                        dst.write_band(1, masked_data.filled(fill_value=kwargs['nodata']))
+
             print 'saving output to %s' % filename
 
         properties = {
@@ -110,6 +134,7 @@ class ExtractElevations(FilterBase):
             'input_file': input_file,
             'elevation_service': service,
             'relative_path': filename, 
+            'view': view_file,
             'datatype': 'vector',
         }
 
