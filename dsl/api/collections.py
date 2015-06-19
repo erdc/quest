@@ -285,7 +285,7 @@ def delete_collection(name, delete_data=True, **kwargs):
         return collections
 
     if delete_data:
-        path = get_collection(name)[path]
+        path = get_collection(name)['path']
         print 'deleting all data under path:', path
         shutil.rmtree(path)
 
@@ -343,25 +343,14 @@ def update_collection(name, **kwargs):
 
 
 @util.jsonify
-def delete_from_collection(name, service, feature_ids, **kwargs):
-    """delete locations? from collection
+def delete_from_collection(name, service, location, parameter, **kwargs):
+    """delete (name, service, location, parameter) tuple from collection
 
-    NOT IMPLEMENTED 
+    DOES NOT DELETE ACTUAL DATA FILES JUST THE REFERENCES
     """
-    raise NotImplementedError('Deleting from collections has not been implemented')
-
-    if not isinstance(feature_ids, list):
-        feature_ids = [feature_ids]
-
     collection = get_collection(name)
-    service = collection['service'].get(service)
-    if service:
-        dataset['features']['features'] = [feature for feature in dataset['features']['features'] if feature['id'] not in feature_ids]
-    
-        if not dataset['features']['features']:
-            del collection['datasets'][service]
-
-        _write_collection(collection)
+    del collection['datasets'][service]['data'][location][parameter]
+    _write_collection(collection)
 
     return collection
 
