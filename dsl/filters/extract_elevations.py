@@ -121,8 +121,8 @@ class ExtractElevations(FilterBase):
                     kwargs['transform'] = shifted_affine
                     kwargs['affine'] = shifted_affine
                     kwargs['driver'] = 'GTIFF'
-                    kwargs['width'] = masked_data.shape[0]
-                    kwargs['height'] = masked_data.shape[1]
+                    kwargs['width'] = masked_data.shape[1]
+                    kwargs['height'] = masked_data.shape[0]
                     view_file = filename.split('.')[0] + '.tif'
                     with rasterio.open(view_file, 'w', **kwargs) as dst:
                         dst.write_band(1, masked_data.filled(fill_value=kwargs['nodata']))
