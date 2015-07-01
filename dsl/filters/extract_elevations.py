@@ -38,14 +38,15 @@ class ExtractElevations(FilterBase):
         }
 
 
-    def apply_filter(self, collection_name, service=None, method='nearest', input_file=None, **kwargs):
+    def apply_filter(self, collection_name, service=None, method='nearest', input_file=None, output_file=None, **kwargs):
         import rasterio
         import rasterio.features
         import fiona
 
-        # convert service name to service code
         services = api.get_services(parameter='elevation', datatype='raster')
-        service = [s['service_code'] for s in services if s['display_name']==service][0]
+        # convert service name to service code (for DataBrowser since it displays Service Display Name)
+        if service not in [s['service_code'] for s in services]:
+            service = [s['service_code'] for s in services if s['display_name']==service][0]
 
         #setup output file
         collection = api.get_collection(collection_name)
@@ -54,7 +55,10 @@ class ExtractElevations(FilterBase):
         head, tail = os.path.split(input_file)
         fname, ext = os.path.splitext(tail)
         fname = fname + '_with_elevations_from_%s' % service + ext
-        filename = os.path.join(plugin_dir, fname)
+        if output_file is None:
+            filename = os.path.join(plugin_dir, fname)
+        else:
+            filename = output_file
 
         # read vector features
         with fiona.open(input_file, 'r') as vector:
