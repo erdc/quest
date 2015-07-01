@@ -5,6 +5,7 @@ from .base import DataServiceBase
 from geojson import Feature, Point, FeatureCollection
 import numpy as np
 import pandas as pd
+import pkg_resources
 import re
 import os
 from ulmo.usgs import nwis
@@ -120,23 +121,28 @@ class NwisBase(DataServiceBase):
         return schema
 
     def get_data_options(self, **kwargs):
+        # schema = {
+        #     "title": "USGS NWIS Download Options",
+        #     "type": "object",
+        #     "properties": {
+        #         "start": {
+        #             "type": "string",
+        #             "description": "start date",
+        #         },
+        #         "end": {
+        #             "type": "string",
+        #             "description": "end date",
+        #         },
+        #         "period": {
+        #             "type": "string",
+        #             "description": "period date",
+        #         },
+        #     },
+        # }
+        smtk_filename = 'usgs-nwis-download.sbt'
         schema = {
-            "title": "USGS NWIS Download Options",
-            "type": "object",
-            "properties": {
-                "start": {
-                    "type": "string",
-                    "description": "start date",
-                },
-                "end": {
-                    "type": "string",
-                    "description": "end date",
-                },
-                "period": {
-                    "type": "string",
-                    "description": "period date",
-                },
-            },
+            "type": "smtk",
+            "smtk-path": pkg_resources.resource_filename('dsl.smtk', smtk_filename)
         }
         return schema
 

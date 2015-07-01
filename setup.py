@@ -48,6 +48,7 @@ setup(
     url='',
     keywords='',
     packages=find_packages(),
+    package_data={'dsl.smtk': ['*.sbt']},
     platforms='any',
     install_requires=[
         'numpy',
