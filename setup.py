@@ -59,6 +59,7 @@ setup(
         'ulmo>=0.7.6',
         'pyyaml',
         'pyoos',
+        'click',
         'matplotlib>=1.4.0',
     ],
     classifiers=[

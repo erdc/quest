@@ -17,5 +17,6 @@ dependencies:
     - rasterio=0.23=py27_0
     - pyyaml
     - matplotlib>=1.4.0
+    - click
     - pip:
       - stevedore==1.4.0
