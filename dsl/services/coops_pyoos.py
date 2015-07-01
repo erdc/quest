@@ -155,7 +155,7 @@ class CoopsPyoos(DataServiceBase):
                         df.index = pd.to_datetime(df['date_time'])
                         df.drop(df.columns[:5], axis=1, inplace=True)
 
-                        filename = os.path.join(path, 'coops_stn:%s_%s.json' % (location, parameter))
+                        filename = os.path.join(path, 'coops_stn_%s_%s.json' % (location, parameter))
                         data_files[location][parameter] = filename
                         io.write(filename, location_id=location_id, geometry=geometry, dataframe=df, metadata=metadata)
                 else:

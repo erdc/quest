@@ -11,7 +11,7 @@ from ulmo.usgs import nwis
 from .. import util
 
 # default file path (appended to collection path)
-DEFAULT_FILE_PATH = 'usgs/nwis/'
+DEFAULT_FILE_PATH = os.path.join('usgs','nwis')
 
 class NwisBase(DataServiceBase):
     def register(self):
@@ -192,7 +192,7 @@ class NwisBase(DataServiceBase):
                 df = df[['value']]
                 df.value = df.value.apply(np.float)
                 df.columns = [parameter + '(%s)' % data['variable']['units']['code']]
-                filename = path + 'nwis:%s_stn:%s_%s.json' % (self.service, location, parameter)
+                filename = path + 'nwis_%s_stn_%s_%s.json' % (self.service, location, parameter)
                 data_files[location][parameter] = filename
                 location_id = data['site']['code']
                 geometry = Point((float(data['site']['location']['longitude']), float(data['site']['location']['latitude'])))

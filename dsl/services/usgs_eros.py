@@ -10,7 +10,7 @@ from geojson import FeatureCollection, dump
 import json
 import os
 
-DEFAULT_FILE_PATH = 'usgs/eros'
+DEFAULT_FILE_PATH = os.path.join('usgs','eros')
 CACHE_FILE = 'eros_%s_metadata.json'
 
 class UsgsErosBase(DataServiceBase):

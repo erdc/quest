@@ -64,7 +64,7 @@ class NrmmFromFfd(FilterBase):
         plugin_dir = os.path.join(collection['path'], 'ffd2nrmm')
         util.mkdir_if_doesnt_exist(plugin_dir)
         #dest = 'nrmm/data-%s.dat' % nrmm_id
-        nrmm_file = 'fdd2nrmm/NRMM/NRMM.grd'
+        nrmm_file = os.path.join('fdd2nrmm', 'NRMM', 'NRMM.grd')
         #open(os.path.join(collection['path'], dest), 'w').close() #make fake empty file
         properties = {'metadata': 'generated using ffd2nrmm plugin', 'relative_path': nrmm_file}
         new_locs = FeatureCollection([Feature(geometry=Polygon([util.bbox2poly(south, west, north, east)]), properties=properties, id=nrmm_id)])

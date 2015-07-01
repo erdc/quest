@@ -10,7 +10,7 @@ from geojson import FeatureCollection, dump
 import json
 import os
 
-DEFAULT_FILE_PATH = 'usgs/ned'
+DEFAULT_FILE_PATH = os.path.join('usgs','ned')
 CACHE_FILE = 'ned_%s_metadata.json'
 
 class UsgsNedBase(DataServiceBase):
