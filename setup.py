@@ -59,6 +59,7 @@ setup(
         'ulmo>=0.7.6',
         'pyyaml',
         'pyoos',
+        'click',
         'matplotlib>=1.4.0',
     ],
     classifiers=[
@@ -73,6 +74,7 @@ setup(
     include_package_data=True,
 
     entry_points={
+        'console_scripts': ['dsl-get-elevations=dsl.scripts.get_elevations:cli'],
         'dsl.services': services,
         'dsl.filters': filters,
         'dsl.io': io,

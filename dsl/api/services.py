@@ -95,7 +95,7 @@ def get_parameters(name, **kwargs):
 
 
 @util.jsonify
-def get_services(names=None, group=False, provider=None, **kwargs):
+def get_services(names=None, parameter=None, datatype=None, provider=None, group=False, **kwargs):
     """get metadata for available data services
 
     Parameters
@@ -105,6 +105,12 @@ def get_services(names=None, group=False, provider=None, **kwargs):
 
     group : bool,
         If True, group the metadata by provider. Default is False.
+
+    datatype : ``None`` or str,
+        Filter list by datatype. 
+
+    parameter : ``None`` or str,
+        Filter list by parameter. 
 
     provider : ``None`` or str,
         Filter list by provider. 
@@ -119,6 +125,12 @@ def get_services(names=None, group=False, provider=None, **kwargs):
 
     if provider is not None:
         services = [service for service in services if service['provider']['code']==provider]
+
+    if datatype is not None:
+        services = [service for service in services if service['datatype']==datatype]
+
+    if parameter is not None:
+        services = [service for service in services if parameter in service['parameters']]
 
     if group is False:
         services = sorted(services)

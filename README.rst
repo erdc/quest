@@ -7,9 +7,6 @@ Conda Install
 =============
 Install Anaconda (http://continuum.io/downloads) or Miniconda (http://conda.io/) for your OS
 
-conda config --add channels erdc
-conda config --add channels ulmo
-conda config --add channels ioos
 conda env create -n dsl --file conda-requirements.yml
 source activate dsl (just activate dsl on windows)
 pip install -r requirements.txt

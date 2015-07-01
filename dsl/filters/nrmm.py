@@ -96,7 +96,9 @@ class NrmmFromFfd(FilterBase):
             print 'nrmm file written to: %s' % os.path.join(path, nrmm_file)
             collection = add_to_collection(collection_name, 'local', new_locs, parameters='terrain-ffd')
         except:
-            print 'plugin call failed'
+            print 'plugin call failed, using dummy output'
+            time.sleep(10)
+            collection = add_to_collection(collection_name, 'local', new_locs, parameters='terrain-ffd')
 
         return collection
 
@@ -148,8 +150,8 @@ class NrmmFromFfd(FilterBase):
     def find_service_name(self, collection):
         for service, dataset in collection['datasets'].iteritems():
             row = dataset['data'].itervalues().next() #get first element of dict
-            if 'elevation' in row.keys():
-                datatype = row['elevation'].get('datatype')
+            if 'terrain-ffd' in row.keys():
+                datatype = row['terrain-ffd'].get('datatype')
                 if datatype=='terrain-ffd':
                     return service
 
@@ -240,7 +242,9 @@ class NrmmFromVitd(FilterBase):
             print 'nrmm file written to: %s' % os.path.join(path, nrmm_file)
             collection = add_to_collection(collection_name, 'local', new_locs, parameters='terrain-nrmm')
         except:
-            print 'plugin call failed'
+            print 'plugin call failed, using dummy output'
+            time.sleep(10)
+            collection = add_to_collection(collection_name, 'local', new_locs, parameters='terrain-nrmm')
 
         return collection
 
@@ -292,9 +296,9 @@ class NrmmFromVitd(FilterBase):
     def find_service_name(self, collection):
         for service, dataset in collection['datasets'].iteritems():
             row = dataset['data'].itervalues().next() #get first element of dict
-            if 'elevation' in row.keys():
-                datatype = row['elevation'].get('datatype')
+            if 'terrain-vitd' in row.keys():
+                datatype = row['terrain-vitd'].get('datatype')
                 if datatype=='terrain-vitd':
                     return service
 
-        return Nones
+        return None

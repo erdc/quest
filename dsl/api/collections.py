@@ -8,6 +8,7 @@ import json
 import matplotlib.pyplot as plt
 from matplotlib import style
 import os
+import shutil
 from ..settings import COLLECTION_METADATA_FILE
 import warnings
 
@@ -73,7 +74,15 @@ def add_to_collection(name, service, locations, parameters=None, **kwargs):
 
         relative_path = feature['properties'].get('relative_path') #required for adding locally generated datasets from filters
         datatype = feature['properties'].get('datatype')
-        dataset['data'][loc].update({p:{'relative_path': relative_path, 'datatype': datatype} for p in parameters})
+        view = feature['properties'].get('view')
+        dataset['data'][loc].update(
+            {p:{
+                'relative_path': relative_path, 
+                'datatype': datatype,
+                'view': view,
+                } for p in parameters
+            }
+        )
     
     _write_collection(collection)
     return collection
@@ -249,19 +258,19 @@ def new_collection(name, path=None, tags=None, **kwargs):
 
 
 @util.jsonify
-def delete_collection(name, **kwargs):
+def delete_collection(name, delete_data=True, **kwargs):
     """delete a collection
 
     Deletes a collection from the collections metadata file.
-
-    Note: This currently does not delete folders and/or data present 
-    in the collection folder, it just removes the reference from the
-    master metadata file.
+    Optionally deletes all data under collection.
 
     Parameters
     ----------
     name : str,
         The name of the collection
+
+    delete_data : bool,
+        if True all data in the collection will be deleted
 
     Returns
     -------
@@ -273,7 +282,14 @@ def delete_collection(name, **kwargs):
 
     if not name in collections.keys():
         print 'Collection not found'
-        return
+        return collections
+
+    if delete_data:
+        path = get_collection(name)['path']
+        print 'deleting all data under path:', path
+        shutil.rmtree(path)
+
+    print 'removing %s from collections' % name
 
     del collections[name]
     _write_collections(collections)
@@ -327,25 +343,14 @@ def update_collection(name, **kwargs):
 
 
 @util.jsonify
-def delete_from_collection(name, service, feature_ids, **kwargs):
-    """delete locations? from collection
+def delete_from_collection(name, service, location, parameter, **kwargs):
+    """delete (name, service, location, parameter) tuple from collection
 
-    NOT IMPLEMENTED 
+    DOES NOT DELETE ACTUAL DATA FILES JUST THE REFERENCES
     """
-    raise NotImplementedError('Deleting from collections has not been implemented')
-
-    if not isinstance(feature_ids, list):
-        feature_ids = [feature_ids]
-
     collection = get_collection(name)
-    service = collection['service'].get(service)
-    if service:
-        dataset['features']['features'] = [feature for feature in dataset['features']['features'] if feature['id'] not in feature_ids]
-    
-        if not dataset['features']['features']:
-            del collection['datasets'][service]
-
-        _write_collection(collection)
+    del collection['datasets'][service]['data'][location][parameter]
+    _write_collection(collection)
 
     return collection
 

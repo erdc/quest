@@ -19,6 +19,7 @@ filters = {
         'ts-remove-outliers': 'dsl.filters.timeseries:TsRemoveOutliers',
         'ts-2-adh': 'dsl.filters.timeseries:ToAdh',
         'export-raster': 'dsl.filters.export_raster:ExportRaster',
+        'get-elevations-along-path': 'dsl.filters.extract_elevations:ExtractElevations'
     }
 
 io = {
