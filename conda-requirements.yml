@@ -1,22 +1,19 @@
 name: dsl
 
 channels:
-    - erdc
-    - ioos
     - ulmo
 
 dependencies:
-    - fiona=1.5.1=py27_0
-    - gdal=1.11.0=np19py27_0
-    - geojson=1.0.9=py27_0
-    - jsonschema=2.4.0=py27_0
-    - ulmo=0.7.6=py27_0
-    - pip=6.1.1=py27_0
-    - pyoos=0.6.2=np19py27_0
-    - python=2.7.9=1
-    - rasterio=0.23=py27_0
+    - gdal
+    - fiona>=1.5.1
+    - rasterio>=0.23.0
+    - numpy
+    - geojson
+    - jsonschema
+    - ulmo>=0.7.8
+    - pyoos
     - pyyaml
     - matplotlib>=1.4.0
     - click
     - pip:
-      - stevedore==1.4.0
+      - stevedore

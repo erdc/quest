@@ -56,7 +56,7 @@ setup(
         'geojson',
         'jsonschema',
         'stevedore',
-        'ulmo>=0.7.6',
+        'ulmo>=0.7.8',
         'pyyaml',
         'pyoos',
         'click',
