@@ -2,6 +2,7 @@ name: dsl
 
 channels:
     - ulmo
+    - ioos
 
 dependencies:
     - gdal
