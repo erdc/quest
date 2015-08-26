@@ -20,11 +20,11 @@ class IoBase(object):
         """
 
     @abc.abstractmethod
-    def read(self):
+    def read_features(self, filters=None):
         """Read data from format
         """
 
     @abc.abstractmethod
-    def write(self):
+    def read_data(self):
         """Write data to format
         """

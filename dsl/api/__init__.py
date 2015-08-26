@@ -6,30 +6,47 @@ Data Services Library.
 
 __version__ = 1.0
 
+
+from .collections import (
+        get_collections,
+        new_collection,
+        update_collection,
+        delete_collection,
+    )
+
+from .datasets import (
+        stage_dataset,
+        download_staged_dataset,
+        download_dataset,
+        update_dataset,
+        describe_dataset,
+        open_dataset,
+        view_dataset,
+    )
+
+from .features import (
+        get_features,
+        new_feature,
+        update_feature,
+        delete_feature,
+    )
+
 from .filters import (
         get_filters, 
         apply_filter, 
         apply_filter_options,
     )
-from .providers import get_providers
-from .services import (
-        get_data,
-        get_locations,
+
+from .parameters import (
         get_parameters,
-        get_services,
-        get_data_options,
-        get_locations_options,
-    )
-from .collections import (
-        new_collection,
-        get_collection,
-        add_to_collection,
-        delete_collection,
-        delete_from_collection,
-        download_in_collection,
-        download_in_collection_options,
-        update_collection,
-        list_collections,
-        view_in_collection,
+        new_parameter,
+        update_parameters,
+        delete_parameters,   
     )
 
+from .services import (
+        get_services,
+        new_service,
+        update_service,
+        delete_service,
+    )

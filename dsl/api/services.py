@@ -11,6 +11,22 @@ from collections import defaultdict
 from stevedore import driver
 
 
+def get_services():
+    pass
+
+
+def new_service():
+    pass
+
+
+def update_service():
+    pass
+
+
+def delete_service():
+    pass
+
+
 @util.jsonify
 def get_data(name, locations, parameters=None, **kwargs):
     """downloads data from a given service and returns a reference to downloaded data

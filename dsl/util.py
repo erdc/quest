@@ -8,6 +8,8 @@ try:
 except ImportError:
     import json
 
+from uuid import uuid4
+
 
 def append_features(old, new):
     if not old:
@@ -117,6 +119,10 @@ def jsonify(f):
 
 def stringify(args):
     return isinstance(args, list) and ','.join(args) or None
+
+
+def uid():
+    return uuid4().hex
 
 
 def _abs_path(path):
