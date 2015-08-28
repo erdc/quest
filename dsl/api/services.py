@@ -6,7 +6,7 @@ from __future__ import absolute_import
 import json
 import os
 import glob
-from .. import settings, util
+from .. import util
 from collections import defaultdict
 from stevedore import driver
 

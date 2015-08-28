@@ -6,6 +6,12 @@ Data Services Library.
 
 __version__ = 1.0
 
+from ..util import (
+        get_settings,
+        save_settings, 
+        update_settings, 
+        update_settings_from_file,
+    )
 
 from .collections import (
         get_collections,
