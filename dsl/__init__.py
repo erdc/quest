@@ -8,8 +8,8 @@ from __future__ import absolute_import
 
 from .version import __version__
 
-from .init import init
+from .settings import init_settings
 
 from . import util, api
 
-init()
+settings = init_settings()
