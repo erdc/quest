@@ -1,0 +1,7 @@
+BASE_DIR: /Users/dharhas/Library/Application Support/dsl
+CACHE_DIR: /Users/dharhas/Library/Application Support/dsl/cache
+COLLECTIONS_INDEX_FILE: /Users/dharhas/Library/Application Support/dsl/dsl_collections.yml
+CONFIG_FILE: /Users/dharhas/Library/Application Support/dsl/dsl_config.yml
+DATA_DIR: /Users/dharhas/Library/Application Support/dsl/data
+LOCAL_SERVICES: []
+WEB_SERVICES: []

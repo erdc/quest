@@ -8,8 +8,6 @@ import json
 import matplotlib.pyplot as plt
 from matplotlib import style
 import os
-import shutil
-from ..settings import COLLECTION_METADATA_FILE
 import warnings
 
 
