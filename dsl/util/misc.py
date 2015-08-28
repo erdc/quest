@@ -1,7 +1,5 @@
 import appdirs
 import os
-from . import settings
-from . import init
 from stevedore import extension, driver
 try:
     import simplejson as json

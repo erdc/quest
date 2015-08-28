@@ -1,24 +1,50 @@
 """Module wide settings
 """
+import appdirs
+import logging
 import os
+import yaml
 
-def init_settings(config=None):
+log = logging.getLogger(__name__)
+
+settings = {}
+
+def update_settings(config={}):
+    print __name__
     config.setdefault('BASE_DIR', _default_dsl_dir())
-    config.setdefault('CONFIG_FILENAME', 'dsl_config.yml')
-    config.setdefault('COLLECTION_INDEX_FILENAME', 'dsl_collections.yml')
     config.setdefault('CACHE_DIR', os.path.join(config['BASE_DIR'], 'cache'))
     config.setdefault('DATA_DIR', os.path.join(config['BASE_DIR'], 'data'))
+    config.setdefault('CONFIG_FILE', os.path.join(config['BASE_DIR'], 'dsl_config.yml'))
+    config.setdefault('COLLECTIONS_INDEX_FILE', os.path.join(config['BASE_DIR'], 'dsl_collections.yml'))
     config.setdefault('WEB_SERVICES', [])
     config.setdefault('LOCAL_SERVICES', [])
 
-    return config
+    settings = config
 
 
-def init_settings_from_file():
+def update_settings_from_file(filename):
+    config = yaml.safe_load(open(config_file, 'r'))
 
-    if os.path.isfile(config_file):
-        _load_dsl_config(config_file)
+    #convert keys to uppercase
+    if config is not None:
+        for k,v in config.iteritems():
+            if v is not None:
+                config.__dict__[k.upper()] = v
 
+    #recursively parse for local services
+    local_services = config.get('LOCAL_SERVICES')
+    if local_services is not None:
+        config.LOCAL_SERVICES = _expand_dirs(local_services)
+    
+    log.info('Settings read from %s' % filename)
+    update_settings(config=config)
+
+
+def save_settings(filename):
+    with open(filename, 'w') as f:
+        f.write(yaml.dump(settings, default_flow_style=False))
+        log.info('Settings written to %s' % filename)
+    
 
 def _default_dsl_dir():
     dsl_dir = os.environ.get('ENVSIM_DSL_DIR')
@@ -26,28 +52,6 @@ def _default_dsl_dir():
         dsl_dir = appdirs.user_data_dir('dsl', 'envsim')
 
     return dsl_dir
-
-
-def _load_dsl_config(config_file):
-    config = yaml.load(open(config_file, 'r'))
-
-    #read in dsl settings, settings are always upper case 
-    custom_settings = config.get('settings')
-    if settings is not None:
-        for k,v in custom_settings.iteritems():
-            if v is not None:
-                settings.__dict__[k.upper()] = v
-
-    if settings.DSL_DIR is None:
-        settings.DSL_DIR = os.path.os.path.dirname(config_file)
-
-    web_services = config.get('web_services')
-    if web_services is not None:
-        settings.WEB_SERVICES = web_services
-
-    local_services = config.get('local_services')
-    if local_services is not None:
-        settings.LOCAL_SERVICES = _expand_dirs(local_services)
 
 
 def _expand_dirs(local_services):
