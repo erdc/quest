@@ -2,14 +2,11 @@
 
 """
 from .. import util
-from .services import get_services, get_locations, get_data, get_data_options, get_parameters
-import datetime
-import json
-import matplotlib.pyplot as plt
-from matplotlib import style
 import os
-import warnings
+import shutil
+import yaml
 
+COLLECTION_METADATA_FILE = 'dsl.yml'
 
 @util.jsonify
 def get_collections(filters=None):
@@ -27,7 +24,7 @@ def get_collections(filters=None):
 
 
 @util.jsonify     
-def new_collection(name, metadata={}, path=None):
+def new_collection(metadata={}, path=None):
     """Create a new collection
 
     Create a new collection by creating a new folder and placing a json
@@ -48,25 +45,22 @@ def new_collection(name, metadata={}, path=None):
         A python dict representation of the collection in the format {uid: metadata}
     """
 
-    collections = _load_collections()
+    uid = util.uid()
+    if path is None:
+        metadata.update({'path': uid})
+        path = util.get_data_dir()
+    else:
+        metadata.update({'path': os.path.join(path, uid)})
 
-    if name in collections.keys():
-        print 'Collection Already Exists'
-        return get_collection(name)
+    if metadata.get('display_name') is None:
+        metadata['display_name'] = uid
 
-    if not path:
-        path = os.path.join(util.get_dsl_dir(), 'collections')
-
-    collection_path = os.path.join(path, name)
+    collection_path = os.path.join(path, uid)
     util.mkdir_if_doesnt_exist(collection_path)
 
-    collection = {'name': name, 'path': collection_path}
-    metadata = {'created_on' : datetime.datetime.now().isoformat(), 'datasets': {}}
-
-    with open(os.path.join(collection['path'], COLLECTION_METADATA_FILE), 'w') as f:
-        json.dump(metadata, f)
-
-    collections[name] = collection
+    collection = {uid: metadata}
+    collections = _load_collections()
+    collections.update(collection)
     _write_collections(collections)
 
     return collection
@@ -74,13 +68,21 @@ def new_collection(name, metadata={}, path=None):
 
 @util.jsonify
 def update_collection(uid, metadata):
-    """Change metadata of collection.
+    """Update metadata of collection.
     """
-    pass
+    collections = _load_collections()
+
+    if uid not in collections.keys():
+        print 'Collection not found'
+        return {}
+
+    collections[uid].update(metadata)
+    _write_collections(collections)
+    return collections[uid]
 
 
 @util.jsonify
-def delete_collection(uid, delete_data=True, **kwargs):
+def delete_collection(uid, delete_data=True):
     """delete a collection
 
     Deletes a collection from the collections metadata file.
@@ -102,18 +104,18 @@ def delete_collection(uid, delete_data=True, **kwargs):
     """
     collections = _load_collections()
 
-    if not name in collections.keys():
+    if uid not in collections.keys():
         print 'Collection not found'
         return collections
 
     if delete_data:
-        path = get_collection(name)['path']
-        print 'deleting all data under path:', path
-        shutil.rmtree(path)
+        path = collections[uid]['path']
+        if os.path.exists(path):
+            print 'deleting all data under path:', path
+            shutil.rmtree(path)
 
-    print 'removing %s from collections' % name
-
-    del collections[name]
+    print 'removing %s from collections' % uid
+    del collections[uid]
     _write_collections(collections)
     return collections
 
@@ -128,7 +130,7 @@ def _load_collections():
         return {}
 
     with open(path) as f:
-        return json.load(f)
+        return yaml.safe_load(f)
 
 
 def _write_collections(collections):
@@ -136,7 +138,7 @@ def _write_collections(collections):
     """
     path = util.get_collections_index()
     with open(path, 'w') as f:
-        json.dump(collections, f)
+        yaml.dump(collections, f)
 
 
 # @util.jsonify

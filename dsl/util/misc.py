@@ -38,7 +38,7 @@ def get_cache_dir():
 
 def get_collections_index():
     settings = get_settings()
-    return _abs_path(settings['COLLECTIONS_INDEX_FILE'])
+    return _abs_path(settings['COLLECTIONS_INDEX_FILE'], mkdir=False)
 
 
 def get_dsl_dir():
@@ -117,9 +117,11 @@ def uid():
     return uuid4().hex
 
 
-def _abs_path(path):
+def _abs_path(path, mkdir=True):
     if not os.path.isabs(path):
         path = os.path.join(get_dsl_dir(), path)
 
-    mkdir_if_doesnt_exist(path)
+    if mkdir:
+        mkdir_if_doesnt_exist(path)
+
     return path
