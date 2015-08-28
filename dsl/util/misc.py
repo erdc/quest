@@ -1,4 +1,5 @@
 import appdirs
+from .config import get_settings
 import os
 from stevedore import extension, driver
 try:
@@ -30,31 +31,24 @@ def bbox2poly(x1, y1, x2, y2):
     return poly
 
 
-def get_dsl_dir():
-    if settings.DSL_DIR is None:
-        init()
-
-    return settings.DSL_DIR
-
-
-def get_collections_dir():
-    return _abs_path(settings.COLLECTIONS_DIR)
+def get_cache_dir():
+    settings = get_settings()
+    return _abs_path(settings['CACHE_DIR'])
 
 
 def get_collections_index():
-    return os.path.join(get_collections_dir(), settings.COLLECTIONS_INDEX_FILE)
+    settings = get_settings()
+    return _abs_path(settings['COLLECTIONS_INDEX_FILE'])
 
 
-def get_cache_dir():
-    return _abs_path(settings.CACHE_DIR)
+def get_dsl_dir():
+    settings = get_settings()
+    return settings['BASE_DIR']
 
 
-def get_dsl_demo_dir():
-    return_dir = os.environ.get('ENVSIM_DSL_DEMO_DIR')
-    if not return_dir:
-        raise 'Please Set environment variable ENVSIM_DSL_DEMO_DIR'
-    mkdir_if_doesnt_exist(return_dir)
-    return return_dir   
+def get_data_dir():
+    settings = get_settings()
+    return _abs_path(settings['DATA_DIR'])
 
 
 def mkdir_if_doesnt_exist(dir_path):
@@ -126,4 +120,6 @@ def uid():
 def _abs_path(path):
     if not os.path.isabs(path):
         path = os.path.join(get_dsl_dir(), path)
+
+    mkdir_if_doesnt_exist(path)
     return path

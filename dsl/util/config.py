@@ -9,34 +9,39 @@ log = logging.getLogger(__name__)
 
 settings = {}
 
+
+def get_settings():
+    global settings
+    if not settings:
+        update_settings()
+
+    return settings
+
+
 def update_settings(config={}):
-    print __name__
+    global settings
     config.setdefault('BASE_DIR', _default_dsl_dir())
-    config.setdefault('CACHE_DIR', os.path.join(config['BASE_DIR'], 'cache'))
-    config.setdefault('DATA_DIR', os.path.join(config['BASE_DIR'], 'data'))
-    config.setdefault('CONFIG_FILE', os.path.join(config['BASE_DIR'], 'dsl_config.yml'))
-    config.setdefault('COLLECTIONS_INDEX_FILE', os.path.join(config['BASE_DIR'], 'dsl_collections.yml'))
+    config.setdefault('CACHE_DIR', 'cache')
+    config.setdefault('DATA_DIR', 'data')
+    config.setdefault('CONFIG_FILE', 'dsl_config.yml')
+    config.setdefault('COLLECTIONS_INDEX_FILE', 'dsl_collections.yml')
     config.setdefault('WEB_SERVICES', [])
     config.setdefault('LOCAL_SERVICES', [])
 
-    settings = config
+    settings.update(config)
 
 
 def update_settings_from_file(filename):
-    config = yaml.safe_load(open(config_file, 'r'))
+    config = yaml.safe_load(open(filename, 'r'))
 
     #convert keys to uppercase
-    if config is not None:
-        for k,v in config.iteritems():
-            if v is not None:
-                config.__dict__[k.upper()] = v
+    config = dict((k.upper(), v) for k, v in config.iteritems())
+    print config
 
     #recursively parse for local services
-    local_services = config.get('LOCAL_SERVICES')
-    if local_services is not None:
-        config.LOCAL_SERVICES = _expand_dirs(local_services)
-    
+    config['LOCAL_SERVICES'] = _expand_dirs(config['LOCAL_SERVICES'])
     log.info('Settings read from %s' % filename)
+
     update_settings(config=config)
 
 
@@ -56,6 +61,9 @@ def _default_dsl_dir():
 
 def _expand_dirs(local_services):
     "if any dir ends in * then walk the subdirectories looking for dsl.yml"
+    if local_services == []:
+        return []
+
     expanded = []
     for path in local_services:
         head, tail = os.path.split(path)
