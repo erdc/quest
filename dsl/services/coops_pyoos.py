@@ -1,3 +1,7 @@
+from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
 
 from .base import DataServiceBase
 import os
@@ -7,7 +11,7 @@ from .. import util
 from pyoos.collectors.coops.coops_sos import CoopsSos
 import pandas as pd
 import time
-from StringIO import StringIO
+from io import StringIO
 
 DEFAULT_FILE_PATH = 'coops'
 DEFAULT_TIMEOUT = 300 #in seconds
@@ -52,7 +56,7 @@ class CoopsPyoos(DataServiceBase):
                 bounding_box = self.metadata['bounding_boxes'][0]
 
             xmin, ymin, xmax, ymax = [float(p) for p in bounding_box]
-            for offeringID in self.COOPS.server.contents.keys():
+            for offeringID in list(self.COOPS.server.contents.keys()):
                 if 'network' not in offeringID:
                     stationID = offeringID.split('-')[1]
                     offeringid = 'station-%s' % stationID
@@ -139,7 +143,7 @@ class CoopsPyoos(DataServiceBase):
                         response = self.COOPS.raw(responseFormat="text/csv", timeout=DEFAULT_TIMEOUT)
                         df = pd.read_csv(StringIO(response))
                         if df.empty:
-                            print 'No data found'
+                            print('No data found')
                             data_files[location][parameter] = None
                             continue
                             

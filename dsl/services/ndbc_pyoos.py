@@ -1,3 +1,7 @@
+from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
 from .base import DataServiceBase
 import os
 from geojson import Feature, FeatureCollection, Point
@@ -5,7 +9,7 @@ from datetime import date, datetime, timedelta
 from .. import util
 from pyoos.collectors.ndbc.ndbc_sos import NdbcSos
 import pandas as pd
-from StringIO import StringIO
+from io import StringIO
 
 DEFAULT_FILE_PATH = 'ndbc'
 DEFAULT_TIMEOUT = 300 #in seconds
@@ -48,7 +52,7 @@ class NdbcPyoos(DataServiceBase):
                 bounding_box = self.metadata['bounding_boxes'][0]
 
             xmin, ymin, xmax, ymax = [float(p) for p in bounding_box]
-            for offeringID in self.NDBC.server.contents.keys():
+            for offeringID in list(self.NDBC.server.contents.keys()):
                 if 'network' not in offeringID:
                     stationID = offeringID.split('-')[1]
                     offeringid = 'station-%s' % stationID
@@ -130,7 +134,7 @@ class NdbcPyoos(DataServiceBase):
                         response = self.NDBC.raw(responseFormat="text/csv", timeout=DEFAULT_TIMEOUT)
                         df = pd.read_csv(StringIO(response))
                         if df.empty:
-                            print 'No data found'
+                            print('No data found')
                             data_files[location][parameter] = None
                             continue
 

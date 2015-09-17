@@ -1,6 +1,8 @@
 """Generic plugin for file based datasets
 
 """
+from __future__ import print_function
+from past.builtins import basestring
 from .base import IoBase
 from .. import util
 import fiona
@@ -113,13 +115,13 @@ class Generic(IoBase):
         util.mkdir_if_doesnt_exist(path)
 
         #copy common files
-        print 'value =', kwargs.get('copy_common')
-        print 'src=', src_path
+        print('value =', kwargs.get('copy_common'))
+        print('src=', src_path)
         if kwargs.get('copy_common'):
             common_files = [f for f in os.listdir(src_path) if os.path.isfile(os.path.join(src_path,f))]
-            print 'files=', common_files
+            print('files=', common_files)
             for f in common_files:
-                print 'copying common file: ', f
+                print('copying common file: ', f)
                 shutil.copy(os.path.join(src_path,f), path)
 
         #copy vitd data folder
@@ -132,7 +134,7 @@ class Generic(IoBase):
                 fname = fname.replace('<parameter>', parameter)
                 src = os.path.join(src_path, fname)
                 dest = os.path.join(path, fname)
-                print 'downloading file for %s, %s' % (location, parameter)
+                print('downloading file for %s, %s' % (location, parameter))
                 if os.path.isdir(src):
                     shutil.copytree(src, dest)
                 else:

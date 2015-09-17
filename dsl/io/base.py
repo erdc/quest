@@ -2,13 +2,13 @@
 
 
 """
+from builtins import object
 import abc
+from future.utils import with_metaclass
 
-class IoBase(object):
+class IoBase(with_metaclass(abc.ABCMeta, object)):
     """Base class for I/O for different file formats
     """
-
-    __metaclass__ = abc.ABCMeta
 
     def __init__(self):
         self.register()

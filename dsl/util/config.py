@@ -1,5 +1,6 @@
 """Module wide settings
 """
+from __future__ import print_function
 import appdirs
 import logging
 import os
@@ -35,8 +36,8 @@ def update_settings_from_file(filename):
     config = yaml.safe_load(open(filename, 'r'))
 
     #convert keys to uppercase
-    config = dict((k.upper(), v) for k, v in config.iteritems())
-    print config
+    config = dict((k.upper(), v) for k, v in config.items())
+    print(config)
 
     #recursively parse for local services
     config['LOCAL_SERVICES'] = _expand_dirs(config['LOCAL_SERVICES'])

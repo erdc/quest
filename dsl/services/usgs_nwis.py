@@ -1,6 +1,10 @@
 """DSL wrapper for USGS NWIS Services
 
 """
+from __future__ import division
+from __future__ import print_function
+from builtins import str
+from past.utils import old_div
 from .base import DataServiceBase
 from geojson import Feature, Point, FeatureCollection
 import numpy as np
@@ -44,8 +48,8 @@ class NwisBase(DataServiceBase):
             
             #limit boxes < 5x5 decimal degree size
             boxes = []
-            x = np.linspace(xmin, xmax, np.ceil((xmax-xmin)/5.0)+1)
-            y = np.linspace(ymin, ymax, np.ceil((ymax-ymin)/5.0)+1)
+            x = np.linspace(xmin, xmax, np.ceil(old_div((xmax-xmin),5.0))+1)
+            y = np.linspace(ymin, ymax, np.ceil(old_div((ymax-ymin),5.0))+1)
             for i, xd in enumerate(x[:-1]):
                 x1, x2 = x[i], x[i+1]
                 for j, yd in enumerate(y[:-1]):            
@@ -65,10 +69,10 @@ class NwisBase(DataServiceBase):
                     sites_in_box = nwis.get_sites(sites=util.stringify(locations), bounding_box=box, 
                             parameter_code=parameter, service=self.service)
                     sites.update(sites_in_box)
-                    site_parameters[parameter].extend([site['code'] for site in sites_in_box.values()])
+                    site_parameters[parameter].extend([site['code'] for site in list(sites_in_box.values())])
                     
         features = []
-        for site in sites.values():
+        for site in list(sites.values()):
             properties = {
                             'name': site['name'],
                             'huc': site['huc'],
@@ -162,7 +166,7 @@ class NwisBase(DataServiceBase):
             statistic_codes.append(s)
 
         parameter_codes = ','.join(set(parameter_codes))
-        statistic_codes = filter(None, set(statistic_codes))
+        statistic_codes = [_f for _f in set(statistic_codes) if _f]
         if statistic_codes:
             statistic_codes = ','.join(statistic_codes)
         else:
@@ -176,10 +180,10 @@ class NwisBase(DataServiceBase):
                                         start=start, end=end, period=period,
                                         service=self.service)
 
-            for code, data in datasets.iteritems():
+            for code, data in datasets.items():
                 df = pd.DataFrame(data['values'])
                 if df.empty:
-                    print 'No data found, try different time period'
+                    print('No data found, try different time period')
                     continue
                     
                 df.index = self._make_index(df)
@@ -261,8 +265,8 @@ def _as_nwis(parameter, invert=False):
     }
 
     if invert:
-        codes = {v: k for k, v in codes.items()}
-        stats = {v: k for k, v in stats.items()}
+        codes = {v: k for k, v in list(codes.items())}
+        stats = {v: k for k, v in list(stats.items())}
         stats['00011'] = None
 
     return codes[p], stats[s]

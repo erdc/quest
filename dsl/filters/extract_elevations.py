@@ -1,6 +1,11 @@
 """Extract elevations from raster datasources
 
 """
+from __future__ import division
+from __future__ import print_function
+from builtins import str
+from builtins import zip
+from past.utils import old_div
 
 from affine import Affine
 from .base import FilterBase
@@ -67,23 +72,23 @@ class ExtractElevations(FilterBase):
             x1, y1, x2, y2 = bbox
             polygon = Polygon([_bbox2poly(x1, y1, x2, y2)])
 
-            print 'downloading required tiles'
+            print('downloading required tiles')
             locs = api.get_locations(service, bounding_box=bbox)
             locs = [loc['id'] for loc in locs['features']]
             if len(locs)==0:
-                print 'no tiles found'
+                print('no tiles found')
                 return
 
             tiles = api.get_data(service, locs)
-            tiles = [v['elevation'] for v in tiles.values()]
+            tiles = [v['elevation'] for v in list(tiles.values())]
 
             if len(tiles)>1:
                 raster_file = os.path.splitext(tiles[0])[0] + '.vrt'
-                print subprocess.check_output(['gdalbuildvrt', '-overwrite', raster_file] + tiles)
+                print(subprocess.check_output(['gdalbuildvrt', '-overwrite', raster_file] + tiles))
             else:
                 raster_file = tiles[0]
 
-            print 'extracting elevations along feature'
+            print('extracting elevations along feature')
             with rasterio.drivers():
                 with rasterio.open(raster_file, 'r') as raster:
                     masks = []
@@ -100,8 +105,8 @@ class ExtractElevations(FilterBase):
                                 coordinates = []
                                 for x,y in points:
                                     a, b, c, d, e, f, _, _, _ = raster.affine
-                                    yf, r = math.modf((y-f)/e)
-                                    xf, c = math.modf((x-c)/a)
+                                    yf, r = math.modf(old_div((y-f),e))
+                                    xf, c = math.modf(old_div((x-c),a))
                                     r, c = int(r), int(c)
                                     window = ((r, r+2), (c, c+2))
                                     data = raster.read(None, window=window, masked=False, boundless=True)
@@ -131,7 +136,7 @@ class ExtractElevations(FilterBase):
                     with rasterio.open(view_file, 'w', **kwargs) as dst:
                         dst.write_band(1, masked_data.filled(fill_value=kwargs['nodata']))
 
-            print 'saving output to %s' % filename
+            print('saving output to %s' % filename)
 
         properties = {
             'metadata': 'generated using get_elevations_along_path plugin', 

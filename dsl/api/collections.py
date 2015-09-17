@@ -1,6 +1,7 @@
 """API functions related to Collections
 
 """
+from __future__ import print_function
 from .. import util
 import os
 import shutil
@@ -72,8 +73,8 @@ def update_collection(uid, metadata):
     """
     collections = _load_collections()
 
-    if uid not in collections.keys():
-        print 'Collection not found'
+    if uid not in list(collections.keys()):
+        print('Collection not found')
         return {}
 
     collections[uid].update(metadata)
@@ -104,17 +105,17 @@ def delete_collection(uid, delete_data=True):
     """
     collections = _load_collections()
 
-    if uid not in collections.keys():
-        print 'Collection not found'
+    if uid not in list(collections.keys()):
+        print('Collection not found')
         return collections
 
     if delete_data:
         path = collections[uid]['path']
         if os.path.exists(path):
-            print 'deleting all data under path:', path
+            print('deleting all data under path:', path)
             shutil.rmtree(path)
 
-    print 'removing %s from collections' % uid
+    print('removing %s from collections' % uid)
     del collections[uid]
     _write_collections(collections)
     return collections

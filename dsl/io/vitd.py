@@ -2,6 +2,8 @@
 
 
 """
+from __future__ import print_function
+from past.builtins import basestring
 from .base import IoBase
 from .. import util
 from geojson import Feature, FeatureCollection, Point, Polygon, dump
@@ -57,7 +59,7 @@ class Vitd(IoBase):
         with open(path, 'w') as f:
             dump(feature, f)
 
-        print 'file written to: %s' % path
+        print('file written to: %s' % path)
 
     def get_locations(self, locations=None, bounding_box=None, **kwargs):
         if locations is not None:
@@ -136,7 +138,7 @@ class Vitd(IoBase):
             fname = location
             src = os.path.join(src_path, fname)
             dest = os.path.join(path, fname)
-            print 'downloading file for %s from NGA' % location
+            print('downloading file for %s from NGA' % location)
             shutil.copytree(src, dest)
             data_files[location][parameters] = dest
 

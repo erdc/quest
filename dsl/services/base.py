@@ -1,10 +1,10 @@
+from builtins import object
 import abc
+from future.utils import with_metaclass
 
-class DataServiceBase(object):
+class DataServiceBase(with_metaclass(abc.ABCMeta, object)):
     """Base class for data services plugins
     """
-
-    __metaclass__ = abc.ABCMeta
 
     def __init__(self):
         self.register()

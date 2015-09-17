@@ -1,3 +1,4 @@
+from past.builtins import execfile
 import os
 import sys
 
@@ -33,9 +34,9 @@ with open('README.rst') as f:
 
 
 # create plugin entrypoint strings
-services = [' = '.join([k,v]) for k,v in services.iteritems()]
-filters = [' = '.join([k,v]) for k,v in filters.iteritems()]
-io = [' = '.join([k,v]) for k,v in io.iteritems()]
+services = [' = '.join([k,v]) for k,v in services.items()]
+filters = [' = '.join([k,v]) for k,v in filters.items()]
+io = [' = '.join([k,v]) for k,v in io.items()]
 
 setup(
     name='dsl',
@@ -54,9 +55,10 @@ setup(
         'fiona>=1.5.1',
         'rasterio>=0.23.0',
         'geojson',
+        'future',
         'jsonschema',
         'stevedore',
-        'ulmo>=0.7.8',
+        'ulmo>=0.8.1',
         'pyyaml',
         'pyoos',
         'click',

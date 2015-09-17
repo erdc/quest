@@ -1,6 +1,7 @@
 """Timeseries Filters
 
 """
+from __future__ import print_function
 
 from .base import FilterBase
 from ..api import get_collection
@@ -36,7 +37,7 @@ class ExportRaster(FilterBase):
         export_path = os.path.join(export_path, filename)
 
         if not datatype=='raster':
-            print 'Cannot apply this plugin to not timeseries data'
+            print('Cannot apply this plugin to not timeseries data')
             return
 
         try:
@@ -44,10 +45,10 @@ class ExportRaster(FilterBase):
             with rasterio.drivers():
                 rasterio.copy(datafile, export_path, driver=fmt)
 
-            print 'File exported to %s' % export_path
+            print('File exported to %s' % export_path)
 
         except:
-            print 'export failed'
+            print('export failed')
 
         return collection
 
