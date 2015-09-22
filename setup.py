@@ -65,6 +65,7 @@ setup(
         'pyoos',
         'click',
         'matplotlib>=1.4.0',
+        'werkzeug',
     ],
     classifiers=[
         'Development Status :: 3 - Alpha',

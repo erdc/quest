@@ -15,6 +15,7 @@ dependencies:
     - pyyaml
     - matplotlib>=1.4.0
     - click
+    - werkzeug
     - pip:
       - json-rpc
       - jsonrpc-requests
