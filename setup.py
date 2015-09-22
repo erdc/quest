@@ -5,8 +5,6 @@ import sys
 from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand
 
-from config import services, filters, io
-
 
 class PyTest(TestCommand):
     def finalize_options(self):
@@ -19,9 +17,15 @@ class PyTest(TestCommand):
         import pytest
         errno = pytest.main(self.test_args)
         sys.exit(errno)
+
 # this sets __version__
-info = {}
-execfile(os.path.join('dsl', 'version.py'), info)
+# Parse the version from the fiona module.
+with open('dsl/__init__.py', 'r') as f:
+    for line in f:
+        if line.find("__version__") >= 0:
+            version = line.split("=")[1].strip()
+            version = version.strip("'")
+            continue
 
 
 with open('README.rst') as f:
@@ -33,14 +37,9 @@ with open('README.rst') as f:
         if 'travis-ci' not in line])
 
 
-# create plugin entrypoint strings
-services = [' = '.join([k,v]) for k,v in services.items()]
-filters = [' = '.join([k,v]) for k,v in filters.items()]
-io = [' = '.join([k,v]) for k,v in io.items()]
-
 setup(
     name='dsl',
-    version=info['__version__'],
+    version=version,
     license='',
     author='Dharhas Pothina',
     author_email='dharhas.pothina@erdc.dren.mil',
@@ -77,19 +76,7 @@ setup(
     ],
 
     include_package_data=True,
-
-    entry_points={
-        'console_scripts': [
-            'dsl-get-elevations=dsl.scripts.get_elevations:cli',
-            'dsl-rpc-server=dsl.scripts.rpc_server:cli',
-        ],
-        'dsl.services': services,
-        'dsl.filters': filters,
-        'dsl.io': io,
-    },
-
     zip_safe=False,
-
     tests_require=[
         'pytest>=2.3.2',
     ],
