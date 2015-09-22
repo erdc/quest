@@ -2,6 +2,7 @@
 """
 from __future__ import print_function
 import appdirs
+from jsonrpc import dispatcher
 import logging
 import os
 import yaml
@@ -11,6 +12,7 @@ log = logging.getLogger(__name__)
 settings = {}
 
 
+@dispatcher.add_method
 def get_settings():
     global settings
     if not settings:
@@ -18,7 +20,7 @@ def get_settings():
 
     return settings
 
-
+@dispatcher.add_method
 def update_settings(config={}):
     global settings
     config.setdefault('BASE_DIR', _default_dsl_dir())
@@ -32,6 +34,7 @@ def update_settings(config={}):
     settings.update(config)
 
 
+@dispatcher.add_method
 def update_settings_from_file(filename):
     config = yaml.safe_load(open(filename, 'r'))
 
@@ -46,6 +49,7 @@ def update_settings_from_file(filename):
     update_settings(config=config)
 
 
+@dispatcher.add_method
 def save_settings(filename):
     with open(filename, 'w') as f:
         f.write(yaml.dump(settings, default_flow_style=False))

@@ -55,6 +55,7 @@ setup(
         'fiona>=1.5.1',
         'rasterio>=0.23.0',
         'geojson',
+        'json-rpc',
         'future',
         'jsonschema',
         'stevedore',
@@ -76,7 +77,10 @@ setup(
     include_package_data=True,
 
     entry_points={
-        'console_scripts': ['dsl-get-elevations=dsl.scripts.get_elevations:cli'],
+        'console_scripts': [
+            'dsl-get-elevations=dsl.scripts.get_elevations:cli',
+            'dsl-rpc-server=dsl.scripts.rpc_server:cli',
+        ],
         'dsl.services': services,
         'dsl.filters': filters,
         'dsl.io': io,

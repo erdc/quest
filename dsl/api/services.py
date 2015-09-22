@@ -6,6 +6,7 @@ from __future__ import absolute_import
 from __future__ import print_function
 from builtins import str
 import json
+from jsonrpc import dispatcher
 import os
 import glob
 from .. import util
@@ -29,7 +30,7 @@ def delete_service():
     pass
 
 
-@util.jsonify
+@dispatcher.add_method
 def get_data(name, locations, parameters=None, **kwargs):
     """downloads data from a given service and returns a reference to downloaded data
 
@@ -58,7 +59,7 @@ def get_data(name, locations, parameters=None, **kwargs):
     return service.get_data(locations, parameters=parameters, **kwargs)
 
 
-@util.jsonify
+@dispatcher.add_method
 def get_data_options(name, **kwargs):
     """get available filter options for get_data call
 
@@ -76,7 +77,7 @@ def get_data_options(name, **kwargs):
     return service.get_data_options(**kwargs)
 
 
-@util.jsonify
+@dispatcher.add_method
 def get_locations_options(name, **kwargs):
     """get available filter options for get_locations call
 
@@ -94,7 +95,7 @@ def get_locations_options(name, **kwargs):
     return service.get_locations_options()
 
 
-@util.jsonify
+@dispatcher.add_method
 def get_parameters(name, **kwargs):
     """get list of available parameters for a service
 
@@ -112,7 +113,7 @@ def get_parameters(name, **kwargs):
     return service.provides()
 
 
-@util.jsonify
+@dispatcher.add_method
 def get_services(names=None, parameter=None, datatype=None, provider=None, group=False, **kwargs):
     """get metadata for available data services
 
@@ -168,7 +169,7 @@ def get_services(names=None, parameter=None, datatype=None, provider=None, group
     return services
 
 
-@util.jsonify
+@dispatcher.add_method
 def get_locations(name, locations=None, bounding_box=None, **kwargs):
     """Fetches location metadata for a given service
 

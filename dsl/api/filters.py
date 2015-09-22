@@ -3,9 +3,10 @@
 This will eventually hold filter related functionality 
 """
 from .. import util
+from jsonrpc import dispatcher
 
 
-@util.jsonify
+@dispatcher.add_method
 def get_filters(names=None, group=False, datatype=None, level=None, **kwargs):
     """List available filter plugins
     """
@@ -31,13 +32,13 @@ def get_filters(names=None, group=False, datatype=None, level=None, **kwargs):
     return filters
 
 
-@util.jsonify
+@dispatcher.add_method
 def apply_filter(name, **kwargs):
     driver = util.load_drivers('filters', name)[name].driver
     return driver.apply_filter(**kwargs)
 
 
-@util.jsonify
+@dispatcher.add_method
 def apply_filter_options(name, **kwargs):
     driver = util.load_drivers('filters', name)[name].driver
     return driver.apply_filter_options()

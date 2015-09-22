@@ -2,6 +2,7 @@
 
 """
 from __future__ import print_function
+from jsonrpc import dispatcher
 from .. import util
 import os
 import shutil
@@ -9,7 +10,7 @@ import yaml
 
 COLLECTION_METADATA_FILE = 'dsl.yml'
 
-@util.jsonify
+@dispatcher.add_method
 def get_collections(filters=None):
     """Get list of available collections.
 
@@ -24,7 +25,7 @@ def get_collections(filters=None):
     return _load_collections()
 
 
-@util.jsonify     
+@dispatcher.add_method     
 def new_collection(metadata={}, path=None):
     """Create a new collection
 
@@ -67,7 +68,7 @@ def new_collection(metadata={}, path=None):
     return collection
 
 
-@util.jsonify
+@dispatcher.add_method
 def update_collection(uid, metadata):
     """Update metadata of collection.
     """
@@ -82,7 +83,7 @@ def update_collection(uid, metadata):
     return collections[uid]
 
 
-@util.jsonify
+@dispatcher.add_method
 def delete_collection(uid, delete_data=True):
     """delete a collection
 
@@ -142,7 +143,7 @@ def _write_collections(collections):
         yaml.dump(collections, f)
 
 
-# @util.jsonify
+# @dispatcher.add_method
 # def add_to_collection(name, service, locations, parameters=None, **kwargs):
 #     """adds locations from a service to a collection
 
@@ -217,7 +218,7 @@ def _write_collections(collections):
 #     return collection
 
 
-# @util.jsonify
+# @dispatcher.add_method
 # def download_in_collection(name, service=None, location=None, parameter=None, **kwargs):
 #     """download data for services/locations/parameters present in collection
 
@@ -270,7 +271,7 @@ def _write_collections(collections):
 #     return collection
 
 
-# @util.jsonify
+# @dispatcher.add_method
 # def download_in_collection_options(name, service=None, location=None, parameter=None):
 #     collection = get_collection(name)
 
@@ -291,7 +292,7 @@ def _write_collections(collections):
 #     return options
 
 
-# @util.jsonify
+# @dispatcher.add_method
 # def view_in_collection(name, service, location, parameter, use_cache=True, **kwargs):
 #     """view dataset in collection 
 
@@ -341,7 +342,7 @@ def _write_collections(collections):
 
 
 
-# @util.jsonify
+# @dispatcher.add_method
 # def get_collection(name, **kwargs):
 #     """get a collection
 
@@ -365,7 +366,7 @@ def _write_collections(collections):
 #     return collection
 
 
-# @util.jsonify
+# @dispatcher.add_method
 # def delete_from_collection(name, service, location, parameter, **kwargs):
 #     """delete (name, service, location, parameter) tuple from collection
 

@@ -1,7 +1,6 @@
 name: dsl
 
 channels:
-    - ulmo
     - ioos
 
 dependencies:
@@ -11,10 +10,11 @@ dependencies:
     - numpy
     - geojson
     - jsonschema
-    - ulmo>=0.7.8
+    - ulmo>=0.8.1
     - pyoos
     - pyyaml
     - matplotlib>=1.4.0
     - click
     - pip:
+      - json-rpc
       - stevedore

@@ -3,8 +3,9 @@
 Providers are inferred by aggregating information from service plugins.
 """
 from .. import util
+from jsonrpc import dispatcher
 
-@util.jsonify
+@dispatcher.add_method
 def get_providers(name=None, **kwargs):
     """Return list of Providers. 
 
