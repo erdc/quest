@@ -32,6 +32,8 @@ def update_settings(config={}):
     config.setdefault('LOCAL_SERVICES', [])
 
     settings.update(config)
+    msg =  'Settings updated'
+    return msg
 
 
 @dispatcher.add_method
@@ -47,14 +49,19 @@ def update_settings_from_file(filename):
     log.info('Settings read from %s' % filename)
 
     update_settings(config=config)
+    msg =  'Settings updated from file'
+    return msg
 
 
 @dispatcher.add_method
 def save_settings(filename):
     with open(filename, 'w') as f:
-        f.write(yaml.dump(settings, default_flow_style=False))
+        f.write(yaml.safe_dump(settings, default_flow_style=False))
         log.info('Settings written to %s' % filename)
     
+    msg =  'Settings written to %s' % filename
+    return msg
+
 
 def _default_dsl_dir():
     dsl_dir = os.environ.get('ENVSIM_DSL_DIR')

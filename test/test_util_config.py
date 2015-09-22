@@ -13,7 +13,9 @@ test_settings = {
                 'LOCAL_SERVICES': [],
             }
 
-#this test needs to run first because 
+
+# this test needs to run first because dsl is set from environment only 
+# when BASE_DIR is unset
 def test_set_base_path_with_env_var():
     os.environ['ENVSIM_DSL_DIR'] = 'dslenv'
     dsl.api.update_settings()
