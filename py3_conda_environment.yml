@@ -1,6 +1,6 @@
-# conda environment file for python 2, includes packages needed for testing
+# conda environment file for python 3, includes packages needed for testing
 # create a conda virtual env using:
-#   conda env create -n myenv --file py2_conda_environment.yml
+#   conda env create -n myenv --file py3_conda_environment.yml
 #   source activate myenv (use 'activate test_environment' on windows)
 #   python setup.py develop
 #
@@ -13,7 +13,7 @@ channels:
     - ioos
 
 dependencies:
-    - python=2.7
+    - python=3.4
     - gdal
     - fiona>=1.5.1
     - rasterio>=0.23.0
