@@ -56,6 +56,7 @@ setup(
         'rasterio>=0.23.0',
         'geojson',
         'json-rpc',
+        'jsonrpc-requests',
         'future',
         'jsonschema',
         'stevedore',

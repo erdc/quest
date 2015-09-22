@@ -17,4 +17,5 @@ dependencies:
     - click
     - pip:
       - json-rpc
+      - jsonrpc-requests
       - stevedore
