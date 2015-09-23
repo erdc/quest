@@ -5,6 +5,7 @@ from .. import util
 from .services import get_services, get_locations, get_data, get_data_options, get_parameters
 import datetime
 import json
+from jsonrpc import dispatcher
 import matplotlib.pyplot as plt
 from matplotlib import style
 import os
@@ -13,7 +14,7 @@ from ..settings import COLLECTION_METADATA_FILE
 import warnings
 
 
-@util.jsonify
+@dispatcher.add_method
 def add_to_collection(name, service, locations, parameters=None, **kwargs):
     """adds locations from a service to a collection
 
@@ -88,7 +89,7 @@ def add_to_collection(name, service, locations, parameters=None, **kwargs):
     return collection
 
 
-@util.jsonify
+@dispatcher.add_method
 def download_in_collection(name, service=None, location=None, parameter=None, **kwargs):
     """download data for services/locations/parameters present in collection
 
@@ -141,7 +142,7 @@ def download_in_collection(name, service=None, location=None, parameter=None, **
     return collection
 
 
-@util.jsonify
+@dispatcher.add_method
 def download_in_collection_options(name, service=None, location=None, parameter=None):
     collection = get_collection(name)
 
@@ -162,7 +163,7 @@ def download_in_collection_options(name, service=None, location=None, parameter=
     return options
 
 
-@util.jsonify
+@dispatcher.add_method
 def view_in_collection(name, service, location, parameter, use_cache=True, **kwargs):
     """view dataset in collection 
 
@@ -211,7 +212,7 @@ def view_in_collection(name, service, location, parameter, use_cache=True, **kwa
     return view_file
 
 
-@util.jsonify
+@dispatcher.add_method
 def new_collection(name, path=None, tags=None, **kwargs):
     """create a new collection
 
@@ -257,7 +258,7 @@ def new_collection(name, path=None, tags=None, **kwargs):
     return collection
 
 
-@util.jsonify
+@dispatcher.add_method
 def delete_collection(name, delete_data=True, **kwargs):
     """delete a collection
 
@@ -296,7 +297,7 @@ def delete_collection(name, delete_data=True, **kwargs):
     return collections
 
 
-@util.jsonify
+@dispatcher.add_method
 def list_collections(**kwargs):
     """list all available collections
 
@@ -309,7 +310,7 @@ def list_collections(**kwargs):
     return _load_collections()
 
 
-@util.jsonify
+@dispatcher.add_method
 def get_collection(name, **kwargs):
     """get a collection
 
@@ -333,7 +334,7 @@ def get_collection(name, **kwargs):
     return collection
 
 
-@util.jsonify
+@dispatcher.add_method
 def update_collection(name, **kwargs):
     """Not sure of function, maybe allow moving to different path etc
 
@@ -342,7 +343,7 @@ def update_collection(name, **kwargs):
     raise NotImplementedError('Updating Collections has not been implemented')
 
 
-@util.jsonify
+@dispatcher.add_method
 def delete_from_collection(name, service, location, parameter, **kwargs):
     """delete (name, service, location, parameter) tuple from collection
 

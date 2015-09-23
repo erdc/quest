@@ -56,12 +56,14 @@ setup(
         'rasterio>=0.23.0',
         'geojson',
         'jsonschema',
+        'json-rpc',
         'stevedore',
         'ulmo>=0.7.8',
         'pyyaml',
         'pyoos',
         'click',
         'matplotlib>=1.4.0',
+        'werkzeug',
     ],
     classifiers=[
         'Development Status :: 3 - Alpha',
@@ -75,7 +77,10 @@ setup(
     include_package_data=True,
 
     entry_points={
-        'console_scripts': ['dsl-get-elevations=dsl.scripts.get_elevations:cli'],
+        'console_scripts': [
+            'dsl-get-elevations=dsl.scripts.get_elevations:cli',
+            'dsl-rpc-server=dsl.scripts.rpc_server:cli',
+        ],
         'dsl.services': services,
         'dsl.filters': filters,
         'dsl.io': io,
