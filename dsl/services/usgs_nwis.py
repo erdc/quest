@@ -64,6 +64,7 @@ class NwisBase(DataServiceBase):
         p = Pool(processes)
         sites = p.map(_nwis_iv_features, states)
         p.close()
+        p.terminate()
         sites = {k: v for d in sites for k, v in d.items()}
         df = pd.DataFrame.from_dict(sites, orient='index')
         for col in ['latitude', 'longitude', 'srs']:
