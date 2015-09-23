@@ -1,21 +1,46 @@
 """DSL wrapper for USGS NWIS Services
 
 """
-from __future__ import division
-from __future__ import print_function
-from builtins import str
-from past.utils import old_div
 from .base import DataServiceBase
-from geojson import Feature, Point, FeatureCollection
-import numpy as np
+from multiprocessing import Pool
 import pandas as pd
 import re
 import os
 from ulmo.usgs import nwis
 from .. import util
 
-# default file path (appended to collection path)
-DEFAULT_FILE_PATH = os.path.join('usgs','nwis')
+
+states = ["AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DC", "DE", "FL", "GA", 
+          "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", 
+          "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", 
+          "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", 
+          "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"]
+
+def _nwis_iv_features(state):
+    return nwis.get_sites(state_code=state, service='iv')
+
+def _nwis_iv_parameters(site):
+    return {site: nwis.get_site_data(site, service='iv').keys()}
+
+def _pm_codes():
+    url = (
+        'http://nwis.waterdata.usgs.gov/usa/nwis/pmcodes'
+        '?radio_pm_search=param_group&pm_group=All+--+include+all+parameter+groups'
+        '&pm_search=&casrn_search=&srsname_search=&format=rdb_file'
+        '&show=parameter_group_nm&show=parameter_nm&show=casrn&show=srsname&show=parameter_units'
+    )
+
+    df = pd.read_table(url, comment='#')
+    df.index = df[df.columns[0]]
+    df = df.ix[1:] #remove extra header line
+    return df
+
+def _stat_codes():
+    url = 'http://help.waterdata.usgs.gov/code/stat_cd_nm_query?stat_nm_cd=%25&fmt=rdb'
+    df = pd.read_table(url, comment='#')
+    df.index = df[df.columns[0]]
+    df = df.ix[1:] #remove extra header line
+    return df
 
 class NwisBase(DataServiceBase):
     def register(self):
@@ -35,67 +60,16 @@ class NwisBase(DataServiceBase):
                     'datatype': 'timeseries',
                 }
 
-    def get_locations(self, locations=None, bounding_box=None, parameters=None):
+    def get_features(self, processes=20):
+        p = Pool(processes)
+        sites = p.map(_nwis_iv_features, states)
+        p.close()
+        sites = {k: v for d in sites for k, v in d.items()}
+        df = pd.DataFrame.from_dict(sites, orient='index')
+        for col in ['latitude', 'longitude', 'srs']:
+            df[col] = df['location'].apply(lambda x: x[col])
 
-        if locations:
-            sites = nwis.get_sites(sites=util.stringify(locations), service=self.service)
-            parameters = None
-        else:
-            if bounding_box is None:
-                bounding_box = [-124.7099609, 24.54233398, -66.98701171, 49.36967773]
-
-            xmin, ymin, xmax, ymax = [float(x) for x in bounding_box]
-            
-            #limit boxes < 5x5 decimal degree size
-            boxes = []
-            x = np.linspace(xmin, xmax, np.ceil(old_div((xmax-xmin),5.0))+1)
-            y = np.linspace(ymin, ymax, np.ceil(old_div((ymax-ymin),5.0))+1)
-            for i, xd in enumerate(x[:-1]):
-                x1, x2 = x[i], x[i+1]
-                for j, yd in enumerate(y[:-1]):            
-                    y1, y2 = y[j], y[j+1]
-                    boxes.append(','.join([str(round(n,7)) for n in [x1,y1,x2,y2]]))
-
-            if parameters is None:
-                parameters = self.provides()
-
-            parameters = [_as_nwis(p)[0] for p in parameters]
-
-            sites = {}
-            site_parameters = {}
-            for parameter in parameters:
-                site_parameters[parameter] = []
-                for box in boxes:
-                    sites_in_box = nwis.get_sites(sites=util.stringify(locations), bounding_box=box, 
-                            parameter_code=parameter, service=self.service)
-                    sites.update(sites_in_box)
-                    site_parameters[parameter].extend([site['code'] for site in list(sites_in_box.values())])
-                    
-        features = []
-        for site in list(sites.values()):
-            properties = {
-                            'name': site['name'],
-                            'huc': site['huc'],
-                            'county': site['county'],
-                            'site_type': site['site_type'],
-                            'agency': site['agency'],
-                            'state_code': site['state_code'],
-                        }
-            if parameters:
-                provides = []
-                for parameter in parameters:
-                    if site['code'] in site_parameters[parameter]:
-                        provides.append(_as_nwis(parameter, invert=True)[0])
-                properties.update({'available_parameters': provides})
-
-            feature = Feature(id=site['code'],
-                            geometry=Point((float(site['location']['longitude']),
-                                            float(site['location']['latitude']))),
-                            properties=properties,
-                        )
-            features.append(feature)
-
-        return FeatureCollection(features)
+        return df
 
     def get_locations_options(self): 
         schema = {
@@ -123,7 +97,7 @@ class NwisBase(DataServiceBase):
         }
         return schema
 
-    def get_data_options(self, **kwargs):
+    def download_dataset_options(self, **kwargs):
         schema = {
             "title": "USGS NWIS Download Options",
             "type": "object",
@@ -144,13 +118,10 @@ class NwisBase(DataServiceBase):
         }
         return schema
 
-    def get_data(self, locations, parameters=None, path=None, start=None, end=None, period=None):
+    def download_data(self, feature, parameter, path, start=None, end=None, period=None):
         
         if not any([start, end, period]):
             period = 'P365D' #default to past 1yr of data
-
-        if parameters is None:
-            parameters = self.provides()
 
         if path is None:
             path = util.get_dsl_dir()

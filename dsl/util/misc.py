@@ -1,4 +1,5 @@
 import appdirs
+import itertools
 from .config import get_settings
 import os
 from stevedore import extension, driver
@@ -55,6 +56,20 @@ def mkdir_if_doesnt_exist(dir_path):
     """makes a directory if it doesn't exist"""
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
+
+
+def parse_uri(uri):
+    """parse uri and return dictionary
+
+    webservice://<webservice>::<layer>::<feature>::<parameter>::<dataset>
+    collection://<collection>::<layer>::<feature>::<parameter>::<dataset>
+    """
+    keys = ['name', 'layer', 'feature', 'parameter', 'dataset']
+    uri_dict = {}
+    uri_dict['resource'], remainder = uri.split('://')
+    parts = remainder.split('::')
+    uri_dict.update({k: parts[i].strip() if i < len(parts) else None for i, k in enumerate(keys)})
+    return uri_dict
 
 
 def listify(liststr, delimiter=','):
