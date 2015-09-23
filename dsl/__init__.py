@@ -8,6 +8,7 @@ from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
 from builtins import *
 from . import util, api
+import pbr.version
 
 # set version number
-__version__ = '1.0.0-dev'
+__version__ = pbr.version.VersionInfo('dsl').version_string_with_vcs()
