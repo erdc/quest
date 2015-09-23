@@ -16,11 +16,29 @@ states = ["AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DC", "DE", "FL", "GA",
           "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", 
           "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"]
 
+
+def _chunks(l, n=100):
+    """Yield successive n-sized chunks from l."""
+    for i in xrange(0, len(l), n):
+        yield l[i:i+n]
+
+
 def _nwis_iv_features(state):
     return nwis.get_sites(state_code=state, service='iv')
 
+
 def _nwis_iv_parameters(site):
     return {site: nwis.get_site_data(site, service='iv').keys()}
+
+
+def _parse_rdb(url, index=None):
+    df = pd.read_table(url, comment='#')
+    if index is not None:
+        df.index = df[index]
+
+    df = df.ix[1:] #remove extra header line
+    return df
+
 
 def _pm_codes():
     url = (
@@ -30,17 +48,19 @@ def _pm_codes():
         '&show=parameter_group_nm&show=parameter_nm&show=casrn&show=srsname&show=parameter_units'
     )
 
-    df = pd.read_table(url, comment='#')
-    df.index = df[df.columns[0]]
-    df = df.ix[1:] #remove extra header line
-    return df
+    return _parse_rdb(url, index='parameter_cd')
+
 
 def _stat_codes():
     url = 'http://help.waterdata.usgs.gov/code/stat_cd_nm_query?stat_nm_cd=%25&fmt=rdb'
-    df = pd.read_table(url, comment='#')
-    df.index = df[df.columns[0]]
-    df = df.ix[1:] #remove extra header line
-    return df
+    return _parse_rdb(url, index='stat_CD')
+
+
+def _site_info(sites):
+    base_url = 'http://waterservices.usgs.gov/nwis/site/?format=rdb,1.0&sites=%s&seriesCatalogOutput=true&outputDataTypeCd=iv&hasDataTypeCd=iv'
+    url = base_url % ','.join(sites)
+    return _parse_rdb(url)
+
 
 class NwisBase(DataServiceBase):
     def register(self):
@@ -71,6 +91,14 @@ class NwisBase(DataServiceBase):
             df[col] = df['location'].apply(lambda x: x[col])
 
         return df
+
+    def get_parameters(self, df, processes=20):
+        p = Pool(processes)
+        chunks = list(_chunks(df.index.tolist()))
+        df = p.map(_site_info, chunks)
+        p.close()
+        p.terminate()
+        return pd.concat(df, ignore_index=True)
 
     def get_locations_options(self): 
         schema = {
