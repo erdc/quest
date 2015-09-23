@@ -2,7 +2,7 @@
 
 Features are unique identifiers with a web service or collection.
 """
-from ..utils import parse_uri
+from ..util import parse_uri
 
 def get_features(uri, filters, as_dataframe=False, as_geojson=True):
     """

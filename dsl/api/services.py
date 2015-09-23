@@ -201,17 +201,18 @@ def get_locations(name, locations=None, bounding_box=None, **kwargs):
 
 
 def _load_services(names=None):
+    settings = util.get_settings()
     #add web services
     web_services = util.list_drivers('services')
     web_services.remove('local')
-    enabled_services = settings.WEB_SERVICES
+    enabled_services = settings.get('WEB_SERVICES', [])
     if len(enabled_services) > 0:
         web_services = list(set(web_services).intersection(enabled_services))
 
     services = {name: driver.DriverManager('dsl.services', name, invoke_on_load='True').driver for name in web_services}
 
-    if len(settings.LOCAL_SERVICES) > 0:
-        for path in settings.LOCAL_SERVICES:
+    if len(settings.get('LOCAL_SERVICES', [])) > 0:
+        for path in settings.get('LOCAL_SERVICES', []):
             try:
                 drv = driver.DriverManager('dsl.services', 'local', invoke_on_load='True', invoke_kwds={'path':path}).driver
                 services['local-' + drv.name] = drv
