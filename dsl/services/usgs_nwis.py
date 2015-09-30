@@ -1,90 +1,63 @@
 """DSL wrapper for USGS NWIS Services
 
 """
-from .base import DataServiceBase
-from multiprocessing import Pool
+from .base import WebServiceBase
+import concurrent.futures
+from functools import partial
 import pandas as pd
-import re
 import os
 from ulmo.usgs import nwis
 from .. import util
 
 
-states = ["AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DC", "DE", "FL", "GA", 
-          "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", 
-          "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", 
-          "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", 
-          "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"]
-
-
-def _chunks(l, n=100):
-    """Yield successive n-sized chunks from l."""
-    for i in xrange(0, len(l), n):
-        yield l[i:i+n]
-
-
-def _nwis_iv_features(state):
-    return nwis.get_sites(state_code=state, service='iv')
-
-
-def _nwis_iv_parameters(site):
-    return {site: nwis.get_site_data(site, service='iv').keys()}
-
-
-def _parse_rdb(url, index=None):
-    df = pd.read_table(url, comment='#')
-    if index is not None:
-        df.index = df[index]
-
-    df = df.ix[1:] #remove extra header line
-    return df
-
-
-def _pm_codes():
-    url = (
-        'http://nwis.waterdata.usgs.gov/usa/nwis/pmcodes'
-        '?radio_pm_search=param_group&pm_group=All+--+include+all+parameter+groups'
-        '&pm_search=&casrn_search=&srsname_search=&format=rdb_file'
-        '&show=parameter_group_nm&show=parameter_nm&show=casrn&show=srsname&show=parameter_units'
-    )
-
-    return _parse_rdb(url, index='parameter_cd')
-
-
-def _stat_codes():
-    url = 'http://help.waterdata.usgs.gov/code/stat_cd_nm_query?stat_nm_cd=%25&fmt=rdb'
-    return _parse_rdb(url, index='stat_CD')
-
-
-def _site_info(sites):
-    base_url = 'http://waterservices.usgs.gov/nwis/site/?format=rdb,1.0&sites=%s&seriesCatalogOutput=true&outputDataTypeCd=iv&hasDataTypeCd=iv'
-    url = base_url % ','.join(sites)
-    return _parse_rdb(url)
-
-
-class NwisBase(DataServiceBase):
-    def register(self):
+class NwisService(WebServiceBase):
+    def _register(self):
         self.metadata = {
-                    'provider': {
-                        'abbr': 'USGS',
+            'display_name': 'USGS NWIS Web Services',
+            'description': 'Services available through the USGS National Water Information System',
+            'provider': {
+                'abbr': 'USGS',
                         'name': 'United States Geological Survey', 
-                        },
-                    
-                    'geographical_areas': ['Alaska', 'USA', 'Hawaii'],
-                    'bounding_boxes' : [
-                            (-178.19453125, 51.6036621094, -130.0140625, 71.4076660156),
-                            (-124.709960938, 24.5423339844, -66.9870117187, 49.3696777344),
-                            (-160.243457031, 18.9639160156, -154.804199219, 22.2231445312),
-                        ],
-                    'geotype': 'points',
-                    'datatype': 'timeseries',
-                }
+            },
+        }
 
-    def get_features(self, processes=20):
-        p = Pool(processes)
-        sites = p.map(_nwis_iv_features, states)
-        p.close()
-        p.terminate()
+    def _get_services(self):
+        return {
+            'iv': {
+                'display_name': 'NWIS Instantaneous Values Service',
+                'description': 'Retrieve current streamflow and other real-time data for USGS water sites since October 1, 2007',
+                'parameters': self.get_parameters('iv'),
+                'unmapped_parameters': self.get_parameters('iv', mapped=False),
+                'geotype': 'points',
+                'datatype': 'timeseries',
+                'geographical_areas': ['Alaska', 'USA', 'Hawaii'],
+                'bounding_boxes' : [
+                    (-178.19453125, 51.6036621094, -130.0140625, 71.4076660156),
+                    (-124.709960938, 24.5423339844, -66.9870117187, 49.3696777344),
+                    (-160.243457031, 18.9639160156, -154.804199219, 22.2231445312),
+                ],
+            },
+            'dv': {
+                'display_name': 'NWIS Daily Values Service',
+                'description': 'Retrieve historical summarized daily data about streams, lakes and wells. Daily data available for USGS water sites include mean, median, maximum, minimum, and/or other derived values.'
+                'parameters': self.get_parameters('dv'),
+                'unmapped_parameters': self.get_parameters('iv', mapped=False),
+                'geotype': 'points',
+                'datatype': 'timeseries',
+                'geographical_areas': ['Alaska', 'USA', 'Hawaii'],
+                'bounding_boxes' : [
+                    (-178.19453125, 51.6036621094, -130.0140625, 71.4076660156),
+                    (-124.709960938, 24.5423339844, -66.9870117187, 49.3696777344),
+                    (-160.243457031, 18.9639160156, -154.804199219, 22.2231445312),
+                ],
+            }
+        }
+
+    def _get_features(self, service):
+        func = partial(_nwis_features, service=service)
+        with concurrent.futures.ProcessPoolExecutor() as executor:
+            sites = executor.map(func, _states())
+                
         sites = {k: v for d in sites for k, v in d.items()}
         df = pd.DataFrame.from_dict(sites, orient='index')
         for col in ['latitude', 'longitude', 'srs']:
@@ -92,62 +65,29 @@ class NwisBase(DataServiceBase):
 
         return df
 
-    def get_parameters(self, df, processes=20):
-        p = Pool(processes)
+    def _get_parameters(self, service):
+        df = self.get_features(_service)
         chunks = list(_chunks(df.index.tolist()))
-        df = p.map(_site_info, chunks)
-        p.close()
-        p.terminate()
-        return pd.concat(df, ignore_index=True)
+        func = partial(_site_info, service=service)
+        with concurrent.futures.ProcessPoolExecutor() as executor:
+            data = executor.map(_site_info, chunks)
+        
+        data = pd.concat(data, ignore_index=True)
+        data.rename(columns={'parm_cd': 'external_parameter', 'site_no': 'feature', 'count_no': 'count'}, inplace=True)
+        data['parameter'] = data['external_parameter'].apply(lambda x: _parameter_map(x))
 
-    def get_locations_options(self): 
-        schema = {
-            "title": "Location Filters",
-            "type": "object",
-            "properties": {
-                "locations": {
-                    "type": "string",
-                    "description": "Optional single or comma delimited list of location identifiers",
-                    },
-                "bounding_box": {
-                    "type": "string",
-                    "description": "bounding box should be a comma delimited set of 4 numbers ",
-                    },
-                "parameters": {
-                    "type": "string",
-                    "description": "comma delimited list of parameter names",
-                    },
-                "all_parameters_required": {
-                    "type": "boolean",
-                    "description": "If true only locations where all parameters exist will be shown"
-                }
-            },
-            "required": None,
+        return data[['parameter', 'external_parameter', 'feature', 'begin_date', 'end_date', 'count']]
+
+    def _get_parameter_map(self, service):
+        return {
+            '00060': 'streamflow',
+            '00065': 'gageheight',
+            '00010': 'water_temperature',
+            ''
         }
-        return schema
 
-    def download_dataset_options(self, **kwargs):
-        schema = {
-            "title": "USGS NWIS Download Options",
-            "type": "object",
-            "properties": {
-                "start": {
-                    "type": "string",
-                    "description": "start date",
-                },
-                "end": {
-                    "type": "string",
-                    "description": "end date",
-                },
-                "period": {
-                    "type": "string",
-                    "description": "period date",
-                },
-            },
-        }
-        return schema
 
-    def download_data(self, feature, parameter, path, start=None, end=None, period=None):
+    def _download_data(self, feature, parameter, path, start=None, end=None, period=None):
         
         if not any([start, end, period]):
             period = 'P365D' #default to past 1yr of data
@@ -204,6 +144,62 @@ class NwisBase(DataServiceBase):
                 io.write(filename, location_id=location_id, geometry=geometry, dataframe=df, metadata=metadata)
 
         return data_files
+
+
+def _chunks(l, n=100):
+    """Yield successive n-sized chunks from l."""
+    for i in xrange(0, len(l), n):
+        yield l[i:i+n]
+
+
+def _nwis_features(state, service):
+    return nwis.get_sites(state_code=state, service=service)
+
+
+def _nwis_parameters(site, service):
+    return {site: nwis.get_site_data(site, service=service).keys()}
+
+
+def _states():
+    return [
+        "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DC", "DE", "FL", "GA", 
+        "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", 
+        "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", 
+        "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", 
+        "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"
+    ]
+
+
+def _parse_rdb(url, index=None):
+    df = pd.read_table(url, comment='#')
+    if index is not None:
+        df.index = df[index]
+
+    df = df.ix[1:] #remove extra header line
+    return df
+
+
+def _pm_codes():
+    url = (
+        'http://nwis.waterdata.usgs.gov/usa/nwis/pmcodes'
+        '?radio_pm_search=param_group&pm_group=All+--+include+all+parameter+groups'
+        '&pm_search=&casrn_search=&srsname_search=&format=rdb_file'
+        '&show=parameter_group_nm&show=parameter_nm&show=casrn&show=srsname&show=parameter_units'
+    )
+
+    return _parse_rdb(url, index='parameter_cd')
+
+
+def _stat_codes():
+    url = 'http://help.waterdata.usgs.gov/code/stat_cd_nm_query?stat_nm_cd=%25&fmt=rdb'
+    return _parse_rdb(url, index='stat_CD')
+
+
+def _site_info(sites, service):
+    base_url = 'http://waterservices.usgs.gov/nwis/site/?format=rdb,1.0&sites=%s'
+    url = base_url % ','.join(sites) + '&seriesCatalogOutput=true&outputDataTypeCd=%s&hasDataTypeCd=%s' % (service, service)
+    return _parse_rdb(url)
+
 
 
 class NwisIv(NwisBase):

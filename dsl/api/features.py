@@ -3,8 +3,10 @@
 Features are unique identifiers with a web service or collection.
 """
 from ..util import parse_uri
+import pandas as pd
 
-def get_features(uri, filters, as_dataframe=False, as_geojson=True):
+
+def get_features(uri, filters, as_dataframe=False):
     """
     """
     uri = parse_uri(uri)
@@ -16,18 +18,25 @@ def get_features(uri, filters, as_dataframe=False, as_geojson=True):
     if uri['resource']=='collection':
         raise NotImplementedError
 
-    if as_geojson and as_dataframe:
-        error_msg = 'Must specify only as_dataframe or as_geojson not both'
-        raise ValueError(error_msg)
+    if isinstance(features, dict):
+        if features.get('type')!='FeatureCollection'
+            features = _to_geojson(features)
 
     if as_dataframe:
-        return 
+        
+
+    return features
+
 
 def new_feature():
+    """return new feature id
+    """
     pass
 
     
 def update_feature():
+    """return 
+    """
     pass
 
     

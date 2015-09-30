@@ -2,52 +2,72 @@ from builtins import object
 import abc
 from future.utils import with_metaclass
 
-class DataServiceBase(with_metaclass(abc.ABCMeta, object)):
+
+
+class WebServiceBase(with_metaclass(abc.ABCMeta, object)):
     """Base class for data services plugins
     """
 
-    def __init__(self):
-        self.register()
+    def __init__(self, use_cache=True, update_frequency='M'):
+        self.use_cache = use_cache
+        self.update_frequency = update_frequency
+        self._register()
 
-    @abc.abstractmethod
-    def register(self):
-        """Register plugin
-
-        Plugins must contain a service name, provider and bounding box
-        """
-
-    @abc.abstractmethod
-    def get_locations(self, locations=None, bounding_box=None, **kwargs):
-        """Get Locations associated with service.
+    def get_features(self, service, parameters=None, features=None, bbox=None, as_dataframe=False):
+        """Get Features associated with service.
 
         Take a series of query parameters and return a list of 
         locations as a geojson python dictionary
+        """           
+        if use_cache:
+            selected_features = _load_cache(self.name, service, update_frequency=update_frequency)
+        else:
+            selected_features = self._get_features(service)
+
+        #apply filters
+        if features:
+            selected_features = selected_features.ix[features]
+
+        if bbox:
+            selected_features = util.filter_bbox(selected_features)
+
+        if not as_dataframe:
+            selected_features = util.df_to_geojson(selected_features)
+
+        return selected_features
+
+
+    def get_services(filters={}):
+        return self._get_services()
+
+    def get_parameters(self, service, features=None):
+        return self._get_parameters(service)
+
+
+    def get_parameter_list(self, service):
+
+
+    @abc.abstractmethod
+    def _register(self):
+        """
         """
 
     @abc.abstractmethod
-    def get_locations_options(self):
-        """Get Filters that can be applied to get_locations call
-
-        Response defined as JSON-Schema
+    def _get_services(self):
         """
-        
-    @abc.abstractmethod
-    def get_data(self, location, path=None, **kwargs):
-        """Download/Transfer data associated with service
-
-        This must either a path varable and query parameters and download 
-        the data to the provided path
         """
 
     @abc.abstractmethod
-    def get_data_options(self):
-        """Get filters that can be applied to the get_data call
-
-        Response defined as JSON-Schema
+    def _get_features(self, service):
+        """
         """
 
     @abc.abstractmethod
-    def provides(self, bounding_box=None, **kwargs):
-        """List parameters that the service potentially provides
+    def _get_parameters(self, services):
+        """
+        """
 
+    @abc.abstractmethod
+    def _download_data(self, feature, **kwargs):
+        """
         """

@@ -1,1 +1,1 @@
-from base import DataServiceBase
+from base import WebServiceBase
