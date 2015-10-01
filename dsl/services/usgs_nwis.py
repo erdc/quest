@@ -83,7 +83,6 @@ class NwisService(WebServiceBase):
             '00060': 'streamflow',
             '00065': 'gageheight',
             '00010': 'water_temperature',
-            ''
         }
 
 
@@ -180,14 +179,8 @@ def _parse_rdb(url, index=None):
 
 
 def _pm_codes():
-    url = (
-        'http://nwis.waterdata.usgs.gov/usa/nwis/pmcodes'
-        '?radio_pm_search=param_group&pm_group=All+--+include+all+parameter+groups'
-        '&pm_search=&casrn_search=&srsname_search=&format=rdb_file'
-        '&show=parameter_group_nm&show=parameter_nm&show=casrn&show=srsname&show=parameter_units'
-    )
-
-    return _parse_rdb(url, index='parameter_cd')
+    url = 'http://help.waterdata.usgs.gov/code/parameter_cd_query?fmt=rdb&group_cd=%'
+    return _parse_rdb(url, index='parm_cd')
 
 
 def _stat_codes():
