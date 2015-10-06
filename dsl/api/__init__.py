@@ -13,6 +13,11 @@ from ..util import (
         update_settings_from_file,
     )
 
+from .version import (
+        get_dsl_version,
+        get_api_version,
+    )
+
 from .collections import (
         get_collections,
         new_collection,
