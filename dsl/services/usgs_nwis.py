@@ -15,9 +15,9 @@ class NwisService(WebServiceBase):
         self.metadata = {
             'display_name': 'USGS NWIS Web Services',
             'description': 'Services available through the USGS National Water Information System',
-            'provider': {
+            'organization': {
                 'abbr': 'USGS',
-                        'name': 'United States Geological Survey', 
+                'name': 'United States Geological Survey', 
             },
         }
 
@@ -26,8 +26,7 @@ class NwisService(WebServiceBase):
             'iv': {
                 'display_name': 'NWIS Instantaneous Values Service',
                 'description': 'Retrieve current streamflow and other real-time data for USGS water sites since October 1, 2007',
-                'parameters': self.get_parameters('iv'),
-                'unmapped_parameters': self.get_parameters('iv', mapped=False),
+                'common_parameters': ['streamflow', 'gage_height', 'water_temperature'],
                 'geotype': 'points',
                 'datatype': 'timeseries',
                 'geographical_areas': ['Alaska', 'USA', 'Hawaii'],
@@ -39,9 +38,8 @@ class NwisService(WebServiceBase):
             },
             'dv': {
                 'display_name': 'NWIS Daily Values Service',
-                'description': 'Retrieve historical summarized daily data about streams, lakes and wells. Daily data available for USGS water sites include mean, median, maximum, minimum, and/or other derived values.'
-                'parameters': self.get_parameters('dv'),
-                'unmapped_parameters': self.get_parameters('iv', mapped=False),
+                'description': 'Retrieve historical summarized daily data about streams, lakes and wells. Daily data available for USGS water sites include mean, median, maximum, minimum, and/or other derived values.',
+                'common_parameters': ['streamflow', 'gage_height', 'water_temperature'],
                 'geotype': 'points',
                 'datatype': 'timeseries',
                 'geographical_areas': ['Alaska', 'USA', 'Hawaii'],
@@ -66,19 +64,19 @@ class NwisService(WebServiceBase):
         return df
 
     def _get_parameters(self, service):
-        df = self.get_features(_service)
+        df = self.get_features(service)
         chunks = list(_chunks(df.index.tolist()))
         func = partial(_site_info, service=service)
         with concurrent.futures.ProcessPoolExecutor() as executor:
-            data = executor.map(_site_info, chunks)
+            data = executor.map(func, chunks)
         
         data = pd.concat(data, ignore_index=True)
         data.rename(columns={'parm_cd': 'external_parameter', 'site_no': 'feature', 'count_no': 'count'}, inplace=True)
-        data['parameter'] = data['external_parameter'].apply(lambda x: _parameter_map(x))
+        data['parameter'] = data['external_parameter'].apply(lambda x: self._parameter_map(x))
 
-        return data[['parameter', 'external_parameter', 'feature', 'begin_date', 'end_date', 'count']]
+        return data #data[['parameter', 'external_parameter', 'feature', 'begin_date', 'end_date', 'count']]
 
-    def _get_parameter_map(self, service):
+    def _parameter_map(self, service):
         return {
             '00060': 'streamflow',
             '00065': 'gageheight',
@@ -195,43 +193,43 @@ def _site_info(sites, service):
 
 
 
-class NwisIv(NwisBase):
-    def register(self):
-        """Register USGS NWIS IV plugin by setting service name, source and uid 
-        """
-        super(NwisIv, self).register()
-        self.service = 'iv'
-        self.metadata.update({
-                'display_name': 'NWIS Instantaneous Values',
-                'service': 'NWIS Instantaneous Values Web Service', 
-                'description': 'For real-time and historical data at USGS water monitoring locations since October 1, 2007,'
-            })
+# class NwisIv(NwisBase):
+#     def register(self):
+#         """Register USGS NWIS IV plugin by setting service name, source and uid 
+#         """
+#         super(NwisIv, self).register()
+#         self.service = 'iv'
+#         self.metadata.update({
+#                 'display_name': 'NWIS Instantaneous Values',
+#                 'service': 'NWIS Instantaneous Values Web Service', 
+#                 'description': 'For real-time and historical data at USGS water monitoring locations since October 1, 2007,'
+#             })
 
-    def provides(self, bounding_box=None):
-        return ['streamflow', 'gageheight']
+#     def provides(self, bounding_box=None):
+#         return ['streamflow', 'gageheight']
 
-    def _make_index(self, df):
-        return pd.to_datetime(df.datetime)
+#     def _make_index(self, df):
+#         return pd.to_datetime(df.datetime)
 
 
-class NwisDv(NwisBase):
-    def register(self):
-        """Register USGS NWIS DV plugin by setting service name, source and uid 
-        """
-        super(NwisDv, self).register()
-        self.service = 'dv'
-        self.metadata.update({
-                'display_name': 'NWIS Daily Values',
-                'service': 'NWIS Daily Values Web Service', 
-                'description': 'Daily statistical data from the hundreds of thousands of hydrologic sites served by the USGS'
-            })
+# class NwisDv(NwisBase):
+#     def register(self):
+#         """Register USGS NWIS DV plugin by setting service name, source and uid 
+#         """
+#         super(NwisDv, self).register()
+#         self.service = 'dv'
+#         self.metadata.update({
+#                 'display_name': 'NWIS Daily Values',
+#                 'service': 'NWIS Daily Values Web Service', 
+#                 'description': 'Daily statistical data from the hundreds of thousands of hydrologic sites served by the USGS'
+#             })
 
-    def provides(self, bounding_box=None):
-        return ['streamflow:dailymin','streamflow:dailymean','streamflow:dailymax', 
-                'gageheight:dailymin', 'gageheight:dailymean', 'gageheight:dailymax']
+#     def provides(self, bounding_box=None):
+#         return ['streamflow:dailymin','streamflow:dailymean','streamflow:dailymax', 
+#                 'gageheight:dailymin', 'gageheight:dailymean', 'gageheight:dailymax']
 
-    def _make_index(self, df):
-        return pd.PeriodIndex(df.datetime, freq='D')
+#     def _make_index(self, df):
+#         return pd.PeriodIndex(df.datetime, freq='D')
 
 
 def _as_nwis(parameter, invert=False):

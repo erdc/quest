@@ -128,6 +128,18 @@ def stringify(args):
     return isinstance(args, list) and ','.join(args) or None
 
 
+def to_dataframe(feature_collection):
+    features = {}
+    for feature in feature_collection['features']:
+        data = feature['properties']
+        data.update({
+            'geotype': feature['geometry']['type'],
+            'geometry': feature['geometry']['coordinates'],
+        })
+        features[feature['id']] = data
+    return pd.DataFrame.from_dict(features, orient='index')
+
+
 def uid():
     return uuid4().hex
 

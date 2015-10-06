@@ -19,11 +19,11 @@ def get_features(uri, filters, as_dataframe=False):
         raise NotImplementedError
 
     if isinstance(features, dict):
-        if features.get('type')!='FeatureCollection'
+        if features.get('type')!='FeatureCollection':
             features = _to_geojson(features)
 
     if as_dataframe:
-        
+        pass
 
     return features
 
