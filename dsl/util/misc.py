@@ -1,4 +1,5 @@
 import appdirs
+from geojson import Point, Polygon, Feature, FeatureCollection
 import itertools
 from .config import get_settings
 import os
@@ -149,6 +150,21 @@ def to_dataframe(feature_collection):
 
         features[feature['id']] = data
     return pd.DataFrame.from_dict(features, orient='index')
+
+
+def to_geojson(df):
+    _func = {
+        'Point': Point,
+        'Polygon': Polygon,
+    }
+    features = []
+    for idx, row in df.iterrows():
+        geometry = _func[row['geom_type']](row['geom_coords'])
+        del row['geom_type']
+        del row['geom_coords']
+        features.append(Feature(geometry=geometry, properties=row.dropna().to_dict(), id=idx))
+
+    return FeatureCollection(features)
 
 
 def uid():

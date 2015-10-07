@@ -45,9 +45,8 @@ def get_features(uris, geom_type=None, parameter=None, bbox=None, as_dataframe=F
         features.index = features.index.map(lambda x: '%s::%s' % (x, parameter))
 
     if not as_dataframe:
-        #features = util.to_geojson(features)
-        pass
-
+        features = util.to_geojson(features)
+        
     return features
 
 
