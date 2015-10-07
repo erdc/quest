@@ -25,7 +25,11 @@ def append_features(old, new):
     return old
 
 
-def bbox2poly(x1, y1, x2, y2):
+def bbox2poly(x1, y1, x2, y2, reverse_order=False):
+    if reverse_order:
+        x1, y1 = y1, x1
+        x2, y2 = y2, x2
+        
     xmin, xmax = sorted([float(x1), float(x2)])
     ymin, ymax = sorted([float(y1), float(y2)])
     poly = [(xmin, ymin), (xmin, ymax), (xmax, ymax), (xmax, ymin)]
