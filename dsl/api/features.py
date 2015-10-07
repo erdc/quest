@@ -44,9 +44,11 @@ def get_features(uris, geom_type=None, parameter=None, bbox=None, as_dataframe=F
         features = features[idx]
         features.index = features.index.map(lambda x: '%s::%s' % (x, parameter))
 
+
+    features['uri'] = features.index 
     if not as_dataframe:
         features = util.to_geojson(features)
-        
+
     return features
 
 
