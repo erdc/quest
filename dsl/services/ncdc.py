@@ -2,8 +2,6 @@
 
 """
 from .base import WebServiceBase
-import concurrent.futures
-from functools import partial
 import pandas as pd
 import os
 from ulmo.ncdc import ghcn_daily, gsod
