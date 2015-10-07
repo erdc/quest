@@ -166,7 +166,8 @@ def to_geojson(df):
         geometry = _func[row['geom_type']](row['geom_coords'])
         del row['geom_type']
         del row['geom_coords']
-        features.append(Feature(geometry=geometry, properties=row.dropna().to_dict(), id=idx))
+        properties = json.loads(row.dropna().to_json())
+        features.append(Feature(geometry=geometry, properties=properties, id=idx))
 
     return FeatureCollection(features)
 

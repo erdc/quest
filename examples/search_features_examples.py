@@ -1,6 +1,6 @@
 from __future__ import print_function
 import dsl
-import json
+import geojson
 
 # get settings and api etc
 settings = dsl.api.get_settings()
@@ -96,4 +96,4 @@ features_geojson = dsl.api.get_features(uris, geom_type=geom_type, bbox=bbox, pa
 filename = raw_input('Enter geojson filename (default: file not saved):')
 if filename:
     with open(filename, 'w') as f:
-        json.dump(f, features_geojson)
+        f.write(geojson.dumps(features_geojson))
