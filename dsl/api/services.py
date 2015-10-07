@@ -15,22 +15,6 @@ from stevedore import driver
 
 
 @dispatcher.add_method
-def get_common_parameters():
-    """get list of common parameters
-
-    Returns
-    -------
-    parameters : list of str,
-        list of parameters available
-    """
-    services = get_services()
-    parameters = []
-    for service in services.values():
-        parameters += service['common_parameters']
-    return list(set(parameters))
-
-
-@dispatcher.add_method
 def get_providers():
     providers = util.load_drivers('services')
     return {k: v.metadata for k, v in providers.iteritems()}

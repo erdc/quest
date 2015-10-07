@@ -2,6 +2,7 @@ import appdirs
 import itertools
 from .config import get_settings
 import os
+import pandas as pd
 from stevedore import extension, driver
 try:
     import simplejson as json
@@ -61,10 +62,10 @@ def mkdir_if_doesnt_exist(dir_path):
 def parse_uri(uri):
     """parse uri and return dictionary
 
-    webservice://<webservice>::<layer>::<feature>::<parameter>::<dataset>
-    collection://<collection>::<layer>::<feature>::<parameter>::<dataset>
+    webservice://<webservice>::<service>::<feature>::<parameter>::<dataset>
+    collection://<collection>::<service>::<feature>::<parameter>::<dataset>
     """
-    keys = ['name', 'layer', 'feature', 'parameter', 'dataset']
+    keys = ['name', 'service', 'feature', 'parameter', 'dataset']
     uri_dict = {}
     uri_dict['resource'], remainder = uri.split('://')
     parts = remainder.split('::')
@@ -104,6 +105,12 @@ def load_drivers(namespace, names=None):
     return {name: driver.DriverManager(namespace, name, invoke_on_load='True') for name in names} 
     
 
+def load_service(uri):
+    if not isinstance(uri, dict):
+        uri = parse_uri(uri)
+    return load_drivers('services', names=uri['name'])[uri['name']].driver
+
+
 def remove_key(d, key):
     r = dict(d)
     del r[key]
@@ -132,10 +139,14 @@ def to_dataframe(feature_collection):
     features = {}
     for feature in feature_collection['features']:
         data = feature['properties']
+        coords = pd.np.array(feature['geometry']['coordinates']).mean(axis=1)
         data.update({
-            'geotype': feature['geometry']['type'],
-            'geometry': feature['geometry']['coordinates'],
+            'geom_type': feature['geometry']['type'],
+            'geom_coords': feature['geometry']['coordinates'],
+            'longitude': coords.flatten()[0],
+            'latitude': coords.flatten()[1],
         })
+
         features[feature['id']] = data
     return pd.DataFrame.from_dict(features, orient='index')
 

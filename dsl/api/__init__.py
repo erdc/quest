@@ -56,7 +56,6 @@ from .parameters import (
     )
 
 from .services import (
-        get_common_parameters,
         get_providers,
         get_services,
         new_service,

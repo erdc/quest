@@ -39,9 +39,10 @@ class UsgsNedService(WebServiceBase):
                 'display_name': 'USGS National Elevation Dataset %s' % description,
                 'description': 'Retrieve USGS NED at %s resolution' % description,
                 'geographical_areas': ['Alaska', 'USA', 'Hawaii'],
-                'common_parameters': ['elevation'],
+                'parameters': ['elevation'],
+                'unmapped_parameters_available': False,
                 'bounding_boxes': [[-180, -90, 180, 90]],
-                'geotype': 'polygons',
+                'geom_type': 'polygon',
                 'datatype': 'raster',
             }
 
@@ -49,13 +50,17 @@ class UsgsNedService(WebServiceBase):
 
     def _get_features(self, service):
         service = self._layers()[service]
-        features = utils.to_dataframe(
+        features = util.to_dataframe(
             ned.get_raster_availability(service, (-180, -90, 180, 90))
         )
+        features['parameters'] = 'elevation'
         return features.rename(columns={'download url': 'download_url'})
         
-    def _get_parameters(self, service):
-        return ['elevation']
+    def _get_parameters(self, service, features=None):
+        return {
+            'parameters': ['elevation'],
+            'parameter_codes': ['elevation'],
+        }
         
     def _download_data(self, locations, path=None, parameters=None, **kwargs):
         """parameter is always set to elevation

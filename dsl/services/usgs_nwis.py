@@ -26,8 +26,9 @@ class NwisService(WebServiceBase):
             'iv': {
                 'display_name': 'NWIS Instantaneous Values Service',
                 'description': 'Retrieve current streamflow and other real-time data for USGS water sites since October 1, 2007',
-                'common_parameters': ['streamflow', 'gage_height', 'water_temperature'],
-                'geotype': 'points',
+                'parameters': ['streamflow', 'gage_height', 'water_temperature'],
+                'unmapped_parameters_available': True,
+                'geom_type': 'Point',
                 'datatype': 'timeseries',
                 'geographical_areas': ['Alaska', 'USA', 'Hawaii'],
                 'bounding_boxes' : [
@@ -39,8 +40,9 @@ class NwisService(WebServiceBase):
             'dv': {
                 'display_name': 'NWIS Daily Values Service',
                 'description': 'Retrieve historical summarized daily data about streams, lakes and wells. Daily data available for USGS water sites include mean, median, maximum, minimum, and/or other derived values.',
-                'common_parameters': ['streamflow', 'gage_height', 'water_temperature'],
-                'geotype': 'points',
+                'parameters': ['streamflow', 'gage_height', 'water_temperature'],
+                'unmapped_parameters_available': True,
+                'geom_type': 'Point',
                 'datatype': 'timeseries',
                 'geographical_areas': ['Alaska', 'USA', 'Hawaii'],
                 'bounding_boxes' : [
@@ -58,28 +60,40 @@ class NwisService(WebServiceBase):
                 
         sites = {k: v for d in sites for k, v in d.items()}
         df = pd.DataFrame.from_dict(sites, orient='index')
-        for col in ['latitude', 'longitude', 'srs']:
-            df[col] = df['location'].apply(lambda x: x[col])
+        df['geom_type'] = 'Point'
+        for col in ['latitude', 'longitude']:
+            df[col] = df['location'].apply(lambda x: float(x[col]))
 
+        df['geom_coords'] = zip(df['longitude'], df['latitude'])
         return df
 
-    def _get_parameters(self, service):
-        df = self.get_features(service)
+    def _get_parameters(self, service, features=None):
+        if features is None:
+            df = self.get_features(service)
+        else:
+            df = features
+
         chunks = list(_chunks(df.index.tolist()))
         func = partial(_site_info, service=service)
         with concurrent.futures.ProcessPoolExecutor() as executor:
             data = executor.map(func, chunks)
         
         data = pd.concat(data, ignore_index=True)
-        data.rename(columns={'parm_cd': 'external_parameter', 'site_no': 'feature', 'count_no': 'count'}, inplace=True)
-        data['parameter'] = data['external_parameter'].apply(lambda x: self._parameter_map(x))
+        data.rename(columns={'parm_cd': 'parameter_code', 'site_no': 'feature_id', 'count_nu': 'count'}, inplace=True)
+        data = data[pd.notnull(data['parameter_code'])]
+        data['parameter'] = data['parameter_code'].apply(lambda x: self._parameter_map(service).get(x))
+        data = data[['parameter', 'parameter_code', 'feature_id', 'begin_date', 'end_date', 'count']]
 
-        return data #data[['parameter', 'external_parameter', 'feature', 'begin_date', 'end_date', 'count']]
+        pm_codes = _pm_codes()
+        data['description'] = data['parameter_code'].apply(lambda x: pm_codes.ix[x]['SRSName'] if x in pm_codes.index else '')
+        data['unit'] = data['parameter_code'].apply(lambda x: pm_codes.ix[x]['parm_unit'] if x in pm_codes.index else '')
+        return data
+
 
     def _parameter_map(self, service):
         return {
             '00060': 'streamflow',
-            '00065': 'gageheight',
+            '00065': 'gage_height',
             '00010': 'water_temperature',
         }
 
@@ -176,9 +190,19 @@ def _parse_rdb(url, index=None):
     return df
 
 
-def _pm_codes():
+def _pm_codes(update_cache=False):
     url = 'http://help.waterdata.usgs.gov/code/parameter_cd_query?fmt=rdb&group_cd=%'
-    return _parse_rdb(url, index='parm_cd')
+    cache_file = os.path.join(util.get_cache_dir(), 'usgs_pmcodes.h5')
+    if update_cache:
+        pm_codes = _parse_rdb(url, index='parm_cd')
+    else:     
+        try:
+            pm_codes = pd.read_hdf(cache_file, 'table')
+        except:
+            pm_codes = _parse_rdb(url, index='parm_cd')
+            pm_codes.to_hdf(cache_file, 'table')
+    
+    return pm_codes
 
 
 def _stat_codes():
@@ -190,46 +214,6 @@ def _site_info(sites, service):
     base_url = 'http://waterservices.usgs.gov/nwis/site/?format=rdb,1.0&sites=%s'
     url = base_url % ','.join(sites) + '&seriesCatalogOutput=true&outputDataTypeCd=%s&hasDataTypeCd=%s' % (service, service)
     return _parse_rdb(url)
-
-
-
-# class NwisIv(NwisBase):
-#     def register(self):
-#         """Register USGS NWIS IV plugin by setting service name, source and uid 
-#         """
-#         super(NwisIv, self).register()
-#         self.service = 'iv'
-#         self.metadata.update({
-#                 'display_name': 'NWIS Instantaneous Values',
-#                 'service': 'NWIS Instantaneous Values Web Service', 
-#                 'description': 'For real-time and historical data at USGS water monitoring locations since October 1, 2007,'
-#             })
-
-#     def provides(self, bounding_box=None):
-#         return ['streamflow', 'gageheight']
-
-#     def _make_index(self, df):
-#         return pd.to_datetime(df.datetime)
-
-
-# class NwisDv(NwisBase):
-#     def register(self):
-#         """Register USGS NWIS DV plugin by setting service name, source and uid 
-#         """
-#         super(NwisDv, self).register()
-#         self.service = 'dv'
-#         self.metadata.update({
-#                 'display_name': 'NWIS Daily Values',
-#                 'service': 'NWIS Daily Values Web Service', 
-#                 'description': 'Daily statistical data from the hundreds of thousands of hydrologic sites served by the USGS'
-#             })
-
-#     def provides(self, bounding_box=None):
-#         return ['streamflow:dailymin','streamflow:dailymean','streamflow:dailymax', 
-#                 'gageheight:dailymin', 'gageheight:dailymean', 'gageheight:dailymax']
-
-#     def _make_index(self, df):
-#         return pd.PeriodIndex(df.datetime, freq='D')
 
 
 def _as_nwis(parameter, invert=False):

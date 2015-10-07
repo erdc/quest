@@ -2,6 +2,7 @@ from builtins import object
 import abc
 from future.utils import with_metaclass
 from dsl import util
+import pandas as pd
 
 
 class WebServiceBase(with_metaclass(abc.ABCMeta, object)):
@@ -13,39 +14,29 @@ class WebServiceBase(with_metaclass(abc.ABCMeta, object)):
         self.update_frequency = update_frequency
         self._register()
 
-    def get_features(self, service, parameters=None, features=None, bbox=None, as_dataframe=False):
+    def get_features(self, service):
         """Get Features associated with service.
 
         Take a series of query parameters and return a list of 
         locations as a geojson python dictionary
         """        
-        use_cache=False  
-        as_dataframe=True 
-        if use_cache:
-            selected_features = _load_cache(self.name, service, update_frequency=update_frequency)
+        features = self._get_features(service)
+        params = self._get_parameters(service, features)
+        if isinstance(params, pd.DataFrame):
+            groups = params.groupby('feature_id').groups
+            features['parameters'] = features.index.map(lambda x: ','.join(filter(None, params.ix[groups[x]]['parameter'].tolist())) if x in groups.keys() else '')
+            features['parameter_codes'] = features.index.map(lambda x: ','.join(filter(None, params.ix[groups[x]]['parameter_code'].tolist())) if x in groups.keys() else '')
         else:
-            selected_features = self._get_features(service)
+            features['parameters'] = ','.join(params['parameters'])
+            features['parameter_codes'] = ','.join(params['parameter_codes'])
 
-        #apply filters
-        if features:
-            selected_features = selected_features.ix[features]
-
-        if bbox:
-            selected_features = util.filter_bbox(selected_features)
-
-        if not as_dataframe:
-            selected_features = util.df_to_geojson(selected_features)
-
-        return selected_features
+        return features
 
     def get_services(self, filters={}):
         return self._get_services()
 
     def get_parameters(self, service, features=None):
         return self._get_parameters(service)
-
-    def get_parameter_list(self, service):
-        pass
 
     @abc.abstractmethod
     def _register(self):

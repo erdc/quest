@@ -2,27 +2,50 @@
 
 Features are unique identifiers with a web service or collection.
 """
-from ..util import parse_uri
+import os
 import pandas as pd
+from .. import util
+from .services import get_services
 
 
-def get_features(uri, filters, as_dataframe=False):
+def get_features(uris, geom_type=None, parameter=None, bbox=None, as_dataframe=False, update_cache=False):
     """
     """
-    uri = parse_uri(uri)
+    uris = util.listify(uris)
+    features = []
+    for uri in uris:
+        uri = util.parse_uri(uri)
+        if uri['service'] is None:
+            svc = util.load_service(uri)
+            services = svc.get_services()
+        else:
+            services = [uri['service']]
 
-    if uri['resource']=='webservice':
-        service = _load_services()[name]
-        features = service.get_features(uri['name'], filters=filters)
+        for service in services:
+            if uri['resource']=='webservice':
+                features.append(_read_cached_features(uri['name'], service, update_cache=update_cache))
 
-    if uri['resource']=='collection':
-        raise NotImplementedError
+            if uri['resource']=='collection':
+                raise NotImplementedError
 
-    if isinstance(features, dict):
-        if features.get('type')!='FeatureCollection':
-            features = _to_geojson(features)
+    features = pd.concat(features)
 
-    if as_dataframe:
+    if bbox:
+        xmin, ymin, xmax, ymax = [float(x) for x in util.listify(bbox)]
+        idx = (features.longitude > xmin) & (features.longitude < xmax) & (features.latitude > ymin) & (features.latitude < ymax)
+        features = features[idx]
+
+    if geom_type:
+        idx = features.geom_type.str.lower() == geom_type.lower()
+        features = features[idx]
+
+    if parameter:
+        idx = features.parameters.str.contains(parameter)
+        features = features[idx]
+        features.index = features.index.map(lambda x: '%s::%s' % (x, parameter))
+
+    if not as_dataframe:
+        #features = util.to_geojson(features)
         pass
 
     return features
@@ -43,12 +66,30 @@ def update_feature():
 def delete_feature():
     pass
 
+
+def search_features(filters=None):
+    pass
+
     
-def _read_cached_features(uri):
+def _read_cached_features(provider, service, update_cache=False):
     """read cached features
     """
-    pass
+    cache_file = os.path.join(util.get_cache_dir(), provider, service+'_features.h5')
+    if update_cache:
+        return _get_features(provider, service, cache_file)
 
+    try:
+        features = pd.read_hdf(cache_file, 'table')
+    except:
+        features = _get_features(provider, service, cache_file)
 
-def _write_cached_features(uri):
-    pass
+    return features
+
+def _get_features(provider, service, cache_file):
+    driver = util.load_drivers('services', names=provider)[provider].driver
+    features = driver.get_features(service)
+    features.index = features.index.map(lambda x: 'webservice://%s::%s::%s' % (provider,service,x))
+    util.mkdir_if_doesnt_exist(os.path.split(cache_file)[0])
+    features.to_hdf(cache_file, 'table')
+
+    return features
