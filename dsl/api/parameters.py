@@ -5,7 +5,7 @@ import os
 from .. import util
 
 @dispatcher.add_method
-def get_common_parameters():
+def get_mapped_parameters():
     """get list common parameters
 
     Returns

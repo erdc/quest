@@ -49,6 +49,7 @@ from .filters import (
     )
 
 from .parameters import (
+        get_mapped_parameters,
         get_parameters,
         new_parameter,
         update_parameters,
