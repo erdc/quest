@@ -2,12 +2,14 @@
 
 Features are unique identifiers with a web service or collection.
 """
+from jsonrpc import dispatcher
 import os
 import pandas as pd
 from .. import util
 from .services import get_services
 
 
+@dispatcher.add_method
 def get_features(uris, geom_type=None, parameter=None, bbox=None, as_dataframe=False, update_cache=False):
     """
     """
