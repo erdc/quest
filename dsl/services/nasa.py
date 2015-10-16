@@ -90,7 +90,7 @@ class NasaService(WebServiceBase):
             metadata = _read_metadata(short_name)
             metadata['display_name'] = metadata.pop('title')
             metadata['description'] = metadata.pop('summary')
-            metadata['bounding_boxes'] = [[x for x in metadata['boxes'][0].split()]]
+            metadata['bounding_boxes'] = [[float(x) for x in metadata['boxes'][0].split()]]
             metadata.update({
                 'parameters': ['elevation'],
                 'unmapped_parameters_available': False,
