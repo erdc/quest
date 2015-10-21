@@ -1,1 +1,1 @@
-from base import WebServiceBase
+from base import WebServiceBase, SingleFileBase

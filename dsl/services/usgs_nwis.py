@@ -98,7 +98,7 @@ class NwisService(WebServiceBase):
         }
 
 
-    def _download_data(self, feature, parameter, path, start=None, end=None, period=None):
+    def _download_dataset(self, feature, parameter, path, start=None, end=None, period=None):
         
         if not any([start, end, period]):
             period = 'P365D' #default to past 1yr of data
@@ -155,6 +155,10 @@ class NwisService(WebServiceBase):
                 io.write(filename, location_id=location_id, geometry=geometry, dataframe=df, metadata=metadata)
 
         return data_files
+
+
+    def _download_dataset_options(self, service):
+        pass
 
 
 def _chunks(l, n=100):

@@ -2,6 +2,7 @@ from builtins import object
 import abc
 from future.utils import with_metaclass
 from dsl import util
+import ulmo
 import pandas as pd
 
 
@@ -9,7 +10,8 @@ class WebServiceBase(with_metaclass(abc.ABCMeta, object)):
     """Base class for data services plugins
     """
 
-    def __init__(self, use_cache=True, update_frequency='M'):
+    def __init__(self, cache_dir=None, use_cache=True, update_frequency='M'):
+        self.cache_dir = cache_dir
         self.use_cache = use_cache
         self.update_frequency = update_frequency
         self._register()
@@ -38,6 +40,12 @@ class WebServiceBase(with_metaclass(abc.ABCMeta, object)):
     def get_parameters(self, service, features=None):
         return self._get_parameters(service)
 
+    def download_dataset(self, path, service, feature, parameter, **kwargs):
+        return self._download_dataset(path, service, feature, parameter, **kwargs)
+
+    def download_dataset_options(self, service):
+        return self._download_dataset_options()
+
     @abc.abstractmethod
     def _register(self):
         """
@@ -59,6 +67,30 @@ class WebServiceBase(with_metaclass(abc.ABCMeta, object)):
         """
 
     @abc.abstractmethod
-    def _download_data(self, feature, **kwargs):
+    def _download_dataset(self, path, service, feature, parameter, **kwargs):
         """
+        needs to return dictionary
+        eg. {'path': /path/to/dir/or/file, 'format': 'raster'}
         """
+
+    @abc.abstractmethod
+    def _download_dataset_options(self, service):
+        """
+        needs to return dictionary
+        eg. {'path': /path/to/dir/or/file, 'format': 'raster'}
+        """
+
+class SingleFileBase(WebServiceBase):
+    """Base file for datasets that are a single file download
+    eg elevation raster etc
+    """
+    def _download_dataset(self, path, service, feature, parameter, **kwargs):
+        feature = self.get_features(service)[feature]
+        download_url = feature['download_url']
+        extract_from_zip = feature.get('extract_from_zip', '')
+        save_path = ulmo.util.download_tiles(path, [download_url], extract_from_zip)[0]
+        return {'save_path': save_path, 'file_format': feature.get('file_format')}
+        
+    def _download_dataset_options(self, service):
+        return {}
+

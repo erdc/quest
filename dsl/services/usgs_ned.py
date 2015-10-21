@@ -2,7 +2,7 @@
 Example Services
 """
 
-from .base import WebServiceBase
+from .base import SingleFileBase
 from .. import util
 from ulmo.usgs import ned
 from ulmo.usgs.ned.core import _download_tiles as download_tiles
@@ -13,7 +13,7 @@ import os
 DEFAULT_FILE_PATH = os.path.join('usgs','ned')
 CACHE_FILE = 'ned_%s_metadata.json'
 
-class UsgsNedService(WebServiceBase):
+class UsgsNedService(SingleFileBase):
     def _register(self):
         self.metadata = {
             'display_name': 'USGS National Elevation Dataset',
@@ -61,16 +61,3 @@ class UsgsNedService(WebServiceBase):
             'parameters': ['elevation'],
             'parameter_codes': ['elevation'],
         }
-        
-    def _download_data(self, locations, path=None, parameters=None, **kwargs):
-        """parameter is always set to elevation
-        """
-        parameters = 'elevation'
-
-        if not path:
-            path = util.get_dsl_dir()
-
-        path = os.path.join(path, DEFAULT_FILE_PATH)
-        locations = self.get_locations(locations=locations)
-        tiles = download_tiles(locations, path=path)
-        return {tile['id']: {parameters: tile['properties']['file']} for tile in tiles['features']}

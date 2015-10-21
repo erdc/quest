@@ -38,9 +38,13 @@ def bbox2poly(x1, y1, x2, y2, reverse_order=False):
     return poly
 
 
-def get_cache_dir():
+def get_cache_dir(service=None):
     settings = get_settings()
-    return _abs_path(settings['CACHE_DIR'])
+    path = _abs_path(settings['CACHE_DIR'])
+    if service is not None:
+        path = os.path.join(path, service)
+
+    return path
 
 
 def get_collections_index():
@@ -107,7 +111,7 @@ def load_drivers(namespace, names=None):
         )
         return dict((x.name, x.obj) for x in mgr)
 
-    return {name: driver.DriverManager(namespace, name, invoke_on_load='True') for name in names} 
+    return {name: driver.DriverManager(namespace, name, invoke_kwds={'cache_dir': get_cache_dir(name)}, invoke_on_load='True') for name in names} 
     
 
 def load_service(uri):
