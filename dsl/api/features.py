@@ -25,7 +25,7 @@ def get_features(uris, geom_type=None, parameter=None, bbox=None, as_dataframe=F
 
         for service in services:
             if uri['resource']=='webservice':
-                features.append(_read_cached_features(uri['name'], service, update_cache=update_cache))
+                features.append(_get_features(uri['name'], service, update_cache=update_cache))
 
             if uri['resource']=='collection':
                 raise NotImplementedError
@@ -73,26 +73,10 @@ def delete_feature():
 def search_features(filters=None):
     pass
 
-    
-def _read_cached_features(provider, service, update_cache=False):
-    """read cached features
-    """
-    cache_file = os.path.join(util.get_cache_dir(), provider, service+'_features.h5')
-    if update_cache:
-        return _get_features(provider, service, cache_file)
 
-    try:
-        features = pd.read_hdf(cache_file, 'table')
-    except:
-        features = _get_features(provider, service, cache_file)
-
-    return features
-
-def _get_features(provider, service, cache_file):
+def _get_features(provider, service, update_cache):
     driver = util.load_drivers('services', names=provider)[provider].driver
-    features = driver.get_features(service)
+    features = driver.get_features(service, update_cache=update_cache)
     features.index = features.index.map(lambda x: 'webservice://%s::%s::%s' % (provider,service,x))
-    util.mkdir_if_doesnt_exist(os.path.split(cache_file)[0])
-    features.to_hdf(cache_file, 'table')
 
     return features

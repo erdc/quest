@@ -2,6 +2,7 @@ from builtins import object
 import abc
 from future.utils import with_metaclass
 from dsl import util
+import os
 import ulmo
 import pandas as pd
 
@@ -10,18 +11,26 @@ class WebServiceBase(with_metaclass(abc.ABCMeta, object)):
     """Base class for data services plugins
     """
 
-    def __init__(self, cache_dir=None, use_cache=True, update_frequency='M'):
-        self.cache_dir = cache_dir
-        self.use_cache = use_cache
-        self.update_frequency = update_frequency
+    def __init__(self, uid=None, use_cache=True, update_frequency='M'):
+        self.uid = uid
+        self.use_cache = use_cache #not implemented
+        self.update_frequency = update_frequency #not implemented
         self._register()
 
-    def get_features(self, service):
+    def get_features(self, service, update_cache=False):
         """Get Features associated with service.
 
         Take a series of query parameters and return a list of 
         locations as a geojson python dictionary
-        """        
+        """
+        cache_file = os.path.join(util.get_cache_dir(self.uid), service + '_features.h5')
+        if not update_cache:
+            try:
+                return pd.read_hdf(cache_file, 'table')
+            except:
+                print 'updating cache'
+                pass
+
         features = self._get_features(service)
         params = self._get_parameters(service, features)
         if isinstance(params, pd.DataFrame):
@@ -32,6 +41,8 @@ class WebServiceBase(with_metaclass(abc.ABCMeta, object)):
             features['parameters'] = ','.join(params['parameters'])
             features['parameter_codes'] = ','.join(params['parameter_codes'])
 
+        util.mkdir_if_doesnt_exist(os.path.split(cache_file)[0])
+        features.to_hdf(cache_file, 'table')
         return features
 
     def get_services(self, filters={}):
@@ -93,4 +104,3 @@ class SingleFileBase(WebServiceBase):
         
     def _download_dataset_options(self, service):
         return {}
-
