@@ -96,7 +96,7 @@ class SingleFileBase(WebServiceBase):
     eg elevation raster etc
     """
     def _download_dataset(self, path, service, feature, parameter, **kwargs):
-        feature = self.get_features(service)[feature]
+        feature = self.get_features(service).ix[feature]
         download_url = feature['download_url']
         extract_from_zip = feature.get('extract_from_zip', '')
         save_path = ulmo.util.download_tiles(path, [download_url], extract_from_zip)[0]

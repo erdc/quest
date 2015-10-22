@@ -54,7 +54,8 @@ class UsgsNedService(SingleFileBase):
             ned.get_raster_availability(service, (-180, -90, 180, 90))
         )
         features['parameters'] = 'elevation'
-        return features.rename(columns={'download url': 'download_url'})
+        features['file_format'] = 'raster'
+        return features.rename(columns={'download url': 'download_url', 'format': 'extract_from_zip'})
         
     def _get_parameters(self, service, features=None):
         return {
