@@ -36,6 +36,7 @@ from .datasets import (
     )
 
 from .features import (
+        add_to_collection,
         get_features,
         new_feature,
         update_feature,

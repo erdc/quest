@@ -67,13 +67,22 @@ def mkdir_if_doesnt_exist(dir_path):
 def parse_uri(uri):
     """parse uri and return dictionary
 
-    webservice://<webservice>::<service>::<feature>::<parameter>::<dataset>
-    collection://<collection>::<service>::<feature>::<parameter>::<dataset>
+    webservice://<webservice>::<datalayer>::<feature>::<parameter>::<dataset>
+    collection://<collection>::<feature>::<parameter>::<dataset>
     """
-    keys = ['name', 'service', 'feature', 'parameter', 'dataset']
+    if isinstance(uri, dict):
+        return uri
+
     uri_dict = {}
     uri_dict['resource'], remainder = uri.split('://')
     parts = remainder.split('::')
+    
+    if uri_dict['resource']=='webservice':
+        keys = ['uid', 'service', 'feature', 'parameter', 'dataset']
+
+    if uri_dict['resource']=='collection':
+        keys = ['uid', 'feature', 'parameter', 'dataset']
+    
     uri_dict.update({k: parts[i].strip() if i < len(parts) else None for i, k in enumerate(keys)})
     return uri_dict
 
@@ -113,7 +122,7 @@ def load_drivers(namespace, names=None):
 def load_service(uri):
     if not isinstance(uri, dict):
         uri = parse_uri(uri)
-    return load_drivers('services', names=uri['name'])[uri['name']].driver
+    return load_drivers('services', names=uri['uid'])[uri['uid']].driver
 
 
 def remove_key(d, key):

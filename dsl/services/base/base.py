@@ -21,6 +21,7 @@ class WebServiceBase(with_metaclass(abc.ABCMeta, object)):
         locations as a geojson python dictionary
         """        
         features = self._get_features(service)
+        features['external_feature_id'] = features.index
         params = self._get_parameters(service, features)
         if isinstance(params, pd.DataFrame):
             groups = params.groupby('feature_id').groups

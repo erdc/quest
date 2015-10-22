@@ -5,10 +5,24 @@ from __future__ import print_function
 from jsonrpc import dispatcher
 from .. import util
 import os
+import pandas as pd
 import shutil
 import yaml
 
+
 COLLECTION_METADATA_FILE = 'dsl.yml'
+
+
+@dispatcher.add_method
+def delete_from_collection(collection, uris):
+    """Remove uris to collection
+    """
+    uris = util.listify(uris)
+    for uri in uris:
+        _delete_from_collection(collection, uri)
+    
+    return
+
 
 @dispatcher.add_method
 def get_collections(filters=None):
@@ -120,6 +134,33 @@ def delete_collection(uid, delete_data=True):
     del collections[uid]
     _write_collections(collections)
     return collections
+
+
+def _collection_features_file(collection):
+    collection = _load_collections().get(collection)
+    if collection is None:
+        raise ValueError('Collection Not Found')
+
+    path = collection.get('path')
+    if path is None:
+        path = os.path.join(util.get_data_dir(), collection)
+
+    util.mkdir_if_doesnt_exist(path)
+    return os.path.join(path, 'features.h5')
+
+
+def _read_collection_features(collection):
+    features_file = _collection_features_file(collection)
+    try:
+        features = pd.read_hdf(features_file, 'table')
+    except:
+        features = pd.DataFrame()
+    return features
+
+
+def _write_collection_features(collection, features):
+    features_file = _collection_features_file(collection)
+    features.to_hdf(features_file, 'table')
 
 
 def _load_collections():
