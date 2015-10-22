@@ -3,7 +3,6 @@
 """
 from .base import WebServiceBase
 import pandas as pd
-import os
 from ulmo.ncdc import ghcn_daily, gsod
 from ulmo.ncdc.ghcn_daily.core import _get_inventory as _get_ghcn_inventory
 from .. import util
@@ -108,5 +107,8 @@ class NcdcService(WebServiceBase):
 
         return pmap
 
-    def _download_data(self, feature, parameter, path, start=None, end=None, period=None):
+    def _download_dataset(self, path, service, feature, **kwargs):
+        pass
+
+    def _download_dataset_options(self, service):
         pass

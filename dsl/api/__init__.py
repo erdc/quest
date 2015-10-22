@@ -26,12 +26,10 @@ from .collections import (
     )
 
 from .datasets import (
-        stage_dataset,
-        download_staged_dataset,
         download_dataset,
+        download_dataset_options,
         update_dataset,
         describe_dataset,
-        open_dataset,
         view_dataset,
     )
 

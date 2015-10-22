@@ -1,13 +1,9 @@
 """DSL wrapper for USGS NWIS Services
 
 """
-from .base import WebServiceBase
-import pickle
+from .base import SingleFileBase
 import pandas as pd
-import os
 import requests
-from ulmo.ncdc import ghcn_daily, gsod
-from ulmo.ncdc.ghcn_daily.core import _get_inventory as _get_ghcn_inventory
 from .. import util
 
 
@@ -73,7 +69,7 @@ def _read_metadata(short_name):
 def _read_granules(short_name, page_num):
     return requests.get(granules_url % (short_name, page_num)).json()['feed']['entry']
 
-class NasaService(WebServiceBase):
+class NasaService(SingleFileBase):
     def _register(self):
         self.metadata = {
             'display_name': 'NASA Web Services',
@@ -127,7 +123,8 @@ class NasaService(WebServiceBase):
         coords = features['geom_coords'].apply(lambda x: pd.np.array(x).mean(axis=1))
         features['longitude'] = coords.apply(lambda x: x.flatten()[0])
         features['latitude'] = coords.apply(lambda x: x.flatten()[1])
-        #features['download_url'] = features['links'].apply(lambda x: link['href'] for link in x if link['type']=='application/zip')
+        features['download_url'] = features['links'].apply(lambda x: [link['href'] for link in x if link.get('type')=='application/zip'][0])
+
         return features
 
     def _get_parameters(self, service, features=None):
@@ -135,6 +132,3 @@ class NasaService(WebServiceBase):
             'parameters': ['elevation'],
             'parameter_codes': ['elevation'],
         }
-
-    def _download_data(self, feature, parameter, path, start=None, end=None, period=None):
-        pass
