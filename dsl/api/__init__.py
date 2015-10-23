@@ -55,6 +55,16 @@ from .parameters import (
         delete_parameters,   
     )
 
+
+from .projects import (
+       add_project,
+       new_project,
+       delete_project,
+       get_projects,
+       set_active_project,
+   )
+
+
 from .services import (
         get_providers,
         get_services,
