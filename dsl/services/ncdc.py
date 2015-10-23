@@ -24,6 +24,7 @@ class NcdcService(WebServiceBase):
             'ghcn-daily': {
                 'display_name': 'NCDC GHCN Daily',
                 'description': 'Daily Meteorologic Data from the Global Historic Climate Netword',
+                'service_type': 'geo-discrete',
                 'parameters': self._parameter_map('ghcn-daily').values(),
                 'unmapped_parameters_available': True,
                 'geom_type': 'Point',
@@ -36,6 +37,7 @@ class NcdcService(WebServiceBase):
             'gsod': {
                 'display_name': 'NCDC GSOD',
                 'description': 'Daily Meteorologic Data from the Global Summary of thr Day',
+                'service_type': 'geo-discrete',
                 'parameters': self._parameter_map('gsod').values(),
                 'unmapped_parameters_available': True,
                 'geom_type': 'Point',

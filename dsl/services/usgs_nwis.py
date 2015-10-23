@@ -26,6 +26,7 @@ class NwisService(WebServiceBase):
             'iv': {
                 'display_name': 'NWIS Instantaneous Values Service',
                 'description': 'Retrieve current streamflow and other real-time data for USGS water sites since October 1, 2007',
+                'service_type': 'geo-discrete',
                 'parameters': ['streamflow', 'gage_height', 'water_temperature'],
                 'unmapped_parameters_available': True,
                 'geom_type': 'Point',
@@ -40,6 +41,7 @@ class NwisService(WebServiceBase):
             'dv': {
                 'display_name': 'NWIS Daily Values Service',
                 'description': 'Retrieve historical summarized daily data about streams, lakes and wells. Daily data available for USGS water sites include mean, median, maximum, minimum, and/or other derived values.',
+                'service_type': 'geo-discrete',
                 'parameters': ['streamflow', 'gage_height', 'water_temperature'],
                 'unmapped_parameters_available': True,
                 'geom_type': 'Point',

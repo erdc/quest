@@ -86,6 +86,7 @@ class NasaService(SingleFileBase):
             metadata = _read_metadata(short_name)
             metadata['display_name'] = metadata.pop('title')
             metadata['description'] = metadata.pop('summary')
+            metadata['service_type'] = 'geo-discrete'
             metadata['bounding_boxes'] = [[float(x) for x in metadata['boxes'][0].split()]]
             metadata.update({
                 'parameters': ['elevation'],

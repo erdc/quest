@@ -38,6 +38,7 @@ class UsgsNedService(SingleFileBase):
             services[service] = { 
                 'display_name': 'USGS National Elevation Dataset %s' % description,
                 'description': 'Retrieve USGS NED at %s resolution' % description,
+                'service_type': 'geo-discrete',
                 'geographical_areas': ['Alaska', 'USA', 'Hawaii'],
                 'parameters': ['elevation'],
                 'unmapped_parameters_available': False,
