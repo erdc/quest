@@ -63,7 +63,7 @@ Notes:
   - A design goal is that downloaded data is reasonably structured and usable even if you don't use DSL
   - A project is a folder that has some metadata and a set of collections
   - All collections in a project are saved in subdirectories of the main project folder for portability
-  - Only one project can be active at a time
+  - Only one project can be active at a time, if none is specified a project called 'default' will be created and used
   - Other projects can be opened as 'local' web services and features/data 'downloaded' in to the current project
   - Only one dataset (with linear progression of versions) can exist in a (collection,parameter,feature) tuple. i.e. You cannot have two temperature datasets like 2015 Temperature and 2013 Temperature in the same collection+feature. You will either need to copy the feature with a new feature_id or copy to a new collection.
   - Any 'project' can be added as a user defined DSL service (either from a local/network drive or http folder). In that case, the 'project' is equivalent to a 'provider' and each 'collection' is equivalent to a 'service'
