@@ -25,7 +25,7 @@ def add_to_collection(collection, uris):
 
 
 @dispatcher.add_method
-def get_features(uris, geom_type=None, parameter=None, bbox=None, as_dataframe=False, update_cache=False):
+def get_features(uris, geom_type=None, parameter=None, bbox=None, tags=None, as_dataframe=False, update_cache=False):
     """
     currently ignores parameter and dataset portion of uri
     if uris contain feature, then return exact feature.
@@ -45,6 +45,7 @@ def get_features(uris, geom_type=None, parameter=None, bbox=None, as_dataframe=F
                 services = [uri['service']]
 
             for service in services:
+                # seamless not implemented yet
                 tmp_feats = _get_features(uri['name'], service, update_cache=update_cache)
                 if uri['feature'] is not None:
                     tmp_feats = tmp_feats[tmp_feats['external_feature_id']==uri['feature']]
@@ -57,6 +58,9 @@ def get_features(uris, geom_type=None, parameter=None, bbox=None, as_dataframe=F
             features.append(tmp_feats)
 
     features = pd.concat(features)
+
+    if tags:
+        NotImplementedError('Tag search not implemented')
 
     if bbox:
         xmin, ymin, xmax, ymax = [float(x) for x in util.listify(bbox)]
