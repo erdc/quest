@@ -68,11 +68,16 @@ def mkdir_if_doesnt_exist(dir_path):
         os.makedirs(dir_path)
 
 
+def get_projects_index():
+    settings = get_settings()
+    return _abs_path(settings['PROJECTS_INDEX_FILE'], mkdir=False)
+
+
 def parse_uri(uri):
     """parse uri and return dictionary
 
-    webservice://<webservice>::<datalayer>::<feature>::<parameter>::<dataset>
-    collection://<collection>::<feature>::<parameter>::<dataset>
+    webservice://<uid>::<datalayer>::<feature>::<parameter>
+    project://<uid>::<collection>::<feature>::<parameter>::<dataset>
     """
     if isinstance(uri, dict):
         return uri
@@ -82,10 +87,10 @@ def parse_uri(uri):
     parts = remainder.split('::')
     
     if uri_dict['resource']=='webservice':
-        keys = ['uid', 'service', 'feature', 'parameter', 'dataset']
+        keys = ['uid', 'service', 'feature', 'parameter']
 
-    if uri_dict['resource']=='collection':
-        keys = ['uid', 'feature', 'parameter', 'dataset']
+    if uri_dict['resource']=='project':
+        keys = ['uid', 'collection', 'feature', 'parameter', 'dataset']
     
     uri_dict.update({k: parts[i].strip() if i < len(parts) else None for i, k in enumerate(keys)})
     return uri_dict
