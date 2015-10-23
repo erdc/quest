@@ -59,8 +59,13 @@ DSL_USER_SERVICES       list of web/file uris to user defined DSL services      
 
 You can add any extra settings needed by a plugin here as well using the keyword:arg structure.
 
-Notes:
-  - A design goal is that downloaded data is reasonably structured and usable even if you don't use DSL
+Design Goals:
+  - Data downloaded through DSL should be reasonably structured, portable and usable even if you don't use DSL later
+  - A DSL project (defined below), should be usable as a user defined DSL service from either a folder or http url
+  - Be able to easily convert a folder of structured data into a read-only user defined DSL service by adding a few metadata files
+
+
+Projects and Collections:  
   - A project is a folder that has some metadata and a set of collections
   - All collections in a project are saved in subdirectories of the main project folder for portability
   - Only one project can be active at a time, if none is specified a project called 'default' will be created and used
@@ -68,6 +73,9 @@ Notes:
   - Only one dataset (with linear progression of versions) can exist in a (collection,parameter,feature) tuple. i.e. You cannot have two temperature datasets like 2015 Temperature and 2013 Temperature in the same collection+feature. You will either need to copy the feature with a new feature_id or copy to a new collection.
   - Any 'project' can be added as a user defined DSL service (either from a local/network drive or http folder). In that case, the 'project' is equivalent to a 'provider' and each 'collection' is equivalent to a 'service'
   - There will be a way to convert folders of non DSL data into a user defined service by adding a dsl_project.yml to the folder with appropriate metadata. These will be read-only projects.
+
+
+Services:
   - There will be three types of services available (use the service_type filter in dsl.api.get_service() to return a specific list)
         - geo-discrete: These are what we currently use, feature based, features have location info
         - geo-seamless: This is for seamless datasets. There is no get_features function. Instead you pass a geometric feature (bbox, line etc) to the service and the data is extracted and returned (eg. GEBCO Global Bathymetry data)
