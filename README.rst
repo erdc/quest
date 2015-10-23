@@ -33,8 +33,8 @@ Usage Examples
 >>> services_json = dsl.api.get_services(as_json=True) #as pretty printed json string
 
 
-Configuration and Directory Structure
-=====================================
+DSL Design
+==========
 
 DSL can be configured in three ways:
 
