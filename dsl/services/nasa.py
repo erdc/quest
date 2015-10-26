@@ -13,30 +13,30 @@ granules_url = 'https://cmr.earthdata.nasa.gov/search/granules.json?short_name=%
 
 def _read_metadata(short_name):
     #return requests.get(collections_url % short_name).json()['feed']['entry'][0]
-    if short_name=='SRTMGL3N':
+    if short_name=='SRTMGL3':
         metadata = {
             u'archive_center': u'LPDAAC',
             u'boxes': [u'-56 -180 60 180'],
             u'browse_flag': False,
             u'coordinate_system': u'CARTESIAN',
             u'data_center': u'LPDAAC_ECS',
-            u'dataset_id': u'NASA Shuttle Radar Topography Mission Global 3 arc second number V003',
-            u'id': u'C204582037-LPDAAC_ECS',
-            u'links': [{u'href': u'http://dx.doi.org/10.5067/MEaSUREs/SRTM/SRTMGL3N.003',
-              u'hreflang': u'en-US',
-              u'rel': u'http://esipfed.org/ns/fedsearch/1.1/metadata#',
-              u'title': u'Data set landing page at the LP DAAC (MiscInformation)'}],
+            u'dataset_id': u'NASA Shuttle Radar Topography Mission Global 3 arc second V003',
+            u'id': u'C204582034-LPDAAC_ECS',
+            u'links': [{u'href': u'http://dx.doi.org/10.5067/MEaSUREs/SRTM/SRTMGL3.003',
+            u'hreflang': u'en-US',
+            u'rel': u'http://esipfed.org/ns/fedsearch/1.1/metadata#',
+            u'title': u'Data set landing page at the LP DAAC (MiscInformation)'}],
             u'online_access_flag': False,
             u'orbit_parameters': {},
             u'original_format': u'ECHO10',
             u'processing_level_id': u'3',
-            u'short_name': u'SRTMGL3N',
-            u'summary': u'NASA Shuttle Radar Topography Mission Global 3 arc second number',
+            u'short_name': u'SRTMGL3',
+            u'summary': u"Created using a conventional 'taking looks' technique of averaging pixels to decrease the effects of speckle and increase radiometric accuracy using the original postings.",
             u'time_end': u'2000-02-21T23:59:59.000Z',
             u'time_start': u'2000-02-11T00:00:00.000Z',
-            u'title': u'NASA Shuttle Radar Topography Mission Global 3 arc second number V003',
-            u'updated': u'2015-09-02T10:31:07.438Z',
-            u'version_id': u'003'
+            u'title': u'NASA Shuttle Radar Topography Mission Global 3 arc second V003',
+            u'updated': u'2015-09-02T10:31:06.540Z',
+            u'version_id': u'003',
         }
 
     if short_name=='SRTMGL30':
@@ -62,7 +62,7 @@ def _read_metadata(short_name):
             u'time_start': u'2000-02-11T00:00:00.000Z',
             u'title': u'NASA Shuttle Radar Topography Mission Global 30 arc second V002',
             u'updated': u'2015-09-02T10:31:07.011Z',
-            u'version_id': u'002'
+            u'version_id': u'002',
         }
     return metadata
 
@@ -101,7 +101,7 @@ class NasaService(SingleFileBase):
 
     def _service_dict(self):
         return {
-            'srtm-3-arc-second': 'SRTMGL3N', 
+            'srtm-3-arc-second': 'SRTMGL3', 
             'srtm-30-arc-second': 'SRTMGL30',
         }
 
