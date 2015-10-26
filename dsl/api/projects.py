@@ -6,24 +6,29 @@ from .. import util
 import os
 import yaml
 
+
 @dispatcher.add_method
-def add_project:
+def add_project():
     pass
+
        
 @dispatcher.add_method
-def new_project:
+def new_project():
     pass
 
-@dispatcher.add_method
-def delete_project:
-    pass
 
 @dispatcher.add_method
-def get_projects:
+def delete_project():
     pass
 
+
 @dispatcher.add_method
-def set_active_project:
+def get_projects():
+    pass
+
+
+@dispatcher.add_method
+def set_active_project():
     pass
 
 
