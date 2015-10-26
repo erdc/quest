@@ -46,7 +46,7 @@ def get_features(uris, geom_type=None, parameter=None, bbox=None, tags=None, as_
 
             for service in services:
                 # seamless not implemented yet
-                tmp_feats = _get_features(uri['name'], service, update_cache=update_cache)
+                tmp_feats = _get_features(uri['uid'], service, update_cache=update_cache)
                 if uri['feature'] is not None:
                     tmp_feats = tmp_feats[tmp_feats['external_feature_id']==uri['feature']]
                 features.append(tmp_feats)

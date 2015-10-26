@@ -12,7 +12,7 @@ def download_dataset(source_uri, target_uri=None, **kwargs):
     If source uri is not a collection then target_uri must be specified
     """
     source_uri = util.parse_uri(source_uri)
-    provider = source_uri['name']
+    provider = source_uri['uid']
     service = source_uri['service']
     feature = source_uri['feature']
     parameter = source_uri['parameter']
