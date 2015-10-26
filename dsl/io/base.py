@@ -2,13 +2,13 @@
 
 
 """
+from builtins import object
 import abc
+from future.utils import with_metaclass
 
-class IoBase(object):
+class IoBase(with_metaclass(abc.ABCMeta, object)):
     """Base class for I/O for different file formats
     """
-
-    __metaclass__ = abc.ABCMeta
 
     def __init__(self):
         self.register()
@@ -20,11 +20,11 @@ class IoBase(object):
         """
 
     @abc.abstractmethod
-    def read(self):
+    def read_features(self, filters=None):
         """Read data from format
         """
 
     @abc.abstractmethod
-    def write(self):
+    def read_data(self):
         """Write data to format
         """

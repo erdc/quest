@@ -1,0 +1,8 @@
+DSL_BASE_DIR: dsl
+DSL_CACHE_DIR: cache
+DSL_PROJECT_FILE: dsl_project.yml
+DSL_PROJECTS_INDEX_FILE: dsl_projects_index.yml
+DSL_CONFIG_FILE: dsl_config.yml
+DSL_USER_SERVICES:
+    usgs-ned1: http://localhost/data
+    iraq-vitd: file:///tmp/data

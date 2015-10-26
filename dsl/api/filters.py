@@ -5,12 +5,13 @@ This will eventually hold filter related functionality
 from .. import util
 from jsonrpc import dispatcher
 
+
 @dispatcher.add_method
 def get_filters(names=None, group=False, datatype=None, level=None, **kwargs):
     """List available filter plugins
     """
     names = util.listify(names)
-    filters = [dict(name=k, **v.metadata) for k,v in util.load_drivers('filters', names=names).iteritems()]
+    filters = [dict(name=k, **v.metadata) for k,v in util.load_drivers('filters', names=names).items()]
 
     if datatype is not None:
         filters = [f for f in filters if datatype in f['operates_on']['datatype']]

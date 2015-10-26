@@ -22,7 +22,7 @@ def get_providers(name=None, **kwargs):
         A python list representation of the providers
     """
     services = util.load_drivers('services')
-    providers = {service.metadata['provider']['name']:service.metadata['provider'] for service in services.itervalues()}
+    providers = {service.metadata['provider']['name']:service.metadata['provider'] for service in services.values()}
 
     if name is not None:
         providers = [provider for provider in providers if provider['name']==name]

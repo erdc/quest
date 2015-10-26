@@ -1,0 +1,6 @@
+include *.rst
+include *.txt
+include *.yml
+
+recursive-include dsl *.py
+recursive-include dsl *.smtk

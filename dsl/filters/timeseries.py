@@ -1,6 +1,7 @@
 """Timeseries Filters
 
 """
+from __future__ import print_function
 
 from .base import FilterBase
 from ..api import get_collection, add_to_collection
@@ -84,7 +85,7 @@ class TsRemoveOutliers(FilterBase):
         datatype = dataset[location][parameter]['datatype']
 
         if not datatype=='timeseries':
-            print 'Cannot apply this plugin to not timeseries data'
+            print('Cannot apply this plugin to not timeseries data')
             return
 
         # hard coding to work only with ts_geojson for now
@@ -172,7 +173,7 @@ class TsResample(FilterBase):
         datatype = dataset[location][parameter]['datatype']
 
         if not datatype=='timeseries':
-            print 'Cannot apply this plugin to not timeseries data'
+            print('Cannot apply this plugin to not timeseries data')
             return
 
         # hard coding to work only with ts_geojson for now
@@ -267,7 +268,7 @@ class ToAdh(FilterBase):
         datatype = dataset[location][parameter]['datatype']
 
         if not datatype=='timeseries':
-            print 'Cannot apply this plugin to not timeseries data'
+            print('Cannot apply this plugin to not timeseries data')
             return
 
         # hard coding to work only with ts_geojson for now
@@ -281,7 +282,7 @@ class ToAdh(FilterBase):
         df.index = (df.index - df.index[0]).seconds
         path = os.path.join(export_path, filename)
         df.to_csv(path, index_label='seconds_from_starttime')
-        print 'File exported to %s' % path
+        print('File exported to %s' % path)
 
         return collection
 

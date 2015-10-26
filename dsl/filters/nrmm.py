@@ -1,6 +1,8 @@
 """NRMM Filter
 
 """
+from __future__ import print_function
+from builtins import str
 
 from .base import FilterBase
 from ..api import get_collection, add_to_collection
@@ -35,10 +37,10 @@ class NrmmFromFfd(FilterBase):
 
 
     def apply_filter(self, collection_name, **kwargs):
-        available_themes = self.get_themes().keys()
+        available_themes = list(self.get_themes().keys())
 
         themes = []
-        for k, v in kwargs.items():
+        for k, v in list(kwargs.items()):
             if k in available_themes:
                 if v:
                     themes.append(k)
@@ -49,7 +51,7 @@ class NrmmFromFfd(FilterBase):
         #calculate bounding box
         service = self.find_service_name(collection)
         if service is None:
-            print 'no terrain-ffd data available in collection: %s' % collection_name
+            print('no terrain-ffd data available in collection: %s' % collection_name)
             return collection
 
         locations = collection['datasets'][service]['locations']['features']
@@ -71,7 +73,7 @@ class NrmmFromFfd(FilterBase):
         path = collection['path']        
         vitd_dir = os.path.join(path, 'terrain-ffd')
         #call plugin.
-        print 'calling FFD to NRMM plugin for bounding box - %s, with themes - %s' % (bounding_box, themes)
+        print('calling FFD to NRMM plugin for bounding box - %s, with themes - %s' % (bounding_box, themes))
         args = [
             'ffd2nrmm',
             '-i', '"%s"' % vitd_dir,
@@ -89,14 +91,14 @@ class NrmmFromFfd(FilterBase):
         if resolution is not None:
             args += ['-r', str(resolution)]
 
-        print '--> %s' % (' '.join(args))
+        print('--> %s' % (' '.join(args)))
         try:
             subprocess.call(' '.join(args))
-            print 'success'
-            print 'nrmm file written to: %s' % os.path.join(path, nrmm_file)
+            print('success')
+            print('nrmm file written to: %s' % os.path.join(path, nrmm_file))
             collection = add_to_collection(collection_name, 'local', new_locs, parameters='terrain-ffd')
         except:
-            print 'plugin call failed, using dummy output'
+            print('plugin call failed, using dummy output')
             time.sleep(10)
             collection = add_to_collection(collection_name, 'local', new_locs, parameters='terrain-ffd')
 
@@ -110,7 +112,7 @@ class NrmmFromFfd(FilterBase):
                 "description": "Name of collection",
             }, 
         }
-        for k, v in themes.iteritems():
+        for k, v in themes.items():
             properties.update({
                     k: {
                         "type": "boolean",
@@ -148,9 +150,9 @@ class NrmmFromFfd(FilterBase):
         return themes
 
     def find_service_name(self, collection):
-        for service, dataset in collection['datasets'].iteritems():
-            row = dataset['data'].itervalues().next() #get first element of dict
-            if 'terrain-ffd' in row.keys():
+        for service, dataset in collection['datasets'].items():
+            row = next(iter(dataset['data'].values())) #get first element of dict
+            if 'terrain-ffd' in list(row.keys()):
                 datatype = row['terrain-ffd'].get('datatype')
                 if datatype=='terrain-ffd':
                     return service
@@ -181,10 +183,10 @@ class NrmmFromVitd(FilterBase):
 
 
     def apply_filter(self, collection_name, **kwargs):
-        available_themes = self.get_themes().keys()
+        available_themes = list(self.get_themes().keys())
 
         themes = []
-        for k, v in kwargs.items():
+        for k, v in list(kwargs.items()):
             if k in available_themes:
                 if v:
                     themes.append(k)
@@ -195,7 +197,7 @@ class NrmmFromVitd(FilterBase):
         #calculate bounding box
         service = self.find_service_name(collection)
         if service is None:
-            print 'no terrain-vitd data available in collection: %s' % collection_name
+            print('no terrain-vitd data available in collection: %s' % collection_name)
             return collection
 
         locations = collection['datasets'][service]['locations']['features']
@@ -217,7 +219,7 @@ class NrmmFromVitd(FilterBase):
         path = collection['path']        
         vitd_dir = os.path.join(path, 'terrain-vitd')
         #call plugin.
-        print 'calling VITD to NRMM plugin for bounding box - %s, with themes - %s' % (bounding_box, themes)
+        print('calling VITD to NRMM plugin for bounding box - %s, with themes - %s' % (bounding_box, themes))
         args = [
             'vitd2nrmm',
             '-i', '"%s"' % vitd_dir,
@@ -235,14 +237,14 @@ class NrmmFromVitd(FilterBase):
         if resolution is not None:
             args += ['-r', str(resolution)]
 
-        print '--> %s' % (' '.join(args))
+        print('--> %s' % (' '.join(args)))
         try:
             subprocess.call(' '.join(args))
-            print 'success'
-            print 'nrmm file written to: %s' % os.path.join(path, nrmm_file)
+            print('success')
+            print('nrmm file written to: %s' % os.path.join(path, nrmm_file))
             collection = add_to_collection(collection_name, 'local', new_locs, parameters='terrain-nrmm')
         except:
-            print 'plugin call failed, using dummy output'
+            print('plugin call failed, using dummy output')
             time.sleep(10)
             collection = add_to_collection(collection_name, 'local', new_locs, parameters='terrain-nrmm')
 
@@ -256,7 +258,7 @@ class NrmmFromVitd(FilterBase):
                 "description": "Name of collection",
             }, 
         }
-        for k, v in themes.iteritems():
+        for k, v in themes.items():
             properties.update({
                     k: {
                         "type": "boolean",
@@ -294,9 +296,9 @@ class NrmmFromVitd(FilterBase):
         return themes
 
     def find_service_name(self, collection):
-        for service, dataset in collection['datasets'].iteritems():
-            row = dataset['data'].itervalues().next() #get first element of dict
-            if 'terrain-vitd' in row.keys():
+        for service, dataset in collection['datasets'].items():
+            row = next(iter(dataset['data'].values())) #get first element of dict
+            if 'terrain-vitd' in list(row.keys()):
                 datatype = row['terrain-vitd'].get('datatype')
                 if datatype=='terrain-vitd':
                     return service

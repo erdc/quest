@@ -9,6 +9,8 @@ This script does the following:
 
 note: sites were chosen visually in DataBrowser and by checking that they had recent data. 
 """
+from __future__ import print_function
+from builtins import input
 import dsl
 import datetime
 import shutil
@@ -17,8 +19,8 @@ import os
 ######################################################################################################################
 # create a lejeune demo collection:
 
-collection_name = raw_input('Enter Collection Name (default lejeune-data):')
-save_path = raw_input('Enter output path to save plots and adh exported data (default is $ENVSIM_DSL_DIR/adh):')
+collection_name = input('Enter Collection Name (default lejeune-data):')
+save_path = input('Enter output path to save plots and adh exported data (default is $ENVSIM_DSL_DIR/adh):')
 if save_path=='':
     save_path = os.path.join(dsl.util.get_dsl_dir(), 'adh')
 
@@ -27,12 +29,12 @@ dsl.util.mkdir_if_doesnt_exist(save_path)
 if collection_name=='':
     collection_name = 'lejeune-data'
 
-print 'creating collection %s' % collection_name
+print('creating collection %s' % collection_name)
 dsl.api.new_collection(collection_name)
 
 ######################################################################################################################
 # add sites to this location
-print 'adding sites to collection'
+print('adding sites to collection')
 
 # ndbc
 #dsl.api.add_to_collection(collection_name, 'noaa-ndbc', ['41036','41037'])
@@ -110,7 +112,7 @@ dsl.api.apply_filter('ts-2-adh', collection_name=collection_name, service="noaa-
 # export ned 1/9 arc second to USGSDEM format
 dsl.api.apply_filter('export-raster', collection_name=collection_name, service="usgs-ned-19", location="53174dbde4b0cd4cd83c4421", parameter="elevation", export_path=save_path, filename='usgs_ned', fmt='USGSDEM')
 
-print 'copying image files to %s' % save_path
-for name, path in images.iteritems():
-    print 'copying %s: %s' % (name, path)
+print('copying image files to %s' % save_path)
+for name, path in images.items():
+    print('copying %s: %s' % (name, path))
     shutil.copy(path, save_path)

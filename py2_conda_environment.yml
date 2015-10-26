@@ -1,0 +1,33 @@
+# conda environment file for python 2, includes packages needed for testing
+# create a conda virtual env using:
+#   conda env create -n myenv --file py2_conda_environment.yml
+#   source activate myenv (use 'activate myenv' on windows)
+#   python setup.py develop
+#
+# optionally run tests:
+#   python setup.py test
+
+name: dsl
+
+channels:
+    - ioos
+
+dependencies:
+    - python=2.7
+    - gdal
+    - fiona>=1.5.1
+    - futures
+    - rasterio>=0.23.0
+    - numpy
+    - geojson
+    - jsonschema
+    - ulmo>=0.8.1
+    - pyoos
+    - pyyaml
+    - matplotlib>=1.4.0
+    - click
+    - werkzeug
+    - pip:
+      - json-rpc
+      - jsonrpc-requests
+      - stevedore

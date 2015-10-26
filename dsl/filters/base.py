@@ -1,10 +1,10 @@
+from builtins import object
 import abc
+from future.utils import with_metaclass
 
-class FilterBase(object):
+class FilterBase(with_metaclass(abc.ABCMeta, object)):
     """Base class for data filters
     """
-
-    __metaclass__ = abc.ABCMeta
 
     def __init__(self):
         self.register()

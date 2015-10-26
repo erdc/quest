@@ -2,6 +2,7 @@
 
 
 """
+from __future__ import print_function
 from .base import IoBase
 from .. import util
 from geojson import Feature, Point, dump
@@ -70,4 +71,4 @@ class TsGeojson(IoBase):
         with open(path, 'w') as f:
             dump(feature, f)
 
-        print 'file written to: %s' % path
+        print('file written to: %s' % path)
