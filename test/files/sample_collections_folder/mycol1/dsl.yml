@@ -1,0 +1,35 @@
+dsl:
+    file_type: collection
+    file_version: 1.0
+
+metadata:
+    display_name: Sample MyCol1
+    description: This Collection is for testing
+    service_type: geo-discrete
+    tags:
+
+# features can be hdf5/geojson/csv
+features:
+    file: features.h5
+    format: hdf5
+
+#dict or list
+parameters:
+    temperature:
+        display_name: Temperature
+        features:
+            089233123:
+                datasets:
+                    - dsakjfhdsf31ehfdf623r3bjhasd:
+                        display_name: default
+                        description: blah blah
+                        format: hdf5
+                        format_kwargs: 
+                        dsl_call:
+                    - adydwegey2367491231432423787:
+                        display_name: derived
+                        description: haha
+                        format: hdf5
+
+            089234771:
+                - 
