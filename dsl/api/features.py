@@ -26,7 +26,7 @@ def add_to_collection(collection, uris):
 
 
 @dispatcher.add_method
-def get_features(uris, geom_type=None, parameter=None, bbox=None, tags=None, as_dataframe=False, update_cache=False):
+def get_features(uris, geom_type=None, parameter=None, bbox=None, filters=None, as_dataframe=False, update_cache=False):
     """Retrieve list of features from a uri.
 
     currently ignores parameter and dataset portion of uri
@@ -34,16 +34,12 @@ def get_features(uris, geom_type=None, parameter=None, bbox=None, tags=None, as_
 
     Parameters
     ----------
-        uris: str, comma separated str, list of str
-            list of uris to search in for features
-        geom_type: str
-            filter results by geom_type - point/line/polygon
-        parameter: str
-            filter results by parameter
-        bbox: str
-            filter results by bounding box
-        tags: dict
-            filter results by key/value pairs. NOTIMPLEMENTED
+        uris (string, comma separated strings, list of strings): list of uris to 
+            search in for features
+        geom_type (string): filter results by geom_type, i.e. point/line/polygon
+        parameter (string): filter results by parameter
+        bbox (string): filter results by bounding box
+        filters (dict): filter results by key/value pairs. NOTIMPLEMENTED
         as_dataframe: bool
             If True, return features as pandas DataFrame, else
             return a geojson style dict
@@ -81,8 +77,10 @@ def get_features(uris, geom_type=None, parameter=None, bbox=None, tags=None, as_
 
     features = pd.concat(features)
 
-    if tags:
-        NotImplementedError('Tag search not implemented')
+    if filters:
+        for k, v in filters.items():
+            idx = features[k] == v
+            features = features[idx]
 
     if bbox:
         xmin, ymin, xmax, ymax = [float(x) for x in util.listify(bbox)]
