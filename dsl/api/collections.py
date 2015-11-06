@@ -36,8 +36,7 @@ def get_collections():
 
     Returns
     -------
-    collections : dict
-        Available collections keyed by the collection uid  
+    collections (dict): Available collections keyed by the collection uid  
     """
     collections = {}
     for uid, path in _load_collections().iteritems():
@@ -61,19 +60,16 @@ def new_collection(uid, display_name=None, metadata={}, path=None):
     file in the folder for dsl metadata and adding a reference to the 
     master collections metadata folder.
 
-    Parameters
-    ----------
-        name : str
-            The name of the collection
-        metadata : dict 
-            optional metadata values
-        path: ``None`` or str,
-            If ``None`` use default dsl location for collections otherwise use specified path. 
+    Args:
+        uid (string): uid of the collection used in all dsl function calls,
+            must be unique.
+        display_name (string, optional): Display name for collection, default is uid
+        metadata (dict, optional): metadata values, difault is empty dict
+        path (string, optional): folder in which to save collection, default is a folder 
+            named the same as the uid
 
-    Returns
-    -------
-        collection : dict
-            The collection in the format {uid: metadata}
+    Returns:
+        A dict representing the collection keyed on uid
     """
 
     uid = uid.lower()
