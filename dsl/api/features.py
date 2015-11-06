@@ -13,6 +13,7 @@ from .collections import _read_collection_features, _write_collection_features
 @dispatcher.add_method
 def add_to_collection(collection, uris):
     """Add uris to collection
+    todo NEEDS WORK
     """
     uris = util.listify(uris)
     new_features = get_features(uris, as_dataframe=True)
@@ -26,9 +27,30 @@ def add_to_collection(collection, uris):
 
 @dispatcher.add_method
 def get_features(uris, geom_type=None, parameter=None, bbox=None, tags=None, as_dataframe=False, update_cache=False):
-    """
+    """Retrieve list of features from a uri.
+
     currently ignores parameter and dataset portion of uri
     if uris contain feature, then return exact feature.
+
+    Parameters
+    ----------
+        uris: str, comma separated str, list of str
+            list of uris to search in for features
+        geom_type: str
+            filter results by geom_type - point/line/polygon
+        parameter: str
+            filter results by parameter
+        bbox: str
+            filter results by bounding box
+        tags: dict
+            filter results by key/value pairs. NOTIMPLEMENTED
+        as_dataframe: bool
+            If True, return features as pandas DataFrame, else
+            return a geojson style dict
+    Returns
+    -------
+        features: geojson style dict or pandas.DataFrame
+
     """
     uris = util.listify(uris)
     features = []
@@ -86,9 +108,16 @@ def get_features(uris, geom_type=None, parameter=None, bbox=None, tags=None, as_
 
 
 def new_feature(uri, geom_type, geom_coords, metadata={}):
-    """
-    return new feature id
+    """Add a new feature to a collection 
     ignore feature/parameter/dataset in uri
+
+    NOT FULLY IMPLEMENTED
+
+    Returns
+    -------
+        feature_id : str
+            uid of newly created feature
+    
     """
     uri = util.parse_uri(uri)
     if uri['resource']!='collection':
@@ -97,21 +126,25 @@ def new_feature(uri, geom_type, geom_coords, metadata={}):
     feature = {
         util.uid()
     }
-    return
+    return feature
     
 
     
-def update_feature():
-    """return 
+def update_feature(uri, metadata={}):
+    """Change metadata and properties of feature to a uri (probably only collection) 
     """
     pass
 
     
 def delete_feature(uri):
+    """Remove feature/metadata from a collection?
+    """
     pass
 
 
 def search_features(filters=None):
+    """SOme sort of free form search through features. NOTIMPLEMENTED.
+    """
     pass
 
 

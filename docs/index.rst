@@ -4,8 +4,8 @@ Welcome to Data Services Library's documentation!
 Contents:
 
 .. toctree::
-   :maxdepth: 1
-   
+   :maxdepth: 2
+
    install
    quickstart
    examples

@@ -14,6 +14,24 @@ settings = {}
 
 @dispatcher.add_method
 def get_settings():
+    """Get the settings currently being used by DSL
+    
+    Returns
+    -------
+        settings : dict
+            Dictionary of current settings
+
+    Example
+    -------
+    >>> dsl.api.get_settings()
+    {'BASE_DIR': '/Users/dharhas/Library/Application Support/dsl',
+     'CACHE_DIR': 'cache',
+     'COLLECTIONS_INDEX_FILE': 'dsl_collections.yml',
+     'CONFIG_FILE': 'dsl_config.yml',
+     'DATA_DIR': 'data',
+     'LOCAL_SERVICES': [],
+     'WEB_SERVICES': []}
+    """
     global settings
     if not settings:
         update_settings()
@@ -22,6 +40,34 @@ def get_settings():
 
 @dispatcher.add_method
 def update_settings(config={}):
+    """Update settings currently being used by DSL
+
+    Only key/value pairs that are provided are updated, 
+    any other existing pairs are left unchanged or defaults 
+    are used.
+
+    Parameters
+    ----------
+        config : dict
+            key/value pairs of settings that are to be updated.
+
+    Returns
+    -------
+        True
+            Settings where updated successfully
+
+    Example
+    -------
+    >>> dsl.api.update_settings({'BASE_DIR':'/Users/dharhas/mydsldir'})
+    {'BASE_DIR': '/Users/dharhas/mydsldir',
+     'CACHE_DIR': 'cache',
+     'COLLECTIONS_INDEX_FILE': 'dsl_collections.yml',
+     'CONFIG_FILE': 'dsl_config.yml',
+     'DATA_DIR': 'data',
+     'LOCAL_SERVICES': [],
+     'WEB_SERVICES': []}
+    """
+
     global settings
     config.setdefault('BASE_DIR', _default_dsl_dir())
     config.setdefault('CACHE_DIR', 'cache')
@@ -30,14 +76,40 @@ def update_settings(config={}):
     config.setdefault('COLLECTIONS_INDEX_FILE', 'dsl_collections.yml')
     config.setdefault('WEB_SERVICES', [])
     config.setdefault('LOCAL_SERVICES', [])
-
     settings.update(config)
-    msg =  'Settings updated'
-    return msg
+
+    return True
 
 
 @dispatcher.add_method
 def update_settings_from_file(filename):
+    """Update settings currently being used by DSL from a yaml file
+
+    Only key/value pairs that are provided are updated, 
+    any other existing pairs are left unchanged or defaults 
+    are used.
+
+    Parameters
+    ----------
+        filename : str
+            path to yaml file containing settings
+
+    Returns
+    -------
+        True
+            Settings were updated successfully from file
+
+    Example
+    -------
+    >>> dsl.api.update_settings_from_file('/Users/dharhas/mydslsettings.yml')
+    {'BASE_DIR': '/Users/dharhas/mydsl2dir',
+     'CACHE_DIR': 'cache',
+     'COLLECTIONS_INDEX_FILE': 'dsl_collections.yml',
+     'CONFIG_FILE': 'dsl_config.yml',
+     'DATA_DIR': 'data',
+     'LOCAL_SERVICES': [],
+     'WEB_SERVICES': []}
+    """
     config = yaml.safe_load(open(filename, 'r'))
 
     #convert keys to uppercase
@@ -49,18 +121,37 @@ def update_settings_from_file(filename):
     log.info('Settings read from %s' % filename)
 
     update_settings(config=config)
-    msg =  'Settings updated from file'
-    return msg
+    log.info('Settings updated from file %s' % filename)
+    return True
 
 
 @dispatcher.add_method
 def save_settings(filename):
+    """Save settings currently being used by DSL to a yaml file
+
+    Parameters
+    ----------
+
+        filename : str
+            path to yaml file in which to save settings
+
+    Returns
+    -------
+    
+        True
+            Settings saved successfully
+
+    Example
+    -------
+    >>> dsl.api.save_settings('/Users/dharhas/mydslsettings.yml')
+    """
     with open(filename, 'w') as f:
         f.write(yaml.safe_dump(settings, default_flow_style=False))
         log.info('Settings written to %s' % filename)
     
-    msg =  'Settings written to %s' % filename
-    return msg
+    log.info('Settings written to %s' % filename)
+
+    return True
 
 
 def _default_dsl_dir():

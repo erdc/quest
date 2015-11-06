@@ -22,7 +22,7 @@ __all__ = [
     'download_dataset_options',
     'update_dataset',
     'describe_dataset',
-    'view_dataset',
+    'vizualize_dataset',
     'add_to_collection',
     'get_features',
     'new_feature',
@@ -72,7 +72,7 @@ from .datasets import (
         download_dataset_options,
         update_dataset,
         describe_dataset,
-        view_dataset,
+        vizualize_dataset,
     )
 
 from .features import (

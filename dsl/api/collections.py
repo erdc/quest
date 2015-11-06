@@ -16,7 +16,9 @@ COLLECTION_METADATA_FILE = 'dsl.yml'
 
 @dispatcher.add_method
 def delete_from_collection(collection, uris):
-    """Remove uris to collection
+    """Remove uris from collection
+
+    TODO
     """
     uris = util.listify(uris)
     for uri in uris:
@@ -26,16 +28,16 @@ def delete_from_collection(collection, uris):
 
 
 @dispatcher.add_method
-def get_collections(filters=None):
-    """Get list of available collections.
+def get_collections():
+    """Get available collections.
 
     Collections are folders on the local disk that contain downloaded or created data
     along with associated metadata.
 
     Returns
     -------
-    collections : dict,
-        A python dict representation of the list of available collections 
+    collections : dict
+        Available collections keyed by the collection uid  
     """
     collections = {}
     for uid, path in _load_collections().iteritems():
@@ -61,16 +63,17 @@ def new_collection(uid, display_name=None, metadata={}, path=None):
 
     Parameters
     ----------
-    name : str,
-        The name of the collection
-    metadata : ``dict`` containing optional metadata values
-    path: ``None`` or str,
-        If ``None`` use default dsl location for collections otherwise use specified path. 
+        name : str
+            The name of the collection
+        metadata : dict 
+            optional metadata values
+        path: ``None`` or str,
+            If ``None`` use default dsl location for collections otherwise use specified path. 
 
     Returns
     -------
-    collection : dict,
-        A python dict representation of the collection in the format {uid: metadata}
+        collection : dict
+            The collection in the format {uid: metadata}
     """
 
     uid = uid.lower()
@@ -85,8 +88,8 @@ def new_collection(uid, display_name=None, metadata={}, path=None):
         abs_path = path
 
     util.mkdir_if_doesnt_exist(abs_path)
-
-    collections.update({uid: path})
+    #*****TODO ****
+    collections.update({uid: {'folder': path}})
     _write_collections(collections)
     
     metadata.update({
@@ -124,17 +127,17 @@ def delete_collection(uid, delete_data=False):
 
     Parameters
     ----------
-    name : str,
-        The name of the collection
+        name : str,
+            The name of the collection
 
-    delete_data : bool,
-        if True all data in the collection will be deleted
+        delete_data : bool,
+            if True all data in the collection will be deleted
 
-    Returns
-    -------
-    collections : dict,
-        A python dict representation of the list of available collections, 
-        the updated collections list is also written to a json file.
+        Returns
+        -------
+        collections : dict,
+            A python dict representation of the list of available collections, 
+            the updated collections list is also written to a json file.
     """
     collections = _load_collections()
 
