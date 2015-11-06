@@ -2,3 +2,4 @@ dsl.egg-info/
 *.pyc
 dsl/.DS_Store
 .DS_Store
+docs/_build/

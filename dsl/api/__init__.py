@@ -6,6 +6,48 @@ Data Services Library.
 
 __version__ = 1.0
 
+# __all__ needed for autodoc to work
+__all__ = [
+    'get_settings',
+    'save_settings',
+    'update_settings',
+    'update_settings_from_file',
+    'get_dsl_version',
+    'get_api_version',
+    'get_collections',
+    'new_collection',
+    'update_collection',
+    'delete_collection',
+    'download_dataset',
+    'download_dataset_options',
+    'update_dataset',
+    'describe_dataset',
+    'view_dataset',
+    'add_to_collection',
+    'get_features',
+    'new_feature',
+    'update_feature',
+    'delete_feature',
+    'get_filters', 
+    'apply_filter', 
+    'apply_filter_options',
+    'get_mapped_parameters',
+    'get_parameters',
+    'new_parameter',
+    'update_parameters',
+    'delete_parameters',
+    'add_project',
+    'new_project',
+    'delete_project',
+    'get_projects',
+    'set_active_project',
+    'get_providers',
+    'get_services',
+    'new_service',
+    'update_service',
+    'delete_service',
+]
+
 from ..util import (
         get_settings,
         save_settings, 
