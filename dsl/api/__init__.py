@@ -34,8 +34,8 @@ __all__ = [
     'get_mapped_parameters',
     'get_parameters',
     'new_parameter',
-    'update_parameters',
-    'delete_parameters',
+    'update_parameter',
+    'delete_parameter',
     'add_project',
     'new_project',
     'delete_project',
@@ -93,8 +93,8 @@ from .parameters import (
         get_mapped_parameters,
         get_parameters,
         new_parameter,
-        update_parameters,
-        delete_parameters,   
+        update_parameter,
+        delete_parameter,   
     )
 
 
