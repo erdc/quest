@@ -16,12 +16,16 @@ from stevedore import driver
 
 @dispatcher.add_method
 def get_providers():
+    """Return list of Providers.
+    """
     providers = util.load_drivers('services')
     return {k: v.metadata for k, v in providers.iteritems()}
 
 
 @dispatcher.add_method
 def get_services(parameter=None, service_type=None):
+    """Return list of Services.
+    """
     providers = util.load_drivers('services')
     services = {}
     for provider, svc in providers.iteritems():
@@ -36,16 +40,23 @@ def get_services(parameter=None, service_type=None):
 
 @dispatcher.add_method
 def new_service():
+    """Create a new DSL service from 'user' collection/website etc.
+    SHOULD THIS BE CALLED ADD_SERVICE
+    """
     pass
 
 
 @dispatcher.add_method
 def update_service():
+    """Update 'user' service metadata or path
+    """
     pass
 
 
 @dispatcher.add_method
 def delete_service():
+    """Remove 'user' service
+    """
     pass
 
 

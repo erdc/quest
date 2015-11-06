@@ -34,11 +34,15 @@ def get_filters(names=None, group=False, datatype=None, level=None, **kwargs):
 
 @dispatcher.add_method
 def apply_filter(name, **kwargs):
+    """Apply Filter to dataset
+    """
     driver = util.load_drivers('filters', name)[name].driver
     return driver.apply_filter(**kwargs)
 
 
 @dispatcher.add_method
 def apply_filter_options(name, **kwargs):
+    """Retreive kwarg options for apply_filter
+    """
     driver = util.load_drivers('filters', name)[name].driver
     return driver.apply_filter_options()

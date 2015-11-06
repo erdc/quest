@@ -9,26 +9,39 @@ import yaml
 
 @dispatcher.add_method
 def add_project():
+    """Add a existing DSL project to the list of available projects
+
+    This to add existing dsl projects to current session
+    """
     pass
 
        
 @dispatcher.add_method
 def new_project():
+    """Create a new DSL project and add it to list of available projects
+    """
     pass
 
 
 @dispatcher.add_method
 def delete_project():
+    """Delete project from list of available projects. DO WE NEED A SEPERATE 
+    REMOVE_PROJECT? DO WE DELETE ALL DATA UNDER PROJECT?
+    """
     pass
 
 
 @dispatcher.add_method
 def get_projects():
+    """Get list of available projects
+    """
     pass
 
 
 @dispatcher.add_method
 def set_active_project():
+    """Set active DSL project
+    """
     pass
 
 

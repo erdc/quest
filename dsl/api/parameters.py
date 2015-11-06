@@ -22,6 +22,8 @@ def get_mapped_parameters():
 
 @dispatcher.add_method
 def get_parameters(uri, update_cache=False):
+    """get list of all parameters available, even unmapped ones
+    """
     uri = util.parse_uri(uri)
     if uri['resource']=='webservice':
         parameters = _read_cached_parameters(uri['name'], uri['service'], update_cache=update_cache)
@@ -33,14 +35,20 @@ def get_parameters(uri, update_cache=False):
 
 
 def new_parameter():
+    """Add new parameter to collection
+    """
     pass
 
 
-def update_parameters():
+def update_parameter():
+    """Add update parameter metadata in a collection
+    """
     pass
 
    
-def delete_parameters():
+def delete_parameter():
+    """delete a parameter in a collection
+    """
     pass
    
 
