@@ -32,7 +32,7 @@ class WebServiceBase(with_metaclass(abc.ABCMeta, object)):
                 pass
 
         features = self._get_features(service)
-        features['external_feature_id'] = features.index
+        features['feature_id'] = features.index
         params = self._get_parameters(service, features)
         if isinstance(params, pd.DataFrame):
             groups = params.groupby('feature_id').groups

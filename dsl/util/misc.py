@@ -76,8 +76,8 @@ def get_projects_index():
 def parse_uri(uri):
     """parse uri and return dictionary
 
-    webservice://<uid>::<datalayer>::<feature>::<parameter>
-    project://<uid>::<collection>::<feature>::<parameter>::<dataset>
+    service://<uid>::<datalayer>::<feature>::<parameter>
+    collection://<uid>::<feature>::<parameter>::<dataset>
     """
     if isinstance(uri, dict):
         return uri
@@ -86,11 +86,11 @@ def parse_uri(uri):
     uri_dict['resource'], remainder = uri.split('://')
     parts = remainder.split('::')
     
-    if uri_dict['resource']=='webservice':
+    if uri_dict['resource']=='service':
         keys = ['uid', 'service', 'feature', 'parameter']
 
-    if uri_dict['resource']=='project':
-        keys = ['uid', 'collection', 'feature', 'parameter', 'dataset']
+    if uri_dict['resource']=='collection':
+        keys = ['uid', 'feature', 'parameter', 'dataset']
     
     uri_dict.update({k: parts[i].strip() if i < len(parts) else None for i, k in enumerate(keys)})
     return uri_dict

@@ -25,8 +25,11 @@ def get_parameters(uri, update_cache=False):
     """get list of all parameters available, even unmapped ones
     """
     uri = util.parse_uri(uri)
-    if uri['resource']=='webservice':
-        parameters = _read_cached_parameters(uri['name'], uri['service'], update_cache=update_cache)
+    if uri['resource']=='service':
+        parameters = _read_cached_parameters(uri['uid'], uri['service'], update_cache=update_cache)
+        if uri['feature']:
+            idx = parameters['feature_id'] == uri['feature']
+            parameters = parameters[idx]
 
     if uri['resource']=='collection':
         raise NotImplementedError

@@ -39,7 +39,8 @@ def get_collections():
     collections (dict): Available collections keyed by the collection uid  
     """
     collections = {}
-    for uid, path in _load_collections().iteritems():
+    for uid, collection in _load_collections().iteritems():
+        path = collection['path']
         if not os.path.isabs(path):
             path = os.path.join(util.get_data_dir(), path)
 
@@ -84,8 +85,7 @@ def new_collection(uid, display_name=None, metadata={}, path=None):
         abs_path = path
 
     util.mkdir_if_doesnt_exist(abs_path)
-    #*****TODO ****
-    collections.update({uid: {'folder': path}})
+    collections.update({uid: {'path': path}})
     _write_collections(collections)
     
     metadata.update({
@@ -115,7 +115,7 @@ def update_collection(uid, metadata):
 
 
 @dispatcher.add_method
-def delete_collection(uid, delete_data=False):
+def delete_collection(uid, delete_data=True):
     """delete a collection
 
     Deletes a collection from the collections metadata file.
@@ -185,7 +185,7 @@ def _get_collection_file(uid):
     if uid not in collections.keys():
         raise ValueError('Collection %s not found' % uid)
 
-    path = collections[uid]
+    path = collections[uid]['path']
 
     if not os.path.isabs(path):
         path = os.path.join(util.get_data_dir(), path)

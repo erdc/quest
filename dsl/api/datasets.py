@@ -60,7 +60,7 @@ def download_dataset_options(source_uri):
         TODO add examples
     """
     source_uri = util.parse_uri(source_uri)
-    provider = source_uri['name']
+    provider = source_uri['uid']
     service = source_uri['service']
     feature = source_uri['feature']
     parameter = source_uri['parameter']
