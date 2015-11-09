@@ -13,23 +13,6 @@ features:
     file: features.h5
     format: hdf5
 
-#dict or list
 parameters:
-    temperature:
-        display_name: Temperature
-        features:
-            089233123:
-                datasets:
-                    - dsakjfhdsf31ehfdf623r3bjhasd:
-                        display_name: default
-                        description: blah blah
-                        format: hdf5
-                        format_kwargs: 
-                        dsl_call:
-                    - adydwegey2367491231432423787:
-                        display_name: derived
-                        description: haha
-                        format: hdf5
-
-            089234771:
-                - 
+    file: parameters.yml
+    format: yml

@@ -1,0 +1,48 @@
+dsl:
+    file_type: parameters
+    file_version: 1.0
+
+parameters:
+    temperature:
+        display_name: Temperature
+        features:
+            768dca4d5707436996f60d07a690895e:
+                datasets:
+                    - bdabc53d886e473c88fd7a192fab198f:
+                        display_name: downloaded
+                        description: Data Downloaded from USGS-NWIS
+                        format: timeseries-hdf5
+                        format_kwargs: 
+                        dsl_call: 
+                            func: download_dataset 
+                            start_date: 2014-01-01 
+                            end_date: 2014-12-31
+                    - 281abe0b57744303a25b04548573e497:
+                        display_name: filtered
+                        description: Ran spike filter
+                        format: hdf5
+                        format_kwargs:
+                        dsl_call:
+                            func: apply_filter
+                            sigma: 3
+
+            3bfa8817f86b4b55bac5cc9018452686:
+                datasets
+                    - c08eafaab5514d01932229b6a15ec88c:
+                        display_name: downloaded
+                        description: Data Downloaded from USGS-NWIS
+                        format: timeseries-hdf5
+                        format_kwargs: 
+                        dsl_call:
+    elevation:
+        display_name: Land Surface Elevation
+            features:
+                8cd3587c3aba4f16bffd48d7faa65596:
+                    datasets:
+                        - 1234d87a2bac4626afbbe6ebc92b3ffe:
+                            display_name: downloaded
+                            description: Data Downloaded from USGS-NED
+                            format: gdal-raster
+                            format_kwargs: 
+                            dsl_call: 
+                                func: download_dataset 

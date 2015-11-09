@@ -7,7 +7,12 @@ import os
 import pandas as pd
 from .. import util
 from .services import get_services
-from .collections import _read_collection_features, _write_collection_features
+from .collections import (
+        _read_collection_features, 
+        _write_collection_features,
+        _load_collection,
+        _write_collection,
+    )
 
 
 @dispatcher.add_method
@@ -71,7 +76,11 @@ def add_features_to_collection(collection, uris, geom_type=None, parameter=None,
     _write_collection_features(collection, new_features)
 
     if parameter:
-        #WRITE NEW PARAMETER TO PARAMETER YML FILE
+        col =_load_collection()
+        p = col.get('parameters')
+        #****todo****
+        # WRITE NEW PARAMETER TO PARAMETER YML FILE
+        # LOOK AT parameters.yml file in test directory
         pass
     
     return True

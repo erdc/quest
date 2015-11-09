@@ -58,6 +58,7 @@ Example Directory Structure::
             mycollection_1/                 # example collection inside myproject_1
                 dsl_collection.yml          # collection metadata
                 features.h5                 # master list of features inside collection, can also be csv, geojson
+                parameters.yml              # file to keep track of available parameters, download status, versions of downloaded data etc
                 temperature/                # folder for all temperature data in mycollection_1
                     feature_1/              #   folder for temperature data at feature_1 (feature_1 coords & metadata are in the master features.h5)
                         66a4e39d            #       temperature datasets at feature_1
