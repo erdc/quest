@@ -40,24 +40,23 @@ def get_collections():
     """
     collections = {}
     for uid, collection in _load_collections().iteritems():
-        path = collection['path']
-        if not os.path.isabs(path):
-            path = os.path.join(util.get_data_dir(), path)
+        folder = collection['folder']
+        path = os.path.join(util.get_data_dir(), folder)
 
         metadata = _load_collection(uid)['metadata']
         metadata.update({
             'uid': uid,
-            'absolute_path': path,
+            'folder': path,
         })
         collections[uid] = metadata
     return collections
 
 
 @dispatcher.add_method     
-def new_collection(uid, display_name=None, metadata={}, path=None):
+def new_collection(uid, display_name=None, metadata={}, folder=None):
     """Create a new collection
 
-    Create a new collection by creating a new folder and placing a json
+    Create a new collection by creating a new folder and placing a yaml
     file in the folder for dsl metadata and adding a reference to the 
     master collections metadata folder.
 
@@ -66,7 +65,7 @@ def new_collection(uid, display_name=None, metadata={}, path=None):
             must be unique.
         display_name (string, optional): Display name for collection, default is uid
         metadata (dict, optional): metadata values, difault is empty dict
-        path (string, optional): folder in which to save collection, default is a folder 
+        folder (string, optional): folder in which to save collection, default is a folder 
             named the same as the uid
 
     Returns:
@@ -78,14 +77,12 @@ def new_collection(uid, display_name=None, metadata={}, path=None):
     if uid in collections.keys():
         raise ValueError('Collection %s already exists, please use a unique name', uid)
 
-    if path is None:
-        path = uid
-        abs_path = os.path.join(util.get_data_dir(), path)
-    else:
-        abs_path = path
-
-    util.mkdir_if_doesnt_exist(abs_path)
-    collections.update({uid: {'path': path}})
+    if folder is None:
+        folder = uid
+    
+    path = os.path.join(util.get_data_dir(), folder)
+    util.mkdir_if_doesnt_exist(path)
+    collections.update({uid: {'folder': folder}})
     _write_collections(collections)
     
     metadata.update({
@@ -93,7 +90,7 @@ def new_collection(uid, display_name=None, metadata={}, path=None):
         'description': metadata.get('description', None),
         'created_on': datetime.datetime.now().isoformat(),
     })
-    collection = {'metadata': metadata, 'features': None}
+    collection = {'metadata': metadata, 'features': 'features.h5'}
     _write_collection(uid, collection)
 
     return collection
@@ -158,11 +155,9 @@ def _collection_features_file(collection):
     if collection is None:
         raise ValueError('Collection Not Found')
 
-    path = collection.get('path')
-    if path is None:
-        path = os.path.join(util.get_data_dir(), collection)
+    folder = collection['folder']
+    path = os.path.join(util.get_data_dir(), folder)
 
-    util.mkdir_if_doesnt_exist(path)
     return os.path.join(path, 'features.h5')
 
 
@@ -185,10 +180,8 @@ def _get_collection_file(uid):
     if uid not in collections.keys():
         raise ValueError('Collection %s not found' % uid)
 
-    path = collections[uid]['path']
-
-    if not os.path.isabs(path):
-        path = os.path.join(util.get_data_dir(), path)
+    folder = collections[uid]['folder']
+    path = os.path.join(util.get_data_dir(), folder)
 
     return os.path.join(path, 'dsl.yml')
 
