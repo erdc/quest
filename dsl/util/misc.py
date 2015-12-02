@@ -78,6 +78,7 @@ def parse_uri(uri):
 
     service://<uid>::<datalayer>::<feature>::<parameter>
     collection://<uid>::<feature>::<parameter>::<dataset>
+    project://<project_uid>::<collection_uid>::<feature>::<parameter>::<dataset>
     """
     if isinstance(uri, dict):
         return uri

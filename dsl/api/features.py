@@ -121,7 +121,7 @@ def get_features(uris, geom_type=None, parameter=None, parameter_code=None,
 
         if uri['parameter'] and parameter is None:
             parameter = uri['parameter']
-
+        
         if uri['resource']=='service':
             if uri['service'] is None:
                 svc = util.load_service(uri)
