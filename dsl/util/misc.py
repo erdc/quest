@@ -76,6 +76,16 @@ def get_projects_index():
 def parse_uri(uri):
     """parse uri and return dictionary
 
+    uri definition
+        <protocol[:version>]://<provider[:service]>::<feature[:query]>::<parameter[:]>::<dataset[:]>
+
+    examples:
+        service://usgs-nwis:iv::0803200::temperature
+        service://gebco:bathymetry::bbox:-40,40,-40,40::elevation
+
+        project://myproj:mycol::93d2e03543224096b14ce2eacd2eb275::temperature::472e7a7dd177405192fcb47a0c959c9d
+        project://myproj:mycol::52b588510ce948b2a2515da02024c53e::temperature::
+
     service://<uid>::<datalayer>::<feature>::<parameter>
     collection://<uid>::<feature>::<parameter>::<dataset>
     project://<project_uid>::<collection_uid>::<feature>::<parameter>::<dataset>
