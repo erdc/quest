@@ -63,4 +63,4 @@ def _write_projects_index(projects):
     """
     path = util.get_projects_index()
     with open(path, 'w') as f:
-        yaml.dump(projects, f, default_flow_style=False)
+        yaml.safe_dump(projects, f, default_flow_style=False)

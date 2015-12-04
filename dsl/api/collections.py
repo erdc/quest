@@ -217,7 +217,7 @@ def _write_collection(uid, collection):
 
     """
     with open(_get_collection_file(uid), 'w') as f:
-        yaml.dump(collection, f, default_flow_style=False)
+        yaml.safe_dump(collection, f, default_flow_style=False)
 
 
 def _write_collections(collections):
@@ -225,4 +225,4 @@ def _write_collections(collections):
     """
     path = util.get_collections_index()
     with open(path, 'w') as f:
-        yaml.dump(collections, f, default_flow_style=False)
+        yaml.safe_dump(collections, f, default_flow_style=False)
