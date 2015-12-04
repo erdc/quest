@@ -76,8 +76,8 @@ def add_features_to_collection(collection, uris, geom_type=None, parameter=None,
     _write_collection_features(collection, new_features)
 
     if parameter:
-        col =_load_collection()
-        p = col.get('parameters')
+        #col =_load_collection(collection)
+        #p = col.get('parameters')
         #****todo****
         # WRITE NEW PARAMETER TO PARAMETER YML FILE
         # LOOK AT parameters.yml file in test directory
