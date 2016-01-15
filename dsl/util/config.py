@@ -1,5 +1,7 @@
-"""Module wide settings
+"""Module wide settings.
+
 """
+
 from __future__ import print_function
 import appdirs
 from jsonrpc import dispatcher
@@ -14,8 +16,8 @@ settings = {}
 
 @dispatcher.add_method
 def get_settings():
-    """Get the settings currently being used by DSL
-    
+    """Get the settings currently being used by DSL.
+
     Returns
     -------
         settings : dict
@@ -38,12 +40,13 @@ def get_settings():
 
     return settings
 
+
 @dispatcher.add_method
 def update_settings(config={}):
     """Update settings currently being used by DSL
 
-    Only key/value pairs that are provided are updated, 
-    any other existing pairs are left unchanged or defaults 
+    Only key/value pairs that are provided are updated,
+    any other existing pairs are left unchanged or defaults
     are used.
 
     Parameters
@@ -85,8 +88,8 @@ def update_settings(config={}):
 def update_settings_from_file(filename):
     """Update settings currently being used by DSL from a yaml file
 
-    Only key/value pairs that are provided are updated, 
-    any other existing pairs are left unchanged or defaults 
+    Only key/value pairs that are provided are updated,
+    any other existing pairs are left unchanged or defaults
     are used.
 
     Parameters
@@ -112,11 +115,11 @@ def update_settings_from_file(filename):
     """
     config = yaml.safe_load(open(filename, 'r'))
 
-    #convert keys to uppercase
+    # convert keys to uppercase
     config = dict((k.upper(), v) for k, v in config.items())
     print(config)
 
-    #recursively parse for local services
+    # recursively parse for local services
     config['LOCAL_SERVICES'] = _expand_dirs(config['LOCAL_SERVICES'])
     log.info('Settings read from %s' % filename)
 
@@ -137,7 +140,7 @@ def save_settings(filename):
 
     Returns
     -------
-    
+
         True
             Settings saved successfully
 
@@ -148,7 +151,7 @@ def save_settings(filename):
     with open(filename, 'w') as f:
         f.write(yaml.safe_dump(settings, default_flow_style=False))
         log.info('Settings written to %s' % filename)
-    
+
     log.info('Settings written to %s' % filename)
 
     return True
@@ -170,7 +173,7 @@ def _expand_dirs(local_services):
     expanded = []
     for path in local_services:
         head, tail = os.path.split(path)
-        if tail=='*':
+        if tail == '*':
             for root, dirs, files in os.walk(head):
                 if os.path.exists(os.path.join(root, 'dsl.yml')):
                     expanded.append(root)
