@@ -1,0 +1,18 @@
+# Project File
+# dsl file type information, must contain file_type and file_version
+dsl:
+    file_type: project
+    file_version: 1.0
+
+# metadata must include at least display_name and description
+metadata:
+    display_name: Test Project 2
+    description: Test Description 2
+
+# list of available collections, if blank then search for all sub-directories
+# that have a dsl.yml file
+collections:
+    mycolA:
+        folder: mycolA
+    mycolB:
+        folder: mycolB

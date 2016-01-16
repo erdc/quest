@@ -74,9 +74,7 @@ def update_settings(config={}):
     global settings
     config.setdefault('BASE_DIR', _default_dsl_dir())
     config.setdefault('CACHE_DIR', 'cache')
-    config.setdefault('DATA_DIR', 'data')
-    config.setdefault('CONFIG_FILE', 'dsl_config.yml')
-    config.setdefault('COLLECTIONS_INDEX_FILE', 'dsl_collections.yml')
+    config.setdefault('PROJECTS_DIR', 'projects')
     config.setdefault('WEB_SERVICES', [])
     config.setdefault('LOCAL_SERVICES', [])
     settings.update(config)

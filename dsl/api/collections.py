@@ -23,7 +23,7 @@ def delete_from_collection(collection, uris):
     uris = util.listify(uris)
     for uri in uris:
         _delete_from_collection(collection, uri)
-    
+
     return
 
 
@@ -36,7 +36,7 @@ def get_collections():
 
     Returns
     -------
-    collections (dict): Available collections keyed by the collection uid  
+    collections (dict): Available collections keyed by the collection uid
     """
     collections = {}
     for uid, collection in _load_collections().iteritems():
@@ -52,12 +52,12 @@ def get_collections():
     return collections
 
 
-@dispatcher.add_method     
+@dispatcher.add_method
 def new_collection(uid, display_name=None, metadata={}, folder=None):
     """Create a new collection
 
     Create a new collection by creating a new folder and placing a yaml
-    file in the folder for dsl metadata and adding a reference to the 
+    file in the folder for dsl metadata and adding a reference to the
     master collections metadata folder.
 
     Args:
@@ -65,7 +65,7 @@ def new_collection(uid, display_name=None, metadata={}, folder=None):
             must be unique.
         display_name (string, optional): Display name for collection, default is uid
         metadata (dict, optional): metadata values, difault is empty dict
-        folder (string, optional): folder in which to save collection, default is a folder 
+        folder (string, optional): folder in which to save collection, default is a folder
             named the same as the uid
 
     Returns:
@@ -79,12 +79,12 @@ def new_collection(uid, display_name=None, metadata={}, folder=None):
 
     if folder is None:
         folder = uid
-    
+
     path = os.path.join(util.get_data_dir(), folder)
     util.mkdir_if_doesnt_exist(path)
     collections.update({uid: {'folder': folder}})
     _write_collections(collections)
-    
+
     metadata.update({
         'display_name': metadata.get('display_name', uid),
         'description': metadata.get('description', None),
@@ -129,7 +129,7 @@ def delete_collection(uid, delete_data=True):
         Returns
         -------
         collections : dict,
-            A python dict representation of the list of available collections, 
+            A python dict representation of the list of available collections,
             the updated collections list is also written to a json file.
     """
     collections = _load_collections()
@@ -194,7 +194,7 @@ def _load_collection(uid):
 
     if not os.path.exists(path):
         return {}
-    
+
     with open(path) as f:
         return yaml.safe_load(f)
 
@@ -221,7 +221,7 @@ def _write_collection(uid, collection):
 
 
 def _write_collections(collections):
-    """write list of collections to  file 
+    """write list of collections to  file
     """
     path = util.get_collections_index()
     with open(path, 'w') as f:

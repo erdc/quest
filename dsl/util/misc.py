@@ -29,7 +29,7 @@ def bbox2poly(x1, y1, x2, y2, reverse_order=False):
     if reverse_order:
         x1, y1 = y1, x1
         x2, y2 = y2, x2
-        
+
     xmin, xmax = sorted([float(x1), float(x2)])
     ymin, ymax = sorted([float(y1), float(y2)])
     poly = [(xmin, ymin), (xmin, ymax), (xmax, ymax), (xmax, ymin)]
@@ -68,9 +68,9 @@ def mkdir_if_doesnt_exist(dir_path):
         os.makedirs(dir_path)
 
 
-def get_projects_index():
+def get_projects_dir():
     settings = get_settings()
-    return _abs_path(settings['PROJECTS_INDEX_FILE'], mkdir=False)
+    return _abs_path(settings['PROJECTS_DIR'], mkdir=False)
 
 
 def parse_uri(uri):
@@ -96,13 +96,13 @@ def parse_uri(uri):
     uri_dict = {}
     uri_dict['resource'], remainder = uri.split('://')
     parts = remainder.split('::')
-    
+
     if uri_dict['resource']=='service':
         keys = ['uid', 'service', 'feature', 'parameter']
 
     if uri_dict['resource']=='collection':
         keys = ['uid', 'feature', 'parameter', 'dataset']
-    
+
     uri_dict.update({k: parts[i].strip() if i < len(parts) else None for i, k in enumerate(keys)})
     return uri_dict
 
@@ -113,7 +113,7 @@ def listify(liststr, delimiter=','):
     if liststr is None:
         return None
 
-    return isinstance(liststr, list) and liststr or [s.strip() for s in liststr.split(delimiter)] 
+    return isinstance(liststr, list) and liststr or [s.strip() for s in liststr.split(delimiter)]
 
 
 def list_drivers(namespace):
@@ -136,8 +136,8 @@ def load_drivers(namespace, names=None):
         )
         return dict((x.name, x.obj) for x in mgr)
 
-    return {name: driver.DriverManager(namespace, name, invoke_kwds={'uid': name}, invoke_on_load='True') for name in names} 
-    
+    return {name: driver.DriverManager(namespace, name, invoke_kwds={'uid': name}, invoke_on_load='True') for name in names}
+
 
 def load_service(uri):
     if not isinstance(uri, dict):
