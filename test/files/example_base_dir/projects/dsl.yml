@@ -5,6 +5,7 @@ dsl:
     file_version: 1.0
 
 # projects
+active_project: project1
 projects:
     project1:
         folder: project1

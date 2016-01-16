@@ -5,6 +5,7 @@ from __future__ import print_function
 import datetime
 from jsonrpc import dispatcher
 from .. import util
+from .projects import get_active_project, get_projects
 import os
 import pandas as pd
 import shutil
@@ -41,12 +42,10 @@ def get_collections():
     collections = {}
     for uid, collection in _load_collections().iteritems():
         folder = collection['folder']
-        path = os.path.join(util.get_data_dir(), folder)
-
-        metadata = _load_collection(uid)['metadata']
+        metadata = _load_collection(uid).get('metadata', {})
         metadata.update({
             'uid': uid,
-            'folder': path,
+            'folder': folder,
         })
         collections[uid] = metadata
     return collections
@@ -80,7 +79,7 @@ def new_collection(uid, display_name=None, metadata={}, folder=None):
     if folder is None:
         folder = uid
 
-    path = os.path.join(util.get_data_dir(), folder)
+    path = os.path.join(util.get_projects_dir(), folder)
     util.mkdir_if_doesnt_exist(path)
     collections.update({uid: {'folder': folder}})
     _write_collections(collections)
@@ -139,7 +138,7 @@ def delete_collection(uid, delete_data=True):
         return collections
 
     if delete_data:
-        path = collections[uid]['path']
+        path = collections[uid]['folder']
         if os.path.exists(path):
             print('deleting all data under path:', path)
             shutil.rmtree(path)
@@ -156,7 +155,7 @@ def _collection_features_file(collection):
         raise ValueError('Collection Not Found')
 
     folder = collection['folder']
-    path = os.path.join(util.get_data_dir(), folder)
+    path = os.path.join(_get_collections_dir(), folder)
 
     return os.path.join(path, 'features.h5')
 
@@ -181,9 +180,15 @@ def _get_collection_file(uid):
         raise ValueError('Collection %s not found' % uid)
 
     folder = collections[uid]['folder']
-    path = os.path.join(util.get_data_dir(), folder)
+    return os.path.join(folder, 'dsl.yml')
 
-    return os.path.join(path, 'dsl.yml')
+
+def _get_collections_dir():
+    return get_projects()[get_active_project()]['folder']
+
+
+def _get_collections_index_file():
+    return os.path.join(_get_collections_dir(), 'dsl.yml')
 
 
 def _load_collection(uid):
@@ -191,38 +196,32 @@ def _load_collection(uid):
 
     """
     path = _get_collection_file(uid)
-
-    if not os.path.exists(path):
-        return {}
-
-    with open(path) as f:
-        return yaml.safe_load(f)
+    return util.read_yaml(path)
 
 
 def _load_collections():
     """load list of collections
 
     """
-    path = util.get_collections_index()
-
-    if not os.path.exists(path):
+    path = _get_collections_index_file()
+    collections = util.read_yaml(path).get('collections')
+    if collections is None:
         return {}
 
-    with open(path) as f:
-        return yaml.safe_load(f)
+    return collections
 
 
 def _write_collection(uid, collection):
     """write collection
 
     """
-    with open(_get_collection_file(uid), 'w') as f:
-        yaml.safe_dump(collection, f, default_flow_style=False)
+    util.write_yaml(_get_collection_file(uid), collection)
 
 
 def _write_collections(collections):
     """write list of collections to  file
     """
-    path = util.get_collections_index()
-    with open(path, 'w') as f:
-        yaml.safe_dump(collections, f, default_flow_style=False)
+    path = _get_collections_index_file()
+    contents = util.read_yaml(path)
+    contents.update({'collections': collections})
+    util.write_yaml(path, contents)
