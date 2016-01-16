@@ -117,7 +117,19 @@ def get_active_project():
 def get_projects():
     """Get list of available projects
     """
-    return _load_projects()
+    projects = {}
+    for uid, project in _load_projects().iteritems():
+        path = project['folder']
+        if not os.path.isabs(path):
+            path = os.path.join(util.get_projects_dir(), path)
+
+        metadata = _load_project(uid)['metadata']
+        metadata.update({
+            'uid': uid,
+            'folder': path,
+        })
+        projects[uid] = metadata
+    return projects
 
 
 @dispatcher.add_method
@@ -133,6 +145,11 @@ def set_active_project(uid):
     return uid
 
 
+def _load_project(uid):
+    path = _get_project_file(uid)
+    return util.read_yaml(path)
+
+
 def _load_projects():
     """load list of collections
 
@@ -141,22 +158,22 @@ def _load_projects():
     projects = util.read_yaml(path).get('projects')
     # make sure a default project exists
     if projects is None:
-        print('INSIDE LOOP')
         projects = {
             'default': {'folder': 'default_project'}
         }
         default_dir = os.path.join(util.get_projects_dir(), 'default_project')
         util.mkdir_if_doesnt_exist(default_dir)
+        metadata = {'display_name': 'Default Project',
+                    'description': 'Created by DSL',
+                    'created_on': datetime.datetime.now().isoformat(),
+                    }
+        project = {'metadata': metadata}
+        util.mkdir_if_doesnt_exist(default_dir)
+        util.write_yaml(os.path.join(default_dir, 'dsl.yml'), project)
         _write_projects(projects)
+        set_active_project('default')
 
     return projects
-
-
-def _write_project(uid, project):
-    """write collection
-
-    """
-    util.write_yaml(_get_project_file(uid), project)
 
 
 def _write_projects(projects):
