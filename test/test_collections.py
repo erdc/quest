@@ -16,10 +16,11 @@ def test_new_collection():
     assert len(list(dsl.api.get_collections().keys())) == 1
 
     collection_dir = tempfile.mkdtemp()
-    c = dsl.api.new_collection('test2', {
-                                        'display_name': 'my test collection',
-                                        'tag': 'test tag'
-                                },
+    metadata = {
+        'display_name': 'my test collection',
+        'tag': 'test tag'
+    }
+    c = dsl.api.new_collection('test2', metadata,
                                 folder=collection_dir)
 
     assert len(list(dsl.api.get_collections().keys())) == 2

@@ -50,7 +50,11 @@ def test_delete_project():
 
 
 def set_active_project():
-    assert False, 'Not Implemented'
+    _setup()
+    assert dsl.api.get_active_project() == 'default'
+    dsl.api.new_project('test1')
+    dsl.api.set_active_project('test1')
+    assert dsl.api.get_active_project() == 'test1'
 
 
 def _setup():

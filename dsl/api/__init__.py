@@ -7,7 +7,7 @@ Services Library.
 __version__ = 1.0
 
 # __all__ needed for autodoc to work
-__all__ = [
+__all__ = (
     'get_settings',
     'save_settings',
     'update_settings',
@@ -47,7 +47,7 @@ __all__ = [
     'new_service',
     'update_service',
     'delete_service',
-]
+)
 
 from ..util import (
     get_settings,

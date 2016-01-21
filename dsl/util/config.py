@@ -27,12 +27,10 @@ def get_settings():
     -------
     >>> dsl.api.get_settings()
     {'BASE_DIR': '/Users/dharhas/Library/Application Support/dsl',
-     'CACHE_DIR': 'cache',
-     'COLLECTIONS_INDEX_FILE': 'dsl_collections.yml',
-     'CONFIG_FILE': 'dsl_config.yml',
-     'DATA_DIR': 'data',
-     'LOCAL_SERVICES': [],
-     'WEB_SERVICES': []}
+    'CACHE_DIR': 'cache',
+    'PROJECTS_DIR': 'projects',
+    'USER_SERVICES': [],
+    }
     """
     global settings
     if not settings:
@@ -64,19 +62,16 @@ def update_settings(config={}):
     >>> dsl.api.update_settings({'BASE_DIR':'/Users/dharhas/mydsldir'})
     {'BASE_DIR': '/Users/dharhas/mydsldir',
      'CACHE_DIR': 'cache',
-     'COLLECTIONS_INDEX_FILE': 'dsl_collections.yml',
-     'CONFIG_FILE': 'dsl_config.yml',
-     'DATA_DIR': 'data',
-     'LOCAL_SERVICES': [],
-     'WEB_SERVICES': []}
+     'PROJECTS_DIR': 'projects',
+     'USER_SERVICES': [],
+     }
     """
 
     global settings
     config.setdefault('BASE_DIR', _default_dsl_dir())
     config.setdefault('CACHE_DIR', 'cache')
     config.setdefault('PROJECTS_DIR', 'projects')
-    config.setdefault('WEB_SERVICES', [])
-    config.setdefault('LOCAL_SERVICES', [])
+    config.setdefault('USER_SERVICES', [])
     settings.update(config)
 
     return True
@@ -105,11 +100,9 @@ def update_settings_from_file(filename):
     >>> dsl.api.update_settings_from_file('/Users/dharhas/mydslsettings.yml')
     {'BASE_DIR': '/Users/dharhas/mydsl2dir',
      'CACHE_DIR': 'cache',
-     'COLLECTIONS_INDEX_FILE': 'dsl_collections.yml',
-     'CONFIG_FILE': 'dsl_config.yml',
-     'DATA_DIR': 'data',
-     'LOCAL_SERVICES': [],
-     'WEB_SERVICES': []}
+     'PROJECTS_DIR': 'data',
+     'USER_SERVICES': [],
+     }
     """
     config = yaml.safe_load(open(filename, 'r'))
 
@@ -118,7 +111,7 @@ def update_settings_from_file(filename):
     print(config)
 
     # recursively parse for local services
-    config['LOCAL_SERVICES'] = _expand_dirs(config['LOCAL_SERVICES'])
+    config['USER_SERVICES'] = _expand_dirs(config['USER_SERVICES'])
     log.info('Settings read from %s' % filename)
 
     update_settings(config=config)

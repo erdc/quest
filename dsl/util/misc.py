@@ -47,19 +47,14 @@ def get_cache_dir(service=None):
     return path
 
 
-def get_collections_index():
-    settings = get_settings()
-    return _abs_path(settings['COLLECTIONS_INDEX_FILE'], mkdir=False)
-
-
 def get_dsl_dir():
     settings = get_settings()
     return settings['BASE_DIR']
 
 
-def get_data_dir():
+def get_projects_dir():
     settings = get_settings()
-    return _abs_path(settings['DATA_DIR'])
+    return _abs_path(settings['PROJECTS_DIR'])
 
 
 def mkdir_if_doesnt_exist(dir_path):
