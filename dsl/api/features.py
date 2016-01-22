@@ -5,7 +5,6 @@ Features are unique identifiers with a web service or collection.
 from jsonrpc import dispatcher
 import pandas as pd
 from .. import util
-from .services import get_services
 from .collections import (
         _read_collection_features,
         _write_collection_features,

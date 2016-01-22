@@ -1,12 +1,14 @@
+"""API functions related to Parameters."""
 from jsonrpc import dispatcher
 import pandas as pd
 from .services import get_services
 import os
 from .. import util
 
+
 @dispatcher.add_method
 def get_mapped_parameters():
-    """get list common parameters
+    """get list common parameters.
 
     Returns
     -------
@@ -22,42 +24,38 @@ def get_mapped_parameters():
 
 @dispatcher.add_method
 def get_parameters(uri, update_cache=False):
-    """get list of all parameters available, even unmapped ones
-    """
+    """get list of all parameters available, even unmapped ones."""
     uri = util.parse_uri(uri)
-    if uri['resource']=='service':
-        parameters = _read_cached_parameters(uri['uid'], uri['service'], update_cache=update_cache)
+    if uri['resource'] == 'service':
+        parameters = _read_cached_parameters(uri['uid'], uri['service'],
+                                             update_cache=update_cache)
         if uri['feature']:
             idx = parameters['feature_id'] == uri['feature']
             parameters = parameters[idx]
 
-    if uri['resource']=='collection':
+    if uri['resource'] == 'collection':
         raise NotImplementedError
 
-    return parameters    
+    return parameters
 
 
-def new_parameter():
-    """Add new parameter to collection
-    """
+def new_parameter(uri, parameter_name, ):
+    """Add new parameter to collection."""
     pass
 
 
 def update_parameter():
-    """Add update parameter metadata in a collection
-    """
+    """Add update parameter metadata in a collection."""
     pass
 
-   
+
 def delete_parameter():
-    """delete a parameter in a collection
-    """
+    """delete a parameter in a collection."""
     pass
-   
+
 
 def _read_cached_parameters(provider, service, update_cache=False):
-    """read cached features
-    """
+    """read cached features."""
     cache_file = os.path.join(util.get_cache_dir(), provider, service+'_parameters.h5')
     if update_cache:
         return _get_parameters(provider, service, cache_file)

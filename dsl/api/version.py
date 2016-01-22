@@ -1,9 +1,11 @@
+"""API functions related to versions."""
 import dsl
 from jsonrpc import dispatcher
 
+
 @dispatcher.add_method
 def get_dsl_version():
-    """Return DSL version
+    """Return DSL version.
 
     Returns
     -------
@@ -15,7 +17,7 @@ def get_dsl_version():
 
 @dispatcher.add_method
 def get_api_version():
-    """Return DSL API version
+    """Return DSL API version.
 
     Returns
     -------

@@ -1,6 +1,6 @@
-"""API functions related to data Filters
+"""API functions related to data Filters.
 
-This will eventually hold filter related functionality 
+This will eventually hold filter related functionality
 """
 from .. import util
 from jsonrpc import dispatcher
@@ -8,8 +8,7 @@ from jsonrpc import dispatcher
 
 @dispatcher.add_method
 def get_filters(names=None, group=False, datatype=None, level=None, **kwargs):
-    """List available filter plugins
-    """
+    """List available filter plugins."""
     names = util.listify(names)
     filters = [dict(name=k, **v.metadata) for k,v in util.load_drivers('filters', names=names).items()]
 
@@ -26,7 +25,7 @@ def get_filters(names=None, group=False, datatype=None, level=None, **kwargs):
         filters = [{
                         'type': name,
                         'filters': [_remove_key(item, 'type') for item in group],
-                    } for name, group in itertools.groupby(sorted(filters), 
+                    } for name, group in itertools.groupby(sorted(filters),
                                                            lambda p:p['type'])]
 
     return filters
@@ -34,15 +33,13 @@ def get_filters(names=None, group=False, datatype=None, level=None, **kwargs):
 
 @dispatcher.add_method
 def apply_filter(name, **kwargs):
-    """Apply Filter to dataset
-    """
+    """Apply Filter to dataset."""
     driver = util.load_drivers('filters', name)[name].driver
     return driver.apply_filter(**kwargs)
 
 
 @dispatcher.add_method
 def apply_filter_options(name, **kwargs):
-    """Retreive kwarg options for apply_filter
-    """
+    """Retreive kwarg options for apply_filter."""
     driver = util.load_drivers('filters', name)[name].driver
     return driver.apply_filter_options()

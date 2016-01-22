@@ -1,6 +1,4 @@
-"""API functions related to Collections
-
-"""
+"""API functions related to Collections."""
 from __future__ import print_function
 import datetime
 from jsonrpc import dispatcher
@@ -9,7 +7,6 @@ from .projects import get_active_project, get_projects
 import os
 import pandas as pd
 import shutil
-import yaml
 
 
 COLLECTION_METADATA_FILE = 'dsl.yml'
@@ -17,7 +14,7 @@ COLLECTION_METADATA_FILE = 'dsl.yml'
 
 @dispatcher.add_method
 def delete_from_collection(collection, uris):
-    """Remove uris from collection
+    """Remove uris from collection.
 
     TODO
     """
@@ -53,7 +50,7 @@ def get_collections():
 
 @dispatcher.add_method
 def new_collection(uid, display_name=None, metadata={}, folder=None):
-    """Create a new collection
+    """Create a new collection.
 
     Create a new collection by creating a new folder and placing a yaml
     file in the folder for dsl metadata and adding a reference to the
@@ -70,7 +67,6 @@ def new_collection(uid, display_name=None, metadata={}, folder=None):
     Returns:
         A dict representing the collection keyed on uid
     """
-
     uid = uid.lower()
     collections = _load_collections()
     if uid in collections.keys():
@@ -97,8 +93,7 @@ def new_collection(uid, display_name=None, metadata={}, folder=None):
 
 @dispatcher.add_method
 def update_collection(uid, metadata):
-    """Update metadata of collection.
-    """
+    """Update metadata of collection."""
     collections = _load_collections()
 
     if uid not in list(collections.keys()):
@@ -112,7 +107,7 @@ def update_collection(uid, metadata):
 
 @dispatcher.add_method
 def delete_collection(uid, delete_data=True):
-    """delete a collection
+    """delete a collection.
 
     Deletes a collection from the collections metadata file.
     Optionally deletes all data under collection.
@@ -192,17 +187,13 @@ def _get_collections_index_file():
 
 
 def _load_collection(uid):
-    """load collection
-
-    """
+    """load collection."""
     path = _get_collection_file(uid)
     return util.read_yaml(path)
 
 
 def _load_collections():
-    """load list of collections
-
-    """
+    """load list of collections."""
     path = _get_collections_index_file()
     collections = util.read_yaml(path).get('collections')
     if collections is None:
@@ -212,15 +203,12 @@ def _load_collections():
 
 
 def _write_collection(uid, collection):
-    """write collection
-
-    """
+    """write collection."""
     util.write_yaml(_get_collection_file(uid), collection)
 
 
 def _write_collections(collections):
-    """write list of collections to  file
-    """
+    """write list of collections to file."""
     path = _get_collections_index_file()
     contents = util.read_yaml(path)
     contents.update({'collections': collections})

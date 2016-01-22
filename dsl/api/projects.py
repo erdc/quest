@@ -1,6 +1,4 @@
-"""API functions related to Projects
-
-"""
+"""API functions related to Projects."""
 import datetime
 from jsonrpc import dispatcher
 import os
@@ -10,7 +8,7 @@ from .. import util
 
 @dispatcher.add_method
 def add_project(uid, path):
-    """Add a existing DSL project to the list of available projects
+    """Add a existing DSL project to the list of available projects.
 
     This to add existing dsl projects to current session
     """
@@ -32,8 +30,7 @@ def add_project(uid, path):
 
 @dispatcher.add_method
 def new_project(uid, metadata={}, folder=None):
-    """Create a new DSL project and add it to list of available projects
-    """
+    """Create a new DSL project and add it to list of available projects."""
     uid = uid.lower()
     projects = _load_projects()
     if uid in projects.keys():
@@ -64,7 +61,7 @@ def new_project(uid, metadata={}, folder=None):
 
 @dispatcher.add_method
 def delete_project(uid, delete_data=False):
-    """delete a project
+    """delete a project.
 
     Deletes a collection from the collections metadata file.
     Optionally deletes all data under collection.
@@ -107,16 +104,14 @@ def delete_project(uid, delete_data=False):
 
 @dispatcher.add_method
 def get_active_project():
-    """Get active project uid
-    """
+    """Get active project uid."""
     path = _get_projects_index_file()
     return util.read_yaml(path).get('active_project')
 
 
 @dispatcher.add_method
 def get_projects():
-    """Get list of available projects
-    """
+    """Get list of available projects."""
     projects = {}
     for uid, project in _load_projects().iteritems():
         path = project['folder']
@@ -134,8 +129,7 @@ def get_projects():
 
 @dispatcher.add_method
 def set_active_project(uid):
-    """Set active DSL project
-    """
+    """Set active DSL project."""
     path = _get_projects_index_file()
     contents = util.read_yaml(path)
     if uid not in contents['projects'].keys():
@@ -151,9 +145,7 @@ def _load_project(uid):
 
 
 def _load_projects():
-    """load list of collections
-
-    """
+    """load list of collections."""
     path = _get_projects_index_file()
     projects = util.read_yaml(path).get('projects')
     # make sure a default project exists
@@ -177,8 +169,7 @@ def _load_projects():
 
 
 def _write_projects(projects):
-    """write list of collections to file
-    """
+    """write list of collections to file."""
     path = _get_projects_index_file()
     contents = util.read_yaml(path)
     contents.update({'projects': projects})
