@@ -79,7 +79,7 @@ def new_collection(uid, display_name=None, metadata={}, folder=None):
     if folder is None:
         folder = uid
 
-    path = os.path.join(util.get_projects_dir(), folder)
+    path = os.path.join(_get_collections_dir(), folder)
     util.mkdir_if_doesnt_exist(path)
     collections.update({uid: {'folder': folder}})
     _write_collections(collections)
