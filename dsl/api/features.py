@@ -190,6 +190,7 @@ def get_features(uris, geom_type=None, parameter=None, parameter_code=None,
     return features
 
 
+@dispatcher.add_method
 def new_feature(uri, geom_type, geom_coords, metadata={}):
     """Add a new feature to a collection.
 
@@ -224,6 +225,7 @@ def new_feature(uri, geom_type, geom_coords, metadata={}):
     return feature.name
 
 
+@dispatcher.add_method
 def update_feature(uri, metadata):
     """Change metadata feature in collection.
 
@@ -263,6 +265,7 @@ def update_feature(uri, metadata):
     return True
 
 
+@dispatcher.add_method
 def delete_feature(uri):
     """Delete feature from collection).
 
