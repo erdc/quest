@@ -14,11 +14,9 @@ Description of Settings:
 ======================= ======================================================================= ====================================
 Variable Name           Description                                                             Default
 ----------------------- ----------------------------------------------------------------------- ------------------------------------
-DSL_BASE_DIR            Base directory to save dsl data/metadata                                determined by appdirs python package 
-DSL_CACHE_DIR           Location to save cached data/metadata                                   DSL_BASE_DIR/cache/
-DSL_PROJECT_FILE        Name of project metadata file                                           dsl_project.yml
-DSL_PROJECTS_INDEX_FILE Name of projects index file listing available projects and their paths  dsl_projects_index.yml
-DSL_CONFIG_FILE         Name of dsl_config file that these settings are saved in                dsl_config.yml
+DSL_BASE_DIR            Base directory to save dsl data/metadata                                determined by appdirs python package
+DSL_CACHE_DIR           Location to save cached data/metadata                                   BASE_DIR/cache/
+DSL_PROJECTS_DIR        Default directory to save projects                                      BASE_DIR/projects/
 DSL_USER_SERVICES       list of web/file uris to user defined DSL services                      None
 ======================= ======================================================================= ====================================
 
@@ -30,7 +28,7 @@ Design Goals:
   - Be able to easily convert a folder of structured data into a read-only user defined DSL service by adding a few metadata files
 
 
-Projects and Collections:  
+Projects and Collections:
   - A project is a folder that has some metadata and a set of collections
   - All collections in a project are saved in subdirectories of the main project folder for portability
   - Only one project can be active at a time, if none is specified a project called 'default' will be created and used
@@ -63,7 +61,7 @@ Example Directory Structure::
                     feature_1/              #   folder for temperature data at feature_1 (feature_1 coords & metadata are in the master features.h5)
                         66a4e39d            #       temperature datasets at feature_1
                         f974a0c1            #       these are different versions of the same dataset, the last one is the final
-                        203a91e3            #       the versioning and applyed filters metadata is tracked in dsl_collection.yml
+                        203a91e3            #       the versioning and applied filters metadata is tracked in dsl_collection.yml
                     feature_2/
                 precipitation/
                     feature_1/
@@ -77,6 +75,3 @@ Example Directory Structure::
         dsl_project.yml
         mycollection_1/
         mycollection_2/
-
-
-
