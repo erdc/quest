@@ -200,9 +200,11 @@ def new_feature(uri, geom_type=None, geom_coords=None, metadata={}):
     Args:
         uri (string): uri of collection
         geom_type (string, optional): point/line/polygon
-        geom_coords (string, optional): geometric coordinates specified as
-            valid geojson coordinates (i.e. a list of lists i.e.
-            '[[-94.0, 23.2], [-94.2, 23.4] ...]' etc)
+        geom_coords (string or list, optional): geometric coordinates specified
+            as valid geojson coordinates (i.e. a list of lists i.e.
+            '[[-94.0, 23.2], [-94.2, 23.4] ...]'
+            --------- OR ---------
+            [[-94.0, 23.2], [-94.2, 23.4] ...] etc)
         metadata (dict, optional): metadata at the new feature
 
     Returns
@@ -223,7 +225,8 @@ def new_feature(uri, geom_type=None, geom_coords=None, metadata={}):
                     'geom_type must be one of LineString, Point or Polygon'
                 )
 
-        geom_coords = json.loads(geom_coords)
+        if isinstance(geom_coords, str):
+            geom_coords = json.loads(geom_coords)
 
     metadata.update({'geom_type': geom_type, 'geom_coords': geom_coords})
     metadata.update({})
