@@ -1,4 +1,4 @@
-"""io utilities"""
+"""io utilities."""
 import os
 import yaml
 from .misc import mkdir_if_doesnt_exist
