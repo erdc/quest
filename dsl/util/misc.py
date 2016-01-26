@@ -1,5 +1,5 @@
 import appdirs
-from geojson import Point, Polygon, Feature, FeatureCollection
+from geojson import LineString, Point, Polygon, Feature, FeatureCollection
 import itertools
 from .config import get_settings
 import os
@@ -182,12 +182,15 @@ def to_dataframe(feature_collection):
 
 def to_geojson(df):
     _func = {
+        'LineString': LineString,
         'Point': Point,
         'Polygon': Polygon,
     }
     features = []
     for idx, row in df.iterrows():
-        geometry = _func[row['geom_type']](row['geom_coords'])
+        geometry = None
+        if row['geom_type'] is not None:
+            geometry = _func[row['geom_type']](row['geom_coords'])
         del row['geom_type']
         del row['geom_coords']
         properties = json.loads(row.dropna().to_json())

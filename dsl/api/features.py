@@ -2,6 +2,7 @@
 
 Features are unique identifiers with a web service or collection.
 """
+import json
 from jsonrpc import dispatcher
 import pandas as pd
 from .. import util
@@ -191,7 +192,7 @@ def get_features(uris, geom_type=None, parameter=None, parameter_code=None,
 
 
 @dispatcher.add_method
-def new_feature(uri, geom_type, geom_coords, metadata={}):
+def new_feature(uri, geom_type=None, geom_coords=None, metadata={}):
     """Add a new feature to a collection.
 
     (ignore feature/parameter/dataset in uri)
@@ -199,7 +200,9 @@ def new_feature(uri, geom_type, geom_coords, metadata={}):
     Args:
         uri (string): uri of collection
         geom_type (string, optional): point/line/polygon
-        geom_coords (string, optional): geometric coordinates
+        geom_coords (string, optional): geometric coordinates specified as
+            valid geojson coordinates (i.e. a list of lists i.e.
+            '[[-94.0, 23.2], [-94.2, 23.4] ...]' etc)
         metadata (dict, optional): metadata at the new feature
 
     Returns
@@ -213,6 +216,15 @@ def new_feature(uri, geom_type, geom_coords, metadata={}):
         raise NotImplementedError
 
     collection = uri['uid']
+
+    if geom_type is not None:
+        if geom_type not in ['LineString', 'Point', 'Polygon']:
+            raise ValueError(
+                    'geom_type must be one of LineString, Point or Polygon'
+                )
+
+        geom_coords = json.loads(geom_coords)
+
     metadata.update({'geom_type': geom_type, 'geom_coords': geom_coords})
     metadata.update({})
     uid = 'collection://' + collection + '::' + util.uid()
