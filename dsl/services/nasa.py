@@ -76,7 +76,7 @@ class NasaService(SingleFileBase):
             'description': 'Services available through the NASA',
             'organization': {
                 'abbr': 'NASA',
-                'name': 'National Aeronautic and Space Administration', 
+                'name': 'National Aeronautic and Space Administration',
             },
         }
 
@@ -101,7 +101,7 @@ class NasaService(SingleFileBase):
 
     def _service_dict(self):
         return {
-            'srtm-3-arc-second': 'SRTMGL3', 
+            'srtm-3-arc-second': 'SRTMGL3',
             'srtm-30-arc-second': 'SRTMGL30',
         }
 
@@ -124,8 +124,8 @@ class NasaService(SingleFileBase):
         coords = features['geom_coords'].apply(lambda x: pd.np.array(x).mean(axis=1))
         features['longitude'] = coords.apply(lambda x: x.flatten()[0])
         features['latitude'] = coords.apply(lambda x: x.flatten()[1])
-        features['download_url'] = features['links'].apply(lambda x: [link['href'] for link in x if link.get('type')=='application/zip'][0])
-
+        features['download_url'] = features['links'].apply(
+            lambda x: next(iter([link['href'] for link in x if link.get('type') == 'application/zip']), None))
         return features
 
     def _get_parameters(self, service, features=None):
