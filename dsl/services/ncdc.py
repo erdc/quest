@@ -1,11 +1,8 @@
-"""DSL wrapper for USGS NWIS Services
-
-"""
+"""DSL wrapper for NCDC GHCN and GSOD Services."""
 from .base import WebServiceBase
 import pandas as pd
 from ulmo.ncdc import ghcn_daily, gsod
 from ulmo.ncdc.ghcn_daily.core import _get_inventory as _get_ghcn_inventory
-from .. import util
 
 
 class NcdcService(WebServiceBase):
@@ -15,7 +12,7 @@ class NcdcService(WebServiceBase):
             'description': 'Services available through the NCDC',
             'organization': {
                 'abbr': 'NCDC',
-                'name': 'National Climatic Data Center', 
+                'name': 'National Climatic Data Center',
             },
         }
 
@@ -23,27 +20,29 @@ class NcdcService(WebServiceBase):
         return {
             'ghcn-daily': {
                 'display_name': 'NCDC GHCN Daily',
-                'description': 'Daily Meteorologic Data from the Global Historic Climate Netword',
+                'description': 'Daily Meteorologic Data from the Global '
+                               'Historic Climate Network',
                 'service_type': 'geo-discrete',
                 'parameters': self._parameter_map('ghcn-daily').values(),
                 'unmapped_parameters_available': True,
                 'geom_type': 'Point',
                 'datatype': 'timeseries',
                 'geographical_areas': ['Worldwide'],
-                'bounding_boxes' : [
+                'bounding_boxes': [
                     [-180, -90, 180, 90],
                 ],
             },
             'gsod': {
                 'display_name': 'NCDC GSOD',
-                'description': 'Daily Meteorologic Data from the Global Summary of thr Day',
+                'description': 'Daily Meteorologic Data from the Global '
+                               'Summary of the Day',
                 'service_type': 'geo-discrete',
                 'parameters': self._parameter_map('gsod').values(),
                 'unmapped_parameters_available': True,
                 'geom_type': 'Point',
                 'datatype': 'timeseries',
                 'geographical_areas': ['Worldwide'],
-                'bounding_boxes' : [
+                'bounding_boxes': [
                     [-180, -90, 180, 90],
                 ],
             },
@@ -52,7 +51,7 @@ class NcdcService(WebServiceBase):
     def _get_features(self, service):
         if service == 'ghcn-daily':
             features = ghcn_daily.get_stations(as_dataframe=True)
-            
+
         if service == 'gsod':
             features = gsod.get_stations()
             features = pd.DataFrame.from_dict(features, orient='index')
@@ -60,9 +59,12 @@ class NcdcService(WebServiceBase):
             del features['begin']
             del features['end']
 
-        features[pd.notnull(features.latitude) & pd.notnull(features.longitude)]
+        # remove locations with invalid coordinates
+        valid = pd.notnull(features.latitude) & pd.notnull(features.longitude)
+        features = features[valid]
         features['geom_type'] = 'Point'
-        features['geom_coords'] = zip(features['longitude'], features['latitude'])
+        features['geom_coords'] = \
+            zip(features['longitude'], features['latitude'])
         return features
 
     def _get_parameters(self, service, features=None):
@@ -90,21 +92,24 @@ class NcdcService(WebServiceBase):
     def _parameter_map(self, service):
         if service=='ghcn-daily':
             pmap = {
-                'PRCP': 'precipitation',
-                'SNOW': 'snowfall',
-                'SNWD': 'snow_depth',
-                'TMAX': 'maximum_air_temperature',
-                'TMIN': 'minimum_air_temperature',
-                'TAVG': 'mean_air_temperature',
+                'PRCP': 'rainfall:daily:total',
+                'SNOW': 'snowfall:daily:total',
+                'SNWD': 'snow_depth:daily:total',
+                'TMAX': 'air_temperature:daily:total',
+                'TMIN': 'air_temperature:daily:minimum',
+                'TAVG': 'air_temperature:daily:mean',
             }
+
+            #// NOTE // consider switching order. store on disk as feature->dataset
+            #, then parameter/units become part of dataset metadata.
 
         if service=='gsod':
             pmap = {
-                'precip': 'precipitation',
-                'snow_depth': 'snow_depth',
-                'max_temp': 'maximum_air_temperature',
-                'min_temp': 'minimum_air_temperature',
-                'max_temp': 'mean_air_temperature',
+                'precip': 'rainfall:daily:total',
+                'snow_depth': 'snow_depth:daily:total',
+                'max_temp': 'air_temperature:daily:max',
+                'min_temp': 'air_temperature:daily:min',
+                'max_temp': 'air_temperature:daily:min',
             }
 
         return pmap
