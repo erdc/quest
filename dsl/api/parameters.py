@@ -72,6 +72,7 @@ def _get_parameters(provider, service, cache_file):
     driver = util.load_drivers('services', names=provider)[provider].driver
     parameters = driver.get_parameters(service)
     util.mkdir_if_doesnt_exist(os.path.split(cache_file)[0])
-    parameters.to_hdf(cache_file, 'table')
+    if isinstance(parameters, pd.DataFrame):
+        parameters.to_hdf(cache_file, 'table')
 
     return parameters
