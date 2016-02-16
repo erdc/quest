@@ -15,8 +15,10 @@ Description of Settings:
 Variable Name           Description                                                             Default
 ----------------------- ----------------------------------------------------------------------- ------------------------------------
 DSL_BASE_DIR            Base directory to save dsl data/metadata                                determined by appdirs python package
-DSL_CACHE_DIR           Location to save cached data/metadata                                   BASE_DIR/cache/
-DSL_PROJECTS_DIR        Default directory to save projects                                      BASE_DIR/projects/
+DSL_CACHE_DIR           Location to save cached data/metadata                                   DSL_BASE_DIR/cache/
+DSL_PROJECT_FILE        Name of project metadata file                                           dsl_project.yml
+DSL_PROJECTS_INDEX_FILE Name of projects index file listing available projects and their paths  dsl_projects_index.yml
+DSL_CONFIG_FILE         Name of dsl_config file that these settings are saved in                dsl_config.yml
 DSL_USER_SERVICES       list of web/file uris to user defined DSL services                      None
 ======================= ======================================================================= ====================================
 
@@ -44,6 +46,17 @@ Services:
         - geo-seamless: This is for seamless datasets. There is no get_features function. Instead you pass a geometric feature (bbox, line etc) to the service and the data is extracted and returned (eg. GEBCO Global Bathymetry data)
         - geo-typical: This had features, by the features do not have geometry defined. Will function the same as geo-discrete. Will need to add a tag based search option.
 
+Parameters:
+  - external_name: what it is called in the service
+  - external_vocabulary: what the external vocab is
+  - vdatum: vertical datum if relevant
+  - long_name: display name
+  - standard_name: dsl name, i.e air_temperature:daily:max
+  - vocabulary: ERDC Environmental Simulator
+  - units: m
+  - concept: air_temperature
+  - frequency: hourly, daily, etc
+  - statistic: instantaneous, mean, min, max etc
 
 Example Directory Structure::
 
@@ -54,7 +67,7 @@ Example Directory Structure::
         myproject_1/                        # example project called myproject_1
             dsl_project.yml                 # project metadata
             mycollection_1/                 # example collection inside myproject_1
-                dsl_collection.yml          # collection metadata
+                dsl.yml                     # collection metadata
                 features.h5                 # master list of features inside collection, can also be csv, geojson
                 parameters.yml              # file to keep track of available parameters, download status, versions of downloaded data etc
                 temperature/                # folder for all temperature data in mycollection_1
