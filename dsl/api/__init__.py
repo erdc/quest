@@ -7,6 +7,7 @@ Services Library.
 __version__ = 1.0
 
 # __all__ needed for autodoc to work
+
 __all__ = (
     'get_settings',
     'save_settings',
@@ -14,12 +15,16 @@ __all__ = (
     'update_settings_from_file',
     'get_dsl_version',
     'get_api_version',
+    #'get_metadata',
+    #'update_metadata',
     'get_collections',
     'new_collection',
     'update_collection',
     'delete_collection',
-    'download_dataset',
-    'download_dataset_options',
+    'stage_for_download',
+    'download',
+    'download_options',
+    'locate_dataset',
     'update_dataset',
     'describe_dataset',
     'vizualize_dataset',
@@ -69,8 +74,8 @@ from .collections import (
 )
 
 from .datasets import (
-    download_dataset,
-    download_dataset_options,
+    download,
+    download_options,
     update_dataset,
     describe_dataset,
     vizualize_dataset,
