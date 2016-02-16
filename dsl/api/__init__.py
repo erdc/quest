@@ -20,6 +20,7 @@ __all__ = (
     'delete_collection',
     'download_dataset',
     'download_dataset_options',
+    'add_dataset_to_feature',
     'update_dataset',
     'describe_dataset',
     'vizualize_dataset',

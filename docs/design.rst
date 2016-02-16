@@ -70,6 +70,10 @@ Example Directory Structure::
                 adh/
                     feature_5/              # directory containing adh model grid defined by a polygon called feature_5
                     feature_6/              # directory containing adh model grid defined by a polygon called feature_6
+                timeseries/
+                    66a4e39d
+                vitd-terrain/
+                raster/
 
     /some_other_location/myproject_2/       # another project listed in dsl_projects_index.yml but not in the DSL_BASE_DIR
         dsl_project.yml
