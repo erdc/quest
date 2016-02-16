@@ -9,9 +9,6 @@ import pandas as pd
 import shutil
 
 
-COLLECTION_METADATA_FILE = 'dsl.yml'
-
-
 @dispatcher.add_method
 def delete_from_collection(collection, uris):
     """Remove uris from collection.
@@ -158,6 +155,17 @@ def _collection_features_file(collection):
     return os.path.join(path, 'features.h5')
 
 
+def _collection_db(collection):
+    collection = _load_collections().get(collection)
+    if collection is None:
+        raise ValueError('Collection Not Found')
+
+    folder = collection['folder']
+    path = os.path.join(_get_collections_dir(), folder)
+
+    return os.path.join(path, 'dsl.db')
+
+
 def _read_collection_features(collection):
     features_file = _collection_features_file(collection)
     try:
@@ -178,7 +186,7 @@ def _get_collection_file(uid):
         raise ValueError('Collection %s not found' % uid)
 
     folder = collections[uid]['folder']
-    return os.path.join(folder, 'dsl.yml')
+    return os.path.join(folder, 'dsl.db')
 
 
 def _get_collections_dir():

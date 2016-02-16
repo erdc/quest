@@ -29,4 +29,5 @@ dependencies:
     - pip:
       - json-rpc
       - jsonrpc-requests
+      - peewee
       - stevedore
