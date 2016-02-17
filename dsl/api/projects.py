@@ -7,15 +7,15 @@ from .. import util
 
 
 @dispatcher.add_method
-def add_project(uid, path):
+def add_project(name, path):
     """Add a existing DSL project to the list of available projects.
 
     This to add existing dsl projects to current session
     """
-    uid = uid.lower()
+    name = name.lower()
     projects = _load_projects()
-    if uid in projects.keys():
-        raise ValueError('Project %s exists, please use a unique name' % uid)
+    if name in projects.keys():
+        raise ValueError('Project %s exists, please use a unique name' % name)
 
     try:
         project = util.read_yaml(os.path.join(path, 'dsl.yml'))
@@ -23,21 +23,30 @@ def add_project(uid, path):
         raise ValueError('Invalid Project Folder: %s' % path)
 
     folder = path
-    projects.update({uid: {'folder': folder}})
+    projects.update({name: {'folder': folder}})
     _write_projects(projects)
     return project
 
 
 @dispatcher.add_method
-def new_project(uid, metadata={}, folder=None):
+def new_project(name, display_name=None, description=None, metadata=None, folder=None):
     """Create a new DSL project and add it to list of available projects."""
-    uid = uid.lower()
+    name = name.lower()
     projects = _load_projects()
-    if uid in projects.keys():
-        raise ValueError('Project %s exists, please use a unique name' % uid)
+    if name in projects.keys():
+        raise ValueError('Project %s exists, please use a unique name' % name)
+
+    if display_name is None:
+        display_name = name
+
+    if description is None:
+        description = ''
 
     if folder is None:
-        folder = uid
+        folder = name
+
+    if metadata is None:
+        metadata = {}
 
     if not os.path.isabs(folder):
         path = os.path.join(util.get_projects_dir(), folder)
@@ -45,22 +54,23 @@ def new_project(uid, metadata={}, folder=None):
         path = folder
 
     metadata.update({
-        'display_name': metadata.get('display_name', uid),
-        'description': metadata.get('description', None),
-        'created_on': datetime.datetime.now().isoformat(),
+        '_type_': 'project',
+        '_display_name_': metadata.get('display_name', name),
+        '_description_': metadata.get('description', None),
+        '_created_on_': datetime.datetime.now().isoformat(),
     })
     project = {'metadata': metadata}
 
     util.mkdir_if_doesnt_exist(path)
     util.write_yaml(os.path.join(path, 'dsl.yml'), project)
-    projects.update({uid: {'folder': folder}})
+    projects.update({name: {'folder': folder}})
     _write_projects(projects)
 
     return project
 
 
 @dispatcher.add_method
-def delete_project(uid, delete_data=False):
+def delete_project(name, delete_data=False):
     """delete a project.
 
     Deletes a collection from the collections metadata file.
@@ -82,12 +92,12 @@ def delete_project(uid, delete_data=False):
     """
     projects = _load_projects()
 
-    if uid not in list(projects.keys()):
+    if name not in list(projects.keys()):
         print('Project not found')
         return projects
 
     if delete_data:
-        folder = projects[uid]['folder']
+        folder = projects[name]['folder']
         if not os.path.isabs(folder):
             path = os.path.join(util.get_projects_dir(), folder)
         else:
@@ -96,15 +106,15 @@ def delete_project(uid, delete_data=False):
             print('deleting all data under path:', path)
             shutil.rmtree(path)
 
-    print('removing %s from projects' % uid)
-    del projects[uid]
+    print('removing %s from projects' % name)
+    del projects[name]
     _write_projects(projects)
     return projects
 
 
 @dispatcher.add_method
 def get_active_project():
-    """Get active project uid."""
+    """Get active project name."""
     path = _get_projects_index_file()
     return util.read_yaml(path).get('active_project')
 
@@ -113,34 +123,34 @@ def get_active_project():
 def get_projects():
     """Get list of available projects."""
     projects = {}
-    for uid, project in _load_projects().iteritems():
+    for name, project in _load_projects().iteritems():
         path = project['folder']
         if not os.path.isabs(path):
             path = os.path.join(util.get_projects_dir(), path)
 
-        metadata = _load_project(uid)['metadata']
+        metadata = _load_project(name)['metadata']
         metadata.update({
-            'uid': uid,
-            'folder': path,
+            '_name_': name,
+            '_folder_': path,
         })
-        projects[uid] = metadata
+        projects[name] = metadata
     return projects
 
 
 @dispatcher.add_method
-def set_active_project(uid):
+def set_active_project(name):
     """Set active DSL project."""
     path = _get_projects_index_file()
     contents = util.read_yaml(path)
-    if uid not in contents['projects'].keys():
-        raise ValueError('Project %s does not exist' % uid)
-    contents.update({'active_project': uid})
+    if name not in contents['projects'].keys():
+        raise ValueError('Project %s does not exist' % name)
+    contents.update({'active_project': name})
     util.write_yaml(path, contents)
-    return uid
+    return name
 
 
-def _load_project(uid):
-    path = _get_project_file(uid)
+def _load_project(name):
+    path = _get_project_file(name)
     return util.read_yaml(path)
 
 
@@ -155,10 +165,12 @@ def _load_projects():
         }
         default_dir = os.path.join(util.get_projects_dir(), 'default_project')
         util.mkdir_if_doesnt_exist(default_dir)
-        metadata = {'display_name': 'Default Project',
-                    'description': 'Created by DSL',
-                    'created_on': datetime.datetime.now().isoformat(),
-                    }
+        metadata = {
+            '_type_': 'project',
+            '_display_name_': 'Default Project',
+            '_description_': 'Created by DSL',
+            '_created_on_': datetime.datetime.now().isoformat(),
+        }
         project = {'metadata': metadata}
         util.mkdir_if_doesnt_exist(default_dir)
         util.write_yaml(os.path.join(default_dir, 'dsl.yml'), project)
@@ -176,12 +188,12 @@ def _write_projects(projects):
     util.write_yaml(path, contents)
 
 
-def _get_project_file(uid):
+def _get_project_file(name):
     projects = _load_projects()
-    if uid not in projects.keys():
-        raise ValueError('Project %s not found' % uid)
+    if name not in projects.keys():
+        raise ValueError('Project %s not found' % name)
 
-    path = projects[uid]['folder']
+    path = projects[name]['folder']
     if not os.path.isabs(path):
         path = os.path.join(util.get_projects_dir(), path)
 
