@@ -4,7 +4,7 @@
 from .. import util
 
 
-def download_dataset(source_uri, target_uri=None, **kwargs):
+def download(source_uri, target_uri=None, async=False, **kwargs):
     """Download dataset and save it locally.
 
     Parameters
@@ -19,10 +19,13 @@ def download_dataset(source_uri, target_uri=None, **kwargs):
             is ignores. If source_uri is a webservice then target_uri must be a
             filepath (i.e. file:///path/to/folder). (target_uri can also be a
             different collection *NOTIMPLEMENTED*)
+        async: bool (default False)
+            If true download in background
 
     Return
     ------
-        msg: str Not sure need to check
+        uri: string
+            uri or handle of downloaded dataset
 
     Examples:
         TODO add examples
@@ -44,7 +47,7 @@ def download_dataset(source_uri, target_uri=None, **kwargs):
     return driver.download_dataset(path, service, feature, parameter, **kwargs)
 
 
-def download_dataset_options(source_uri):
+def download_options(source_uri):
     """List optional kwargs that can be specified when downloading a dataset
 
     Parameters
@@ -58,7 +61,7 @@ def download_dataset_options(source_uri):
     ------
         kwargs: dict
             Optional kwargs that can be specified when calling
-            dsl.api.download_dataset
+            dsl.api.download
 
     Examples:
         TODO add examples
@@ -70,6 +73,10 @@ def download_dataset_options(source_uri):
     parameter = source_uri['parameter']
     driver = util.load_drivers('services', names=provider)[provider].driver
     return driver.download_dataset_options(service)
+
+
+def stage_for_download(uri):
+    pass
 
 
 def update_dataset():
