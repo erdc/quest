@@ -37,7 +37,7 @@ def get_collections():
     collections = {}
     for name in _load_collections():
         metadata = _load_collection(name).get('metadata', {})
-        metadata['name'] = name
+        metadata['_name_'] = name
         collections[name] = metadata
 
     return collections
@@ -71,6 +71,9 @@ def new_collection(name, display_name=None, description=None, metadata=None):
 
     if description is None:
         description = ''
+
+    if metadata is None:
+        metadata = {}
 
     path = os.path.join(_get_project_dir(), name)
     util.mkdir_if_doesnt_exist(path)

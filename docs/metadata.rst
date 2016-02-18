@@ -14,7 +14,6 @@ Collection:
     __display_name__
     __description__
     __creation_date__
-    __folder__
     custom metadata fields...
 
 Feature:
@@ -35,4 +34,5 @@ Dataset:
     __classification__
     __dsl_ver__
     __path__
+    __parameters__ = {'code': {group:,name:,unit}}
     custom metadata fields...

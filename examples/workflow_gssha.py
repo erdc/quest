@@ -20,9 +20,9 @@ bbox = []
 cid = 'gssha-test'
 dsl.api.new_collection(cid)
 services = ['service://usgs-ned::1-arc-second']
-filters = {'parameter': 'elevation' , 'bbox': bbox}
+filters = {'parameter': 'elevation', 'bbox': bbox}
 features = dsl.api.get_features(services, filters=filters)
-features = dsl.api.add_to_collection(cid, features)
+features = dsl.api.add_to_collection(cid, features) 
 elevation_rasters = dsl.api.stage_for_download(features, options={'parameter': 'elevation'})
 
 services = ['service://usgs-nlcd::2006']

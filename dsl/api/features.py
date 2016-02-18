@@ -13,16 +13,14 @@ from .collections import (
 
 
 @dispatcher.add_method
-def add_features_to_collection(collection, uris, geom_type=None,
-                               parameter=None, parameter_code=None, bbox=None,
-                               filters=None, update_cache=False):
+def add_features_to_collection(collection, feature_uris):
     """Add features to a collection based on the passed in uris.
 
     This does not download datasets, it just adds features and parameters
     to a collection.
 
-    When the features are added into a collection they are given a new uid.
-    The original uid is saved as 'external_uri'. If external_uri already exists
+    When the features are added into a collection they are given a new name.
+    The original name is saved as 'external_uri'. If external_uri already exists
     (i.e. Feature was originally from usgs-nwis but is being copied from one
     collection to another) then does not overwrite external_uri.
 
@@ -31,7 +29,7 @@ def add_features_to_collection(collection, uris, geom_type=None,
     created.
 
     Args:
-        collection (string): uid of collection
+        collection (string): name of collection
         uris (string, comma separated strings, list of strings): list of uris
             to search in for features. If uri specifies a parameter and
             parameter arg is None then use set the parameter to the uri value
@@ -49,42 +47,14 @@ def add_features_to_collection(collection, uris, geom_type=None,
     Returns:
         True on success.
     """
-    new_features = get_features(uris, geom_type=geom_type, parameter=parameter,
-                                parameter_code=parameter_code, bbox=bbox,
-                                filters=filters, update_cache=update_cache,
-                                as_dataframe=True)
-
-    # if external_uri already exists don't overwrite
-    # this preserves external metadata when copying features
-    # from one collection to another
-    if 'external_uri' not in new_features.columns:
-        new_features['external_uri'] = new_features.index
-        new_features['external_id'] = new_features['feature_id']
-        new_features['external_parameters'] = new_features['parameters']
-        new_features['external_parameter_codes'] = new_features['parameter_codes']
-        del new_features['parameters']
-        del new_features['parameter_codes']
+    if not isinstance(feature_uris, pd.DataFrame):
+        new_features = get_features(uris, as_dataframe=True)
 
     # assign new feature ids
-    new_features['feature_id'] = [util.uid() for i in range(len(new_features))]
+    new_features['_name_'] = [util.name() for i in range(len(new_features))]
+    new_features['_display_name_'] = ''
 
-    existing = _read_collection_features(collection)
-    if not existing.empty:
-        new_features = pd.concat([existing, new_features])
-        new_features = new_features.drop_duplicates(subset='external_uri')
-
-    new_features = new_features.set_index('feature_id', drop=False)
-    new_features.index = new_features.index.map(
-                            lambda x: 'collection://%s::%s' % (collection, x))
-    _write_collection_features(collection, new_features)
-
-    if parameter:
-        # col =_load_collection(collection)
-        # p = col.get('parameters')
-        # ****todo****
-        # WRITE NEW PARAMETER TO PARAMETER YML FILE
-        # LOOK AT parameters.yml file in test directory
-        pass
+    result = db.upsert_many(dbpath, 'features', new_features)
 
     return True
 
@@ -124,22 +94,23 @@ def get_features(uris, geom_type=None, parameter=None, parameter_code=None,
     features = []
     for uri in uris:
         uri = util.parse_uri(uri)
-        if uri['uid'] is None:
-            raise ValueError('Service/Collection uid must be specified')
+        if uri['name'] is None:
+            raise ValueError('Service/Collection name must be specified')
 
-        if uri['parameter'] and parameter is None:
-            parameter = uri['parameter']
+        #if parameter is None:
+        #    parameter = ''
 
         if uri['resource'] == 'service':
-            if uri['service'] is None:
+            if uri['name'] is None:
                 svc = util.load_service(uri)
                 services = svc.get_services()
             else:
-                services = [uri['service']]
+                services = [uri['name']]
 
             for service in services:
                 # seamless not implemented yet
-                tmp_feats = _get_features(uri['uid'], service,
+                provider, service = uri['name'].split(':')
+                tmp_feats = _get_features(provider, service,
                                           update_cache=update_cache)
                 if uri['feature'] is not None:
                     tmp_feats = tmp_feats[
@@ -148,7 +119,7 @@ def get_features(uris, geom_type=None, parameter=None, parameter_code=None,
                 features.append(tmp_feats)
 
         if uri['resource'] == 'collection':
-            tmp_feats = _read_collection_features(uri['uid'])
+            tmp_feats = _read_collection_features(uri['name'])
             if uri['feature'] is not None:
                 tmp_feats = tmp_feats[
                                 tmp_feats['feature_id'] == uri['feature']
@@ -183,7 +154,7 @@ def get_features(uris, geom_type=None, parameter=None, parameter_code=None,
         features = features[idx]
 
     # remove duplicate indices
-    features.reset_index().drop_duplicates(subset='index').set_index('index')
+    #features.reset_index().drop_duplicates(subset='index').set_index('index')
 
     if not as_dataframe:
         features = util.to_geojson(features)
@@ -217,7 +188,7 @@ def new_feature(uri, geom_type=None, geom_coords=None, metadata={}):
     if uri['resource'] != 'collection':
         raise NotImplementedError
 
-    collection = uri['uid']
+    collection = uri['name']
 
     if geom_type is not None:
         if geom_type not in ['LineString', 'Point', 'Polygon']:
@@ -230,9 +201,9 @@ def new_feature(uri, geom_type=None, geom_coords=None, metadata={}):
 
     metadata.update({'geom_type': geom_type, 'geom_coords': geom_coords})
     metadata.update({})
-    uid = 'collection://' + collection + '::' + util.uid()
+    name = 'collection://' + collection + '::' + util.name()
 
-    feature = pd.Series(metadata, name=uid)
+    feature = pd.Series(metadata, name=name)
     existing = _read_collection_features(collection)
     updated = existing.append(feature)
     _write_collection_features(collection, updated)
@@ -263,7 +234,7 @@ def update_feature(uri, metadata):
         if uri['resource'] != 'collection':
             raise NotImplementedError
 
-        collection = uri['uid']
+        collection = uri['name']
         existing = _read_collection_features(collection)
         if uri_str not in existing.index:
             print('%s not found in features' % uri)
@@ -298,7 +269,7 @@ def delete_feature(uri):
     if uri['resource'] != 'collection':
         raise NotImplementedError
 
-    collection = uri['uid']
+    collection = uri['name']
     existing = _read_collection_features(collection)
 
     if uri_str not in existing.index:
@@ -315,8 +286,9 @@ def delete_feature(uri):
 def _get_features(provider, service, update_cache):
     driver = util.load_drivers('services', names=provider)[provider].driver
     features = driver.get_features(service, update_cache=update_cache)
-    features.index = features.index.map(
-                            lambda x: 'service://%s::%s::%s'
-                            % (provider, service, x))
+    features['_service_uri_'] = features.index.map(
+                                    lambda feat: 'service://%s:%s/%s'
+                                    % (provider, service, feat))
 
+    features.index = features['_service_uri_']
     return features

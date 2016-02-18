@@ -72,31 +72,34 @@ def parse_uri(uri):
     """parse uri and return dictionary
 
     uri definition
-        <protocol[:version>]://<provider[:service]>::<feature[:query]>::<parameter[:]>::<dataset[:]>
+        <protocol[:version>]://<provider[:service]>/<feature[:query]>/<parameter[:sub]>/<dataset[:version]>
 
     examples:
-        service://usgs-nwis:iv::0803200::temperature
-        service://gebco:bathymetry::bbox:-40,40,-40,40::elevation
+        service://usgs-nwis:iv/0803200
+        service://gebco-bathymetry
 
-        project://myproj:mycol::93d2e03543224096b14ce2eacd2eb275::temperature::472e7a7dd177405192fcb47a0c959c9d
-        project://myproj:mycol::52b588510ce948b2a2515da02024c53e::temperature::
 
-    service://<uid>::<datalayer>::<feature>::<parameter>
-    collection://<uid>::<feature>::<parameter>::<dataset>
-    project://<project_uid>::<collection_uid>::<feature>::<parameter>::<dataset>
+        project://myproj:mycol/93d2e03543224096b14ce2eacd2eb275/temperature/472e7a7dd177405192fcb47a0c959c9d
+        project://myproj:mycol/52b588510ce948b2a2515da02024c53e/temperature/
+
+    service://<name>:<datalayer>/<feature>
+    project://<name>:<collection>/<feature>/<dataset>
     """
     if isinstance(uri, dict):
         return uri
 
     uri_dict = {}
     uri_dict['resource'], remainder = uri.split('://')
-    parts = remainder.split('::')
+    parts = remainder.split('/')
 
-    if uri_dict['resource']=='service':
-        keys = ['uid', 'service', 'feature', 'parameter']
+    if uri_dict['resource'] not in ['project', 'service']:
+        raise ValueError('Unknown resource type in uri: %s' % uri_dict['resource'])
 
-    if uri_dict['resource']=='collection':
-        keys = ['uid', 'feature', 'parameter', 'dataset']
+    if uri_dict['resource'] == 'service':
+        keys = ['name', 'feature']
+
+    if uri_dict['resource'] == 'project':
+        keys = ['name', 'feature', 'dataset']
 
     uri_dict.update({k: parts[i].strip() if i < len(parts) else None for i, k in enumerate(keys)})
     return uri_dict
@@ -137,7 +140,7 @@ def load_drivers(namespace, names=None):
 def load_service(uri):
     if not isinstance(uri, dict):
         uri = parse_uri(uri)
-    return load_drivers('services', names=uri['uid'])[uri['uid']].driver
+    return load_drivers('services', names=uri['name'])[uri['name']].driver
 
 
 def remove_key(d, key):

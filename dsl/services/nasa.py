@@ -12,59 +12,64 @@ collections_url = 'https://cmr.earthdata.nasa.gov/search/collections.json?short_
 granules_url = 'https://cmr.earthdata.nasa.gov/search/granules.json?short_name=%s&page_size=1000&page_num=%s'
 
 def _read_metadata(short_name):
-    #return requests.get(collections_url % short_name).json()['feed']['entry'][0]
-    if short_name=='SRTMGL3':
+    # return requests.get(collections_url % short_name).json()['feed']['entry'][0]
+    if short_name == 'SRTMGL3':
         metadata = {
-            u'archive_center': u'LPDAAC',
-            u'boxes': [u'-56 -180 60 180'],
-            u'browse_flag': False,
-            u'coordinate_system': u'CARTESIAN',
-            u'data_center': u'LPDAAC_ECS',
-            u'dataset_id': u'NASA Shuttle Radar Topography Mission Global 3 arc second V003',
-            u'id': u'C204582034-LPDAAC_ECS',
-            u'links': [{u'href': u'http://dx.doi.org/10.5067/MEaSUREs/SRTM/SRTMGL3.003',
-            u'hreflang': u'en-US',
-            u'rel': u'http://esipfed.org/ns/fedsearch/1.1/metadata#',
-            u'title': u'Data set landing page at the LP DAAC (MiscInformation)'}],
-            u'online_access_flag': False,
-            u'orbit_parameters': {},
-            u'original_format': u'ECHO10',
-            u'processing_level_id': u'3',
-            u'short_name': u'SRTMGL3',
-            u'summary': u"Created using a conventional 'taking looks' technique of averaging pixels to decrease the effects of speckle and increase radiometric accuracy using the original postings.",
-            u'time_end': u'2000-02-21T23:59:59.000Z',
-            u'time_start': u'2000-02-11T00:00:00.000Z',
-            u'title': u'NASA Shuttle Radar Topography Mission Global 3 arc second V003',
-            u'updated': u'2015-09-02T10:31:06.540Z',
-            u'version_id': u'003',
+            'archive_center': 'LPDAAC',
+            'boxes': ['-56 -180 60 180'],
+            'browse_flag': False,
+            'coordinate_system': 'CARTESIAN',
+            'data_center': 'LPDAAC_ECS',
+            'dataset_id': 'NASA Shuttle Radar Topography Mission Global 3 arc second V003',
+            'id': 'C204582034-LPDAAC_ECS',
+            'links': [{
+                'href': 'http://dx.doi.org/10.5067/MEaSUREs/SRTM/SRTMGL3.003',
+                'hreflang': 'en-US',
+                'rel': 'http://esipfed.org/ns/fedsearch/1.1/metadata#',
+                'title': 'Data set landing page at the LP DAAC (MiscInformation)'
+            }],
+            'online_access_flag': False,
+            'orbit_parameters': {},
+            'original_format': 'ECHO10',
+            'processing_level_id': '3',
+            'short_name': 'SRTMGL3',
+            'summary': u"Created using a conventional 'taking looks' technique of averaging pixels to decrease the effects of speckle and increase radiometric accuracy using the original postings.",
+            'time_end': '2000-02-21T23:59:59.000Z',
+            'time_start': '2000-02-11T00:00:00.000Z',
+            'title': 'NASA Shuttle Radar Topography Mission Global 3 arc second V003',
+            'updated': '2015-09-02T10:31:06.540Z',
+            'version_id': '003',
         }
 
-    if short_name=='SRTMGL30':
+    if short_name == 'SRTMGL30':
         metadata = {
-            u'archive_center': u'LPDAAC',
-            u'boxes': [u'-56 -180 60 180'],
-            u'browse_flag': False,
-            u'coordinate_system': u'CARTESIAN',
-            u'data_center': u'LPDAAC_ECS',
-            u'dataset_id': u'NASA Shuttle Radar Topography Mission Global 30 arc second V002',
-            u'id': u'C204582036-LPDAAC_ECS',
-            u'links': [{u'href': u'http://dx.doi.org/10.5067/MEaSUREs/SRTM/SRTMGL30.002',
-              u'hreflang': u'en-US',
-              u'rel': u'http://esipfed.org/ns/fedsearch/1.1/metadata#',
-              u'title': u'Data set landing page at the LP DAAC (MiscInformation)'}],
-            u'online_access_flag': False,
-            u'orbit_parameters': {},
-            u'original_format': u'ECHO10',
-            u'processing_level_id': u'3',
-            u'short_name': u'SRTMGL30',
-            u'summary': u'NASA Shuttle Radar Topography Mission Global 30 arc second',
-            u'time_end': u'2000-02-21T23:59:59.000Z',
-            u'time_start': u'2000-02-11T00:00:00.000Z',
-            u'title': u'NASA Shuttle Radar Topography Mission Global 30 arc second V002',
-            u'updated': u'2015-09-02T10:31:07.011Z',
-            u'version_id': u'002',
+            'archive_center': 'LPDAAC',
+            'boxes': ['-56 -180 60 180'],
+            'browse_flag': False,
+            'coordinate_system': 'CARTESIAN',
+            'data_center': 'LPDAAC_ECS',
+            'dataset_id': 'NASA Shuttle Radar Topography Mission Global 30 arc second V002',
+            'id': 'C204582036-LPDAAC_ECS',
+            'links': [{
+                'href': 'http://dx.doi.org/10.5067/MEaSUREs/SRTM/SRTMGL30.002',
+                'hreflang': 'en-US',
+                'rel': 'http://esipfed.org/ns/fedsearch/1.1/metadata#',
+                'title': 'Data set landing page at the LP DAAC (MiscInformation)'
+            }],
+            'online_access_flag': False,
+            'orbit_parameters': {},
+            'original_format': 'ECHO10',
+            'processing_level_id': '3',
+            'short_name': 'SRTMGL30',
+            'summary': 'NASA Shuttle Radar Topography Mission Global 30 arc second',
+            'time_end': '2000-02-21T23:59:59.000Z',
+            'time_start': '2000-02-11T00:00:00.000Z',
+            'title': 'NASA Shuttle Radar Topography Mission Global 30 arc second V002',
+            'updated': '2015-09-02T10:31:07.011Z',
+            'version_id': '002',
         }
     return metadata
+
 
 def _read_granules(short_name, page_num):
     return requests.get(granules_url % (short_name, page_num)).json()['feed']['entry']
@@ -119,17 +124,17 @@ class NasaService(SingleFileBase):
 
         features = pd.DataFrame(data)
         features.index = features['id']
-        features['geom_type'] = 'Polygon'
-        features['geom_coords'] = features['boxes'].apply(lambda x: [util.bbox2poly(*x[0].split(), reverse_order=True)])
-        coords = features['geom_coords'].apply(lambda x: pd.np.array(x).mean(axis=1))
-        features['longitude'] = coords.apply(lambda x: x.flatten()[0])
-        features['latitude'] = coords.apply(lambda x: x.flatten()[1])
-        features['download_url'] = features['links'].apply(
+        features['_geom_type_'] = 'Polygon'
+        features['_geom_coords_'] = features['boxes'].apply(lambda x: [util.bbox2poly(*x[0].split(), reverse_order=True)])
+        coords = features['_geom_coords_'].apply(lambda x: pd.np.array(x).mean(axis=1))
+        features['_longitude_'] = coords.apply(lambda x: x.flatten()[0])
+        features['_latitude_'] = coords.apply(lambda x: x.flatten()[1])
+        features['_download_url_'] = features['links'].apply(
             lambda x: next(iter([link['href'] for link in x if link.get('type') == 'application/zip']), None))
         return features
 
     def _get_parameters(self, service, features=None):
         return {
-            'parameters': ['elevation'],
-            'parameter_codes': ['elevation'],
+            '_parameters_': ['elevation'],
+            '_parameter_codes_': ['elevation'],
         }
