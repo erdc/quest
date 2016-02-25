@@ -97,7 +97,7 @@ class NwisService(WebServiceBase):
 
 #/// datasets need to have required dsl metadata and external metadata
 #/// need to keep t
-rack of units/data classification/restrictions
+#rack of units/data classification/restrictions
 
 
         return data

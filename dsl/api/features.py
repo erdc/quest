@@ -48,10 +48,10 @@ def add_features_to_collection(collection, feature_uris):
         True on success.
     """
     if not isinstance(feature_uris, pd.DataFrame):
-        new_features = get_features(uris, as_dataframe=True)
+        new_features = get_features(feature_uris, as_dataframe=True)
 
     # assign new feature ids
-    new_features['_name_'] = [util.name() for i in range(len(new_features))]
+    new_features['_name_'] = [util.uid() for i in range(len(new_features))]
     new_features['_display_name_'] = ''
 
     result = db.upsert_many(dbpath, 'features', new_features)
