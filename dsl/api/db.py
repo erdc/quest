@@ -41,12 +41,14 @@ def upsert_features(dbpath, features):
     upsert pandas dataframe
     """
     db = DataSet(_dburl(dbpath))
+    t = db['features']
 
-    for row in df.iterrows():
-        pass
+    #features =
+
+    #for uri, data in features.iterrows():
+
 
     if '_name_' not in t.columns:
-        t.insert(**data)
         t.create_index(['_name_'], unique=True)
         return db
 

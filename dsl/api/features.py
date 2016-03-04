@@ -6,6 +6,8 @@ import json
 from jsonrpc import dispatcher
 import pandas as pd
 from .. import util
+from . import db
+from .projects import active_db
 from .collections import (
         _read_collection_features,
         _write_collection_features,
@@ -13,13 +15,15 @@ from .collections import (
 
 
 @dispatcher.add_method
-def add_features_to_collection(collection, feature_uris):
+def add_features(collection, features):
     """Add features to a collection based on the passed in uris.
 
-    This does not download datasets, it just adds features and parameters
-    to a collection.
+    This does not download datasets, it just adds features to a collection.
 
     When the features are added into a collection they are given a new name.
+
+    TODO modify this based on new db format
+
     The original name is saved as 'external_uri'. If external_uri already exists
     (i.e. Feature was originally from usgs-nwis but is being copied from one
     collection to another) then does not overwrite external_uri.
@@ -30,39 +34,22 @@ def add_features_to_collection(collection, feature_uris):
 
     Args:
         collection (string): name of collection
-        uris (string, comma separated strings, list of strings): list of uris
-            to search in for features. If uri specifies a parameter and
-            parameter arg is None then use set the parameter to the uri value
-        geom_type (string, optional): filter features by geom_type, i.e.
-            point/line/polygon
-        parameter (string, optional): filter features by parameter
-        parameter_code (string, optional): filter features by parameter_code
-        bbox (string, optional): filter features by bounding box
-        filters (dict, optional): filter features by key/value pairs. The
-            provided keys are the metadata field names and the values are the
-            filters.
-        as_cache (bool, optional): Defaults to False, if True, update metadata
-            cache
+        features (string, comma separated strings, list of strings): list of
+            feature uris to add to the collection.
 
     Returns:
         True on success.
     """
     if not isinstance(feature_uris, pd.DataFrame):
-        new_features = get_features(feature_uris, as_dataframe=True)
+        new_features = get_features(features, as_dataframe=True)
 
-    # assign new feature ids
-    new_features['_name_'] = [util.uid() for i in range(len(new_features))]
-    new_features['_display_name_'] = ''
-
-    result = db.upsert_many(dbpath, 'features', new_features)
+    result = db.upsert_features(active_db(), 'features', new_features)
 
     return True
 
 
 @dispatcher.add_method
-def get_features(uris, geom_type=None, parameter=None, parameter_code=None,
-                 bbox=None, filters=None, as_dataframe=False,
-                 update_cache=False):
+def get_features(uris, as_dataframe=False, update_cache=False, filters=None):
     """Retrieve list of features from resources.
 
     currently ignores parameter and dataset portion of uri
@@ -72,18 +59,17 @@ def get_features(uris, geom_type=None, parameter=None, parameter_code=None,
         uris (string, comma separated strings, list of strings): list of uris
             to search in for features. If uri specifies a parameter and
             parameter arg is None then use set the parameter to the uri value
-        geom_type (string, optional): filter features by geom_type, i.e.
-            point/line/polygon
-        parameter (string, optional): filter features by parameter
-        parameter_code (string, optional): filter features by parameter code
-        bbox (string, optional): filter features by bounding box
-        filters (dict, optional): filter features by key/value pairs. The
-            provided keys are the metadata field names and the values are the
-            filters.
         as_dataframe (bool, optional): Defaults to False, return features as
             a pandas DataFrame indexed by feature uris instead of geojson
         as_cache (bool, optional): Defaults to False, if True, update metadata
             cache.
+        filters (dict, optional): filter features
+            available filters:
+                geom_type (string, optional): filter features by geom_type, i.e.
+                    point/line/polygon
+                parameter (string, optional): filter features by parameter
+                parameter_code (string, optional): filter features by parameter code
+                bbox (string, optional): filter features by bounding box
 
     Returns:
         features (dict|pandas.DataFrame): geojson style dict (default) or
@@ -91,70 +77,73 @@ def get_features(uris, geom_type=None, parameter=None, parameter_code=None,
 
     """
     uris = util.listify(uris)
+
+    #parse uris
+    df = pd.DataFrame({'uri': uris})
+    df = pd.DataFrame(df.uri.str.split('://').tolist(),
+                      columns=['resource', 'remainder'])
+    df1 = df.remainder.str.split('/', expand=True)
+    del df['remainder']
+    df['name'] = df1[0]
+    if len(df1.columns) > 1:
+        df['features'] = df1[1]
+
     features = []
-    for uri in uris:
-        uri = util.parse_uri(uri)
-        if uri['name'] is None:
-            raise ValueError('Service/Collection name must be specified')
+    for (resource, name), group in df.groupby(['resource', 'name']):
+        if resource not in ['service', 'collection']:
+            raise ValueError('URI must be a service or collection')
 
-        #if parameter is None:
-        #    parameter = ''
+        if resource == 'service':
+            provider, service = name.split(':')
+            tmp_feats = _get_features(provider, service,
+                                      update_cache=update_cache)
 
-        if uri['resource'] == 'service':
-            if uri['name'] is None:
-                svc = util.load_service(uri)
-                services = svc.get_services()
-            else:
-                services = [uri['name']]
+            if 'features' in group.columns:
+                # filter by feature/make sure feature exists
+                # this may break on empty/NaN features need to check
+                f = set(group['features'])
+                if None in f:
+                    f = f.remove(None)
 
-            for service in services:
-                # seamless not implemented yet
-                provider, service = uri['name'].split(':')
-                tmp_feats = _get_features(provider, service,
-                                          update_cache=update_cache)
-                if uri['feature'] is not None:
-                    tmp_feats = tmp_feats[
-                                    tmp_feats['feature_id'] == uri['feature']
-                                ]
-                features.append(tmp_feats)
+                if f is not None:
+                    idx = set(tmp_feats.index)
+                    idx.intersection_update(f)
+                    tmp_feats = tmp_feats.ix[list(idx)]
 
-        if uri['resource'] == 'collection':
-            tmp_feats = _read_collection_features(uri['name'])
-            if uri['feature'] is not None:
-                tmp_feats = tmp_feats[
-                                tmp_feats['feature_id'] == uri['feature']
-                            ]
+            tmp_feats.index = tmp_feats['_service_uri_']
             features.append(tmp_feats)
+
+        if resource == 'collection':
+            tmp_feats = pd.DataFrame(db.read_all(active_db(), 'features'))
+            #tmp_feats = TODO
 
     features = pd.concat(features)
 
-    if filters:
+    if filters is not None:
         for k, v in filters.items():
-            idx = features[k] == v
-            features = features[idx]
+            if k=='bbox':
+                xmin, ymin, xmax, ymax = [float(x) for x in util.listify(v)]
+                idx = (features.longitude > xmin) \
+                    & (features.longitude < xmax) \
+                    & (features.latitude > ymin) \
+                    & (features.latitude < ymax)
+                features = features[idx]
 
-    if bbox:
-        xmin, ymin, xmax, ymax = [float(x) for x in util.listify(bbox)]
-        idx = (features.longitude > xmin) \
-            & (features.longitude < xmax) \
-            & (features.latitude > ymin) \
-            & (features.latitude < ymax)
-        features = features[idx]
+            elif k=='geom_type':
+                idx = features._geom_type_.str.lower() == v.lower()
+                features = features[idx]
 
-    if geom_type:
-        idx = features.geom_type.str.lower() == geom_type.lower()
-        features = features[idx]
+            elif k=='parameter':
+                idx = features._parameters_.str.contains(v)
+                features = features[idx]
 
-    if parameter:
-        idx = features.parameters.str.contains(parameter)
-        features = features[idx]
+            elif k=='parameter_code':
+                idx = features._parameter_codes_.str.contains(v)
+                features = features[idx]
 
-    if parameter_code:
-        idx = features.parameters.str.contains(parameter)
-        features = features[idx]
-
-    # remove duplicate indices
-    #features.reset_index().drop_duplicates(subset='index').set_index('index')
+            else:
+                idx = features[k] == v
+                features = features[idx]
 
     if not as_dataframe:
         features = util.to_geojson(features)
@@ -289,6 +278,4 @@ def _get_features(provider, service, update_cache):
     features['_service_uri_'] = features.index.map(
                                     lambda feat: 'service://%s:%s/%s'
                                     % (provider, service, feat))
-
-    features.index = features['_service_uri_']
     return features
