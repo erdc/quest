@@ -3,8 +3,11 @@ import datetime
 from jsonrpc import dispatcher
 import os
 import shutil
+from . import db
 from .. import util
 
+PROJECT_DB_FILE = 'metadata.db'
+PROJECT_INDEX_FILE = 'project_index.yml'
 
 @dispatcher.add_method
 def add_project(name, path):
@@ -18,7 +21,8 @@ def add_project(name, path):
         raise ValueError('Project %s exists, please use a unique name' % name)
 
     try:
-        project = util.read_yaml(os.path.join(path, 'dsl.yml'))
+        dbpath = os.path.join(path, PROJECT_DB_FILE)
+        project = _read_project(dbpath)
     except:
         raise ValueError('Invalid Project Folder: %s' % path)
 
@@ -29,7 +33,8 @@ def add_project(name, path):
 
 
 @dispatcher.add_method
-def new_project(name, display_name=None, description=None, metadata=None, folder=None):
+def new_project(name, display_name=None, description=None, metadata=None,
+                folder=None):
     """Create a new DSL project and add it to list of available projects."""
     name = name.lower()
     projects = _load_projects()
@@ -53,20 +58,20 @@ def new_project(name, display_name=None, description=None, metadata=None, folder
     else:
         path = folder
 
-    metadata.update({
-        '_type_': 'project',
-        '_display_name_': metadata.get('display_name', name),
-        '_description_': metadata.get('description', None),
-        '_created_on_': datetime.datetime.now().isoformat(),
-    })
-    project = {'metadata': metadata}
+    dsl_metadata = {
+        'type': 'project',
+        'display_name': display_name,
+        'description': description,
+        'created_on': datetime.datetime.now().isoformat(),
+    }
 
     util.mkdir_if_doesnt_exist(path)
-    util.write_yaml(os.path.join(path, 'dsl.yml'), project)
-    projects.update({name: {'folder': folder}})
+    dbpath = os.path.join(path, PROJECT_DB_FILE)
+    _write_project(dbpath, dsl_metadata, metadata)
+    projects.update({name: {'_folder_': folder}})
     _write_projects(projects)
 
-    return project
+    return _load_project(name)
 
 
 @dispatcher.add_method
@@ -124,11 +129,11 @@ def get_projects():
     """Get list of available projects."""
     projects = {}
     for name, project in _load_projects().iteritems():
-        path = project['folder']
+        path = project['_folder_']
         if not os.path.isabs(path):
             path = os.path.join(util.get_projects_dir(), path)
 
-        metadata = _load_project(name)['metadata']
+        metadata = _load_project(name)
         metadata.update({
             '_name_': name,
             '_folder_': path,
@@ -150,8 +155,8 @@ def set_active_project(name):
 
 
 def _load_project(name):
-    path = _get_project_file(name)
-    return util.read_yaml(path)
+    dbpath = _get_project_db(name)
+    return db.read_data(dbpath, 'project', 'project_metadata')
 
 
 def _load_projects():
@@ -161,23 +166,27 @@ def _load_projects():
     # make sure a default project exists
     if projects is None:
         projects = {
-            'default': {'folder': 'default_project'}
+            'default': {'_folder_': 'default_project'}
         }
         default_dir = os.path.join(util.get_projects_dir(), 'default_project')
         util.mkdir_if_doesnt_exist(default_dir)
-        metadata = {
-            '_type_': 'project',
-            '_display_name_': 'Default Project',
-            '_description_': 'Created by DSL',
-            '_created_on_': datetime.datetime.now().isoformat(),
+        dsl_metadata = {
+            'type': 'project',
+            'display_name': 'Default Project',
+            'description': 'Created by DSL',
+            'created_on': datetime.datetime.now().isoformat(),
         }
-        project = {'metadata': metadata}
         util.mkdir_if_doesnt_exist(default_dir)
-        util.write_yaml(os.path.join(default_dir, 'dsl.yml'), project)
+        dbpath = os.path.join(default_dir, PROJECT_DB_FILE)
+        _write_project(dbpath, dsl_metadata)
         _write_projects(projects)
         set_active_project('default')
 
     return projects
+
+
+def _write_project(dbpath, dsl_metadata, metadata=None):
+    db.upsert(dbpath, 'project', 'project_metadata', dsl_metadata, metadata)
 
 
 def _write_projects(projects):
@@ -188,18 +197,18 @@ def _write_projects(projects):
     util.write_yaml(path, contents)
 
 
-def _get_project_file(name):
+def _get_project_db(name):
     projects = _load_projects()
     if name not in projects.keys():
         raise ValueError('Project %s not found' % name)
 
-    path = projects[name]['folder']
+    path = projects[name]['_folder_']
     if not os.path.isabs(path):
         path = os.path.join(util.get_projects_dir(), path)
 
     util.mkdir_if_doesnt_exist(path)
-    return os.path.join(path, 'dsl.yml')
+    return os.path.join(path, PROJECT_DB_FILE)
 
 
 def _get_projects_index_file():
-    return os.path.join(util.get_projects_dir(), 'dsl.yml')
+    return os.path.join(util.get_projects_dir(), PROJECT_INDEX_FILE)

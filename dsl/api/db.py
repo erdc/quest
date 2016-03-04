@@ -1,8 +1,7 @@
 import os
 from playhouse.dataset import DataSet
 
-# project
-# db.new_entry('name')
+
 
 
 def upsert(dbpath, table, name, dsl_metadata=None, metadata=None):
@@ -14,15 +13,6 @@ def upsert(dbpath, table, name, dsl_metadata=None, metadata=None):
     if dsl_metadata is None:
         dsl_metadata = {}
 
-    if 'display_name' not in dsl_metadata:
-        dsl_metadata['display_name'] = name
-
-    if 'description' not in dsl_metadata:
-        dsl_metadata['description'] = ''
-
-    if table in ['projects'] and dsl_metadata.get('folder') is None:
-        dsl_metadata['folder'] = name
-
     data = {'_{}_'.format(k): v for k, v in dsl_metadata.items()}
 
     if metadata is not None:
@@ -33,18 +23,15 @@ def upsert(dbpath, table, name, dsl_metadata=None, metadata=None):
         data['id0'] = data.pop('id')
 
     db = DataSet(_dburl(dbpath))
-    create_index = False
     if table not in db.tables:
-        create_index = True
+        t = db[table]
+        t.insert(**data)
+        t.create_index(['_name_'], unique=True)
+        return db
 
     t = db[table]
     if t.find_one(_name_=name) is not None:
         t.update(columns='_name_', **data)
-    else:
-        t.insert(**data)
-
-    if create_index:
-        t.create_index(['name'], unique=True)
 
     return db
 
@@ -52,14 +39,14 @@ def upsert(dbpath, table, name, dsl_metadata=None, metadata=None):
 def read_data(dbpath, table, name):
     db = DataSet(_dburl(dbpath))
     t = db[table]
-    return t.find_one(name=name)
+    return t.find_one(_name_=name)
 
 
 def _dburl(dbpath):
     if dbpath == 'memory':
         return 'sqlite:///:memory:'
     else:
-        return 'sqlite:///' + os.path.join(dbpath, 'dsl.db')
+        return 'sqlite:///' + dbpath
 
 
 def _sanitize(name):
