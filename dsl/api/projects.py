@@ -121,7 +121,7 @@ def delete_project(name, delete_data=False):
 def get_active_project():
     """Get active project name."""
     path = _get_projects_index_file()
-    return util.read_yaml(path).get('active_project')
+    return util.read_yaml(path).get('active_project', 'default')
 
 
 @dispatcher.add_method
