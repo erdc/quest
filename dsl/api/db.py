@@ -2,8 +2,6 @@ import os
 from playhouse.dataset import DataSet
 
 
-
-
 def upsert(dbpath, table, name, dsl_metadata=None, metadata=None):
     """
     """
@@ -23,17 +21,47 @@ def upsert(dbpath, table, name, dsl_metadata=None, metadata=None):
         data['id0'] = data.pop('id')
 
     db = DataSet(_dburl(dbpath))
-    if table not in db.tables:
-        t = db[table]
+    t = db[table]
+
+    if '_name_' not in t.columns:
         t.insert(**data)
         t.create_index(['_name_'], unique=True)
         return db
 
-    t = db[table]
     if t.find_one(_name_=name) is not None:
         t.update(columns='_name_', **data)
+    else:
+        t.insert(**data)
 
     return db
+
+
+def upsert_features(dbpath, features):
+    """
+    upsert pandas dataframe
+    """
+    db = DataSet(_dburl(dbpath))
+
+    for row in df.iterrows():
+        pass
+
+    if '_name_' not in t.columns:
+        t.insert(**data)
+        t.create_index(['_name_'], unique=True)
+        return db
+
+    if t.find_one(_name_=name) is not None:
+        t.update(columns='_name_', **data)
+    else:
+        t.insert(**data)
+
+    return db
+
+
+def read_all(dbpath, table):
+    db = DataSet(_dburl(dbpath))
+    t = db[table]
+    return {row['_name_']: row for row in t.all()}
 
 
 def read_data(dbpath, table, name):

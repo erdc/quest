@@ -3,7 +3,8 @@ from __future__ import print_function
 import datetime
 from jsonrpc import dispatcher
 from .. import util
-from .projects import get_active_project, get_projects
+from . import db
+from .projects import get_active_project, get_projects, active_db
 import os
 import pandas as pd
 import shutil
@@ -34,22 +35,15 @@ def get_collections():
     collections (dict): Available collections keyed by the collection name
     """
 
-    collections = {}
-    for name in _load_collections():
-        metadata = _load_collection(name).get('metadata', {})
-        metadata['_name_'] = name
-        collections[name] = metadata
-
-    return collections
+    return _load_collections()
 
 
 @dispatcher.add_method
 def new_collection(name, display_name=None, description=None, metadata=None):
     """Create a new collection.
 
-    Create a new collection by creating a new folder and placing a yaml
-    file in the folder for dsl metadata and adding a reference to the
-    master collections metadata folder.
+    Create a new collection by creating a new folder in project directory
+    and adding collection metadata in project database.
 
     Args:
         name (string): name of the collection used in all dsl function calls,
@@ -77,25 +71,23 @@ def new_collection(name, display_name=None, description=None, metadata=None):
 
     path = os.path.join(_get_project_dir(), name)
     util.mkdir_if_doesnt_exist(path)
-    collections.append(name)
-    _write_collections(collections)
 
-    metadata.update({
-        '_type_': 'collection',
-        '_display_name_': display_name,
-        '_description_': description,
-        '_created_on_': datetime.datetime.now().isoformat(),
-    })
-
-    collection = {'metadata': metadata}
-    _write_collection(name, collection)
-
-    return collection
+    dsl_metadata = {
+        'type': 'collection',
+        'display_name': display_name,
+        'description': description,
+        'created_on': datetime.datetime.now().isoformat(),
+    }
+    db.upsert(active_db(), 'collections', name, dsl_metadata, metadata)
+    return _load_collection(name)
 
 
 @dispatcher.add_method
 def update_collection(name, display_name=None, description=None, metadata=None):
-    """Update metadata of collection."""
+    """Update metadata of collection.
+
+    TODO - REPLACE WITH GENERIC UPDATE METADATA CALL
+    """
     c = _load_collection(name)
 
     if display_name is not None:
@@ -107,13 +99,15 @@ def update_collection(name, display_name=None, description=None, metadata=None):
     if metadata is not None:
         c['metadata'].update(metadata)
 
-    _write_collection(name, c['metadata'])
+    db.upsert(active_db(), 'collections', name, dsl_metadata, metadata)
     return c
 
 
 @dispatcher.add_method
 def delete_collection(name, delete_data=True):
     """delete a collection.
+
+    TODO FIX THIS TO WORK WITH DB
 
     Deletes a collection from the collections metadata file.
     Optionally deletes all data under collection.
@@ -149,29 +143,10 @@ def delete_collection(name, delete_data=True):
     return collections
 
 
-def _collection_features_file(collection):
-    collection = _load_collections().get(collection)
-    if collection is None:
-        raise ValueError('Collection Not Found')
-
-    folder = collection['folder']
-    path = os.path.join(_get_collections_dir(), folder)
-
-    return os.path.join(path, 'features.h5')
-
-
-def _collection_db(collection):
-    collection = _load_collections().get(collection)
-    if collection is None:
-        raise ValueError('Collection Not Found')
-
-    folder = collection['folder']
-    path = os.path.join(_get_collections_dir(), folder)
-
-    return os.path.join(path, 'dsl.db')
-
-
 def _read_collection_features(collection):
+    """
+    TODO REPLACE WITH GENERIC GET FEATURES
+    """
     features_file = _collection_features_file(collection)
     try:
         features = pd.read_hdf(features_file, 'table')
@@ -181,50 +156,23 @@ def _read_collection_features(collection):
 
 
 def _write_collection_features(collection, features):
-    features_file = _collection_features_file(collection)
+    """
+    TODO MAKE WORK WITH DB
+    """
+    features = _collection_features_file(collection)
+
     features.to_hdf(features_file, 'table')
-
-
-def _get_collection_file(name):
-    collections = _load_collections()
-    if name not in collections:
-        raise ValueError('Collection %s not found' % name)
-
-    return os.path.join(_get_project_dir(), name, 'dsl.yml')
 
 
 def _get_project_dir():
     return get_projects()[get_active_project()]['_folder_']
 
 
-def _get_collections_index_file():
-    return os.path.join(_get_project_dir(), 'dsl.yml')
-
-
 def _load_collection(name):
     """load collection."""
-    path = _get_collection_file(name)
-    return util.read_yaml(path)
+    return db.read_data(active_db(), 'collections', name)
 
 
 def _load_collections():
     """load list of collections."""
-    path = _get_collections_index_file()
-    collections = util.read_yaml(path).get('collections')
-    if collections is None:
-        return []
-
-    return collections
-
-
-def _write_collection(name, collection):
-    """write collection."""
-    util.write_yaml(_get_collection_file(name), collection)
-
-
-def _write_collections(collections):
-    """write list of collections to file."""
-    path = _get_collections_index_file()
-    contents = util.read_yaml(path)
-    contents.update({'collections': collections})
-    util.write_yaml(path, contents)
+    return db.read_all(active_db(), 'collections')

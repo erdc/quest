@@ -3,11 +3,18 @@ import datetime
 from jsonrpc import dispatcher
 import os
 import shutil
-from . import db
 from .. import util
+from . import db
 
 PROJECT_DB_FILE = 'metadata.db'
 PROJECT_INDEX_FILE = 'project_index.yml'
+
+
+def active_db():
+    """Return path to active project database
+    """
+    return _get_project_db(get_active_project())
+
 
 @dispatcher.add_method
 def add_project(name, path):
