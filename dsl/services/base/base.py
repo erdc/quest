@@ -36,8 +36,8 @@ class WebServiceBase(with_metaclass(abc.ABCMeta, object)):
         params = self._get_parameters(service, features)
         if isinstance(params, pd.DataFrame):
             groups = params.groupby('_name_').groups
-            features['_parameters_'] = features.index.map(lambda x: ','.join(filter(None, params.ix[groups[x]]['_parameters_'].tolist())) if x in groups.keys() else '')
-            features['_parameter_codes_'] = features.index.map(lambda x: ','.join(filter(None, params.ix[groups[x]]['_parameter_codes_'].tolist())) if x in groups.keys() else '')
+            features['_parameters_'] = features.index.map(lambda x: ','.join(filter(None, params.ix[groups[x]]['_parameter_'].tolist())) if x in groups.keys() else '')
+            features['_parameter_codes_'] = features.index.map(lambda x: ','.join(filter(None, params.ix[groups[x]]['_parameter_code_'].tolist())) if x in groups.keys() else '')
         else:
             features['_parameters_'] = ','.join(params['_parameters_'])
             features['_parameter_codes_'] = ','.join(params['_parameter_codes_'])

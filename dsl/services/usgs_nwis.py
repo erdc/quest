@@ -87,15 +87,15 @@ class NwisService(WebServiceBase):
             data = executor.map(func, chunks)
 
         data = pd.concat(data, ignore_index=True)
-        data['external_name'] = data['parm_cd'] + ':' + data['stat_cd']
+        data['_parameter_code_'] = data['parm_cd'] + ':' + data['stat_cd']
         data['external_vocabulary'] = 'USGS-NWIS'
         data.rename(columns={'site_no': '_name_', 'count_nu': 'count'}, inplace=True)
-        data = data[pd.notnull(data['external_name'])]
-        data['standard_name'] = data['external_name'].apply(lambda x: self._parameter_map(service).get(x))
+        data = data[pd.notnull(data['_parameter_code_'])]
+        data['_parameter_'] = data['_parameter_code_'].apply(lambda x: self._parameter_map(service).get(x))
         pm_codes = _pm_codes()
         data['external_description'] = data['parm_cd'].apply(lambda x: pm_codes.ix[x]['SRSName'] if x in pm_codes.index else '')
         data['unit'] = data['parm_cd'].apply(lambda x: pm_codes.ix[x]['parm_unit'] if x in pm_codes.index else '')
-        cols = ['standard_name', 'external_name', 'external_vocabulary',
+        cols = ['_parameter_', '_parameter_code_', 'external_vocabulary',
                 '_name_', 'external_description', 'begin_date',
                 'end_date', 'count',
                 ]
