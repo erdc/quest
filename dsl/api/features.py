@@ -40,10 +40,10 @@ def add_features(collection, features):
     Returns:
         True on success.
     """
-    if not isinstance(feature_uris, pd.DataFrame):
-        new_features = get_features(features, as_dataframe=True)
+    if not isinstance(features, pd.DataFrame):
+        features = get_features(features, as_dataframe=True)
 
-    result = db.upsert_features(active_db(), 'features', new_features)
+    result = db.upsert_features(active_db(), features)
 
     return True
 
@@ -111,11 +111,13 @@ def get_features(uris, as_dataframe=False, update_cache=False, filters=None):
                     tmp_feats = tmp_feats.ix[list(idx)]
 
             tmp_feats.index = tmp_feats['_service_uri_']
-            features.append(tmp_feats)
 
         if resource == 'collection':
-            tmp_feats = pd.DataFrame(db.read_all(active_db(), 'features'))
-            #tmp_feats = TODO
+            tmp_feats = pd.DataFrame(db.read_all(active_db(), 'features')).T
+            prefix = 'collection://' + name + '/'
+            tmp_feats.index =  prefix + tmp_feats['_name_']
+
+        features.append(tmp_feats)
 
     features = pd.concat(features)
 

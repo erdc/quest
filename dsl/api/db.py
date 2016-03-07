@@ -1,5 +1,6 @@
 import os
 from playhouse.dataset import DataSet
+from .. import util
 
 
 def upsert(dbpath, table, name, dsl_metadata=None, metadata=None):
@@ -43,19 +44,20 @@ def upsert_features(dbpath, features):
     db = DataSet(_dburl(dbpath))
     t = db['features']
 
-    #features =
+    for uri, data in features.iterrows():
+        if '_service_uri_' in data.index and '_service_uri_' in t.columns:
+            if t.find_one(_service_uri_=data['_service_uri_']) is not None:
+                continue
 
-    #for uri, data in features.iterrows():
+        data_dict = data.to_dict()
+        data_dict.update({'_name_': util.uid()})
+        t.insert(**data_dict)
 
-
-    if '_name_' not in t.columns:
+    try:
         t.create_index(['_name_'], unique=True)
-        return db
-
-    if t.find_one(_name_=name) is not None:
-        t.update(columns='_name_', **data)
-    else:
-        t.insert(**data)
+        t.create_index(['_service_uri_'], unique=True)
+    except:
+        pass # index already present
 
     return db
 

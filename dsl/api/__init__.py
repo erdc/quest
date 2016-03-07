@@ -29,7 +29,7 @@ __all__ = (
     'update_dataset',
     'describe_dataset',
     'vizualize_dataset',
-    #'add_features_to_collection',
+    'add_features',
     'get_features',
     'new_feature',
     'update_feature',
@@ -83,7 +83,7 @@ from .datasets import (
 )
 
 from .features import (
-    #add_features_to_collection,
+    add_features,
     get_features,
     new_feature,
     update_feature,
