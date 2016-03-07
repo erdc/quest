@@ -62,11 +62,17 @@ class NwisService(WebServiceBase):
 
         sites = {k: v for d in sites for k, v in d.items()}
         df = pd.DataFrame.from_dict(sites, orient='index')
-        df['geom_type'] = 'Point'
+        df['_geom_type_'] = 'Point'
         for col in ['latitude', 'longitude']:
             df[col] = df['location'].apply(lambda x: float(x[col]))
 
-        df['geom_coords'] = zip(df['longitude'], df['latitude'])
+        df.rename(columns={
+                    'name': '_name_',
+                    'latitude': '_latitude_',
+                    'longitude': '_longitude_',
+                    }, inplace=True)
+
+        df['_geom_coords_'] = zip(df['_longitude_'], df['_latitude_'])
         return df
 
     def _get_parameters(self, service, features=None):
@@ -83,14 +89,14 @@ class NwisService(WebServiceBase):
         data = pd.concat(data, ignore_index=True)
         data['external_name'] = data['parm_cd'] + ':' + data['stat_cd']
         data['external_vocabulary'] = 'USGS-NWIS'
-        data.rename(columns={'site_no': 'feature_id', 'count_nu': 'count'}, inplace=True)
+        data.rename(columns={'site_no': '_name_', 'count_nu': 'count'}, inplace=True)
         data = data[pd.notnull(data['external_name'])]
         data['standard_name'] = data['external_name'].apply(lambda x: self._parameter_map(service).get(x))
         pm_codes = _pm_codes()
         data['external_description'] = data['parm_cd'].apply(lambda x: pm_codes.ix[x]['SRSName'] if x in pm_codes.index else '')
         data['unit'] = data['parm_cd'].apply(lambda x: pm_codes.ix[x]['parm_unit'] if x in pm_codes.index else '')
         cols = ['standard_name', 'external_name', 'external_vocabulary',
-                'feature_id', 'external_description', 'begin_date',
+                '_name_', 'external_description', 'begin_date',
                 'end_date', 'count',
                 ]
         data = data[cols]

@@ -32,12 +32,12 @@ class WebServiceBase(with_metaclass(abc.ABCMeta, object)):
                 pass
 
         features = self._get_features(service)
-        features['_feature_id_'] = features.index
+        features['_name_'] = features.index
         params = self._get_parameters(service, features)
         if isinstance(params, pd.DataFrame):
-            groups = params.groupby('_feature_id_').groups
-            features['_parameters_'] = features.index.map(lambda x: ','.join(filter(None, params.ix[groups[x]]['parameter'].tolist())) if x in groups.keys() else '')
-            features['_parameter_codes_'] = features.index.map(lambda x: ','.join(filter(None, params.ix[groups[x]]['parameter_code'].tolist())) if x in groups.keys() else '')
+            groups = params.groupby('_name_').groups
+            features['_parameters_'] = features.index.map(lambda x: ','.join(filter(None, params.ix[groups[x]]['_parameters_'].tolist())) if x in groups.keys() else '')
+            features['_parameter_codes_'] = features.index.map(lambda x: ','.join(filter(None, params.ix[groups[x]]['_parameter_codes_'].tolist())) if x in groups.keys() else '')
         else:
             features['_parameters_'] = ','.join(params['_parameters_'])
             features['_parameter_codes_'] = ','.join(params['_parameter_codes_'])
@@ -99,7 +99,7 @@ class SingleFileBase(WebServiceBase):
     def _download(self, path, service, feature, parameter, **kwargs):
         feature = self.get_features(service).ix[feature]
         download_url = feature['_download_url_']
-        extract_from_zip = feature.get('extract_from_zip', '')
+        extract_from_zip = feature.get('_extract_from_zip_', '')
         save_path = ulmo.util.download_tiles(path, [download_url], extract_from_zip)[0]
         return {'save_path': save_path, 'file_format': feature.get('file_format')}
 

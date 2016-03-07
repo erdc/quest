@@ -62,10 +62,15 @@ class NcdcService(WebServiceBase):
         # remove locations with invalid coordinates
         valid = pd.notnull(features.latitude) & pd.notnull(features.longitude)
         features = features[valid]
-        features['geom_type'] = 'Point'
-        features['geom_coords'] = \
-            zip(features['longitude'], features['latitude'])
-        return features
+        features.rename(columns={
+                            'id': '_name_',
+                            'longitude': '_longitude_',
+                            'latitude': '_latitude_'
+                        }, inplace=True)
+        features['_geom_type_'] = 'Point'
+        features['_geom_coords_'] = \
+            zip(features['_longitude_'], features['_latitude_'])
+        return features.rename(columns={'id': '_name_'})
 
     def _get_parameters(self, service, features=None):
         if service=='ghcn-daily':
@@ -76,15 +81,15 @@ class NcdcService(WebServiceBase):
 
             # hardcoding for now
             parameters = {
-                'parameters': self._parameter_map('ghcn-daily').values(),
-                'parameter_codes': self._parameter_map('ghcn-daily').keys()
+                '_parameters_': self._parameter_map('ghcn-daily').values(),
+                '_parameter_codes_': self._parameter_map('ghcn-daily').keys()
             }
 
         if service=='gsod':
             # this is not the real list of parameters. hardcoding for now
             parameters = {
-                'parameters': self._parameter_map('gsod').values(),
-                'parameter_codes': self._parameter_map('gsod').keys()
+                '_parameters_': self._parameter_map('gsod').values(),
+                '_parameter_codes_': self._parameter_map('gsod').keys()
             }
 
         return parameters
@@ -100,9 +105,6 @@ class NcdcService(WebServiceBase):
                 'TAVG': 'air_temperature:daily:mean',
             }
 
-            #// NOTE // consider switching order. store on disk as feature->dataset
-            #, then parameter/units become part of dataset metadata.
-
         if service=='gsod':
             pmap = {
                 'precip': 'rainfall:daily:total',
@@ -114,8 +116,8 @@ class NcdcService(WebServiceBase):
 
         return pmap
 
-    def _download_dataset(self, path, service, feature, **kwargs):
+    def _download(self, path, service, feature, **kwargs):
         pass
 
-    def _download_dataset_options(self, service):
+    def _download_options(self, service):
         pass
