@@ -50,7 +50,7 @@ def upsert_features(dbpath, features):
                 continue
 
         data_dict = data.to_dict()
-        data_dict.update({'_name_': util.uid()})
+        data_dict.update({'_name_': util.uuid()})
         t.insert(**data_dict)
 
     try:

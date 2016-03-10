@@ -1,24 +1,23 @@
 """Datasets API functions."""
-
+from jsonrpc import dispatcher
 
 from .. import util
+from . import db
+from .projects import active_db
 
 
-def download(source_uri, target_uri=None, async=False, **kwargs):
+def download(feature, parameter=None, save_path=None, async=False, **kwargs):
     """Download dataset and save it locally.
 
     Parameters
     ----------
-        source_uri: str
-            uri of webservice or collection. must contain feature but need
-            not contain a parameter, if no parameter then all parameters are
-            included. If source uri is not a collection then target_uri must
-            be specified
-        target_uri: ``None`` or str
-            uri of target. If source_uri is a collection then this parameter
-            is ignores. If source_uri is a webservice then target_uri must be a
-            filepath (i.e. file:///path/to/folder). (target_uri can also be a
-            different collection *NOTIMPLEMENTED*)
+        feature: str
+            uri of feature within service or collection.
+            Ii=f no parameter is specified then all parameters are downloaded
+            included. If feature is not part of a collection then save_path must
+            be specified. save_path is ignored if feature is in collection.
+        save_path: ``None`` or str
+            filepath to save data
         async: bool (default False)
             If true download in background
 
@@ -31,11 +30,15 @@ def download(source_uri, target_uri=None, async=False, **kwargs):
         TODO add examples
 
     """
-    source_uri = util.parse_uri(source_uri)
-    provider = source_uri['uid']
-    service = source_uri['service']
+    if source_uri.startswith('collection'):
+        source = get_features(feature)['_service_uri_']
+    else:
+        source = source_uri
+
+    source_uri = util.parse_uri(source)
+
+    provider, service = source_uri['name'].split()
     feature = source_uri['feature']
-    parameter = source_uri['parameter']
 
     if target_uri is None:
         raise NotImplementedError
@@ -47,15 +50,13 @@ def download(source_uri, target_uri=None, async=False, **kwargs):
     return driver.download_dataset(path, service, feature, parameter, **kwargs)
 
 
-def download_options(source_uri):
+def download_options(feature):
     """List optional kwargs that can be specified when downloading a dataset
 
     Parameters
     ----------
-        source_uri: str
-            uri of webservice or collection. must contain feature but need
-            not contain a parameter, if no parameter then all parameters are
-            included.
+        feature: str
+            uri of feature in webservice or collection.
 
     Return
     ------
@@ -66,25 +67,52 @@ def download_options(source_uri):
     Examples:
         TODO add examples
     """
-    source_uri = util.parse_uri(source_uri)
-    provider = source_uri['uid']
-    service = source_uri['service']
-    feature = source_uri['feature']
-    parameter = source_uri['parameter']
+    uri = util.parse_uri(feature)
+    provider, service = uri['name'].split(':')
+    # feature = uri['feature']
     driver = util.load_drivers('services', names=provider)[provider].driver
     return driver.download_dataset_options(service)
 
 
-def stage_for_download(uri):
-    pass
+@dispatcher.add_method
+def new_dataset(feature, display_name=None, save_path=None, metadata=None):
+    """Create a new dataset at a feature.
 
+    Args:
+        feature (string): uri of feature in collection
 
-def update_dataset():
-    """Update metatata related to a downloaded dataset.
-
-    NOTIMPLEMENTED
+    Returns:
+        uid of dataset
     """
-    pass
+    uri = util.parse_uri(feature)
+    if uri['resource']!='collection':
+        raise ValueError('Please add feature to a collection first')
+
+    name = util.uuid()
+
+    if dsl_metadata is None:
+        dsl_metadata = {}
+
+    dsl_metadata.update({'type': 'dataset'})
+    db.upsert(active_db, 'datasets', name, dsl_metadata, metadata)
+
+    return uid
+
+
+
+def stage_for_download(datasets, download_options=None):
+    """
+    """
+    datasets = util.listify(datasets)
+
+    for datasets in datasets:
+        dsl_metadata = {
+            'download_options': download_options,
+            'status': 'ready to download',
+        }
+        db.upsert(dbpath, 'datasets', dataset, dsl_metadata=None, metadata=None)
+
+    return
 
 
 def describe_dataset():

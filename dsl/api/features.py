@@ -16,26 +16,21 @@ from .collections import (
 
 @dispatcher.add_method
 def add_features(collection, features):
-    """Add features to a collection based on the passed in uris.
+    """Add features to a collection based on the passed in feature uris.
 
     This does not download datasets, it just adds features to a collection.
+    When the features are added into a collection they are given a new
+    feature id.
 
-    When the features are added into a collection they are given a new name.
-
-    TODO modify this based on new db format
-
-    The original name is saved as 'external_uri'. If external_uri already exists
+    The original name is saved as '_service_uri_'. If service_uri already exists
     (i.e. Feature was originally from usgs-nwis but is being copied from one
     collection to another) then does not overwrite external_uri.
 
-    If a features with matching external_uri are merged and the parameter list
-    updated. todo: FEATURE NOT IMPLEMENTED, Currently, new features will be
-    created.
-
     Args:
         collection (string): name of collection
-        features (string, comma separated strings, list of strings): list of
-            feature uris to add to the collection.
+        features (string, comma separated strings,
+                  list of strings, pandas DataFrame): list of
+            features to add to the collection.
 
     Returns:
         True on success.
@@ -49,7 +44,8 @@ def add_features(collection, features):
 
 
 @dispatcher.add_method
-def get_features(uris, as_dataframe=False, update_cache=False, filters=None):
+def get_features(services=None, collections=None, as_dataframe=False,
+                 update_cache=False, filters=None):
     """Retrieve list of features from resources.
 
     currently ignores parameter and dataset portion of uri
@@ -76,47 +72,47 @@ def get_features(uris, as_dataframe=False, update_cache=False, filters=None):
             pandas.DataFrame
 
     """
-    uris = util.listify(uris)
+    if services is None and collections is None:
+        raise ValueError('Specify at least one service or collection')
 
-    #parse uris
-    df = pd.DataFrame({'uri': uris})
-    df = pd.DataFrame(df.uri.str.split('://').tolist(),
-                      columns=['resource', 'remainder'])
-    df1 = df.remainder.str.split('/', expand=True)
-    del df['remainder']
-    df['name'] = df1[0]
-    if len(df1.columns) > 1:
-        df['features'] = df1[1]
+    services = util.listify(services)
+    collections = util.listify(collections)
+
+    # parse uris
+    # df = pd.DataFrame({'uri': uris})
+    # df = pd.DataFrame(df.uri.str.split('://').tolist(),
+    #                  columns=['resource', 'remainder'])
+    # df1 = df.remainder.str.split('/', expand=True)
+    # del df['remainder']
+    # df['name'] = df1[0]
+    # if len(df1.columns) > 1:
+    #    df['features'] = df1[1]
 
     features = []
-    for (resource, name), group in df.groupby(['resource', 'name']):
-        if resource not in ['service', 'collection']:
-            raise ValueError('URI must be a service or collection')
+    #for (resource, name), group in df.groupby(['resource', 'name']):
+    #    if resource not in ['service', 'collection']:
+    #        raise ValueError('URI must be a service or collection')
 
-        if resource == 'service':
-            provider, service = name.split(':')
-            tmp_feats = _get_features(provider, service,
-                                      update_cache=update_cache)
+    for name in services or []:
+        provider, service, feature = util.parse_service_uri(name)
+        tmp_feats = _get_features(provider, service, update_cache=update_cache)
+        tmp_feats.index = tmp_feats['_service_uri_']
+        features.append(tmp_feats)
+        # if feature is  in group.columns:
+        #     # filter by feature/make sure feature exists
+        #     # this may break on empty/NaN features need to check
+        #     f = set(group['features'])
+        #     if None in f:
+        #         f = f.remove(None)
+        #
+        #     if f is not None:
+        #         idx = set(tmp_feats.index)
+        #         idx.intersection_update(f)
+        #         tmp_feats = tmp_feats.ix[list(idx)]
 
-            if 'features' in group.columns:
-                # filter by feature/make sure feature exists
-                # this may break on empty/NaN features need to check
-                f = set(group['features'])
-                if None in f:
-                    f = f.remove(None)
-
-                if f is not None:
-                    idx = set(tmp_feats.index)
-                    idx.intersection_update(f)
-                    tmp_feats = tmp_feats.ix[list(idx)]
-
-            tmp_feats.index = tmp_feats['_service_uri_']
-
-        if resource == 'collection':
-            tmp_feats = pd.DataFrame(db.read_all(active_db(), 'features')).T
-            prefix = 'collection://' + name + '/'
-            tmp_feats.index =  prefix + tmp_feats['_name_']
-
+    for name in collections or []:
+        tmp_feats = pd.DataFrame(db.read_all(active_db(), 'features')).T
+        tmp_feats.index = tmp_feats['_name_']
         features.append(tmp_feats)
 
     features = pd.concat(features)
@@ -154,20 +150,23 @@ def get_features(uris, as_dataframe=False, update_cache=False, filters=None):
 
 
 @dispatcher.add_method
-def new_feature(uri, geom_type=None, geom_coords=None, metadata={}):
+def new_feature(collection, display_name=None, geom_type=None, geom_coords=None, metadata={}):
     """Add a new feature to a collection.
+
+    TODO make work with db
 
     (ignore feature/parameter/dataset in uri)
 
     Args:
-        uri (string): uri of collection
+        collection (string): uri of collection
+        display_name (string): display name of feature
         geom_type (string, optional): point/line/polygon
         geom_coords (string or list, optional): geometric coordinates specified
             as valid geojson coordinates (i.e. a list of lists i.e.
             '[[-94.0, 23.2], [-94.2, 23.4] ...]'
             --------- OR ---------
             [[-94.0, 23.2], [-94.2, 23.4] ...] etc)
-        metadata (dict, optional): metadata at the new feature
+        metadata (dict, optional): optional metadata at the new feature
 
     Returns
     -------
@@ -175,7 +174,7 @@ def new_feature(uri, geom_type=None, geom_coords=None, metadata={}):
             uri of newly created feature
 
     """
-    uri = util.parse_uri(uri)
+    uri = util.parse_uri(collection)
     if uri['resource'] != 'collection':
         raise NotImplementedError
 
@@ -192,24 +191,29 @@ def new_feature(uri, geom_type=None, geom_coords=None, metadata={}):
 
     metadata.update({'geom_type': geom_type, 'geom_coords': geom_coords})
     metadata.update({})
-    name = 'collection://' + collection + '::' + util.name()
+    uid = util.uuid('feature')
+    if display_name is None:
+        display_name = uid
 
-    feature = pd.Series(metadata, name=name)
-    existing = _read_collection_features(collection)
-    updated = existing.append(feature)
-    _write_collection_features(collection, updated)
+    dsl_metadata = {'display_name': display_name}
 
-    return feature.name
+    db.upsert(active_db(), 'features', uid, dsl_metadata=dsl_metadata, metadata=metadata)
+
+    return 'collection://' + collection + '/' + uid
 
 
 @dispatcher.add_method
-def update_feature(uri, metadata):
+def update_features(feature, metadata):
     """Change metadata feature in collection.
+
+    TODO make work with db
+
 
     (ignore feature/parameter/dataset in uri)
 
     Args:
-        uri (string): uri of collection
+        features (string, comma separated strings, list of strings): uri of
+            features to update
         metadata (dict): metadata to be updated
 
     Returns
@@ -217,7 +221,7 @@ def update_feature(uri, metadata):
         True on successful update
 
     """
-    uri_list = util.listify(uri)
+    features = util.listify(features)
 
     for uri in uri_list:
         uri_str = uri
@@ -245,6 +249,8 @@ def update_feature(uri, metadata):
 @dispatcher.add_method
 def delete_feature(uri):
     """Delete feature from collection).
+
+    TODO make work with db
 
     (ignore parameter/dataset in uri)
 
@@ -278,6 +284,6 @@ def _get_features(provider, service, update_cache):
     driver = util.load_drivers('services', names=provider)[provider].driver
     features = driver.get_features(service, update_cache=update_cache)
     features['_service_uri_'] = features.index.map(
-                                    lambda feat: 'service://%s:%s/%s'
+                                    lambda feat: 'svc://%s:%s/%s'
                                     % (provider, service, feat))
     return features

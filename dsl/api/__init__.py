@@ -19,20 +19,21 @@ __all__ = (
     # 'update_metadata',
     'get_collections',
     'new_collection',
-    'update_collection',
+    'update_collection', #replace with update
     'delete_collection',
     # 'stage_for_download',
     'download',
     'download_options',
     # 'locate_dataset',
     # 'add_dataset_to_feature',
-    'update_dataset',
+    'new_dataset',
+    # 'update_dataset',
     'describe_dataset',
     'vizualize_dataset',
     'add_features',
     'get_features',
     'new_feature',
-    'update_feature',
+    # 'update_feature',
     'delete_feature',
     'get_filters',
     'apply_filter',
@@ -77,7 +78,8 @@ from .collections import (
 from .datasets import (
     download,
     download_options,
-    update_dataset,
+    new_dataset,
+    # update_dataset,
     describe_dataset,
     vizualize_dataset,
 )
@@ -86,7 +88,7 @@ from .features import (
     add_features,
     get_features,
     new_feature,
-    update_feature,
+    # update_feature,
     delete_feature,
 )
 

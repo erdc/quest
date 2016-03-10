@@ -101,11 +101,8 @@ class NwisService(WebServiceBase):
                 ]
         data = data[cols]
 
-#/// datasets need to have required dsl metadata and external metadata
-#/// need to keep t
-#rack of units/data classification/restrictions
-
-
+        # datasets need to have required dsl metadata and external metadata
+        # need to keep track of units/data classification/restrictions
         return data
 
 

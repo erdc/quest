@@ -10,7 +10,7 @@ try:
 except ImportError:
     import json
 
-from uuid import uuid4
+from uuid import uuid4, UUID
 
 
 def append_features(old, new):
@@ -69,40 +69,72 @@ def get_projects_dir():
 
 
 def parse_uri(uri):
-    """parse uri and return dictionary
+    """parse uri and return dictionary.
 
-    uri definition
-        <protocol[:version>]://<provider[:service]>/<feature[:query]>/<parameter[:sub]>/<dataset[:version]>
+    if uri starts with svc then parse as a service
+    otherwise it is a collection name
+    if uri is a uuid then it is either a feature or a dataset
+
+    service uri definition
+        <service://<provider[:service]>/<feature or query]>
+        <collection>/
+
+    args:
+        uri (string): uri string to parse
+
+    return:
+        parsed_uri (tuple): resource,
 
     examples:
-        service://usgs-nwis:iv/0803200
+        svc://usgs-nwis:iv/0803200
         service://gebco-bathymetry
-
 
         project://myproj:mycol/93d2e03543224096b14ce2eacd2eb275/temperature/472e7a7dd177405192fcb47a0c959c9d
         project://myproj:mycol/52b588510ce948b2a2515da02024c53e/temperature/
 
-    service://<name>:<datalayer>/<feature>
-    project://<name>:<collection>/<feature>/<dataset>
+        service://<name>:<datalayer>/<feature>
+        project://<name>:<collection>/<feature>/<dataset>
+        feature://<collection>/<feature>/<dataset>
     """
-    if isinstance(uri, dict):
-        return uri
+
+    if uri.startswith('svc://'):
+        resource, name, feature = uri.split('://')[-1].split('/')
 
     uri_dict = {}
     uri_dict['resource'], remainder = uri.split('://')
     parts = remainder.split('/')
 
-    if uri_dict['resource'] not in ['project', 'service']:
+    if uri_dict['resource'] not in ['collection', 'service']:
         raise ValueError('Unknown resource type in uri: %s' % uri_dict['resource'])
 
     if uri_dict['resource'] == 'service':
         keys = ['name', 'feature']
 
-    if uri_dict['resource'] == 'project':
+    if uri_dict['resource'] == 'collection':
         keys = ['name', 'feature', 'dataset']
 
     uri_dict.update({k: parts[i].strip() if i < len(parts) else None for i, k in enumerate(keys)})
     return uri_dict
+
+
+def parse_service_uri(uri):
+    """parse service uri into provider, service, feature.
+
+    Examples:
+        usgs-nwis:dv/0800345522
+        gebco-bathymetry
+        usgs-ned:1-arc-second
+
+    args:
+            uri (string): service uri_dict
+
+        returns:
+            parsed_uri (tuple): tuple containing provider, service, feature
+    """
+    svc, feature = (uri.split('://')[-1].split('/') + [None])[:2]
+    provider, service = (svc.split(':') + [None])[:2]
+
+    return provider, service, feature
 
 
 def listify(liststr, delimiter=','):
@@ -202,8 +234,46 @@ def to_geojson(df):
     return FeatureCollection(features)
 
 
-def uid():
-    return uuid4().hex
+def uuid(resource_type):
+    """Generate new uuid.
+
+    First character of uuid is replaced with 'f' or 'd' respectively
+    for resource_type feature, dataset respectovely
+
+    args:
+        resource_type (string): type of resource i.e. 'feature' or 'dataset'
+
+    returns:
+        uuid (string)
+    """
+    uuid = uuid4().hex
+
+    if resource_type=='feature':
+        uuid = 'f' + uuid[1:]
+
+    if resource_type=='dataset':
+        uuid = 'd' + uuid[1:]
+
+    return uuid
+
+
+def is_uuid(uuid):
+    """Check if string is a uuid4
+
+    Validate that a UUID string is in fact a valid uuid4.
+    source: https://gist.github.com/ShawnMilo/7777304
+    """
+
+    try:
+        val = UUID(uuid, version=4)
+    except ValueError:
+        # If it's a value error, then the string is not a valid UUID.
+        return False
+
+    # If the uuid_string is a valid hex code, but an invalid uuid4,
+    # the UUID.__init__ will convert it to a valid uuid4.
+    # This is bad for validation purposes.
+    return val.hex == uuid
 
 
 def _abs_path(path, mkdir=True):
