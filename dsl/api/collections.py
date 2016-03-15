@@ -24,18 +24,27 @@ def delete_from_collection(collection, uris):
 
 
 @dispatcher.add_method
-def get_collections():
+def get_collections(metadata=None):
     """Get available collections.
 
     Collections are folders on the local disk that contain downloaded or created data
     along with associated metadata.
 
+    args:
+        metadata (bool, optional):
+            Optionally return collection metadata
+
     Returns
     -------
-    collections (dict): Available collections keyed by the collection name
+    collections (list or dict):
+        Available collections
     """
 
-    return _load_collections()
+    collections = _load_collections()
+    if not metadata:
+        collections = collections.keys()
+
+    return collections
 
 
 @dispatcher.add_method

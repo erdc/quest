@@ -49,7 +49,8 @@ def add_features(collection, features):
 
 @dispatcher.add_method
 def get_features(services=None, collections=None, features=None,
-                 as_dataframe=False, update_cache=False, filters=None):
+                 metadata=None, as_dataframe=False, update_cache=False,
+                 filters=None):
     """Retrieve list of features from resources.
 
     currently ignores parameter and dataset portion of uri
@@ -62,6 +63,8 @@ def get_features(services=None, collections=None, features=None,
             collections to search in for features.
         features (comma separated strings, list of strings): list of features
             to include in search.
+        metadata (bool, optional): Defaults to False. If True return feature
+            metadata
         as_dataframe (bool, optional): Defaults to False, return features as
             a pandas DataFrame indexed by feature uris instead of geojson
         as_cache (bool, optional): Defaults to False, if True, update metadata
@@ -135,6 +138,9 @@ def get_features(services=None, collections=None, features=None,
             else:
                 idx = features[k] == v
                 features = features[idx]
+
+    if not metadata and not as_dataframe:
+        return features.index.tolist()
 
     if not as_dataframe:
         features = util.to_geojson(features)

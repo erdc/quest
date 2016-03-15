@@ -126,25 +126,28 @@ def download_options(feature):
 
 
 @dispatcher.add_method
-def get_datasets(filters=None):
+def get_datasets(metadata=None, filters=None, as_dataframe=None):
     """
     """
     datasets = db.read_all(active_db(), 'datasets', as_dataframe=True)
     features = db.read_all(active_db(), 'features', as_dataframe=True)
     datasets = datasets.join(features['_collection_'], on='_feature_')
 
-    if filters is None:
-        return datasets['_name_'].tolist()
+    if filters is not None:
+        for k, v in filters.items():
+            key = '_{}_'.format(k)
+            if key not in datasets.keys():
+                print 'filter field {} not found, continuing'.format(k)
+                continue
 
-    for k, v in filters.items():
-        key = '_{}_'.format(k)
-        if key not in datasets.keys():
-            print 'filter field {} not found, continuing'.format(k)
-            continue
+            datasets = datasets.ix[datasets[key] == v]
 
-        datasets = datasets.ix[datasets[key] == v]
+    if not metadata and not as_dataframe:
+        datasets = datasets['_name_'].tolist()
+    elif not as_dataframe:
+        datasets = datasets.to_dict(orient='index')
 
-    return datasets['_name_'].tolist()
+    return datasets
 
 
 @dispatcher.add_method

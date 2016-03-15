@@ -132,9 +132,12 @@ def get_active_project():
 
 
 @dispatcher.add_method
-def get_projects():
+def get_projects(metadata=None):
     """Get list of available projects."""
     projects = {}
+    if not metadata:
+        return _load_projects().keys()
+
     for name, project in _load_projects().iteritems():
         path = project['_folder_']
         if not os.path.isabs(path):
@@ -146,6 +149,7 @@ def get_projects():
             '_folder_': path,
         })
         projects[name] = metadata
+
     return projects
 
 
