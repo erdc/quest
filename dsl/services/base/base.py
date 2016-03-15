@@ -52,8 +52,8 @@ class WebServiceBase(with_metaclass(abc.ABCMeta, object)):
     def get_parameters(self, service):
         return self._get_parameters(service)
 
-    def download(self, path, service, feature, parameter, **kwargs):
-        return self._download(path, service, feature, parameter, **kwargs)
+    def download(self, service, feature, save_path, **kwargs):
+        return self._download(service, feature, save_path, **kwargs)
 
     def download_options(self, service):
         return self._download_options()
@@ -96,12 +96,17 @@ class SingleFileBase(WebServiceBase):
     """Base file for datasets that are a single file download
     eg elevation raster etc
     """
-    def _download(self, path, service, feature, parameter, **kwargs):
+    def _download(self, service, feature, save_path, **kwargs):
         feature = self.get_features(service).ix[feature]
         download_url = feature['_download_url_']
         extract_from_zip = feature.get('_extract_from_zip_', '')
-        save_path = ulmo.util.download_tiles(path, [download_url], extract_from_zip)[0]
-        return {'save_path': save_path, 'file_format': feature.get('file_format')}
+        save_path = ulmo.util.download_tiles(save_path, [download_url],
+                                             extract_from_zip)[0]
+        return {
+            'save_path': save_path,
+            'file_format': feature.get('_file_format_')
+            'parameter': featture.get('_parameter_')
+        }
 
     def _download_options(self, service):
         return {}

@@ -33,7 +33,7 @@ def upsert(dbpath, table, name, dsl_metadata=None, metadata=None):
         return db
 
     if t.find_one(_name_=name) is not None:
-        t.update(columns='_name_', **data)
+        t.update(columns=['_name_'], **data)
     else:
         t.insert(**data)
 

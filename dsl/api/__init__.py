@@ -21,9 +21,11 @@ __all__ = (
     'new_collection',
     'update_collection', # replace with update
     'delete_collection',
-    # 'stage_for_download',
+    'stage_for_download',
     'download',
+    'download_datasets',
     'download_options',
+    'get_datasets',
     # 'locate_dataset',
     # 'add_dataset_to_feature',
     'new_dataset',
@@ -77,8 +79,11 @@ from .collections import (
 
 from .datasets import (
     download,
+    download_datasets,
     download_options,
+    get_datasets,
     new_dataset,
+    stage_for_download,
     # update_dataset,
     describe_dataset,
     vizualize_dataset,

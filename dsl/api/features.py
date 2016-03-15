@@ -39,6 +39,9 @@ def add_features(collection, features):
     if not isinstance(features, pd.DataFrame):
         features = get_metadata(features, as_dataframe=True)
 
+    features['_service_uri_'] = features.index
+    features[~features.index.str.startswith('svc://')]['_service_uri_'] = None
+    features['_collection_'] = collection
     result = db.upsert_features(active_db(), features)
 
     return True
@@ -100,6 +103,7 @@ def get_features(services=None, collections=None, features=None,
     # get metadata for features in collections
     for name in collections or []:
         tmp_feats = pd.DataFrame(db.read_all(active_db(), 'features')).T
+        tmp_feats = tmp_feats[tmp_feats['_collection_'] == name]
         tmp_feats.index = tmp_feats['_name_']
         all_features.append(tmp_feats)
 

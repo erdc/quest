@@ -55,6 +55,10 @@ def get_metadata(uris, as_dataframe=False):
             if None not in selected_features:
                 features = features.ix[selected_features]
 
+            features.index = features.index.map(
+                                lambda feat: 'svc://%s:%s/%s'
+                                % (provider, service, feat))
+
         metadata.append(features)
 
     if 'collection' in grouped.groups.keys():
