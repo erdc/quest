@@ -1,5 +1,8 @@
-import os
+import json
+import pandas as pd
 from playhouse.dataset import DataSet
+import os
+
 from .. import util
 
 
@@ -49,8 +52,10 @@ def upsert_features(dbpath, features):
             if t.find_one(_service_uri_=data['_service_uri_']) is not None:
                 continue
 
-        data_dict = data.to_dict()
-        data_dict.update({'_name_': util.uuid()})
+        # make roundtrip through json to make sure all fields
+        # are database friendly
+        data_dict = json.loads(data.to_json(date_format='iso'))
+        data_dict.update({'_name_': util.uuid('feature')})
         t.insert(**data_dict)
 
     try:
@@ -62,10 +67,14 @@ def upsert_features(dbpath, features):
     return db
 
 
-def read_all(dbpath, table):
+def read_all(dbpath, table, as_dataframe=False):
     db = DataSet(_dburl(dbpath))
     t = db[table]
-    return {row['_name_']: row for row in t.all()}
+    data = {row['_name_']: row for row in t.all()}
+    if as_dataframe:
+        data = pd.DataFrame(data).T
+
+    return data
 
 
 def read_data(dbpath, table, name):

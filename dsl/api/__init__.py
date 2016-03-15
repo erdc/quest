@@ -15,11 +15,11 @@ __all__ = (
     'update_settings_from_file',
     'get_dsl_version',
     'get_api_version',
-    # 'get_metadata',
+    'get_metadata',
     # 'update_metadata',
     'get_collections',
     'new_collection',
-    'update_collection', #replace with update
+    'update_collection', # replace with update
     'delete_collection',
     # 'stage_for_download',
     'download',
@@ -98,6 +98,10 @@ from .filters import (
     apply_filter_options,
 )
 
+from .metadata import (
+    get_metadata,
+)
+
 from .parameters import (
     get_mapped_parameters,
     get_parameters,
@@ -105,7 +109,6 @@ from .parameters import (
     update_parameter,
     delete_parameter,
 )
-
 
 from .projects import (
     add_project,

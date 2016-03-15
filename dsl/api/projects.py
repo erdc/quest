@@ -171,11 +171,12 @@ def _load_projects():
     path = _get_projects_index_file()
     projects = util.read_yaml(path).get('projects')
     # make sure a default project exists
-    if projects is None:
+    default_dir = os.path.join(util.get_projects_dir(), 'default_project')
+    dbpath = os.path.join(default_dir, PROJECT_DB_FILE)
+    if projects is None or not os.path.exists(dbpath):
         projects = {
             'default': {'_folder_': 'default_project'}
         }
-        default_dir = os.path.join(util.get_projects_dir(), 'default_project')
         util.mkdir_if_doesnt_exist(default_dir)
         dsl_metadata = {
             'type': 'project',
@@ -184,7 +185,6 @@ def _load_projects():
             'created_on': datetime.datetime.now().isoformat(),
         }
         util.mkdir_if_doesnt_exist(default_dir)
-        dbpath = os.path.join(default_dir, PROJECT_DB_FILE)
         _write_project(dbpath, dsl_metadata)
         _write_projects(projects)
         set_active_project('default')

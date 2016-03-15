@@ -5,6 +5,7 @@ Features are unique identifiers with a web service or collection.
 import json
 from jsonrpc import dispatcher
 import pandas as pd
+
 from .. import util
 from . import db
 from .projects import active_db
@@ -12,7 +13,7 @@ from .collections import (
         _read_collection_features,
         _write_collection_features,
     )
-
+from .metadata import get_metadata
 
 @dispatcher.add_method
 def add_features(collection, features):
@@ -36,7 +37,7 @@ def add_features(collection, features):
         True on success.
     """
     if not isinstance(features, pd.DataFrame):
-        features = get_features(features, as_dataframe=True)
+        features = get_metadata(features, as_dataframe=True)
 
     result = db.upsert_features(active_db(), features)
 
@@ -44,27 +45,31 @@ def add_features(collection, features):
 
 
 @dispatcher.add_method
-def get_features(services=None, collections=None, as_dataframe=False,
-                 update_cache=False, filters=None):
+def get_features(services=None, collections=None, features=None,
+                 as_dataframe=False, update_cache=False, filters=None):
     """Retrieve list of features from resources.
 
     currently ignores parameter and dataset portion of uri
     if uris contain feature, then return exact feature.
 
     Args:
-        uris (string, comma separated strings, list of strings): list of uris
-            to search in for features. If uri specifies a parameter and
-            parameter arg is None then use set the parameter to the uri value
+        services (comma separated strings, list of strings): list of services
+            to search in for features.
+        collections (comma separated strings, list of strings): list of
+            collections to search in for features.
+        features (comma separated strings, list of strings): list of features
+            to include in search.
         as_dataframe (bool, optional): Defaults to False, return features as
             a pandas DataFrame indexed by feature uris instead of geojson
         as_cache (bool, optional): Defaults to False, if True, update metadata
             cache.
         filters (dict, optional): filter features
             available filters:
-                geom_type (string, optional): filter features by geom_type, i.e.
-                    point/line/polygon
+                geom_type (string, optional): filter features by geom_type,
+                    i.e. point/line/polygon
                 parameter (string, optional): filter features by parameter
-                parameter_code (string, optional): filter features by parameter code
+                parameter_code (string, optional): filter features by
+                    parameter code
                 bbox (string, optional): filter features by bounding box
 
     Returns:
@@ -72,54 +77,38 @@ def get_features(services=None, collections=None, as_dataframe=False,
             pandas.DataFrame
 
     """
-    if services is None and collections is None:
-        raise ValueError('Specify at least one service or collection')
+    if services is None and collections is None and features is None:
+        raise ValueError('Specify at least one service, collection or feature')
 
     services = util.listify(services)
     collections = util.listify(collections)
+    features = util.listify(features)
 
-    # parse uris
-    # df = pd.DataFrame({'uri': uris})
-    # df = pd.DataFrame(df.uri.str.split('://').tolist(),
-    #                  columns=['resource', 'remainder'])
-    # df1 = df.remainder.str.split('/', expand=True)
-    # del df['remainder']
-    # df['name'] = df1[0]
-    # if len(df1.columns) > 1:
-    #    df['features'] = df1[1]
+    all_features = []
 
-    features = []
-    #for (resource, name), group in df.groupby(['resource', 'name']):
-    #    if resource not in ['service', 'collection']:
-    #        raise ValueError('URI must be a service or collection')
+    # get metadata for directly specified features
+    if features is not None:
+        all_features.append(get_metadata(features, as_dataframe=True))
 
+    # get metadata for features in services
     for name in services or []:
         provider, service, feature = util.parse_service_uri(name)
         tmp_feats = _get_features(provider, service, update_cache=update_cache)
         tmp_feats.index = tmp_feats['_service_uri_']
-        features.append(tmp_feats)
-        # if feature is  in group.columns:
-        #     # filter by feature/make sure feature exists
-        #     # this may break on empty/NaN features need to check
-        #     f = set(group['features'])
-        #     if None in f:
-        #         f = f.remove(None)
-        #
-        #     if f is not None:
-        #         idx = set(tmp_feats.index)
-        #         idx.intersection_update(f)
-        #         tmp_feats = tmp_feats.ix[list(idx)]
+        all_features.append(tmp_feats)
 
+    # get metadata for features in collections
     for name in collections or []:
         tmp_feats = pd.DataFrame(db.read_all(active_db(), 'features')).T
         tmp_feats.index = tmp_feats['_name_']
-        features.append(tmp_feats)
+        all_features.append(tmp_feats)
 
-    features = pd.concat(features)
+    features = pd.concat(all_features)
 
+    # apply any specified filters
     if filters is not None:
         for k, v in filters.items():
-            if k=='bbox':
+            if k == 'bbox':
                 xmin, ymin, xmax, ymax = [float(x) for x in util.listify(v)]
                 idx = (features.longitude > xmin) \
                     & (features.longitude < xmax) \
@@ -127,15 +116,15 @@ def get_features(services=None, collections=None, as_dataframe=False,
                     & (features.latitude < ymax)
                 features = features[idx]
 
-            elif k=='geom_type':
+            elif k == 'geom_type':
                 idx = features._geom_type_.str.lower() == v.lower()
                 features = features[idx]
 
-            elif k=='parameter':
+            elif k == 'parameter':
                 idx = features._parameters_.str.contains(v)
                 features = features[idx]
 
-            elif k=='parameter_code':
+            elif k == 'parameter_code':
                 idx = features._parameter_codes_.str.contains(v)
                 features = features[idx]
 
@@ -196,10 +185,10 @@ def new_feature(collection, display_name=None, geom_type=None, geom_coords=None,
         display_name = uid
 
     dsl_metadata = {'display_name': display_name}
+    db.upsert(active_db(), 'features', uid, dsl_metadata=dsl_metadata,
+              metadata=metadata)
 
-    db.upsert(active_db(), 'features', uid, dsl_metadata=dsl_metadata, metadata=metadata)
-
-    return 'collection://' + collection + '/' + uid
+    return uid
 
 
 @dispatcher.add_method
