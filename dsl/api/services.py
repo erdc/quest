@@ -24,7 +24,7 @@ def get_services(parameter=None, service_type=None):
     services = {}
     for provider, svc in providers.iteritems():
         for service, metadata in svc.get_services().iteritems():
-            name = 'service://%s:%s' % (provider, service)
+            name = 'svc://%s:%s' % (provider, service)
             if service_type == metadata['service_type'] or service_type is None:
                 if parameter in metadata['parameters'] or parameter is None:
                     services[name] = metadata
