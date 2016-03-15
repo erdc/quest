@@ -104,8 +104,8 @@ class SingleFileBase(WebServiceBase):
                                              extract_from_zip)[0]
         return {
             'save_path': save_path,
-            'file_format': feature.get('_file_format_')
-            'parameter': featture.get('_parameter_')
+            'file_format': feature.get('_file_format_'),
+            'parameter': feature.get('_parameter_'),
         }
 
     def _download_options(self, service):
