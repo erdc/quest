@@ -109,7 +109,7 @@ def delete_project(name, delete_data=False):
         return projects
 
     if delete_data:
-        folder = projects[name]['folder']
+        folder = projects[name]['_folder_']
         if not os.path.isabs(folder):
             path = os.path.join(util.get_projects_dir(), folder)
         else:
