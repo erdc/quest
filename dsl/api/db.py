@@ -47,24 +47,29 @@ def upsert_features(dbpath, features):
     db = DataSet(_dburl(dbpath))
     t = db['features']
 
+    uids = []  # feature uids inside collection
     for uri, data in features.iterrows():
         if '_service_uri_' in data.index and '_service_uri_' in t.columns:
-            if t.find_one(_service_uri_=data['_service_uri_']) is not None:
+            row = t.find_one(_service_uri_=data['_service_uri_'])
+            if row is not None:
+                uids.append(row['_name_'])
                 continue
 
         # make roundtrip through json to make sure all fields
         # are database friendly
         data_dict = json.loads(data.to_json(date_format='iso'))
-        data_dict.update({'_name_': util.uuid('feature')})
+        name = util.uuid('feature')
+        data_dict.update({'_name_': name})
         t.insert(**data_dict)
+        uids.append(name)
 
     try:
         t.create_index(['_name_'], unique=True)
         t.create_index(['_service_uri_'], unique=True)
     except:
-        pass # index already present
+        pass  # index already present
 
-    return db
+    return uids
 
 
 def read_all(dbpath, table, as_dataframe=False):

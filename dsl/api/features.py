@@ -42,9 +42,7 @@ def add_features(collection, features):
     features['_service_uri_'] = features.index
     features[~features.index.str.startswith('svc://')]['_service_uri_'] = None
     features['_collection_'] = collection
-    result = db.upsert_features(active_db(), features)
-
-    return True
+    return db.upsert_features(active_db(), features)
 
 
 @dispatcher.add_method
