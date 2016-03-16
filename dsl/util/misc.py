@@ -222,14 +222,24 @@ def to_geojson(df):
         'Polygon': Polygon,
     }
     features = []
-    for idx, row in df.iterrows():
+    idx = df.columns.str.startswith('_')
+    r = {field: field[1:-1] for field in df.columns[idx]}
+    for uid, row in df.iterrows():
+        metadata = json.loads(row[~idx].dropna().to_json())
+        row = row[idx].rename(index=r)
+
+        # create geojson geometry
         geometry = None
         if row['geom_type'] is not None:
             geometry = _func[row['geom_type']](row['geom_coords'])
         del row['geom_type']
         del row['geom_coords']
+
+        # split fields into properties and metadata
         properties = json.loads(row.dropna().to_json())
-        features.append(Feature(geometry=geometry, properties=properties, id=idx))
+        properties.update({'metadata': metadata})
+        features.append(Feature(geometry=geometry, properties=properties,
+                        id=uid))
 
     return FeatureCollection(features)
 
