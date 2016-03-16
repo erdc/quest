@@ -123,7 +123,7 @@ class NasaService(SingleFileBase):
             data += granules
 
         features = pd.DataFrame(data)
-        features.rename(columns = {'id': '_name_'}, inplace=True))
+        features.rename(columns = {'id': '_name_'}, inplace=True)
         features.index = features['_name_']
         features['_geom_type_'] = 'Polygon'
         features['_geom_coords_'] = features['boxes'].apply(lambda x: [util.bbox2poly(*x[0].split(), reverse_order=True)])
