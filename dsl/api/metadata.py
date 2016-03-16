@@ -59,7 +59,7 @@ def get_metadata(uris, as_dataframe=False):
                                 lambda feat: 'svc://%s:%s/%s'
                                 % (provider, service, feat))
 
-        metadata.append(features)
+            metadata.append(features)
 
     if 'collection' in grouped.groups.keys():
         # get metadata for collections
