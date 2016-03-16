@@ -42,6 +42,13 @@ class WebServiceBase(with_metaclass(abc.ABCMeta, object)):
             features['_parameters_'] = ','.join(params['_parameters_'])
             features['_parameter_codes_'] = ','.join(params['_parameter_codes_'])
 
+        # peewee datasets cannot store field names with _id in them so rename
+        # fields to _uid
+        r = {field: field.replace('_id', '_uid') for field in features.columns}
+        if 'id' in r.keys():
+            r['id'] = 'uid'
+        features.rename(columns=r, inplace=True)
+
         util.mkdir_if_doesnt_exist(os.path.split(cache_file)[0])
         features.to_hdf(cache_file, 'table')
         return features
