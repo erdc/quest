@@ -56,7 +56,7 @@ class WebServiceBase(with_metaclass(abc.ABCMeta, object)):
         return self._download(service, feature, save_path, **kwargs)
 
     def download_options(self, service):
-        return self._download_options()
+        return self._download_options(service)
 
     @abc.abstractmethod
     def _register(self):

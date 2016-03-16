@@ -1,6 +1,5 @@
-"""DSL wrapper for USGS NWIS Services
+"""DSL wrapper for USGS NWIS Services."""
 
-"""
 from .base import WebServiceBase
 import concurrent.futures
 from functools import partial
@@ -118,15 +117,12 @@ class NwisService(WebServiceBase):
         }
 
 
-    def _download(self, feature, parameter, path, start=None, end=None, period=None):
+    def _download(self, service, feature, save_path, dataset=None,
+                  parameter=None, start=None, end=None, period=None):
 
         if not any([start, end, period]):
-            period = 'P365D' #default to past 1yr of data
+            period = 'P365D'  # default to past 1yr of data
 
-        if path is None:
-            path = util.get_dsl_dir()
-
-        path = os.path.join(path, DEFAULT_FILE_PATH)
         io = util.load_drivers('io', 'ts-geojson')['ts-geojson'].driver
 
         parameter_codes = []
@@ -176,9 +172,31 @@ class NwisService(WebServiceBase):
 
         return data_files
 
-
     def _download_options(self, service):
-        pass
+        schema = {
+            "title": "USGS NWIS Download Options",
+            "type": "object",
+            "properties": {
+                "start": {
+                    "type": "string",
+                    "description": "start date",
+                },
+                "end": {
+                    "type": "string",
+                    "description": "end date",
+                },
+                "period": {
+                    "type": "string",
+                    "description": "period date",
+                },
+            },
+        }
+        # smtk_filename = 'usgs-nwis-download.sbt'
+        # schema = {
+        #     "type": "smtk",
+        #     "smtk-path": pkg_resources.resource_filename('dsl.smtk', smtk_filename)
+        # }
+        return schema
 
 
 def _chunks(l, n=100):

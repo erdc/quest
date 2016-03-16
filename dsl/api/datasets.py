@@ -106,31 +106,40 @@ def download_datasets(datasets, async=False):
     return status
 
 
-def download_options(feature):
+def download_options(uids):
     """List optional kwargs that can be specified when downloading a dataset
 
     Parameters
     ----------
-        feature: str
-            uri of feature in webservice or collection.
+        uids (string or list):
+            uids of features or datasets
 
     Return
     ------
-        kwargs: dict
-            Optional kwargs that can be specified when calling
-            dsl.api.download
+        download_options: dict
+            download options that can be specified when calling
+            dsl.api.stage_for_download or dsl.api.download
 
     Examples:
         TODO add examples
     """
-    service_uri = feature
-    if not service_uri.startswith('svc://'):
-        service_uri = get_metadata(feature, as_dataframe=True)
-        service_uri = service_uri['_service_uri_'].tolist()[0]
+    uids = util.listify(uids)
+    download_options = {}
+    for uid in uids:
+        service_uri = uid
+        if not service_uri.startswith('svc://'):
+            feature = uid
+            if feature.startswith('d'):
+                feature = get_metadata(uid)[uid]['_feature_']
 
-    provider, service, feature = util.parse_service_uri(service_uri)
-    driver = util.load_drivers('services', names=provider)[provider].driver
-    return driver.download_dataset_options(service)
+            service_uri = get_metadata(feature, as_dataframe=True)
+            service_uri = service_uri['_service_uri_'].tolist()[0]
+
+        provider, service, feature = util.parse_service_uri(service_uri)
+        driver = util.load_drivers('services', names=provider)[provider].driver
+        download_options[uid] = driver.download_options(service)
+
+    return download_options
 
 
 @dispatcher.add_method
