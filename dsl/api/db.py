@@ -50,7 +50,10 @@ def upsert_features(dbpath, features):
     uids = []  # feature uids inside collection
     for uri, data in features.iterrows():
         if '_service_uri_' in data.index and '_service_uri_' in t.columns:
-            row = t.find_one(_service_uri_=data['_service_uri_'])
+            row = t.find_one(
+                    _service_uri_=data['_service_uri_'],
+                    _collection_=data['_collection_']
+                    )
             if row is not None:
                 uids.append(row['_name_'])
                 continue
