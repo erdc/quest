@@ -22,24 +22,25 @@ cname = 'gssha-test'
 if cname not in dsl.api.get_collections():
     dsl.api.new_collection(cname)
 
-# we do not need to specify parameter or download options for elevation data
-# since the services are single parameter, single file downloads
+# we do not need to specify parameter or download options for elevation
+# or landcover data since the services are single parameter,
+# single file downloads
 services = ['svc://usgs-ned:1-arc-second']
 filters = {'bbox': bbox}
 features = dsl.api.get_features(services, filters=filters)
 features = dsl.api.add_features(cname, features)
 elevation_rasters = dsl.api.stage_for_download(features)
-status = dsl.api.download_datasets(elevation_rasters)
+
+
+services = ['svc://usgs-nlcd:2006']
+features = dsl.api.get_features(services, filters=filters)
+features = dsl.api.add_features(cname, features)
+landcover_rasters = dsl.api.stage_for_download(features)
+
+status = dsl.api.download_datasets(elevation_rasters+landcover_rasters)
 
 ####################################
 # NOT WORKING YET BELOW THIS COMMENT
-
-# services = ['svc://usgs-nlcd:2006']
-# filters = {'parameter': 'landcover', 'bbox': bbox}
-# features = dsl.api.get_features(services, filters=filters)
-# features = dsl.api.add_to_collection(cname, features)
-# landcover_rasters = dsl.api.stage_for_download(features, options={'parameter': 'landcover'})
-#
 #
 # reprojected_rasters = dsl.api.apply_filter('raster-reproject', elevation_rasters, options={'target_projection': 'UTM15'})
 # merged_raster = dsl.api.apply_filter('raster-merge-clip', reprojected_rasters, options={})
