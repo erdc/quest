@@ -11,23 +11,30 @@ from stevedore import driver
 
 
 @dispatcher.add_method
-def get_providers():
+def get_providers(metadata=None):
     """Return list of Providers."""
     providers = util.load_drivers('services')
-    return {k: v.metadata for k, v in providers.iteritems()}
+    p = {k: v.metadata for k, v in providers.iteritems()}
+    if not metadata:
+        p = p.keys()
+
+    return p
 
 
 @dispatcher.add_method
-def get_services(parameter=None, service_type=None):
+def get_services(metadata=None, parameter=None, service_type=None):
     """Return list of Services."""
     providers = util.load_drivers('services')
     services = {}
     for provider, svc in providers.iteritems():
-        for service, metadata in svc.get_services().iteritems():
+        for service, svc_metadata in svc.get_services().iteritems():
             name = 'svc://%s:%s' % (provider, service)
-            if service_type == metadata['service_type'] or service_type is None:
-                if parameter in metadata['parameters'] or parameter is None:
-                    services[name] = metadata
+            if service_type == svc_metadata['service_type'] or service_type is None:
+                if parameter in svc_metadata['parameters'] or parameter is None:
+                    services[name] = svc_metadata
+
+    if not metadata:
+        services = services.keys()
 
     return services
 
