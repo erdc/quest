@@ -174,7 +174,7 @@ def _write_collection_features(collection, features):
 
 
 def _get_project_dir():
-    return get_projects()[get_active_project()]['_folder_']
+    return get_projects(metadata=True)[get_active_project()]['_folder_']
 
 
 def _load_collection(name):
