@@ -16,7 +16,7 @@ def get_providers(metadata=None):
     providers = util.load_drivers('services')
     p = {k: v.metadata for k, v in providers.iteritems()}
     if not metadata:
-        p = p.keys()
+        p = sorted(p.keys())
 
     return p
 
@@ -34,7 +34,7 @@ def get_services(metadata=None, parameter=None, service_type=None):
                     services[name] = svc_metadata
 
     if not metadata:
-        services = services.keys()
+        services = sorted(services.keys())
 
     return services
 
