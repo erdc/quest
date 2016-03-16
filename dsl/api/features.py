@@ -12,6 +12,7 @@ from .projects import active_db
 from .collections import (
         _read_collection_features,
         _write_collection_features,
+        get_collections,
     )
 from .metadata import get_metadata
 
@@ -147,15 +148,11 @@ def get_features(services=None, collections=None, features=None,
 
 
 @dispatcher.add_method
-def new_feature(collection, display_name=None, geom_type=None, geom_coords=None, metadata={}):
+def new_feature(collection, display_name=None, geom_type=None, geom_coords=None, metadata=None):
     """Add a new feature to a collection.
 
-    TODO make work with db
-
-    (ignore feature/parameter/dataset in uri)
-
     Args:
-        collection (string): uri of collection
+        collection (string): name of collection
         display_name (string): display name of feature
         geom_type (string, optional): point/line/polygon
         geom_coords (string or list, optional): geometric coordinates specified
@@ -167,15 +164,12 @@ def new_feature(collection, display_name=None, geom_type=None, geom_coords=None,
 
     Returns
     -------
-        feature_id : str
-            uri of newly created feature
+        uid : str
+            uid of newly created feature
 
     """
-    uri = util.parse_uri(collection)
-    if uri['resource'] != 'collection':
-        raise NotImplementedError
-
-    collection = uri['name']
+    if collection not in get_collections():
+        raise ValueError('Collection {} not found'.format(collection))
 
     if geom_type is not None:
         if geom_type not in ['LineString', 'Point', 'Polygon']:
@@ -186,13 +180,17 @@ def new_feature(collection, display_name=None, geom_type=None, geom_coords=None,
         if isinstance(geom_coords, str):
             geom_coords = json.loads(geom_coords)
 
-    metadata.update({'geom_type': geom_type, 'geom_coords': geom_coords})
-    metadata.update({})
     uid = util.uuid('feature')
     if display_name is None:
         display_name = uid
 
-    dsl_metadata = {'display_name': display_name}
+    dsl_metadata = {
+        'display_name': display_name,
+        'geom_type': geom_type,
+        'geom_coords': geom_coords,
+        'collection': collection,
+        }
+
     db.upsert(active_db(), 'features', uid, dsl_metadata=dsl_metadata,
               metadata=metadata)
 
