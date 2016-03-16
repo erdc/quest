@@ -205,10 +205,10 @@ def to_dataframe(feature_collection):
         data = feature['properties']
         coords = pd.np.array(feature['geometry']['coordinates']).mean(axis=1)
         data.update({
-            'geom_type': feature['geometry']['type'],
-            'geom_coords': feature['geometry']['coordinates'],
-            'longitude': coords.flatten()[0],
-            'latitude': coords.flatten()[1],
+            '_geom_type_': feature['geometry']['type'],
+            '_geom_coords_': feature['geometry']['coordinates'],
+            '_longitude_': coords.flatten()[0],
+            '_latitude_': coords.flatten()[1],
         })
 
         features[feature['id']] = data
