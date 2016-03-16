@@ -1,4 +1,5 @@
 """Datasets API functions."""
+import json
 from jsonrpc import dispatcher
 import os
 
@@ -74,10 +75,15 @@ def download_datasets(datasets, async=False):
     for idx, dataset in datasets.iterrows():
         collection_path = os.path.join(project_path, dataset['_collection_'])
         try:
-            metadata = download(dataset['_service_uri_'],
-                                save_path=collection_path,
-                                dataset=idx,
-                                )
+            kwargs = json.loads(dataset['_download_options_'])
+            if kwargs is not None:
+                metadata = download(dataset['_service_uri_'],
+                                    save_path=collection_path,
+                                    dataset=idx, **kwargs)
+            else:
+                metadata = download(dataset['_service_uri_'],
+                                    save_path=collection_path,
+                                    dataset=idx)
 
             dsl_metadata = {
                 'save_path': metadata.pop('save_path'),
@@ -90,6 +96,7 @@ def download_datasets(datasets, async=False):
                 'download_status': 'failed download',
                 'download_message': e.message,
                 }
+            raise
             metadata = None
 
         status[idx] = dsl_metadata['download_status']
@@ -97,6 +104,7 @@ def download_datasets(datasets, async=False):
                   metadata=metadata)
 
     return status
+
 
 def download_options(feature):
     """List optional kwargs that can be specified when downloading a dataset
@@ -180,7 +188,7 @@ def new_dataset(feature, dataset_type=None, display_name=None, save_path=None, m
     return name
 
 
-def stage_for_download(uids, download_kwargs=None):
+def stage_for_download(uids, download_options=None):
     """
     args:
         uids (string or list): uids of features/datasets to stage for download,
@@ -196,17 +204,17 @@ def stage_for_download(uids, download_kwargs=None):
     uids = util.listify(uids)
     datasets = []
 
-    if not isinstance(download_kwargs, list):
-        download_kwargs = [download_kwargs] * len(uids)
+    if not isinstance(download_options, list):
+        download_options = [download_options] * len(uids)
 
-    for uid, kwargs in zip(uids, download_kwargs):
+    for uid, kwargs in zip(uids, download_options):
         # if uid is a feature, create new dataset
         dataset_uid = uid
         if uid.startswith('f'):
             dataset_uid = new_dataset(uid, dataset_type='download')
 
         dsl_metadata = {
-            'download_kwargs': kwargs,
+            'download_options': json.dumps(kwargs),
             'download_status': 'staged for download',
         }
         db.upsert(active_db(), 'datasets', dataset_uid,
