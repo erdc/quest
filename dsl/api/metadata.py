@@ -85,6 +85,6 @@ def get_metadata(uris, as_dataframe=False):
     metadata = pd.concat(metadata)
 
     if not as_dataframe:
-        metadata = metadata.to_dict()
+        metadata = metadata.to_dict(orient='index')
 
     return metadata
