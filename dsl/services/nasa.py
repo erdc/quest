@@ -74,6 +74,7 @@ def _read_metadata(short_name):
 def _read_granules(short_name, page_num):
     return requests.get(granules_url % (short_name, page_num)).json()['feed']['entry']
 
+
 class NasaService(SingleFileBase):
     def _register(self):
         self.metadata = {
@@ -132,6 +133,8 @@ class NasaService(SingleFileBase):
         features['_latitude_'] = coords.apply(lambda x: x.flatten()[1])
         features['_download_url_'] = features['links'].apply(
             lambda x: next(iter([link['href'] for link in x if link.get('type') == 'application/zip']), None))
+        del features['links']
+        
         return features
 
     def _get_parameters(self, service, features=None):
