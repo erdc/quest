@@ -115,10 +115,10 @@ def get_features(services=None, collections=None, features=None,
         for k, v in filters.items():
             if k == 'bbox':
                 xmin, ymin, xmax, ymax = [float(x) for x in util.listify(v)]
-                idx = (features.longitude > xmin) \
-                    & (features.longitude < xmax) \
-                    & (features.latitude > ymin) \
-                    & (features.latitude < ymax)
+                idx = (features._longitude_ > xmin) \
+                    & (features._longitude_ < xmax) \
+                    & (features._latitude_ > ymin) \
+                    & (features._latitude_ < ymax)
                 features = features[idx]
 
             elif k == 'geom_type':
