@@ -133,8 +133,12 @@ class NasaService(SingleFileBase):
         features['_latitude_'] = coords.apply(lambda x: x.flatten()[1])
         features['_download_url_'] = features['links'].apply(
             lambda x: next(iter([link['href'] for link in x if link.get('type') == 'application/zip']), None))
+
+        features = features.ix[~features._download_url_.isnull()]
+        features['_filename_'] = features._download_url_.apply(lambda x: x.split('/')[-1])
+        features['_extract_from_zip_'] = '.DEM'
         del features['links']
-        
+
         return features
 
     def _get_parameters(self, service, features=None):

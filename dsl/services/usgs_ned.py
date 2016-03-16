@@ -55,6 +55,7 @@ class UsgsNedService(SingleFileBase):
         )
         features['_parameters_'] = 'elevation'
         features['_file_format_'] = 'raster'
+        features['_filename_'] = features['download url'].apply(lambda x: x.split('/')[-1])
         return features.rename(columns={'download url': '_download_url_', 'format': '_extract_from_zip_'})
 
     def _get_parameters(self, service, features=None):

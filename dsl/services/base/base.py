@@ -106,9 +106,9 @@ class SingleFileBase(WebServiceBase):
     def _download(self, service, feature, save_path, **kwargs):
         feature = self.get_features(service).ix[feature]
         download_url = feature['_download_url_']
-        extract_from_zip = feature.get('_extract_from_zip_', '')
-        save_path = ulmo.util.download_tiles(save_path, [download_url],
-                                             extract_from_zip)[0]
+        fmt = feature.get('_extract_from_zip_', '')
+        filename = feature.get('_filename_', util.uuid('dataset'))
+        save_path = self._download_file(save_path, download_url, fmt, filename)
         return {
             'save_path': save_path,
             'file_format': feature.get('_file_format_'),
@@ -117,3 +117,18 @@ class SingleFileBase(WebServiceBase):
 
     def _download_options(self, service):
         return {}
+
+    def _download_file(self, path, url, tile_fmt, filename, check_modified=False):
+        util.mkdir_if_doesnt_exist(path)
+        util.mkdir_if_doesnt_exist(os.path.join(path, 'zip'))
+        tile_path = os.path.join(path, filename)
+        print('... downloading %s' % url)
+        if tile_fmt == '':
+            ulmo.util.download_if_new(url, tile_path, check_modified=check_modified)
+        else:
+            zip_path = os.path.join(path, 'zip', filename)
+            ulmo.util.download_if_new(url, zip_path, check_modified=check_modified)
+            print('... ... zipfile saved at %s' % zip_path)
+            tile_path = ulmo.util.extract_from_zip(zip_path, tile_path, tile_fmt)
+
+        return tile_path
