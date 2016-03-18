@@ -96,8 +96,8 @@ class NwisService(WebServiceBase):
         data['_description'] = data['parm_cd'].apply(lambda x: pm_codes.ix[x]['SRSName'] if x in pm_codes.index else '')
         data['_unit'] = data['parm_cd'].apply(lambda x: pm_codes.ix[x]['parm_unit'] if x in pm_codes.index else '')
         cols = ['_parameter', '_parameter_code', '_external_vocabulary',
-                '_service_id', 'external_description', 'begin_date',
-                'end_date', 'count',
+                '_service_id', '_description', 'begin_date',
+                'end_date', '_count',
                 ]
         data = data[cols]
 
