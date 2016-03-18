@@ -100,10 +100,10 @@ def update_collection(name, display_name=None, description=None, metadata=None):
     c = _load_collection(name)
 
     if display_name is not None:
-        c['metadata'].update({'_display_name_': display_name})
+        c['metadata'].update({'_display_name': display_name})
 
     if description is not None:
-        c['metadata'].update({'_description_': description})
+        c['metadata'].update({'_description': description})
 
     if metadata is not None:
         c['metadata'].update(metadata)
@@ -174,7 +174,7 @@ def _write_collection_features(collection, features):
 
 
 def _get_project_dir():
-    return get_projects(metadata=True)[get_active_project()]['_folder_']
+    return get_projects(metadata=True)[get_active_project()]['_folder']
 
 
 def _load_collection(name):

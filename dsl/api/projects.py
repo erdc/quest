@@ -75,7 +75,7 @@ def new_project(name, display_name=None, description=None, metadata=None,
     util.mkdir_if_doesnt_exist(path)
     dbpath = os.path.join(path, PROJECT_DB_FILE)
     _write_project(dbpath, dsl_metadata, metadata)
-    projects.update({name: {'_folder_': folder}})
+    projects.update({name: {'_folder': folder}})
     _write_projects(projects)
 
     return _load_project(name)
@@ -109,7 +109,7 @@ def delete_project(name, delete_data=False):
         return projects
 
     if delete_data:
-        folder = projects[name]['_folder_']
+        folder = projects[name]['_folder']
         if not os.path.isabs(folder):
             path = os.path.join(util.get_projects_dir(), folder)
         else:
@@ -139,14 +139,14 @@ def get_projects(metadata=None):
         return _load_projects().keys()
 
     for name, project in _load_projects().iteritems():
-        path = project['_folder_']
+        path = project['_folder']
         if not os.path.isabs(path):
             path = os.path.join(util.get_projects_dir(), path)
 
         metadata = _load_project(name)
         metadata.update({
-            '_name_': name,
-            '_folder_': path,
+            '_name': name,
+            '_folder': path,
         })
         projects[name] = metadata
 
@@ -179,7 +179,7 @@ def _load_projects():
     dbpath = os.path.join(default_dir, PROJECT_DB_FILE)
     if projects is None or not os.path.exists(dbpath):
         projects = {
-            'default': {'_folder_': 'default_project'}
+            'default': {'_folder': 'default_project'}
         }
         util.mkdir_if_doesnt_exist(default_dir)
         dsl_metadata = {
@@ -213,7 +213,7 @@ def _get_project_db(name):
     if name not in projects.keys():
         raise ValueError('Project %s not found' % name)
 
-    path = projects[name]['_folder_']
+    path = projects[name]['_folder']
     if not os.path.isabs(path):
         path = os.path.join(util.get_projects_dir(), path)
 

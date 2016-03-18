@@ -53,17 +53,18 @@ class UsgsNedService(SingleFileBase):
         features = util.to_dataframe(
             ned.get_raster_availability(service, (-180, -90, 180, 90))
         )
-        features['_parameters_'] = 'elevation'
-        features['_file_format_'] = 'raster'
-        features['_filename_'] = features['download url'].apply(lambda x: x.split('/')[-1])
+        features['_parameters'] = 'elevation'
+        features['_file_format'] = 'raster'
+        features['_filename'] = features['download url'].apply(lambda x: x.split('/')[-1])
         columns = {
-            'download url': '_download_url_',
-            'format': '_extract_from_zip_',
+            'name': '_display_name',
+            'download url': '_download_url',
+            'format': '_extract_from_zip',
             }
         return features.rename(columns=columns)
 
     def _get_parameters(self, service, features=None):
         return {
-            '_parameters_': ['elevation'],
-            '_parameter_codes_': ['elevation'],
+            '_parameters': ['elevation'],
+            '_parameter_codes': ['elevation'],
         }

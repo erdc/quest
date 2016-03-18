@@ -32,22 +32,14 @@ class WebServiceBase(with_metaclass(abc.ABCMeta, object)):
                 pass
 
         features = self._get_features(service)
-        features['_name_'] = features.index
         params = self._get_parameters(service, features)
         if isinstance(params, pd.DataFrame):
-            groups = params.groupby('_name_').groups
-            features['_parameters_'] = features.index.map(lambda x: ','.join(filter(None, params.ix[groups[x]]['_parameter_'].tolist())) if x in groups.keys() else '')
-            features['_parameter_codes_'] = features.index.map(lambda x: ','.join(filter(None, params.ix[groups[x]]['_parameter_code_'].tolist())) if x in groups.keys() else '')
+            groups = params.groupby('_service_id').groups
+            features['_parameters'] = features.index.map(lambda x: ','.join(filter(None, params.ix[groups[x]]['_parameter'].tolist())) if x in groups.keys() else '')
+            features['_parameter_codes'] = features.index.map(lambda x: ','.join(filter(None, params.ix[groups[x]]['_parameter_code'].tolist())) if x in groups.keys() else '')
         else:
-            features['_parameters_'] = ','.join(params['_parameters_'])
-            features['_parameter_codes_'] = ','.join(params['_parameter_codes_'])
-
-        # peewee datasets cannot store field names with _id in them so rename
-        # fields to _uid
-        r = {field: field.replace('_id', '_uid') for field in features.columns}
-        if 'id' in r.keys():
-            r['id'] = 'uid'
-        features.rename(columns=r, inplace=True)
+            features['_parameters'] = ','.join(params['_parameters'])
+            features['_parameter_codes'] = ','.join(params['_parameter_codes'])
 
         util.mkdir_if_doesnt_exist(os.path.split(cache_file)[0])
         features.to_hdf(cache_file, 'table')
@@ -105,14 +97,14 @@ class SingleFileBase(WebServiceBase):
     """
     def _download(self, service, feature, save_path, **kwargs):
         feature = self.get_features(service).ix[feature]
-        download_url = feature['_download_url_']
-        fmt = feature.get('_extract_from_zip_', '')
-        filename = feature.get('_filename_', util.uuid('dataset'))
+        download_url = feature['_download_url']
+        fmt = feature.get('_extract_from_zip', '')
+        filename = feature.get('_filename', util.uuid('dataset'))
         save_path = self._download_file(save_path, download_url, fmt, filename)
         return {
             'save_path': save_path,
-            'file_format': feature.get('_file_format_'),
-            'parameter': feature.get('_parameter_'),
+            'file_format': feature.get('_file_format'),
+            'parameter': feature.get('_parameter'),
         }
 
     def _download_options(self, service):

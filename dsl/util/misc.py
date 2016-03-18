@@ -205,10 +205,11 @@ def to_dataframe(feature_collection):
         data = feature['properties']
         coords = pd.np.array(feature['geometry']['coordinates']).mean(axis=1)
         data.update({
-            '_geom_type_': feature['geometry']['type'],
-            '_geom_coords_': feature['geometry']['coordinates'],
-            '_longitude_': coords.flatten()[0],
-            '_latitude_': coords.flatten()[1],
+            '_geom_type': feature['geometry']['type'],
+            '_geom_coords': feature['geometry']['coordinates'],
+            '_longitude': coords.flatten()[0],
+            '_latitude': coords.flatten()[1],
+            '_service_id': feature['id']
         })
 
         features[feature['id']] = data
@@ -223,7 +224,7 @@ def to_geojson(df):
     }
     features = []
     idx = df.columns.str.startswith('_')
-    r = {field: field[1:-1] for field in df.columns[idx]}
+    r = {field: field[1:] for field in df.columns[idx]}
     for uid, row in df.iterrows():
         metadata = json.loads(row[~idx].dropna().to_json())
         row = row[idx].rename(index=r)

@@ -124,25 +124,25 @@ class NasaService(SingleFileBase):
             data += granules
 
         features = pd.DataFrame(data)
-        features.rename(columns = {'id': '_name_'}, inplace=True)
-        features.index = features['_name_']
-        features['_geom_type_'] = 'Polygon'
-        features['_geom_coords_'] = features['boxes'].apply(lambda x: [util.bbox2poly(*x[0].split(), reverse_order=True)])
-        coords = features['_geom_coords_'].apply(lambda x: pd.np.array(x).mean(axis=1))
-        features['_longitude_'] = coords.apply(lambda x: x.flatten()[0])
-        features['_latitude_'] = coords.apply(lambda x: x.flatten()[1])
-        features['_download_url_'] = features['links'].apply(
+        features.rename(columns = {'id': '_service_id'}, inplace=True)
+        features.index = features['_service_id']
+        features['_geom_type'] = 'Polygon'
+        features['_geom_coords'] = features['boxes'].apply(lambda x: [util.bbox2poly(*x[0].split(), reverse_order=True)])
+        coords = features['_geom_coords'].apply(lambda x: pd.np.array(x).mean(axis=1))
+        features['_longitude'] = coords.apply(lambda x: x.flatten()[0])
+        features['_latitude'] = coords.apply(lambda x: x.flatten()[1])
+        features['_download_url'] = features['links'].apply(
             lambda x: next(iter([link['href'] for link in x if link.get('type') == 'application/zip']), None))
 
         features = features.ix[~features._download_url_.isnull()]
-        features['_filename_'] = features._download_url_.apply(lambda x: x.split('/')[-1])
-        features['_extract_from_zip_'] = '.DEM'
+        features['_filename'] = features._download_url_.apply(lambda x: x.split('/')[-1])
+        features['_extract_from_zip'] = '.DEM'
         del features['links']
 
         return features
 
     def _get_parameters(self, service, features=None):
         return {
-            '_parameters_': ['elevation'],
-            '_parameter_codes_': ['elevation'],
+            '_parameters': ['elevation'],
+            '_parameter_codes': ['elevation'],
         }

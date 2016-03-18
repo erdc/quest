@@ -24,9 +24,10 @@ def add_features(collection, features):
     When the features are added into a collection they are given a new
     feature id.
 
-    The original name is saved as '_service_uri_'. If service_uri already exists
-    (i.e. Feature was originally from usgs-nwis but is being copied from one
-    collection to another) then does not overwrite external_uri.
+    If a featuture from a service already exists then it is not re-added the
+    uri of the existing feature is returned (i.e. Feature was originally from
+    usgs-nwis but is being copied from one collection to another) then does
+    not overwrite external_uri.
 
     Args:
         collection (string): name of collection
@@ -35,14 +36,13 @@ def add_features(collection, features):
             features to add to the collection.
 
     Returns:
-        True on success.
+        uris (list): uri's of features
     """
     if not isinstance(features, pd.DataFrame):
         features = get_metadata(features, as_dataframe=True)
 
-    features['_service_uri_'] = features.index
-    features[~features.index.str.startswith('svc://')]['_service_uri_'] = None
-    features['_collection_'] = collection
+    #features[~features.index.str.startswith('svc://')]['_service'] = None
+    features['_collection'] = collection
     return db.upsert_features(active_db(), features)
 
 
@@ -51,9 +51,6 @@ def get_features(services=None, collections=None, features=None,
                  metadata=None, as_dataframe=False, update_cache=False,
                  filters=None):
     """Retrieve list of features from resources.
-
-    currently ignores parameter and dataset portion of uri
-    if uris contain feature, then return exact feature.
 
     Args:
         services (comma separated strings, list of strings): list of services
@@ -99,14 +96,13 @@ def get_features(services=None, collections=None, features=None,
     for name in services or []:
         provider, service, feature = util.parse_service_uri(name)
         tmp_feats = _get_features(provider, service, update_cache=update_cache)
-        tmp_feats.index = tmp_feats['_service_uri_']
         all_features.append(tmp_feats)
 
     # get metadata for features in collections
     for name in collections or []:
         tmp_feats = pd.DataFrame(db.read_all(active_db(), 'features')).T
-        tmp_feats = tmp_feats[tmp_feats['_collection_'] == name]
-        tmp_feats.index = tmp_feats['_name_']
+        tmp_feats = tmp_feats[tmp_feats['_collection'] == name]
+        tmp_feats.index = tmp_feats['_name']
         all_features.append(tmp_feats)
 
     features = pd.concat(all_features)
@@ -116,22 +112,22 @@ def get_features(services=None, collections=None, features=None,
         for k, v in filters.items():
             if k == 'bbox':
                 xmin, ymin, xmax, ymax = [float(x) for x in util.listify(v)]
-                idx = (features._longitude_ > xmin) \
-                    & (features._longitude_ < xmax) \
-                    & (features._latitude_ > ymin) \
-                    & (features._latitude_ < ymax)
+                idx = (features._longitude > xmin) \
+                    & (features._longitude < xmax) \
+                    & (features._latitude > ymin) \
+                    & (features._latitude < ymax)
                 features = features[idx]
 
             elif k == 'geom_type':
-                idx = features._geom_type_.str.lower() == v.lower()
+                idx = features._geom_type.str.lower() == v.lower()
                 features = features[idx]
 
             elif k == 'parameter':
-                idx = features._parameters_.str.contains(v)
+                idx = features._parameters.str.contains(v)
                 features = features[idx]
 
             elif k == 'parameter_code':
-                idx = features._parameter_codes_.str.contains(v)
+                idx = features._parameter_codes.str.contains(v)
                 features = features[idx]
 
             else:
@@ -164,8 +160,8 @@ def new_feature(collection, display_name=None, geom_type=None, geom_coords=None,
 
     Returns
     -------
-        uid : str
-            uid of newly created feature
+        uri : str
+            uri of newly created feature
 
     """
     if collection not in get_collections():
@@ -180,9 +176,9 @@ def new_feature(collection, display_name=None, geom_type=None, geom_coords=None,
         if isinstance(geom_coords, str):
             geom_coords = json.loads(geom_coords)
 
-    uid = util.uuid('feature')
+    uri = util.uuid('feature')
     if display_name is None:
-        display_name = uid
+        display_name = uri
 
     dsl_metadata = {
         'display_name': display_name,
@@ -191,10 +187,10 @@ def new_feature(collection, display_name=None, geom_type=None, geom_coords=None,
         'collection': collection,
         }
 
-    db.upsert(active_db(), 'features', uid, dsl_metadata=dsl_metadata,
+    db.upsert(active_db(), 'features', uri, dsl_metadata=dsl_metadata,
               metadata=metadata)
 
-    return uid
+    return uri
 
 
 @dispatcher.add_method
@@ -216,6 +212,7 @@ def update_features(feature, metadata):
         True on successful update
 
     """
+    raise NotImplementedError
     features = util.listify(features)
 
     for uri in uri_list:
@@ -256,6 +253,7 @@ def delete_feature(uri):
         -------
             True on successful update
     """
+    raise NotImplementedError
     uri_str = uri
     uri = util.parse_uri(uri)
     if uri['resource'] != 'collection':
@@ -278,7 +276,7 @@ def delete_feature(uri):
 def _get_features(provider, service, update_cache):
     driver = util.load_drivers('services', names=provider)[provider].driver
     features = driver.get_features(service, update_cache=update_cache)
-    features['_service_uri_'] = features.index.map(
-                                    lambda feat: 'svc://%s:%s/%s'
-                                    % (provider, service, feat))
+    features['_service'] = 'svc://{}:{}'.format(provider, service)
+    features.index = features['_service'] + '/' + features['_service_id']
+    features['_name'] = features.index
     return features

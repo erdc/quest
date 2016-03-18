@@ -61,17 +61,18 @@ class NwisService(WebServiceBase):
 
         sites = {k: v for d in sites for k, v in d.items()}
         df = pd.DataFrame.from_dict(sites, orient='index')
-        df['_geom_type_'] = 'Point'
+        df['_geom_type'] = 'Point'
         for col in ['latitude', 'longitude']:
             df[col] = df['location'].apply(lambda x: float(x[col]))
 
         df.rename(columns={
-                    'name': '_name_',
-                    'latitude': '_latitude_',
-                    'longitude': '_longitude_',
+                    'code': '_service_id',
+                    'name': '_display_name',
+                    'latitude': '_latitude',
+                    'longitude': '_longitude',
                     }, inplace=True)
 
-        df['_geom_coords_'] = zip(df['_longitude_'], df['_latitude_'])
+        df['_geom_coords'] = zip(df['_longitude'], df['_latitude'])
         return df
 
     def _get_parameters(self, service, features=None):
@@ -86,16 +87,16 @@ class NwisService(WebServiceBase):
             data = executor.map(func, chunks)
 
         data = pd.concat(data, ignore_index=True)
-        data['_parameter_code_'] = data['parm_cd'] + ':' + data['stat_cd']
-        data['external_vocabulary'] = 'USGS-NWIS'
-        data.rename(columns={'site_no': '_name_', 'count_nu': 'count'}, inplace=True)
-        data = data[pd.notnull(data['_parameter_code_'])]
-        data['_parameter_'] = data['_parameter_code_'].apply(lambda x: self._parameter_map(service).get(x))
+        data['_parameter_code'] = data['parm_cd'] + ':' + data['stat_cd']
+        data['_external_vocabulary'] = 'USGS-NWIS'
+        data.rename(columns={'site_no': '_service_id', 'count_nu': '_count'}, inplace=True)
+        data = data[pd.notnull(data['_parameter_code'])]
+        data['_parameter'] = data['_parameter_code'].apply(lambda x: self._parameter_map(service).get(x))
         pm_codes = _pm_codes()
-        data['external_description'] = data['parm_cd'].apply(lambda x: pm_codes.ix[x]['SRSName'] if x in pm_codes.index else '')
-        data['unit'] = data['parm_cd'].apply(lambda x: pm_codes.ix[x]['parm_unit'] if x in pm_codes.index else '')
-        cols = ['_parameter_', '_parameter_code_', 'external_vocabulary',
-                '_name_', 'external_description', 'begin_date',
+        data['_description'] = data['parm_cd'].apply(lambda x: pm_codes.ix[x]['SRSName'] if x in pm_codes.index else '')
+        data['_unit'] = data['parm_cd'].apply(lambda x: pm_codes.ix[x]['parm_unit'] if x in pm_codes.index else '')
+        cols = ['_parameter', '_parameter_code', '_external_vocabulary',
+                '_service_id', 'external_description', 'begin_date',
                 'end_date', 'count',
                 ]
         data = data[cols]

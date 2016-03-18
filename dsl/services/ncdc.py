@@ -63,14 +63,15 @@ class NcdcService(WebServiceBase):
         valid = pd.notnull(features.latitude) & pd.notnull(features.longitude)
         features = features[valid]
         features.rename(columns={
-                            'id': '_name_',
-                            'longitude': '_longitude_',
-                            'latitude': '_latitude_'
+                            'name': '_display_name',
+                            'id': '_service_id',
+                            'longitude': '_longitude',
+                            'latitude': '_latitude'
                         }, inplace=True)
-        features['_geom_type_'] = 'Point'
-        features['_geom_coords_'] = \
-            zip(features['_longitude_'], features['_latitude_'])
-        return features.rename(columns={'id': '_name_'})
+        features['_geom_type'] = 'Point'
+        features['_geom_coords'] = \
+            zip(features['_longitude'], features['_latitude'])
+        return features
 
     def _get_parameters(self, service, features=None):
         if service=='ghcn-daily':
@@ -81,15 +82,15 @@ class NcdcService(WebServiceBase):
 
             # hardcoding for now
             parameters = {
-                '_parameters_': self._parameter_map('ghcn-daily').values(),
-                '_parameter_codes_': self._parameter_map('ghcn-daily').keys()
+                '_parameters': self._parameter_map('ghcn-daily').values(),
+                '_parameter_codes': self._parameter_map('ghcn-daily').keys()
             }
 
         if service=='gsod':
             # this is not the real list of parameters. hardcoding for now
             parameters = {
-                '_parameters_': self._parameter_map('gsod').values(),
-                '_parameter_codes_': self._parameter_map('gsod').keys()
+                '_parameters': self._parameter_map('gsod').values(),
+                '_parameter_codes': self._parameter_map('gsod').keys()
             }
 
         return parameters

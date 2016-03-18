@@ -65,19 +65,19 @@ class UsgsNlcdService(SingleFileBase):
         features = features.ix[~features.title.str.contains('Imperv')]
         features = features.ix[~features.title.str.contains('by State')]
         features = features.ix[~features.title.str.contains('Tree Canopy')]
-        features['_download_url_'] = features.webLinks.apply(_parse_links)
-        features['_extract_from_zip_'] = '.tif'
-        features['_filename_'] = features['_download_url_'].str.split('FNAME=', expand=True)[1]
-        features['_geom_type_'] = 'Polygon'
-        features['_geom_coords_'] = features.spatial.apply(_bbox2poly)
-        features['_parameters_'] = 'landcover'
-        features['_file_format_'] = 'raster'
-        coords = features['_geom_coords_'].apply(lambda x: pd.np.array(x).mean(axis=1))
-        features['_longitude_'] = coords.apply(lambda x: x.flatten()[0])
-        features['_latitude_'] = coords.apply(lambda x: x.flatten()[1])
-        features.rename(columns={'id': '_name_', 'title': '_display_name_'},
+        features['_download_url'] = features.webLinks.apply(_parse_links)
+        features['_extract_from_zip'] = '.tif'
+        features['_filename'] = features['_download_url'].str.split('FNAME=', expand=True)[1]
+        features['_geom_type'] = 'Polygon'
+        features['_geom_coords'] = features.spatial.apply(_bbox2poly)
+        features['_parameters'] = 'landcover'
+        features['_file_format'] = 'raster'
+        coords = features['_geom_coords'].apply(lambda x: pd.np.array(x).mean(axis=1))
+        features['_longitude'] = coords.apply(lambda x: x.flatten()[0])
+        features['_latitude'] = coords.apply(lambda x: x.flatten()[1])
+        features.rename(columns={'id': '_service_id', 'title': '_display_name'},
                   inplace=True)
-        features.index = features['_name_']
+        features.index = features['_service_id']
 
         # remove extra fields. nested dicts can cause problems
         del features['relatedItems']
@@ -89,8 +89,8 @@ class UsgsNlcdService(SingleFileBase):
 
     def _get_parameters(self, service, features=None):
         return {
-            '_parameters_': ['landcover'],
-            '_parameter_codes_': ['landcover'],
+            '_parameters': ['landcover'],
+            '_parameter_codes': ['landcover'],
         }
 
 
