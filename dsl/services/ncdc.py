@@ -64,10 +64,10 @@ class NcdcService(WebServiceBase):
         features = features[valid]
         features.rename(columns={
                             'name': '_display_name',
-                            'id': '_service_id',
                             'longitude': '_longitude',
                             'latitude': '_latitude'
                         }, inplace=True)
+        features['_service_id'] = features.index
         features['_geom_type'] = 'Point'
         features['_geom_coords'] = \
             zip(features['_longitude'], features['_latitude'])
