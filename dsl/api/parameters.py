@@ -15,7 +15,7 @@ def get_mapped_parameters():
     parameters : list of str,
         list of parameters available
     """
-    services = get_services()
+    services = get_services(metadata=True)
     parameters = []
     for service in services.values():
         parameters += service['parameters']
@@ -24,7 +24,12 @@ def get_mapped_parameters():
 
 @dispatcher.add_method
 def get_parameters(uri, update_cache=False):
-    """get list of all parameters available, even unmapped ones."""
+    """
+
+    FIX FOR DB
+
+    get list of all parameters available, even unmapped ones."""
+    raise NotImplementedError
     uri = util.parse_uri(uri)
     if uri['resource'] == 'service':
         parameters = _read_cached_parameters(uri['uid'], uri['service'],

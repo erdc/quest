@@ -41,6 +41,7 @@ def get_collections(metadata=None):
     """
 
     collections = _load_collections()
+    collections = {k: util.to_metadata(v) for k, v in collections.items()}
     if not metadata:
         collections = collections.keys()
 
@@ -169,12 +170,11 @@ def _write_collection_features(collection, features):
     TODO MAKE WORK WITH DB
     """
     features = _collection_features_file(collection)
-
     features.to_hdf(features_file, 'table')
 
 
 def _get_project_dir():
-    return get_projects(metadata=True)[get_active_project()]['_folder']
+    return get_projects(metadata=True)[get_active_project()]['folder']
 
 
 def _load_collection(name):

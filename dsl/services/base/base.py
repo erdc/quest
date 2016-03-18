@@ -104,7 +104,7 @@ class SingleFileBase(WebServiceBase):
         return {
             'save_path': save_path,
             'file_format': feature.get('_file_format'),
-            'parameter': feature.get('_parameter'),
+            'parameter': feature.get('_parameters'),
         }
 
     def _download_options(self, service):

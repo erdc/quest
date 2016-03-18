@@ -34,7 +34,6 @@ def download(feature, save_path, dataset=None, async=False, **kwargs):
         TODO add examples
 
     """
-
     service_uri = feature
     if not service_uri.startswith('svc://'):
         df = get_metadata(feature, as_dataframe=True)[0]
@@ -94,6 +93,7 @@ def download_datasets(datasets, async=False):
             dsl_metadata = {
                 'save_path': metadata.pop('save_path'),
                 'file_format': metadata.pop('file_format'),
+                'parameter': metadata.pop('parameter'),
                 'download_status': 'downloaded',
                 'download_message': 'success',
                 }
@@ -169,13 +169,15 @@ def get_datasets(metadata=None, filters=None, as_dataframe=None):
     if not metadata and not as_dataframe:
         datasets = datasets['_name'].tolist()
     elif not as_dataframe:
-        datasets = datasets.to_dict(orient='index')
+        # reformat metadata
+        datasets = util.to_metadata(datasets)
 
     return datasets
 
 
 @dispatcher.add_method
-def new_dataset(feature, dataset_type=None, display_name=None, save_path=None, metadata=None):
+def new_dataset(feature, dataset_type=None, display_name=None,
+                description=None, save_path=None, metadata=None):
     """Create a new dataset at a feature.
 
     Args:
@@ -192,9 +194,14 @@ def new_dataset(feature, dataset_type=None, display_name=None, save_path=None, m
     if dataset_type is None:
         dataset_type = 'user_created'
 
+    if display_name is None:
+        display_name = name
+
     dsl_metadata = {
         'feature': feature,
         'dataset_type': dataset_type,
+        'display_name': display_name,
+        'description': description,
     }
     if dataset_type == 'download':
         dsl_metadata.update({'download_status': 'not staged'})

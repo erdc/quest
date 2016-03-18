@@ -143,12 +143,13 @@ def get_projects(metadata=None):
         if not os.path.isabs(path):
             path = os.path.join(util.get_projects_dir(), path)
 
-        metadata = _load_project(name)
-        metadata.update({
+        data = _load_project(name)
+        data.update({
             '_name': name,
             '_folder': path,
         })
-        projects[name] = metadata
+
+        projects[name] = util.to_metadata(data)
 
     return projects
 
