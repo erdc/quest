@@ -134,8 +134,8 @@ class NasaService(SingleFileBase):
         features['_download_url'] = features['links'].apply(
             lambda x: next(iter([link['href'] for link in x if link.get('type') == 'application/zip']), None))
 
-        features = features.ix[~features._download_url_.isnull()]
-        features['_filename'] = features._download_url_.apply(lambda x: x.split('/')[-1])
+        features = features.ix[~features._download_url.isnull()]
+        features['_filename'] = features._download_url.apply(lambda x: x.split('/')[-1])
         features['_extract_from_zip'] = '.DEM'
         del features['links']
 
