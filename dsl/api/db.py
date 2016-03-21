@@ -1,3 +1,5 @@
+"""database functions for storing resources in sqlite database."""
+
 import json
 import pandas as pd
 from playhouse.dataset import DataSet
@@ -5,24 +7,36 @@ from playhouse.dataset import DataSet
 from .. import util
 
 
-def upsert(dbpath, table, name, dsl_metadata=None, metadata=None):
-    """
-    """
-    # name = _sanitize(name)
-    dsl_metadata['name'] = name
+def delete(dbpath, table, name):
+    """delete resource from table."""
 
+    db = DataSet(_dburl(dbpath))
+    t = db[table]
+    t.delete(_name=name)
+
+    return db
+
+
+def upsert(dbpath, table, name, dsl_metadata=None, metadata=None):
+    """insert or update resource."""
+    # name = _sanitize(name)
+
+    # remove empty values
     if dsl_metadata is None:
         dsl_metadata = {}
+
+    dsl_metadata = {k:v for k, v in dsl_metadata.items() if v}
+    dsl_metadata['name'] = name
 
     data = {'_{}'.format(k): v for k, v in dsl_metadata.items()}
 
     if metadata is not None:
+        metadata = {k: v for k, v in metadata.items() if v}
         data.update(metadata)
 
     # cannot have id field in data when inserting into dataset
     if 'id' in data.keys():
         data['uid'] = data.pop('id')
-
 
     db = DataSet(_dburl(dbpath))
     t = db[table]
@@ -41,9 +55,7 @@ def upsert(dbpath, table, name, dsl_metadata=None, metadata=None):
 
 
 def upsert_features(dbpath, features):
-    """
-    upsert pandas dataframe
-    """
+    """upsert pandas dataframe into features table."""
     db = DataSet(_dburl(dbpath))
     t = db['features']
 
@@ -83,6 +95,7 @@ def upsert_features(dbpath, features):
 
 
 def read_all(dbpath, table, as_dataframe=None):
+    """read all rows from table."""
     db = DataSet(_dburl(dbpath))
     t = db[table]
     data = {row['_name']: row for row in t.all()}
@@ -102,6 +115,7 @@ def read_all(dbpath, table, as_dataframe=None):
 
 
 def read_data(dbpath, table, name):
+    """read resource from table."""
     db = DataSet(_dburl(dbpath))
     t = db[table]
     return t.find_one(_name=name)

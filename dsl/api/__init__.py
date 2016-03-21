@@ -16,8 +16,8 @@ __all__ = (
     'get_dsl_version',
     'get_api_version',
     'get_metadata',
-    # 'update_metadata', # replaces update_collection, update_feature, update_dataset
-    # 'delete', # replaces delete_dataset, delete_collection, delete_feature
+    'update_metadata', # replaces update_collection, update_feature, update_dataset
+    'delete', # replaces delete_dataset, delete_collection, delete_feature
     'get_collections',
     'new_collection',
     'stage_for_download',
@@ -25,11 +25,9 @@ __all__ = (
     'download_datasets',
     'download_options',
     'get_datasets',
-    # 'locate_dataset',
     'new_dataset',
-    # 'update_dataset',
     'vizualize_dataset',
-    'add_features',  # replaces add_features_to_collection
+    'add_features',
     'get_features',
     'new_feature',
     'get_filters',
@@ -69,8 +67,6 @@ from .version import (
 from .collections import (
     get_collections,
     new_collection,
-    update_collection,
-    delete_collection,
 )
 
 from .datasets import (
@@ -80,27 +76,30 @@ from .datasets import (
     get_datasets,
     new_dataset,
     stage_for_download,
-    # update_dataset,
     describe_dataset,
     vizualize_dataset,
+)
+
+from .delete import (
+    delete,
 )
 
 from .features import (
     add_features,
     get_features,
     new_feature,
-    # update_feature,
-    delete_feature,
 )
 
 from .filters import (
     get_filters,
     apply_filter,
+    # apply_filter_set
     apply_filter_options,
 )
 
 from .metadata import (
     get_metadata,
+    update_metadata,
 )
 
 from .parameters import (

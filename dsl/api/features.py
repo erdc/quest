@@ -101,8 +101,9 @@ def get_features(services=None, collections=None, features=None,
     # get metadata for features in collections
     for name in collections or []:
         tmp_feats = pd.DataFrame(db.read_all(active_db(), 'features')).T
-        tmp_feats = tmp_feats[tmp_feats['_collection'] == name]
-        tmp_feats.index = tmp_feats['_name']
+        if not tmp_feats.empty:
+            tmp_feats = tmp_feats[tmp_feats['_collection'] == name]
+            tmp_feats.index = tmp_feats['_name']
         all_features.append(tmp_feats)
 
     features = pd.concat(all_features)

@@ -154,6 +154,13 @@ def get_datasets(metadata=None, filters=None, as_dataframe=None):
     """
     """
     datasets = db.read_all(active_db(), 'datasets', as_dataframe=True)
+    if datasets.empty:
+        if not metadata and not as_dataframe:
+            datasets = []
+        elif not as_dataframe:
+            datasets = {}
+        return datasets
+
     features = db.read_all(active_db(), 'features', as_dataframe=True)
     datasets = datasets.join(features['_collection'], on='_feature')
 

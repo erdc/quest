@@ -38,6 +38,29 @@ def bbox2poly(x1, y1, x2, y2, reverse_order=False):
     return poly
 
 
+def classify_uris(uris):
+    """convert list of uris into a pandas dataframe.
+
+    classified by resource type
+    """
+    uris = listify(uris)
+
+    df = pd.DataFrame(uris, columns=['uri'])
+    df['type'] = 'collections'
+
+    uuid_idx = df['uri'].apply(is_uuid)
+    service_idx = df['uri'].str.startswith('svc://')
+    feature_idx = uuid_idx & df['uri'].str.startswith('f')
+    dataset_idx = uuid_idx & df['uri'].str.startswith('d')
+
+    df['type'][service_idx] = 'services'
+    df['type'][feature_idx] = 'features'
+    df['type'][dataset_idx] = 'datasets'
+    df.set_index('uri', drop=False, inplace=True)
+
+    return df
+
+
 def get_cache_dir(service=None):
     settings = get_settings()
     path = _abs_path(settings['CACHE_DIR'])
