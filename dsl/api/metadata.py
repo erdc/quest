@@ -113,7 +113,7 @@ def update_metadata(uris, display_name=None, description=None, metadata=None):
             raise ValueError('description must be a list if more that one uri is passed in')
 
         if not isinstance(metadata, list):
-            metadata = metadata * len(df)
+            metadata = [metadata] * n
 
     for uri, name, desc, metadata in zip(uris, display_name,
                                          description, metadata):
