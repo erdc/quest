@@ -288,6 +288,7 @@ def to_metadata(data):
         properties = data[data.columns[idx]].rename(columns=r)
         properties['metadata'] = data[data.columns[~idx]].to_dict(orient='records')
         properties.index.name = 'name'
+        properties = properties.to_dict(orient='index')
 
     return properties
 
