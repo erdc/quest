@@ -23,23 +23,18 @@ def get_mapped_parameters():
 
 
 @dispatcher.add_method
-def get_parameters(uri, update_cache=False):
+def get_parameters(service_uri, update_cache=False):
+    """Get dataframe of available parameters.
+
+    get list of all parameters available, even unmapped ones.
     """
+    provider, service, feature = util.parse_service_uri(service_uri)
+    parameters = _read_cached_parameters(provider, service,
+                                         update_cache=update_cache)
 
-    FIX FOR DB
-
-    get list of all parameters available, even unmapped ones."""
-    raise NotImplementedError
-    uri = util.parse_uri(uri)
-    if uri['resource'] == 'service':
-        parameters = _read_cached_parameters(uri['uid'], uri['service'],
-                                             update_cache=update_cache)
-        if uri['feature']:
-            idx = parameters['feature_id'] == uri['feature']
-            parameters = parameters[idx]
-
-    if uri['resource'] == 'collection':
-        raise NotImplementedError
+    if feature:
+        idx = parameters['_service_id'] == feature
+        parameters = parameters[idx]
 
     return parameters
 
