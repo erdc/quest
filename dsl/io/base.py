@@ -16,15 +16,15 @@ class IoBase(with_metaclass(abc.ABCMeta, object)):
 
     @abc.abstractmethod
     def register(self):
-        """Register plugin by setting description and io type 
+        """Register plugin by setting description and io type
         """
 
     @abc.abstractmethod
-    def read_features(self, filters=None):
-        """Read data from format
+    def read(self):
+        """Write data to format
         """
 
     @abc.abstractmethod
-    def read_data(self):
+    def write(self):
         """Write data to format
         """

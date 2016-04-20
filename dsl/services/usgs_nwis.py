@@ -8,12 +8,15 @@ import os
 from ulmo.usgs import nwis
 from .. import util
 
+BASE_PATH = 'usgs-nwis'
+
 
 class NwisService(WebServiceBase):
     def _register(self):
         self.metadata = {
             'display_name': 'USGS NWIS Web Services',
-            'description': 'Services available through the USGS National Water Information System',
+            'description': ('Services available through the USGS National '
+                            'Water Information System'),
             'organization': {
                 'abbr': 'USGS',
                 'name': 'United States Geological Survey',
@@ -24,14 +27,16 @@ class NwisService(WebServiceBase):
         return {
             'iv': {
                 'display_name': 'NWIS Instantaneous Values Service',
-                'description': 'Retrieve current streamflow and other real-time data for USGS water sites since October 1, 2007',
+                'description': ('Retrieve current streamflow and other '
+                                'real-time data for USGS water sites '
+                                'since October 1, 2007'),
                 'service_type': 'geo-discrete',
-                'parameters': ['streamflow', 'gage_height', 'water_temperature'],
+                'parameters': self._parameter_map('iv').values(),
                 'unmapped_parameters_available': True,
                 'geom_type': 'Point',
                 'datatype': 'timeseries',
                 'geographical_areas': ['Alaska', 'USA', 'Hawaii'],
-                'bounding_boxes' : [
+                'bounding_boxes': [
                     (-178.19453125, 51.6036621094, -130.0140625, 71.4076660156),
                     (-124.709960938, 24.5423339844, -66.9870117187, 49.3696777344),
                     (-160.243457031, 18.9639160156, -154.804199219, 22.2231445312),
@@ -39,14 +44,18 @@ class NwisService(WebServiceBase):
             },
             'dv': {
                 'display_name': 'NWIS Daily Values Service',
-                'description': 'Retrieve historical summarized daily data about streams, lakes and wells. Daily data available for USGS water sites include mean, median, maximum, minimum, and/or other derived values.',
+                'description': ('Retrieve historical summarized daily data '
+                                'about streams, lakes and wells. Daily data '
+                                'available for USGS water sites include mean, '
+                                'median, maximum, minimum, and/or other '
+                                'derived values.'),
                 'service_type': 'geo-discrete',
-                'parameters': ['streamflow', 'gage_height', 'water_temperature'],
+                'parameters': self._parameter_map('dv').values(),
                 'unmapped_parameters_available': True,
                 'geom_type': 'Point',
                 'datatype': 'timeseries',
                 'geographical_areas': ['Alaska', 'USA', 'Hawaii'],
-                'bounding_boxes' : [
+                'bounding_boxes': [
                     (-178.19453125, 51.6036621094, -130.0140625, 71.4076660156),
                     (-124.709960938, 24.5423339844, -66.9870117187, 49.3696777344),
                     (-160.243457031, 18.9639160156, -154.804199219, 22.2231445312),
@@ -89,12 +98,22 @@ class NwisService(WebServiceBase):
         data = pd.concat(data, ignore_index=True)
         data['_parameter_code'] = data['parm_cd'] + ':' + data['stat_cd']
         data['_external_vocabulary'] = 'USGS-NWIS'
-        data.rename(columns={'site_no': '_service_id', 'count_nu': '_count'}, inplace=True)
+        data.rename(columns={
+                        'site_no': '_service_id',
+                        'count_nu': '_count'
+                        },
+                    inplace=True)
         data = data[pd.notnull(data['_parameter_code'])]
-        data['_parameter'] = data['_parameter_code'].apply(lambda x: self._parameter_map(service).get(x))
+        data['_parameter'] = data['_parameter_code'].apply(
+            lambda x: self._parameter_map(service).get(x)
+            )
         pm_codes = _pm_codes()
-        data['_description'] = data['parm_cd'].apply(lambda x: pm_codes.ix[x]['SRSName'] if x in pm_codes.index else '')
-        data['_unit'] = data['parm_cd'].apply(lambda x: pm_codes.ix[x]['parm_unit'] if x in pm_codes.index else '')
+        data['_description'] = data['parm_cd'].apply(
+            lambda x: pm_codes.ix[x]['SRSName'] if x in pm_codes.index else ''
+            )
+        data['_unit'] = data['parm_cd'].apply(
+            lambda x: pm_codes.ix[x]['parm_unit'] if x in pm_codes.index else ''
+            )
         cols = ['_parameter', '_parameter_code', '_external_vocabulary',
                 '_service_id', '_description', 'begin_date',
                 'end_date', '_count',
@@ -105,79 +124,89 @@ class NwisService(WebServiceBase):
         # need to keep track of units/data classification/restrictions
         return data
 
+    def _parameter_map(self, service, invert=False):
+        if service == 'iv':
+            pmap = {
+                '00060': 'streamflow',
+                '00065': 'gage_height',
+                '00010': 'water_temperature',
+            }
+        else:
+            pmap = {
+                '00060:00003': 'streamflow:mean:daily',
+                '00010:00001': 'water_temperature:daily:min',
+                '00010:00002': 'water_temperature:daily:max',
+                '00010:00003': 'water_temperature:daily:mean',
+            }
 
-    def _parameter_map(self, service):
-        return {
-            '00060': 'streamflow',
-            '00060:00003': 'streamflow:mean:daily',
-            '00065': 'gage_height',
-            '00010': 'water_temperature',
-            '00010:00001': 'water_temperature:daily:min',
-            '00010:00002': 'water_temperature:daily:max',
-            '00010:00003': 'water_temperature:daily:mean',
-        }
+        if invert:
+            pmap = {v: k for k, v in pmap.items()}
 
+        return pmap
 
-    def _download(self, service, feature, save_path, dataset=None,
-                  parameter=None, start=None, end=None, period=None):
+    def _download(self, service, feature, save_path, dataset,
+                  parameter, start=None, end=None, period=None):
 
         if not any([start, end, period]):
             period = 'P365D'  # default to past 1yr of data
 
-        io = util.load_drivers('io', 'ts-geojson')['ts-geojson'].driver
+        pmap = self._parameter_map(service, invert=True)
+        parameter_code, statistic_code = (pmap[parameter].split(':') + [None])[:2]
 
-        parameter_codes = []
-        statistic_codes = []
-        for parameter in parameters:
-            p, s = _as_nwis(parameter)
-            parameter_codes.append(p)
-            statistic_codes.append(s)
+        data = nwis.get_site_data(feature,
+                                  parameter_code=parameter_code,
+                                  statistic_code=statistic_code,
+                                  start=start, end=end, period=period,
+                                  service=service)
 
-        parameter_codes = ','.join(set(parameter_codes))
-        statistic_codes = [_f for _f in set(statistic_codes) if _f]
-        if statistic_codes:
-            statistic_codes = ','.join(statistic_codes)
+        # dict contains only one key since only one parameter/statistic was
+        # downloaded, this would need to be changed if multiple
+        # parameter/stat were downloaded together
+        data = data.values()[0]
+
+        # convert to dataframe and cleanup bad data
+        df = pd.DataFrame(data['values'])
+        if df.empty:
+            raise ValueError('No Data Available')
+        df = df.set_index('datetime')
+        df.value = df.value.astype(float)
+        if statistic_code in ['00001', '00002', '00003']:
+            df.index = pd.to_datetime(df.index).to_period('D')
         else:
-            statistic_codes=None
+            df.index = pd.to_datetime(df.index)  # this is in UTC
 
-        data_files = {}
-        for location in locations:
-            data_files[location] = {}
-            datasets = nwis.get_site_data(location, parameter_code=parameter_codes,
-                                        statistic_code=statistic_codes,
-                                        start=start, end=end, period=period,
-                                        service=self.service)
+        df[df.values == -999999] = pd.np.nan
+        df.rename(columns={'value': parameter}, inplace=True)
 
-            for code, data in datasets.items():
-                df = pd.DataFrame(data['values'])
-                if df.empty:
-                    print('No data found, try different time period')
-                    continue
+        save_path = os.path.join(save_path, BASE_PATH, service)
+        save_path = os.path.join(save_path, dataset)
+        metadata = {
+            'save_path': save_path,
+            'file_format': 'hdf5',
+            'datatype': 'timeseries',
+            'parameter': parameter,
+            'units': data['variable']['units']['code'],
+            'timezone': 'utc',
+            'feature': 'svc://usgs-nwis:{}/{}'.format(service, feature)
+        }
 
-                df.index = self._make_index(df)
-                p, s = _as_nwis(code, invert=True)
-                if s:
-                    parameter = ':'.join([p,s])
-                else:
-                    parameter = p
+        # save data to disk
+        io = util.load_drivers('io', 'timeseries-hdf5')
+        io = io['timeseries-hdf5'].driver
+        io.write(save_path, df, metadata)
 
-                df = df[['value']]
-                df.value = df.value.apply(np.float)
-                df.columns = [parameter + '(%s)' % data['variable']['units']['code']]
-                filename = path + 'nwis_%s_stn_%s_%s.json' % (self.service, location, parameter)
-                data_files[location][parameter] = filename
-                location_id = data['site']['code']
-                geometry = Point((float(data['site']['location']['longitude']), float(data['site']['location']['latitude'])))
-                metadata = data['site']
-                io.write(filename, location_id=location_id, geometry=geometry, dataframe=df, metadata=metadata)
-
-        return data_files
+        return metadata
 
     def _download_options(self, service):
         schema = {
             "title": "USGS NWIS Download Options",
             "type": "object",
             "properties": {
+                "parameter": {
+                    "type": "string",
+                    "enum": self._parameter_map(service).values(),
+                    "description": "start date",
+                },
                 "start": {
                     "type": "string",
                     "description": "start date",
