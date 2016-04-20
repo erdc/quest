@@ -189,7 +189,7 @@ def load_drivers(namespace, names=None):
         )
         return dict((x.name, x.obj) for x in mgr)
 
-    return {name: driver.DriverManager(namespace, name, invoke_kwds={'uid': name}, invoke_on_load='True') for name in names}
+    return {name: driver.DriverManager(namespace, name, invoke_on_load='True') for name in names}
 
 
 def load_service(uri):
