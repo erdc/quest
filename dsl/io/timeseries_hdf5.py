@@ -18,6 +18,8 @@ class TsHdf5(IoBase):
 
     def read(self, path):
         "Read metadata and dataframe from HDF5 store."
+        if not path.endswith('h5'):
+            path += '.h5'
 
         with pd.get_store(path) as h5store:
             dataframe = h5store.get('dataframe')
