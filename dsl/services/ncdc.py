@@ -54,8 +54,6 @@ class NcdcService(WebServiceBase):
     def _get_features(self, service):
         if service == 'ghcn-daily':
             features = ghcn_daily.get_stations(as_dataframe=True)
-            # these fields are causing problems when saving to database
-            features = features.drop(['USAF', 'WBAN'], axis=1)
 
         if service == 'gsod':
             features = gsod.get_stations()
@@ -63,6 +61,8 @@ class NcdcService(WebServiceBase):
             # currently to_geojson can't handle datetime objects so deleting these for now.
             del features['begin']
             del features['end']
+            # these fields are causing problems when saving to database
+            features = features.drop(['USAF', 'WBAN'], axis=1)
 
         # remove locations with invalid coordinates
         valid = pd.notnull(features.latitude) & pd.notnull(features.longitude)
