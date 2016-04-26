@@ -118,9 +118,15 @@ def update_metadata(uris, display_name=None, description=None,
 
         if not isinstance(dsl_metadata, list):
                     dsl_metadata = [dsl_metadata] * n
+    else:
+        display_name = [display_name]
+        description = [description]
+        metadata = [metadata]
+        dsl_metadata = [dsl_metadata]
 
-    for uri, name, desc, metadata in zip(uris, display_name,
-                                         description, metadata):
+    for uri, name, desc, metadata, dsl_metadata in zip(uris, display_name,
+                                                       description, metadata,
+                                                       dsl_metadata):
         if dsl_metadata is None:
             dsl_metadata = {}
 

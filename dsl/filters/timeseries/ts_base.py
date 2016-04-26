@@ -31,11 +31,11 @@ class TsBase(FilterBase):
 
         io = util.load_drivers('io', 'timeseries-hdf5')
         io = io['timeseries-hdf5'].driver
-        metadata = get_metadata(dataset)[dataset]
-        if metadata['_save_path'] is None:
+        orig_metadata = get_metadata(dataset)[dataset]
+        if orig_metadata['_save_path'] is None:
             raise IOError('No data file available for this dataset')
 
-        df = io.read(metadata['_save_path'])
+        df = io.read(orig_metadata['_save_path'])
 
 
         #apply transformation
@@ -48,17 +48,17 @@ class TsBase(FilterBase):
         # setup new dataset
         new_metadata = {
             'parameter': new_df.metadata.get('parameter'),
-            'datatype': metadata['_datatype'],
+            'datatype': orig_metadata['_datatype'],
             'filter_applied': self.name,
             'filter_options': options,
             'parent_datasets': dataset,
-            'feature': metadata['_feature'],
-            'file_format': metadata['_file_format'],
+            'feature': orig_metadata['_feature'],
+            'file_format': orig_metadata['_file_format'],
             'timezone': new_df.metadata.get('timezone'),
             'units': new_df.metadata.get('units'),
         }
 
-        new_dset = new_dataset(metadata['_feature'],
+        new_dset = new_dataset(orig_metadata['_feature'],
                                dataset_type='derived',
                                metadata=new_metadata)
 
@@ -69,7 +69,7 @@ class TsBase(FilterBase):
             description = 'TS Filter'
 
         # save dataframe
-        save_path = os.path.split(metadata['_save_path'])[0]
+        save_path = os.path.split(orig_metadata['_save_path'])[0]
         save_path = os.path.join(save_path, new_dset)
         io.write(save_path, new_df, new_metadata)
 
