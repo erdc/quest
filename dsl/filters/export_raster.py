@@ -4,7 +4,7 @@
 from __future__ import print_function
 
 from .base import FilterBase
-from ..api import get_collection
+#from ..api import get_collection
 from .. import util
 import os
 
@@ -28,7 +28,7 @@ class ExportRaster(FilterBase):
 
 
     def apply_filter(self, collection_name, service, location, parameter, export_path, filename, fmt='USGSDEM'):
-        
+
         collection = get_collection(collection_name)
         path = collection['path']
         dataset = collection['datasets'][service]['data']
@@ -57,15 +57,15 @@ class ExportRaster(FilterBase):
         properties = {
             "export_path": {
                 "type": "string",
-                "description": "adh export path",    
+                "description": "adh export path",
             },
             "filename": {
                 "type": "string",
-                "description": "filename (without the .csv)",    
+                "description": "filename (without the .csv)",
             },
             "fmt": {
                 "type": { "enum": [ 'USGSDEM', 'GTIFF', 'PNG', 'JPG'], "default": 'USGSDEM' },
-                "description": "Simulation start time, if none given first value in dataset will be used",    
+                "description": "Simulation start time, if none given first value in dataset will be used",
             }
         }
 
@@ -75,5 +75,5 @@ class ExportRaster(FilterBase):
             "properties": properties,
             "required": ['export_path', 'filename'],
         }
-        
+
         return schema

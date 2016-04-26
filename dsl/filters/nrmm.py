@@ -5,7 +5,7 @@ from __future__ import print_function
 from builtins import str
 
 from .base import FilterBase
-from ..api import get_collection, add_to_collection
+#from ..api import get_collection, add_to_collection
 from .. import util
 from geojson import Polygon, Feature, FeatureCollection
 import numpy as np
@@ -61,7 +61,7 @@ class NrmmFromFfd(FilterBase):
         south, north = lons.min(), lons.max()
         west, east = lats.min(), lats.max()
         bounding_box = ','.join([str(n) for n in [south, west, north, east]])
-        
+
         nrmm_id = 'nrmm-%s' % (bounding_box)
         plugin_dir = os.path.join(collection['path'], 'ffd2nrmm')
         util.mkdir_if_doesnt_exist(plugin_dir)
@@ -70,7 +70,7 @@ class NrmmFromFfd(FilterBase):
         #open(os.path.join(collection['path'], dest), 'w').close() #make fake empty file
         properties = {'metadata': 'generated using ffd2nrmm plugin', 'relative_path': nrmm_file}
         new_locs = FeatureCollection([Feature(geometry=Polygon([util.bbox2poly(south, west, north, east)]), properties=properties, id=nrmm_id)])
-        path = collection['path']        
+        path = collection['path']
         vitd_dir = os.path.join(path, 'terrain-ffd')
         #call plugin.
         print('calling FFD to NRMM plugin for bounding box - %s, with themes - %s' % (bounding_box, themes))
@@ -110,14 +110,14 @@ class NrmmFromFfd(FilterBase):
             "collection_name": {
                 "type": "string",
                 "description": "Name of collection",
-            }, 
+            },
         }
         for k, v in themes.items():
             properties.update({
                     k: {
                         "type": "boolean",
-                        "description": v,    
-                    } 
+                        "description": v,
+                    }
                 })
 
         properties.update({"resolution": {"type": { "enum": [ 1, 2, 3, 4, 5 ], "default": 5 },
@@ -129,7 +129,7 @@ class NrmmFromFfd(FilterBase):
             "properties": properties,
             "required": ["collection_name"],
         }
-        
+
         return schema
 
     def get_themes(self): #, filename):
@@ -207,7 +207,7 @@ class NrmmFromVitd(FilterBase):
         south, north = lons.min(), lons.max()
         west, east = lats.min(), lats.max()
         bounding_box = ','.join([str(n) for n in [south, west, north, east]])
-        
+
         nrmm_id = 'nrmm-%s' % (bounding_box)
         plugin_dir = os.path.join(collection['path'], 'vitd2nrmm')
         util.mkdir_if_doesnt_exist(plugin_dir)
@@ -216,7 +216,7 @@ class NrmmFromVitd(FilterBase):
         #open(os.path.join(collection['path'], dest), 'w').close() #make fake empty file
         properties = {'metadata': 'generated using vitd2nrmm plugin', 'relative_path': nrmm_file}
         new_locs = FeatureCollection([Feature(geometry=Polygon([util.bbox2poly(south, west, north, east)]), properties=properties, id=nrmm_id)])
-        path = collection['path']        
+        path = collection['path']
         vitd_dir = os.path.join(path, 'terrain-vitd')
         #call plugin.
         print('calling VITD to NRMM plugin for bounding box - %s, with themes - %s' % (bounding_box, themes))
@@ -256,14 +256,14 @@ class NrmmFromVitd(FilterBase):
             "collection_name": {
                 "type": "string",
                 "description": "Name of collection",
-            }, 
+            },
         }
         for k, v in themes.items():
             properties.update({
                     k: {
                         "type": "boolean",
-                        "description": v,    
-                    } 
+                        "description": v,
+                    }
                 })
 
         properties.update({"resolution": {"type": { "enum": [ 1, 2, 3, 4, 5 ], "default": 5 },
@@ -275,7 +275,7 @@ class NrmmFromVitd(FilterBase):
             "properties": properties,
             "required": ["collection_name"],
         }
-        
+
         return schema
 
     def get_themes(self): #, filename):

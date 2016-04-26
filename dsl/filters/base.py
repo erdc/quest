@@ -11,13 +11,15 @@ class FilterBase(with_metaclass(abc.ABCMeta, object)):
 
     @abc.abstractmethod
     def register(self):
-    """Register plugin by setting filter name, geotype and uid."""
+        """Register plugin by setting filter name, geotype and uid."""
+        pass
 
     @abc.abstractmethod
     def apply_filter(self, dataset, features, options):
-    """Function that applies filter"""
-
+        """Function that applies filter"""
+        pass
 
     @abc.abstractmethod
     def apply_filter_options(self):
-    """Function that applies filter"""
+        """Function that applies filter"""
+        pass
