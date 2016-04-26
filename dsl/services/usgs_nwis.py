@@ -162,6 +162,9 @@ class NwisService(WebServiceBase):
         # dict contains only one key since only one parameter/statistic was
         # downloaded, this would need to be changed if multiple
         # parameter/stat were downloaded together
+        if not data:
+            raise ValueError('No Data Available')
+
         data = data.values()[0]
 
         # convert to dataframe and cleanup bad data
