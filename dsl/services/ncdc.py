@@ -167,13 +167,14 @@ class NcdcService(WebServiceBase):
             'datatype': 'timeseries',
             'parameter': parameter,
             'units': self._unit_map(service)[parameter],
-            'feature': 'svc://ncdc:{}/{}'.format(service, feature)
+            'service_id': 'svc://ncdc:{}/{}'.format(service, feature)
         }
 
         # save data to disk
         io = util.load_drivers('io', 'timeseries-hdf5')
         io = io['timeseries-hdf5'].driver
         io.write(save_path, data, metadata)
+        del metadata['service_id']
 
         return metadata
 

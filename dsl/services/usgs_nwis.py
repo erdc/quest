@@ -190,13 +190,14 @@ class NwisService(WebServiceBase):
             'parameter': parameter,
             'units': data['variable']['units']['code'],
             'timezone': 'utc',
-            'feature': 'svc://usgs-nwis:{}/{}'.format(service, feature)
+            'service_id': 'svc://usgs-nwis:{}/{}'.format(service, feature)
         }
 
         # save data to disk
         io = util.load_drivers('io', 'timeseries-hdf5')
         io = io['timeseries-hdf5'].driver
         io.write(save_path, df, metadata)
+        del metadata['service_id']
 
         return metadata
 

@@ -150,13 +150,14 @@ class NoaaService(WebServiceBase):
             'timezone': units['time'],
             'parameter': parameter,
             'units': units[parameter_code],
-            'feature': 'svc://noaa:{}/{}'.format(service, feature)
+            'service_id': 'svc://noaa:{}/{}'.format(service, feature)
         }
 
         # save data to disk
         io = util.load_drivers('io', 'timeseries-hdf5')
         io = io['timeseries-hdf5'].driver
         io.write(save_path, data, metadata)
+        del metadata['service_id']
 
         return metadata
 

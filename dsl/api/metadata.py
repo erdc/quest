@@ -75,7 +75,8 @@ def get_metadata(uris, as_dataframe=False):
 
 
 @dispatcher.add_method
-def update_metadata(uris, display_name=None, description=None, metadata=None):
+def update_metadata(uris, display_name=None, description=None,
+                    metadata=None, dsl_metadata=None):
     """Update metadata for resource(s)
 
     Args:
@@ -115,12 +116,18 @@ def update_metadata(uris, display_name=None, description=None, metadata=None):
         if not isinstance(metadata, list):
             metadata = [metadata] * n
 
+        if not isinstance(dsl_metadata, list):
+                    dsl_metadata = [dsl_metadata] * n
+
     for uri, name, desc, metadata in zip(uris, display_name,
                                          description, metadata):
-        dsl_metadata = {
-            'display_name': display_name,
-            'description': description,
-        }
+        if dsl_metadata is None:
+            dsl_metadata = {}
+
+        if display_name:
+            dsl_metadata.update({'display_name': display_name})
+        if description:
+            dsl_metadata.update({'description': description})
 
         db.upsert(active_db(), resource, uri,
                   dsl_metadata=dsl_metadata,

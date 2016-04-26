@@ -21,7 +21,8 @@ class TsBase(FilterBase):
         }
 
 
-    def apply_filter(self, datasets, features=None, options=None):
+    def apply_filter(self, datasets, features=None, options=None,
+                     display_name=None, description=None, metadata=None):
 
         if len(util.listify(datasets)) > 1:
             raise NotImplementedError('Filter can only be applied to a single dataset')
@@ -41,41 +42,43 @@ class TsBase(FilterBase):
         if options is None:
             options = {}
 
+        # run filter
         new_df = self._apply(df, options)
 
+        # setup new dataset
         new_metadata = {
-            '_parameter': new_df.metadata.get('parameter'),
-            '_dataset_type': 'derived',
-            '_datatype': metadata['datatype'],
-            '_filter_applied': self.name,
-            '_parent_dataset': dataset,
-            '_feature': metadata['_feature'],
-            '_file_format': metadata['_file_format'],
-            'timezone': new_df.metadata.get('tz'),
+            'parameter': new_df.metadata.get('parameter'),
+            'datatype': metadata['_datatype'],
+            'filter_applied': self.name,
+            'filter_options': options,
+            'parent_datasets': dataset,
+            'feature': metadata['_feature'],
+            'file_format': metadata['_file_format'],
+            'timezone': new_df.metadata.get('timezone'),
             'units': new_df.metadata.get('units'),
         }
-
-        # setup new dataset
-        display_name = options.get('display_name')
-        if display_name is None:
-            display_name = ''
-
-        description = options.get('description')
-        if description is None:
-            description = 'TS Filter'
 
         new_dset = new_dataset(metadata['_feature'],
                                dataset_type='derived',
                                metadata=new_metadata)
 
+        if display_name is None:
+            display_name = ''
+
+        if description is None:
+            description = 'TS Filter'
+
+        # save dataframe
         save_path = os.path.split(metadata['_save_path'])[0]
         save_path = os.path.join(save_path, new_dset)
-        new_metadata.update({'save_path': save_path})
         io.write(save_path, new_df, new_metadata)
+
+        new_metadata.update({'save_path': save_path})
         metadata = update_metadata(new_dset,
                                    display_name=display_name,
                                    description=description,
-                                   metadata={'save_path': save_path})
+                                   dsl_metadata=new_metadata,
+                                   metadata=metadata)
 
         return metadata
 

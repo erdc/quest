@@ -50,7 +50,7 @@ def download(feature, save_path, dataset=None, async=False, **kwargs):
     return data
 
 
-def download_datasets(datasets, async=False):
+def download_datasets(datasets, async=False, raise_on_error=False):
     """download staged datasets.
 
     TODO: ASYNC NOT IMPLEMENTED
@@ -82,27 +82,29 @@ def download_datasets(datasets, async=False):
         try:
             kwargs = json.loads(dataset['_download_options'])
             if kwargs is not None:
-                metadata = download(feature_uri,
+                all_metadata = download(feature_uri,
                                     save_path=collection_path,
                                     dataset=idx, **kwargs)
             else:
-                metadata = download(feature_uri,
+                all_metadata = download(feature_uri,
                                     save_path=collection_path,
                                     dataset=idx)
 
-            dsl_metadata = {
-                'save_path': metadata.pop('save_path'),
-                'file_format': metadata.pop('file_format'),
-                'parameter': metadata.pop('parameter'),
+            metadata = all_metadata.pop('metadata', None)
+            dsl_metadata = all_metadata
+            dsl_metadata.update({
                 'download_status': 'downloaded',
                 'download_message': 'success',
-                }
+                })
         except Exception as e:
+            if raise_on_error:
+                raise
+
             dsl_metadata = {
                 'download_status': 'failed download',
                 'download_message': e.message,
                 }
-            
+
             metadata = None
 
         status[idx] = dsl_metadata['download_status']
