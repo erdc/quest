@@ -102,7 +102,7 @@ def download_datasets(datasets, async=False):
                 'download_status': 'failed download',
                 'download_message': e.message,
                 }
-            raise
+            
             metadata = None
 
         status[idx] = dsl_metadata['download_status']
