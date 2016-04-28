@@ -9,6 +9,7 @@ from .projects import active_db
 from .metadata import get_metadata
 
 
+@dispatcher.add_method
 def download(feature, save_path, dataset=None, async=False, **kwargs):
     """Download dataset and save it locally.
 
@@ -50,6 +51,7 @@ def download(feature, save_path, dataset=None, async=False, **kwargs):
     return data
 
 
+@dispatcher.add_method
 def download_datasets(datasets, async=False, raise_on_error=False):
     """download staged datasets.
 
@@ -114,6 +116,7 @@ def download_datasets(datasets, async=False, raise_on_error=False):
     return status
 
 
+@dispatcher.add_method
 def download_options(uris):
     """List optional kwargs that can be specified when downloading a dataset
 
@@ -220,6 +223,7 @@ def new_dataset(feature, dataset_type=None, display_name=None,
     return name
 
 
+@dispatcher.add_method
 def stage_for_download(uris, download_options=None):
     """
     args:
@@ -256,6 +260,7 @@ def stage_for_download(uris, download_options=None):
     return datasets
 
 
+@dispatcher.add_method
 def describe_dataset():
     """Show metadata associated with downloaded dataset.
 
@@ -268,6 +273,7 @@ def describe_dataset():
     pass
 
 
+@dispatcher.add_method
 def open_dataset():
     """Open the dataset as a python/VTK object. Not sure this is needed.
 
@@ -276,6 +282,7 @@ def open_dataset():
     pass
 
 
+@dispatcher.add_method
 def vizualize_dataset():
     """Vizualize the dataset as a matplotlib/bokeh plot.
 

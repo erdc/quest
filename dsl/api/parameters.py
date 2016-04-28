@@ -39,16 +39,19 @@ def get_parameters(service_uri, update_cache=False):
     return parameters
 
 
+@dispatcher.add_method
 def new_parameter(uri, parameter_name, ):
     """Add new parameter to collection."""
     pass
 
 
+@dispatcher.add_method
 def update_parameter():
     """Add update parameter metadata in a collection."""
     pass
 
 
+@dispatcher.add_method
 def delete_parameter():
     """delete a parameter in a collection."""
     pass
