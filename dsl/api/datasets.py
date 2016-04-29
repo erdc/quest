@@ -143,9 +143,9 @@ def download_options(uris):
             if feature.startswith('d'):
                 feature = get_metadata(uri)[uri]['_feature']
 
-            df = get_metadata(feature, as_dataframe=True)[0]
+            df = get_metadata(feature, as_dataframe=True).ix[0]
             df = df['_service'] + '/' + df['_service_id']
-            service_uri = df.tolist()[0]
+            service_uri = df
 
         provider, service, feature = util.parse_service_uri(service_uri)
         driver = util.load_drivers('services', names=provider)[provider].driver
