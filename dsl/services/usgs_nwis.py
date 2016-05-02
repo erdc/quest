@@ -209,7 +209,7 @@ class NwisService(WebServiceBase):
                 "parameter": {
                     "type": "string",
                     "enum": self._parameter_map(service).values(),
-                    "description": "start date",
+                    "description": "parameter",
                 },
                 "start": {
                     "type": "string",
