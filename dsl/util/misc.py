@@ -246,27 +246,28 @@ def to_geojson(df):
         'Polygon': Polygon,
     }
     features = []
-    idx = df.columns.str.startswith('_')
-    r = {field: field[1:] for field in df.columns[idx]}
-    for uid, row in df.iterrows():
-        metadata = json.loads(row[~idx].dropna().to_json())
-        row = row[idx].rename(index=r)
+    if not df.empty:
+        idx = df.columns.str.startswith('_')
+        r = {field: field[1:] for field in df.columns[idx]}
+        for uid, row in df.iterrows():
+            metadata = json.loads(row[~idx].dropna().to_json())
+            row = row[idx].rename(index=r)
 
-        # create geojson geometry
-        geometry = None
-        if row['geom_type'] is not None:
-            coords = row['geom_coords']
-            if not isinstance(coords, (list, tuple)):
-                coords = json.loads(coords)
-            geometry = _func[row['geom_type']](coords)
-        del row['geom_type']
-        del row['geom_coords']
+            # create geojson geometry
+            geometry = None
+            if row['geom_type'] is not None:
+                coords = row['geom_coords']
+                if not isinstance(coords, (list, tuple)):
+                    coords = json.loads(coords)
+                geometry = _func[row['geom_type']](coords)
+            del row['geom_type']
+            del row['geom_coords']
 
-        # split fields into properties and metadata
-        properties = json.loads(row.dropna().to_json())
-        properties.update({'metadata': metadata})
-        features.append(Feature(geometry=geometry, properties=properties,
-                        id=uid))
+            # split fields into properties and metadata
+            properties = json.loads(row.dropna().to_json())
+            properties.update({'metadata': metadata})
+            features.append(Feature(geometry=geometry, properties=properties,
+                            id=uid))
 
     return FeatureCollection(features)
 
