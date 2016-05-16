@@ -93,18 +93,18 @@ class TsRemoveOutliers(TsBase):
 
 
 class TsResample(TsBase):
-    def _apply_filter(self, df, options):
+    def _apply(self, df, options):
         metadata = df.metadata
         del metadata['save_path']
         param = metadata['parameter']
-        period = options.get(period)
-        method = options.get(method)
+        period = options.get('period')
+        method = options.get('method')
 
         orig_param, orig_period, orig_method = (param.split(':') + [None, None])[:3]
         new_df = df.resample(periods[period], how=method, kind='period')
 
-        new_df.rename(columns={param: new_param})
         new_param = '%s:%s:%s' % (orig_param, period, method)
+        new_df.rename(columns={param: new_param})
 
         metadata.update({'parameter': new_param})
         new_df.metadata = metadata

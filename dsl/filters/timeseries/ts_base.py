@@ -48,7 +48,7 @@ class TsBase(FilterBase):
         # setup new dataset
         new_metadata = {
             'parameter': new_df.metadata.get('parameter'),
-            'datatype': orig_metadata['_datatype'],
+            'datatype': orig_metadata['datatype'],
             'filter_applied': self.name,
             'filter_options': options,
             'parent_datasets': dataset,
