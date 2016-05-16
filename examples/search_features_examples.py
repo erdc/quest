@@ -1,7 +1,3 @@
-"""Brief example of using the API to query services for features.
-
-NOTE: Accepts user input through the commandline.
-"""
 from __future__ import print_function
 import dsl
 import geojson
