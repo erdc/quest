@@ -24,10 +24,11 @@ class TsBase(FilterBase):
     def apply_filter(self, datasets, features=None, options=None,
                      display_name=None, description=None, metadata=None):
 
-        if len(util.listify(datasets)) > 1:
+        datasets = util.listify(datasets)
+        if len(datasets) > 1:
             raise NotImplementedError('Filter can only be applied to a single dataset')
 
-        dataset = datasets
+        dataset = datasets[0]
 
         io = util.load_drivers('io', 'timeseries-hdf5')
         io = io['timeseries-hdf5'].driver
