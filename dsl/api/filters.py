@@ -32,10 +32,14 @@ def get_filters(names=None, group=False, datatype=None, level=None, **kwargs):
 
 
 @dispatcher.add_method
-def apply_filter(name, **kwargs):
+def apply_filter(name, datasets=None, features=None, options=None, **kwargs):
     """Apply Filter to dataset."""
+    datasets = util.listify(datasets)
+    features = util.listify(features)
+    options = util.listify(options)
+
     driver = util.load_drivers('filters', name)[name].driver
-    return driver.apply_filter(**kwargs)
+    return driver.apply_filter(datasets, features, options, **kwargs)
 
 
 @dispatcher.add_method
