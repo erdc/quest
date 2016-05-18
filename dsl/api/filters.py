@@ -4,31 +4,85 @@ This will eventually hold filter related functionality
 """
 from .. import util
 from jsonrpc import dispatcher
+from .metadata import get_metadata
 
 
 @dispatcher.add_method
-def get_filters(names=None, group=False, datatype=None, level=None, **kwargs):
-    """List available filter plugins."""
-    names = util.listify(names)
-    filters = [dict(name=k, **v.metadata) for k,v in util.load_drivers('filters', names=names).items()]
+def get_filters(filters=None, metadata=False, **kwargs):
 
-    if datatype is not None:
-        filters = [f for f in filters if datatype in f['operates_on']['datatype']]
+    """List available filter plugins
+    Parameters
+    ----------
+        filters (dict):
+            optional kwargs filter the list of filters
+            allowed filters are dataset, group, datatype, geotype, parameter
+            if dataset is used it overides the others and sets them from the
+            dataset metadata.
 
-    if level is not None:
-        filters = [f for f in filters if level in f['operates_on']['level']]
+        metadata: bool (default False)
+            If true return a dict of metadata
 
-    if not group:
-        filters = sorted(filters)
+    Return
+    ------
+        available filters (list or dict)
+
+    Examples:
+
+        In [1]: import dsl
+        In [2]: dsl.api.get_filters(filters={'group':'Raster'})
+        Out[2]: ['get-elevations-along-path', 'export-raster']
+
+        In [3]: dsl.api.get_filters(filters={'group':'Terrain'})
+        Out[3]: ['vitd2nrmm', 'ffd2nrmm']
+
+        In [4]: dsl.api.get_filters(filters={'group':'Timeseries'})
+        Out[4]: ['ts-resample', 'ts-remove-outliers']
+
+        In [5]: dsl.api.get_filters(filters={'datatype':'timeseries', 'parameters': 'streamflow'})
+        Out[5]: ['ts-resample', 'ts-remove-outliers']
+
+        In [6]: dsl.api.get_filters(filters={'dataset': 'd086ecbbb71947509493f785177b60be'})
+        Out[6]: ['ts-resample', 'ts-remove-outliers']
+
+        In [7]: dsl.api.get_filters(filters={'dataset': 'd086ecbbb71947509493f785177b60be'}, metadata=True)
+        Out[7]:
+        {'ts-remove-outliers': {'group': 'Timeseries',
+          'operates_on': {'datatype': ['timeseries'],
+           'geotype': None,
+           'parameters': None},
+          'produces': {'datatype': ['timeseries'],
+           'geotype': None,
+           'parameters': None}},
+         'ts-resample': {'group': 'Timeseries',
+          'operates_on': {'datatype': ['timeseries'],
+           'geotype': None,
+           'parameters': None},
+          'produces': {'datatype': ['timeseries'],
+           'geotype': None,
+           'parameters': None}}}
+    """
+    avail = [dict(name=k, **v.metadata) for k,v in util.load_drivers('filters').items()]
+
+    if filters is not None:
+        for k, v in filters.items():
+            if k == 'dataset':
+                m = get_metadata(v).get(v)
+                kwargs['datatype'] = m.get('datatype')
+                kwargs['parameters'] = m.get('_parameter')
+                feature = m.get('_feature')
+                kwargs['geotype'] = get_metadata(feature).get(feature).get('_geom_type')
+                return get_filters(filters=kwargs, metadata=metadata)
+            elif k == 'group':
+                avail = [f for f in avail if v == f['group']]
+            else:
+                avail = [f for f in avail if f['operates_on'][k] is None or v in f['operates_on'][k]]
+
+    if metadata:
+        avail = {f.pop('name'): f for f in avail}
     else:
-        #rearrange by geotype
-        filters = [{
-                        'type': name,
-                        'filters': [_remove_key(item, 'type') for item in group],
-                    } for name, group in itertools.groupby(sorted(filters),
-                                                           lambda p:p['type'])]
+        avail = [f['name'] for f in avail]
 
-    return filters
+    return avail
 
 
 @dispatcher.add_method

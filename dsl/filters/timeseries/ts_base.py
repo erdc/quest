@@ -10,13 +10,16 @@ class TsBase(FilterBase):
         """
         self.name = name
         self.metadata = {
+            'group': 'Timeseries',
             'operates_on': {
                 'datatype': ['timeseries'],
-                'geotype': ['polygon', 'point', 'line'],
+                'geotype': None,
+                'parameters': None,
             },
             'produces': {
                 'datatype': ['timeseries'],
-                'geotype': ['polygon', 'point', 'line'],
+                'geotype': None,
+                'parameters': None,
             },
         }
 
