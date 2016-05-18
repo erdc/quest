@@ -17,11 +17,11 @@ class ExportRaster(FilterBase):
         self.schema = {}
 
         self.metadata = {
+            'group': 'Raster',
             'operates_on': {
-                'datatype': ['raster'],
-                'geotype': ['polygon',],
+                'datatype': ['Raster'],
+                'geotype': ['Polygon'],
                 'parameters': None,
-                'level': ['parameter']
             },
             'produces': None,
         }

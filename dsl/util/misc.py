@@ -166,6 +166,9 @@ def listify(liststr, delimiter=','):
     if liststr is None:
         return None
 
+    if isinstance(liststr, dict):
+        return liststr
+
     return isinstance(liststr, list) and liststr or [s.strip() for s in liststr.split(delimiter)]
 
 

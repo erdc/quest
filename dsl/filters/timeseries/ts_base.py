@@ -10,13 +10,16 @@ class TsBase(FilterBase):
         """
         self.name = name
         self.metadata = {
+            'group': 'Timeseries',
             'operates_on': {
                 'datatype': ['timeseries'],
-                'geotype': ['polygon', 'point', 'line'],
+                'geotype': None,
+                'parameters': None,
             },
             'produces': {
                 'datatype': ['timeseries'],
-                'geotype': ['polygon', 'point', 'line'],
+                'geotype': None,
+                'parameters': None,
             },
         }
 
@@ -24,9 +27,8 @@ class TsBase(FilterBase):
     def apply_filter(self, datasets, features=None, options=None,
                      display_name=None, description=None, metadata=None):
 
-        datasets = util.listify(datasets)
         if len(datasets) > 1:
-            raise NotImplementedError('Filter can only be applied to a single dataset')
+            raise NotImplementedError('This filter can only be applied to a single dataset')
 
         dataset = datasets[0]
 
