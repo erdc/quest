@@ -130,9 +130,9 @@ def update_metadata(uris, display_name=None, description=None,
         if dsl_metadata is None:
             dsl_metadata = {}
 
-        if display_name:
+        if name:
             dsl_metadata.update({'display_name': display_name})
-        if description:
+        if desc:
             dsl_metadata.update({'description': description})
 
         db.upsert(active_db(), resource, uri,
