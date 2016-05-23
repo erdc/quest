@@ -145,7 +145,7 @@ class NoaaService(WebServiceBase):
         save_path = os.path.join(save_path, dataset)
         metadata = {
             'save_path': save_path,
-            'file_format': 'hdf5',
+            'file_format': 'timeseries-hdf5',
             'datatype': 'timeseries',
             'timezone': units['time'],
             'parameter': parameter,

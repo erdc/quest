@@ -6,7 +6,7 @@ import os
 from .. import util
 from . import db
 from .projects import active_db
-from .metadata import get_metadata
+from .metadata import get_metadata, update_metadata
 
 
 @dispatcher.add_method
@@ -283,9 +283,55 @@ def open_dataset():
 
 
 @dispatcher.add_method
-def vizualize_dataset():
-    """Vizualize the dataset as a matplotlib/bokeh plot.
+def visualize_dataset(dataset, update_cache=False, **kwargs):
+    """Visualize the dataset as a matplotlib/bokeh plot.
 
-    NOTIMPLEMENTED
+    Check for existence of dataset on disk and call appropriate file format
+    driver.
     """
-    pass
+    m = get_metadata(dataset).get(dataset)
+    visualization_path = m.get('_visualization_path')
+
+    # TODO if vizualize_dataset is called with different options for a given
+    # dataset the update cache.
+    if update_cache or visualization_path is None:
+        file_format = m.get('_file_format')
+        path = m.get('_save_path')
+
+        if path is None:
+            raise ValueError('No dataset file found')
+
+        if file_format not in util.list_drivers('io'):
+            raise ValueError('No reader available for: %s' % file_format)
+
+        io = util.load_drivers('io', file_format)
+        io = io[file_format].driver
+
+        title = m.get('_display_name')
+        if title is None:
+            title = dataset
+
+        visualization_path = io.vizualize(path, title=title, **kwargs)
+        dsl_metadata = {'visualization_path': visualization_path}
+        update_metadata(dataset, dsl_metadata=dsl_metadata)
+
+    return visualization_path
+
+
+@dispatcher.add_method
+def visualize_dataset_options(dataset):
+    """Return visualization available options for dataset."""
+    m = get_metadata(dataset).get(dataset)
+    file_format = m.get('_file_format')
+    path = m.get('_save_path')
+
+    if path is None:
+        raise ValueError('No dataset file found')
+
+    if file_format not in util.list_drivers('io'):
+        raise ValueError('No reader available for: %s' % file_format)
+
+    io = util.load_drivers('io', file_format)
+    io = io[file_format].driver
+
+    return io.vizualize_options(path)
