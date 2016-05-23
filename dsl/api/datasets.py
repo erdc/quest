@@ -321,7 +321,7 @@ def visualize_dataset(dataset, update_cache=False, **kwargs):
 @dispatcher.add_method
 def visualize_dataset_options(dataset):
     """Return visualization available options for dataset."""
-    m = get_metadata(dataset)
+    m = get_metadata(dataset).get(dataset)
     file_format = m.get('_file_format')
     path = m.get('_save_path')
 
