@@ -22,16 +22,16 @@ class NrmmFromFfd(FilterBase):
         self.schema = {}
 
         self.metadata = {
+            'group': 'Terrain',
             'operates_on': {
                 'datatype': ['terrain-ffd'],
-                'geotype': ['polygon'],
+                'geotype': ['Polygon'],
                 'parameters': ['terrain-ffd'],
-                'level': ['collection'],
             },
             'produces': {
                 'datatype': 'terrain-nrmm',
-                'geotype': 'polygon',
-                'parameters': 'nrmm',
+                'geotype': 'Polygon',
+                'parameters': ['nrmm'],
             },
         }
 
@@ -168,15 +168,15 @@ class NrmmFromVitd(FilterBase):
         self.schema = {}
 
         self.metadata = {
+            'group': 'Terrain',
             'operates_on': {
                 'datatype': ['terrain-vitd'],
-                'geotype': ['polygon'],
+                'geotype': ['Polygon'],
                 'parameters': ['terrain-nrmm'],
-                'level': ['collection'],
             },
             'produces': {
                 'datatype': 'terrain-nrmm',
-                'geotype': 'polygon',
+                'geotype': 'Polygon',
                 'parameters': 'nrmm',
             },
         }
