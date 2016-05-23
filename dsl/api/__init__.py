@@ -78,7 +78,8 @@ from .datasets import (
     new_dataset,
     stage_for_download,
     describe_dataset,
-    vizualize_dataset,
+    visualize_dataset,
+    visualize_dataset_options,
 )
 
 from .delete import (
