@@ -69,8 +69,8 @@ class TsHdf5(IoBase):
     def vizualize_options(self, path):
         """vizualation options for timeseries datasets"""
         df = self.read(path)
-        start = df.index[0].to_timestamp()
-        end = df.index[-1].to_timestamp()
+        start = df.index[0].strftime('%Y-%m-%d %H:%M:%S')
+        end = df.index[-1].strftime('%Y-%m-%d %H:%M:%S')
 
         schema = {
             "title": "Timeseries Vizualization Options",
