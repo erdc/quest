@@ -27,6 +27,7 @@ __all__ = (
     'get_datasets',
     'new_dataset',
     'vizualize_dataset',
+    'vizualize_dataset_options',
     'add_features',
     'get_features',
     'new_feature',
