@@ -29,15 +29,15 @@ class ExtractElevations(FilterBase):
         self.schema = {}
 
         self.metadata = {
+            'group': 'Raster',
             'operates_on': {
-                'datatype': None,
-                'geotype': None,
-                'parameters': None,
-                'level': ['collection'],
+                'datatype': 'raster',
+                'geotype': 'Polygon',
+                'parameters': ['elevation'],
             },
             'produces': {
                 'datatype': 'linestring',
-                'geotype': 'line',
+                'geotype': 'LineString',
                 'parameters': ['elevation'],
             },
         }
@@ -139,10 +139,10 @@ class ExtractElevations(FilterBase):
             print('saving output to %s' % filename)
 
         properties = {
-            'metadata': 'generated using get_elevations_along_path plugin', 
+            'metadata': 'generated using get_elevations_along_path plugin',
             'input_file': input_file,
             'elevation_service': service,
-            'relative_path': filename, 
+            'relative_path': filename,
             'view': view_file,
             'datatype': 'vector',
         }
@@ -167,7 +167,7 @@ class ExtractElevations(FilterBase):
                 "type": { "enum": ['nearest', 'bilinear'], "default": 'nearest'},
                 "description": "Type of interpolation to use in extraction from raster",
             },
-        }        
+        }
 
         schema = {
             "title": "Download Elevations along Path",
@@ -175,7 +175,7 @@ class ExtractElevations(FilterBase):
             "properties": properties,
             "required": ["input_file", "service", 'method'],
         }
-        
+
         return schema
 
 

@@ -10,13 +10,16 @@ class TsBase(FilterBase):
         """
         self.name = name
         self.metadata = {
+            'group': 'Timeseries',
             'operates_on': {
                 'datatype': ['timeseries'],
-                'geotype': ['polygon', 'point', 'line'],
+                'geotype': None,
+                'parameters': None,
             },
             'produces': {
                 'datatype': ['timeseries'],
-                'geotype': ['polygon', 'point', 'line'],
+                'geotype': None,
+                'parameters': None,
             },
         }
 
@@ -24,9 +27,8 @@ class TsBase(FilterBase):
     def apply_filter(self, datasets, features=None, options=None,
                      display_name=None, description=None, metadata=None):
 
-        datasets = util.listify(datasets)
         if len(datasets) > 1:
-            raise NotImplementedError('Filter can only be applied to a single dataset')
+            raise NotImplementedError('This filter can only be applied to a single dataset')
 
         dataset = datasets[0]
 
@@ -38,7 +40,6 @@ class TsBase(FilterBase):
 
         df = io.read(orig_metadata['_save_path'])
 
-
         #apply transformation
         if options is None:
             options = {}
@@ -49,25 +50,22 @@ class TsBase(FilterBase):
         # setup new dataset
         new_metadata = {
             'parameter': new_df.metadata.get('parameter'),
-            'datatype': orig_metadata['datatype'],
+            'datatype': orig_metadata['_datatype'],
             'filter_applied': self.name,
             'filter_options': options,
             'parent_datasets': dataset,
-            'feature': orig_metadata['_feature'],
             'file_format': orig_metadata['_file_format'],
             'timezone': new_df.metadata.get('timezone'),
             'units': new_df.metadata.get('units'),
         }
 
+        if description is None:
+            description = 'TS Filter Applied'
+
         new_dset = new_dataset(orig_metadata['_feature'],
                                dataset_type='derived',
-                               metadata=new_metadata)
-
-        if display_name is None:
-            display_name = ''
-
-        if description is None:
-            description = 'TS Filter'
+                               display_name=display_name,
+                               description=description)
 
         # save dataframe
         save_path = os.path.split(orig_metadata['_save_path'])[0]
@@ -76,8 +74,6 @@ class TsBase(FilterBase):
 
         new_metadata.update({'save_path': save_path})
         metadata = update_metadata(new_dset,
-                                   display_name=display_name,
-                                   description=description,
                                    dsl_metadata=new_metadata,
                                    metadata=metadata)
 

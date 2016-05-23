@@ -21,7 +21,6 @@ dependencies:
     - geojson
     - jsonschema
     - ulmo>=0.8.1
-    - pyoos
     - pyyaml
     - matplotlib>=1.4.0
     - click
