@@ -283,8 +283,8 @@ def open_dataset():
 
 
 @dispatcher.add_method
-def vizualize_dataset(dataset, update_cache=False, **kwargs):
-    """Vizualize the dataset as a matplotlib/bokeh plot.
+def visualize_dataset(dataset, update_cache=False, **kwargs):
+    """Visualize the dataset as a matplotlib/bokeh plot.
 
     Check for existence of dataset on disk and call appropriate file format
     driver.
@@ -319,8 +319,8 @@ def vizualize_dataset(dataset, update_cache=False, **kwargs):
 
 
 @dispatcher.add_method
-def vizualize_dataset_options(dataset):
-    """Return vizualization available options for dataset."""
+def visualize_dataset_options(dataset):
+    """Return visualization available options for dataset."""
     m = get_metadata(dataset)
     file_format = m.get('_file_format')
     path = m.get('_save_path')
