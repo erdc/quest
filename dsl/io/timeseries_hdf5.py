@@ -55,13 +55,14 @@ class TsHdf5(IoBase):
             end = df.index[-1]
 
         plt.style.use('ggplot')
-        plt.figure()
+        fig = plt.figure()
         ax = df[parameter][start:end].plot(legend=True, figsize=(8, 6))
         ax.set_title(title)
         ax.set_ylabel(df.metadata['units'])
         base, ext = os.path.splitext(path)
         visualization_path = base + '.png'
         plt.savefig(visualization_path)
+        plt.close(fig)
 
         return visualization_path
 
