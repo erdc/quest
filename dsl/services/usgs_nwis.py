@@ -85,6 +85,15 @@ class NwisService(WebServiceBase):
         return df
 
     def _get_parameters(self, service, features=None):
+        # hardcoding for now
+        parameter_map = self._parameter_map(service)
+        parameters = {
+            '_parameters': parameter_map.values(),
+            '_parameter_codes': parameter_map.keys()
+        }
+
+        return parameters
+
         if features is None:
             df = self.get_features(service)
         else:
