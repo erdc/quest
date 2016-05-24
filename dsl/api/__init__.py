@@ -26,7 +26,8 @@ __all__ = (
     'download_options',
     'get_datasets',
     'new_dataset',
-    'vizualize_dataset',
+    'visualize_dataset',
+    'visualize_dataset_options',
     'add_features',
     'get_features',
     'new_feature',
@@ -77,7 +78,8 @@ from .datasets import (
     new_dataset,
     stage_for_download,
     describe_dataset,
-    vizualize_dataset,
+    visualize_dataset,
+    visualize_dataset_options,
 )
 
 from .delete import (
