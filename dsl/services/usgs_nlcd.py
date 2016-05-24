@@ -71,7 +71,7 @@ class UsgsNlcdService(SingleFileBase):
         features['_geom_type'] = 'Polygon'
         features['_geom_coords'] = features.spatial.apply(_bbox2poly)
         features['_parameters'] = 'landcover'
-        features['_file_format'] = 'raster'
+        features['_file_format'] = 'raster-gdal'
         coords = features['_geom_coords'].apply(lambda x: pd.np.array(x).mean(axis=1))
         features['_longitude'] = coords.apply(lambda x: x.flatten()[0])
         features['_latitude'] = coords.apply(lambda x: x.flatten()[1])

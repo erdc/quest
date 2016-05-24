@@ -137,6 +137,7 @@ class NasaService(SingleFileBase):
         features = features.ix[~features._download_url.isnull()]
         features['_filename'] = features._download_url.apply(lambda x: x.split('/')[-1])
         features['_extract_from_zip'] = '.DEM'
+        features['_file_format'] = 'raster-gdal'
         del features['links']
 
         return features
