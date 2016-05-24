@@ -48,17 +48,17 @@ for svc in chosen_services:
 collections = dsl.api.get_collections(metadata=True)
 print('Available Collections:')
 print('~~~~~~~~~~~~~~~~~~~~~~')
-for name, metadata in collections.items():
-   print('%s - path:%s' % (name, metadata['path']))
+for name in collections:
+   print('%s' % (name))
 print('~~~~~~~~~~~~~~~~~~~~~~')
 collection_name = input('Type collection name to use (will be created if it is not in list above:')
 if collection_name not in list(collections.keys()):
    dsl.api.new_collection(collection_name)
    col = dsl.api.get_collections(collection_name)
-   print('collection created at %s' % col[collection_name]['path'])
+   print('Collection Created: %s' % collection_name)
 collections = dsl.api.get_collections(metadata=True)
 
-print('~~~adding first 2 features (all parameters) from each chosen service to collection~~~')
+print('~~~adding first 2 features (all parameters) from each chosen service to collection~~~\n')
 
 for svc in chosen_services:
    feats = [p for p in features[svc][:2]]
@@ -66,12 +66,20 @@ for svc in chosen_services:
        print('No features available for ', svc_dict[svc])
        continue
    feats = ','.join(feats) # convert from list to csv
-   print('~~~Adding features [%s] from %s~~~' % (feats, svc_dict[svc]))
+   print('~~~Adding features [%s] from %s~~~\n' % (feats, svc_dict[svc]))
    feats=dsl.api.add_features(collection_name,feats)
-   feats=dsl.api.stage_for_download(feats)
-   print('~~~Downloading data for all available parameters~~~')
-   stat=dsl.api.download_datasets(feats)
 
+   print('Available parameter(s) for %s\n'%(svc_dict[svc]))
+   parameters=dsl.api.get_parameters(svc_dict[svc])['_parameters']
+   for number,param in enumerate(parameters):
+        print(number,':',param)
 
-print('~~~Data has been downloaded to :%s~~~' % collections[collection_name]['path'])
-print('~~~Metadata and location data will be in the file dsl_metadata.json~~~')
+   options=input('\nWhich parameter(s)?')
+   if int(options) not in range(0,len(parameters)):
+      print('Not an available parameter.\n')
+      options=input('\nChoose a parameter from above')
+
+   feats=dsl.api.stage_for_download(feats,download_options={'parameter':parameters[int(options)]})
+   print('\n~~~Downloading data for all available parameters~~~\n')
+   stat=dsl.api.download_datasets(feats,raise_on_error=True)
+
