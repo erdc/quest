@@ -6,36 +6,36 @@ import tempfile
 
 
 def test_get_projects():
-    dsl.api.update_settings({'BASE_DIR': 'files/example_base_dir'})
+    dsl.api.update_settings({'BASE_DIR': 'test/files/example_base_dir'})
     c = dsl.api.get_projects()
-    assert len(list(c.keys())) == 2
+    assert len(list(c)) == 2
 
 
 def test_default_project():
     _setup()
     c = dsl.api.get_projects()
-    assert len(list(c.keys())) == 1
-    assert 'default' in c.keys()
-    assert c['default']['display_name'] == 'Default Project'
+    assert len(list(c)) == 1
+    assert 'default' in c
+    #assert c['default']['display_name'] == 'Default Project'
 
 
 def test_new_project():
     _setup()
     dsl.api.new_project('test')
     c = dsl.api.get_projects()
-    assert len(list(c.keys())) == 2
+    assert len(list(c)) == 2
 
 
 def test_add_project():
-    _setup()
+    path=_setup()
     dsl.api.new_project('test1')
     dsl.api.new_project('test2')
     dsl.api.new_project('test3')
     dsl.api.delete_project('test2')
     dsl.api.delete_project('default')
-    dsl.api.add_project('test4', 'test2')
+    dsl.api.add_project('test4',path+'/projects')
     c = dsl.api.get_projects()
-    assert len(list(c.keys())) == 3
+    assert len(list(c)) == 3
 
 
 def test_delete_project():
@@ -46,7 +46,7 @@ def test_delete_project():
     dsl.api.delete_project('test2')
     dsl.api.delete_project('default')
     c = dsl.api.get_projects()
-    assert len(list(c.keys())) == 2
+    assert len(list(c)) == 2
 
 
 def set_active_project():

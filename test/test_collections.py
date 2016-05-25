@@ -5,30 +5,24 @@ import shutil
 
 
 def test_get_collections():
-    dsl.api.update_settings({'BASE_DIR': 'files/example_base_dir'})
+    dsl.api.update_settings({'BASE_DIR': 'test/files/example_base_dir'})
     c = dsl.api.get_collections()
-    assert len(list(c.keys())) == 3
+    assert len(list(c)) == 3
 
 
 def test_new_collection():
     _setup()
     c = dsl.api.new_collection('test1')
-    assert len(list(dsl.api.get_collections().keys())) == 1
-
-    collection_dir = tempfile.mkdtemp()
+    assert len(list(dsl.api.get_collections())) == 1
     metadata = {
         'display_name': 'my test collection',
         'tag': 'test tag'
     }
-    c = dsl.api.new_collection('test2', metadata,
-                                folder=collection_dir)
-
-    assert len(list(dsl.api.get_collections().keys())) == 2
+    c = dsl.api.new_collection('test2', metadata=metadata)
+    assert len(list(dsl.api.get_collections())) == 2
     c = dsl.api.get_collections()
-    assert 'test1' in c.keys()
-    assert 'test2' in c.keys()
-    assert c['test2']['folder'] == collection_dir
-
+    assert 'test1' in c
+    assert 'test2' in c
 
 def test_delete_collection():
     _setup()
@@ -36,11 +30,11 @@ def test_delete_collection():
     dsl.api.new_collection('test2')
     dsl.api.new_collection('test3')
 
-    dsl.api.delete_collection('test2')
-    assert len(list(dsl.api.get_collections().keys())) == 2
+    dsl.api.delete('test2')
+    assert len(list(dsl.api.get_collections())) == 2
 
-    dsl.api.delete_collection('test3')
-    assert len(list(dsl.api.get_collections().keys())) == 1
+    dsl.api.delete('test3')
+    assert len(list(dsl.api.get_collections())) == 1
 
 
 def test_update_collection():
@@ -48,9 +42,9 @@ def test_update_collection():
     dsl.api.new_collection('test1')
     metadata = {'display_name': 'New Name', 'new_field': 'test'}
 
-    c = dsl.api.update_collection('test1', metadata)
-    assert c['display_name'] == 'New Name'
-    assert c['new_field'] == 'test'
+    c = dsl.api.update_metadata('test1', metadata=metadata)
+    assert c['test1']['display_name'] == 'New Name'
+    assert c['test1']['new_field'] == 'test'
 
 
 def _setup():

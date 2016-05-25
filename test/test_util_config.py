@@ -35,7 +35,8 @@ def test_update_settings():
 
 
 def test_update_settings_from_file():
-    dsl.api.update_settings_from_file('files/dsl_config.yml')
+
+    dsl.api.update_settings_from_file('test/files/dsl_config.yml')
     test = test_settings.copy()
     test.update({'USER_SERVICES': ['iraq-vitd', 'usgs-ned1']})
 
