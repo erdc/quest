@@ -27,11 +27,11 @@ def add_project(name, path):
     if name in projects.keys():
         raise ValueError('Project %s exists, please use a unique name' % name)
 
-    try:
-        dbpath = os.path.join(path, PROJECT_DB_FILE)
-        project = _read_project(dbpath)
-    except:
-        raise ValueError('Invalid Project Folder: %s' % path)
+    #try:
+    dbpath = os.path.join(path, PROJECT_DB_FILE)
+    project = _load_project(dbpath)
+    #except:
+        #raise ValueError('Invalid Project Folder: %s' % path)
 
     folder = path
     projects.update({name: {'folder': folder}})
