@@ -94,20 +94,19 @@ usgs_ned=dsl.api.stage_for_download(usgs_ned, download_options={'parameters':'el
 print('~~~~~~~~~~Downloading data for usgs_nwis~~~~~~~~~~~')
 stat_nwis=dsl.api.download_datasets(usgs_nwis)
 print('~~~~~~~~~~Downloading data for usgs_ned~~~~~~~~~~~')
-stat_ned=dsl.api.download_datasets(usgs_ned)
+#stat_ned=dsl.api.download_datasets(usgs_ned)
+
 # # ######################################################################################################################
 # # # apply some filters
 print('~~~~~~~~~~Applying filters to usgs_nwis~~~~~~~~~~~')
 # # # remove crazy spike from usgs data
-dsl.api.apply_filter('ts-remove-outliers',datasets=usgs_nwis)
-##uncomment when visualize_dataset is implemented 
-#images.update({'usgs-streamflow-outliers-removed':dsl.api.visualize_dataset(usgs_nwis)})
+new_usgs=dsl.api.apply_filter('ts-remove-outliers',datasets=usgs_nwis)
+images.update({'usgs-streamflow-outliers-removed':dsl.api.visualize_dataset(new_usgs.keys()[0])})
 
 # # # demo calculating monthly max streamflow
-dsl.api.apply_filter('ts-resample', datasets=usgs_nwis, options={'period':'weekly', 'method':'mean'})
+new1_usgs=dsl.api.apply_filter('ts-resample', datasets=usgs_nwis, options={'period':'weekly', 'method':'mean'})
+images.update({'usgs-streamflow-outliers-removed-monthly-max':dsl.api.visualize_dataset(new1_usgs.keys()[0])})
 
-##uncomment when visualize_dataset is implemented 
-#images.update({'usgs-streamflow-outliers-removed-monthly-max':dsl.api.visualize_dataset(usgs)nwis)})
 
 ##uncomment when ToAdh is implemented 
 # # # export clean data to adh after clipping to 1 year ago
@@ -118,8 +117,7 @@ dsl.api.apply_filter('ts-resample', datasets=usgs_nwis, options={'period':'weekl
 # # # export ned 1/9 arc second to USGSDEM format
 #dsl.api.apply_filter('export-raster',datasets=usgs_ned, options={'export_path':save_path, 'filename':'usgs_ned', 'fmt':'USGSDEM'})
 
-##uncomment when visualize_dataset is implemented 
-# # print('copying image files to %s' % save_path)
-# # for name, path in images.items():
-# #     print('copying %s: %s' % (name, path))
-# #     shutil.copy(path, save_path)
+print('copying image files to %s' % save_path)
+for name, path in images.items():
+    print('copying %s: %s' % (name, path))
+    shutil.copy(path, save_path)
