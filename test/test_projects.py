@@ -3,10 +3,14 @@
 
 import dsl
 import tempfile
+import os
+
+
+
 
 
 def test_get_projects():
-    dsl.api.update_settings({'BASE_DIR': 'test/files/example_base_dir'})
+    dsl.api.update_settings({'BASE_DIR': 'files/example_base_dir'})
     c = dsl.api.get_projects()
     assert len(list(c)) == 2
 
@@ -27,13 +31,14 @@ def test_new_project():
 
 
 def test_add_project():
-    path=_setup()
+    _setup()
     dsl.api.new_project('test1')
     dsl.api.new_project('test2')
     dsl.api.new_project('test3')
     dsl.api.delete_project('test2')
     dsl.api.delete_project('default')
-    dsl.api.add_project('test4',path+'/projects')
+    path=os.getcwd()
+    dsl.api.add_project('project1', path+'/files/example_base_dir/projects/project1')
     c = dsl.api.get_projects()
     assert len(list(c)) == 3
 
