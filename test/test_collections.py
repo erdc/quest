@@ -5,7 +5,7 @@ import shutil
 
 
 def test_get_collections():
-    dsl.api.update_settings({'BASE_DIR': 'test/files/example_base_dir'})
+    dsl.api.update_settings({'BASE_DIR': 'files/example_base_dir'})
     c = dsl.api.get_collections()
     assert len(list(c)) == 3
 
@@ -24,7 +24,7 @@ def test_new_collection():
     assert 'test1' in c
     assert 'test2' in c
 
-def test_delete_collection():
+def test_delete():
     _setup()
     dsl.api.new_collection('test1')
     dsl.api.new_collection('test2')

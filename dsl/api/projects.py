@@ -15,7 +15,6 @@ def active_db():
     """
     return _get_project_db(get_active_project())
 
-
 @dispatcher.add_method
 def add_project(name, path):
     """Add a existing DSL project to the list of available projects.
@@ -26,16 +25,21 @@ def add_project(name, path):
     projects = _load_projects()
     if name in projects.keys():
         raise ValueError('Project %s exists, please use a unique name' % name)
+    if not os.path.exists(path):
+        raise ValueError('Path does not exist: %s' % path)
 
-    #try:
-    dbpath = os.path.join(path, PROJECT_DB_FILE)
-    project = _load_project(dbpath)
-    #except:
-        #raise ValueError('Invalid Project Folder: %s' % path)
+    try:
+        folder = path
+        # new_projects = dict(projects)
+        projects.update({name: {'_folder': folder}})
+        _write_projects(projects)
+        project = _load_project(name)
+    except Exception as e:
+        projects.pop(name)
+        # print projects
+        _write_projects(projects)
+        raise ValueError('Invalid Project Folder: %s' % path)
 
-    folder = path
-    projects.update({name: {'folder': folder}})
-    _write_projects(projects)
     return project
 
 
