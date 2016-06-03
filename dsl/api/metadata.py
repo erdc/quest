@@ -124,19 +124,19 @@ def update_metadata(uris, display_name=None, description=None,
         metadata = [metadata]
         dsl_metadata = [dsl_metadata]
 
-    for uri, name, desc, metadata, dsl_metadata in zip(uris, display_name,
-                                                       description, metadata,
-                                                       dsl_metadata):
-        if dsl_metadata is None:
-            dsl_metadata = {}
+    for uri, name, desc, meta, dsl_meta in zip(uris, display_name,
+                                               description, metadata,
+                                               dsl_metadata):
+        if dsl_meta is None:
+            dsl_meta = {}
 
         if name:
-            dsl_metadata.update({'display_name': display_name})
+            dsl_meta.update({'display_name': name})
         if desc:
-            dsl_metadata.update({'description': description})
+            dsl_meta.update({'description': desc})
 
         db.upsert(active_db(), resource, uri,
-                  dsl_metadata=dsl_metadata,
-                  metadata=metadata)
+                  dsl_metadata=dsl_meta,
+                  metadata=meta)
 
     return get_metadata(uris)
