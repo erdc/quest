@@ -100,11 +100,13 @@ class SingleFileBase(WebServiceBase):
         download_url = feature['_download_url']
         fmt = feature.get('_extract_from_zip', '')
         filename = feature.get('_filename', util.uuid('dataset'))
+        datatype = self._get_services()[service].get('datatype')
         save_path = self._download_file(save_path, download_url, fmt, filename)
         return {
             'save_path': save_path,
             'file_format': feature.get('_file_format'),
             'parameter': feature.get('_parameters'),
+            'datatype': datatype,
         }
 
     def _download_options(self, service):
