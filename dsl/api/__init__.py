@@ -48,8 +48,8 @@ __all__ = (
     'set_active_project',
     'get_providers',
     'get_services',
-    'add_service',  # add custom url or local folder as a service
-    'delete_service',
+    'add_provider',  # add custom url or local folder as a service
+    'delete_provider',
 )
 
 from ..util import (
@@ -76,7 +76,6 @@ from .datasets import (
     get_datasets,
     new_dataset,
     stage_for_download,
-    describe_dataset,
     visualize_dataset,
     visualize_dataset_options,
 )
@@ -124,6 +123,6 @@ from .projects import (
 from .services import (
     get_providers,
     get_services,
-    add_service,
-    delete_service,
+    add_provider,
+    delete_provider,
 )
