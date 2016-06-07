@@ -44,7 +44,7 @@ def get_services(metadata=None, parameter=None, service_type=None):
 
 
 @dispatcher.add_method
-def add_service(uri):
+def add_provider(uri):
     """Add a custom web service created from a file or http folder
 
     Converts a local/network or http folder that contains a dsl.yml
@@ -76,8 +76,15 @@ def add_service(uri):
 
 
 @dispatcher.add_method
-def delete_service(uri):
+def delete_provider(uri):
     """Remove 'user' service."""
+    if uri.startswith('svc://'):
+        provider, service, _ = util.parse_service_uri(uri)
+        if not provider.startswith('user'):
+            raise ValueError('Can only remove user services')
+
+        uri = get_providers(metadata=True)[provider].get('service_uri')
+
     user_services = util.get_settings()['USER_SERVICES']
     if uri in user_services:
         user_services.remove(uri)
