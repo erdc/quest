@@ -11,8 +11,8 @@ class WebServiceBase(with_metaclass(abc.ABCMeta, object)):
     """Base class for data services plugins
     """
 
-    def __init__(self, uid=None, use_cache=True, update_frequency='M'):
-        self.uid = uid
+    def __init__(self, name=None, use_cache=True, update_frequency='M'):
+        self.name = name
         self.use_cache = use_cache #not implemented
         self.update_frequency = update_frequency #not implemented
         self._register()
@@ -23,7 +23,7 @@ class WebServiceBase(with_metaclass(abc.ABCMeta, object)):
         Take a series of query parameters and return a list of
         locations as a geojson python dictionary
         """
-        cache_file = os.path.join(util.get_cache_dir(self.uid), service + '_features.h5')
+        cache_file = os.path.join(util.get_cache_dir(self.name), service + '_features.h5')
         if not update_cache:
             try:
                 return pd.read_hdf(cache_file, 'table')

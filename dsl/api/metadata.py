@@ -34,13 +34,14 @@ def get_metadata(uris, as_dataframe=False):
                               columns=['provider', 'service', 'feature'])
 
         for (provider,service), grp in svc_df.groupby(['provider', 'service']):
-            driver = util.load_drivers('services', names=provider)[provider].driver
+            svc = 'svc://{}:{}'.format(provider, service)
+            driver = util.load_services()[provider]
             features = driver.get_features(service)
             selected_features = grp['feature'].tolist()
             if None not in selected_features:
                 features = features.ix[selected_features]
 
-            features['_service'] = 'svc://{}:{}'.format(provider, service)
+            features['_service'] = svc
             features.index = features['_service'] + '/' + features['_service_id']
             features['_name'] = features.index
             metadata.append(features)

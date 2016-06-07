@@ -45,7 +45,7 @@ def download(feature, save_path, dataset=None, async=False, **kwargs):
         pass
 
     provider, service, feature = util.parse_service_uri(service_uri)
-    driver = util.load_drivers('services', names=provider)[provider].driver
+    driver = util.load_services()[provider]
     data = driver.download(service=service, feature=feature,
                            save_path=save_path, dataset=dataset, **kwargs)
     return data

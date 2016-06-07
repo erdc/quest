@@ -7,13 +7,16 @@ from __future__ import print_function
 from builtins import str
 from jsonrpc import dispatcher
 from .. import util
+
+import os
+import requests
 from stevedore import driver
 
 
 @dispatcher.add_method
 def get_providers(metadata=None):
     """Return list of Providers."""
-    providers = util.load_drivers('services')
+    providers = util.load_services() #util.load_drivers('services')
     p = {k: v.metadata for k, v in providers.iteritems()}
     if not metadata:
         p = sorted(p.keys())
@@ -24,13 +27,14 @@ def get_providers(metadata=None):
 @dispatcher.add_method
 def get_services(metadata=None, parameter=None, service_type=None):
     """Return list of Services."""
-    providers = util.load_drivers('services')
+    providers = util.load_services() # util.load_drivers('services')
     services = {}
     for provider, svc in providers.iteritems():
         for service, svc_metadata in svc.get_services().iteritems():
             name = 'svc://%s:%s' % (provider, service)
             if service_type == svc_metadata['service_type'] or service_type is None:
                 if parameter in svc_metadata['parameters'] or parameter is None:
+                    svc_metadata.update({'name': name})
                     services[name] = svc_metadata
 
     if not metadata:
@@ -40,46 +44,47 @@ def get_services(metadata=None, parameter=None, service_type=None):
 
 
 @dispatcher.add_method
-def new_service():
-    """Create a new DSL service from 'user' collection/website etc.
+def add_service(uri):
+    """Add a custom web service created from a file or http folder
 
-    SHOULD THIS BE CALLED ADD_SERVICE
+    Converts a local/network or http folder that contains a dsl.yml
+    and associated data into a service that can be accessed through dsl
     """
-    pass
+    valid = False
+    if uri.startswith('http'):
+        url = uri.rstrip('/') + '/dsl.yml'
+        r = requests.head(url)
+        if (r.status_code == requests.codes.ok):
+            valid = True
+    else:
+        path = os.path.join(uri, 'dsl.yml')
+        valid = os.path.isfile(path)
+
+    if valid:
+        user_services = util.get_settings()['USER_SERVICES']
+        if uri not in user_services:
+            user_services.append(uri)
+            util.update_settings({'USER_SERVICES': user_services})
+            util.save_settings()
+            msg = 'service added'
+        else:
+            msg = 'service already present'
+    else:
+        msg = 'service does not have a dsl config file (dsl.yml)'
+
+    return msg
 
 
 @dispatcher.add_method
-def update_service():
-    """Update 'user' service metadata or path."""
-    pass
-
-
-@dispatcher.add_method
-def delete_service():
+def delete_service(uri):
     """Remove 'user' service."""
-    pass
+    user_services = util.get_settings()['USER_SERVICES']
+    if uri in user_services:
+        user_services.remove(uri)
+        util.update_settings({'USER_SERVICES': user_services})
+        util.save_settings()
+        msg = 'service removed'
+    else:
+        msg = 'service not found'
 
-
-def _load_services(names=None):
-    settings = util.get_settings()
-    # add web services
-    web_services = util.list_drivers('services')
-    web_services.remove('local')
-    enabled_services = settings.get('WEB_SERVICES', [])
-    if len(enabled_services) > 0:
-        web_services = list(set(web_services).intersection(enabled_services))
-
-    services = {name: driver.DriverManager('dsl.services', name, invoke_on_load='True').driver for name in web_services}
-
-    if len(settings.get('LOCAL_SERVICES', [])) > 0:
-        for path in settings.get('LOCAL_SERVICES', []):
-            try:
-                drv = driver.DriverManager('dsl.services', 'local', invoke_on_load='True', invoke_kwds={'path': path}).driver
-                services['local-' + drv.name] = drv
-            except Exception as e:
-                print('Failed to load local service from %s, with exception: %s' % (path, str(e)))
-
-    if names is not None:
-        services = {k: v for k, v in services.items() if k in names}
-
-    return services
+    return msg

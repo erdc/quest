@@ -48,8 +48,7 @@ __all__ = (
     'set_active_project',
     'get_providers',
     'get_services',
-    'new_service',  # add custom url or local folder as a service
-    'update_service',
+    'add_service',  # add custom url or local folder as a service
     'delete_service',
 )
 
@@ -125,7 +124,6 @@ from .projects import (
 from .services import (
     get_providers,
     get_services,
-    new_service,
-    update_service,
+    add_service,
     delete_service,
 )
