@@ -63,7 +63,7 @@ class UserService(WebServiceBase):
                 # mbr fromat in dsl-demo-data
                 polys = []
                 for line in f:
-                    feature_id, x1, y1, x2, y2 = line.split(',')
+                    feature_id, y1, x1, y2, x2 = line.split(',')
                     feature_id = feature_id.split('.')[0]
                     properties = {'feature_id': feature_id}
                     polys.append(Feature(geometry=Polygon([util.bbox2poly(x1, y1, x2, y2)]), properties=properties, id=feature_id))
