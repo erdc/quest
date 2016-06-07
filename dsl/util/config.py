@@ -2,7 +2,6 @@
 
 """
 
-from __future__ import print_function
 import appdirs
 from jsonrpc import dispatcher
 import logging
@@ -35,6 +34,9 @@ def get_settings():
     global settings
     if not settings:
         update_settings()
+        filename = _default_config_file()
+        if os.path.isfile(filename):
+            update_settings_from_file(filename)
 
     return settings
 
@@ -108,7 +110,6 @@ def update_settings_from_file(filename):
 
     # convert keys to uppercase
     config = dict((k.upper(), v) for k, v in config.items())
-    print(config)
 
     # recursively parse for local services
     config['USER_SERVICES'] = _expand_dirs(config['USER_SERVICES'])
@@ -120,7 +121,7 @@ def update_settings_from_file(filename):
 
 
 @dispatcher.add_method
-def save_settings(filename):
+def save_settings(filename=None):
     """Save settings currently being used by DSL to a yaml file
 
     Parameters
@@ -139,6 +140,9 @@ def save_settings(filename):
     -------
     >>> dsl.api.save_settings('/Users/dharhas/mydslsettings.yml')
     """
+    if filename is None:
+        filename = _default_config_file()
+
     with open(filename, 'w') as f:
         f.write(yaml.safe_dump(settings, default_flow_style=False))
         log.info('Settings written to %s' % filename)
@@ -146,6 +150,11 @@ def save_settings(filename):
     log.info('Settings written to %s' % filename)
 
     return True
+
+
+def _default_config_file():
+    base = get_settings()['BASE_DIR']
+    return os.path.join(base, 'dsl_config.yml')
 
 
 def _default_dsl_dir():
