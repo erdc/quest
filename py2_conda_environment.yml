@@ -10,7 +10,8 @@
 name: dsl
 
 channels:
-    - ioos
+    - conda-forge
+    - defaults
 
 dependencies:
     - python=2.7
@@ -27,6 +28,7 @@ dependencies:
     - click
     - werkzeug
     - pip:
+      - fs
       - json-rpc
       - jsonrpc-requests
       - peewee
