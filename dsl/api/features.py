@@ -275,7 +275,7 @@ def delete_feature(uri):
 
 
 def _get_features(provider, service, update_cache):
-    driver = util.load_drivers('services', names=provider)[provider].driver
+    driver = util.load_services()[provider]
     features = driver.get_features(service, update_cache=update_cache)
     features['_service'] = 'svc://{}:{}'.format(provider, service)
     features.index = features['_service'] + '/' + features['_service_id']

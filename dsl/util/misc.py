@@ -201,6 +201,26 @@ def load_service(uri):
     return load_drivers('services', names=uri['name'])[uri['name']].driver
 
 
+def load_services():
+    settings = get_settings()
+
+    # add web services
+    web_services = list_drivers('services')
+    web_services.remove('user')
+
+    services = {name: driver.DriverManager('dsl.services', name, invoke_on_load='True').driver for name in web_services}
+
+    if len(settings.get('USER_SERVICES', [])) > 0:
+        for uri in settings.get('USER_SERVICES', []):
+            try:
+                drv = driver.DriverManager('dsl.services', 'user', invoke_on_load='True', invoke_kwds={'uri': uri}).driver
+                services['user-' + drv.name] = drv
+            except Exception as e:
+                print('Failed to load local service from %s, with exception: %s' % (uri, str(e)))
+
+    return services
+
+
 def remove_key(d, key):
     r = dict(d)
     del r[key]
@@ -229,7 +249,9 @@ def to_dataframe(feature_collection):
     features = {}
     for feature in feature_collection['features']:
         data = feature['properties']
-        coords = pd.np.array(feature['geometry']['coordinates']).mean(axis=1)
+        coords = pd.np.array(feature['geometry']['coordinates'])
+        if len(coords.shape) > 1:
+            coords = coords.mean(axis=1)
         data.update({
             '_geom_type': feature['geometry']['type'],
             '_geom_coords': feature['geometry']['coordinates'],
