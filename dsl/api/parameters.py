@@ -19,7 +19,7 @@ def get_mapped_parameters():
     parameters = []
     for service in services.values():
         parameters += service['parameters']
-    return list(set(parameters))
+    return sorted(list(set(parameters)))
 
 
 @dispatcher.add_method
