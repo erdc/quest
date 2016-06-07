@@ -43,6 +43,7 @@ class UserService(WebServiceBase):
             if fmt.lower() == 'geojson':
                 features = geojson.load(f)
                 features = util.to_dataframe(features)
+
             if fmt.lower() == 'mbr':
                 # TODO creating FeatureCollection not needed anymore
                 # this can be rewritten as directly creating a pandas dataframe
@@ -51,6 +52,19 @@ class UserService(WebServiceBase):
                 f.readline()
                 for line in f:
                     feature_id, x1, y1, x2, y2 = line.split()
+                    properties = {'feature_id': feature_id}
+                    polys.append(Feature(geometry=Polygon([util.bbox2poly(x1, y1, x2, y2)]), properties=properties, id=feature_id))
+                features = FeatureCollection(polys)
+                features = util.to_dataframe(features)
+
+            if fmt.lower() == 'mbr-csv':
+                # TODO merge this with the above,
+                # mbr format from datalibrary not exactly the same as
+                # mbr fromat in dsl-demo-data
+                polys = []
+                for line in f:
+                    feature_id, x1, y1, x2, y2 = line.split(',')
+                    feature_id = feature_id.split('.')[0]
                     properties = {'feature_id': feature_id}
                     polys.append(Feature(geometry=Polygon([util.bbox2poly(x1, y1, x2, y2)]), properties=properties, id=feature_id))
                 features = FeatureCollection(polys)
