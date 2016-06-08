@@ -1,4 +1,4 @@
-"""run dsl rpc server. 
+"""run dsl rpc server.
 
 This script wraps dsl.api functions and exposes them through RPC
 """
@@ -30,7 +30,9 @@ def cli():
 
 @cli.command('start', help='Start DSL RPC server')
 @click.option('--port', default=4000, help='Port number to run rpc server. Default(4000)')
-def start_server(port):
+@click.option('--threaded', is_flag=True, help='Run each request in a new thread')
+@click.option('--processes', default=1, type=int, help='Number of Processes to use')
+def start_server(port, threaded, processes):
     """Start DSL RPC Server\b
 
     This script wraps dsl.api functions and exposes them through JSON RPC over HTTP.
@@ -42,7 +44,11 @@ def start_server(port):
     \b
     <port>   : Port number to run rpc server. Default(4000)
     """
-    run_simple('localhost', port, wsgi_app)
+    if threaded and processes>1:
+        print('RPC server can either be started multithreaded or multiprocess. Not both. Please pick one.')
+        exit(0)
+        
+    run_simple('localhost', port, wsgi_app, threaded=threaded, processes=processes)
 
 
 @cli.command('stop', help='Stop DSL RPC server')
