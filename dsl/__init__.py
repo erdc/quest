@@ -16,9 +16,9 @@ __version__ = pbr.version.VersionInfo('dsl').version_string_with_vcs()
 _ROOT = os.path.abspath(os.path.dirname(__file__))
 
 
-def get_pkg_data_path(filename=None):
-    """Return path to dsl package data directory."""
-    if filename is None:
-        filename = ''
+def get_pkg_data_path(*args):
+    """Return path to dsl package data directory.
 
-    return os.path.join(_ROOT, 'data', filename)
+    *args: optional tuple to join with the pkg data path
+    """
+    return os.path.join(_ROOT, 'data', *args)
