@@ -106,7 +106,7 @@ def get_features(services=None, collections=None, features=None,
             tmp_feats.index = tmp_feats['_name']
         all_features.append(tmp_feats)
 
-    features = pd.concat(all_features)
+    features = pd.concat(all_features).drop_duplicates()
 
     # apply any specified filters
     if filters is not None:
@@ -136,7 +136,7 @@ def get_features(services=None, collections=None, features=None,
                 features = features[idx]
 
     if not metadata and not as_dataframe:
-        return features.index.tolist()
+        return features.index.astype('unicode').tolist()
 
     if not as_dataframe:
         features = util.to_geojson(features)
