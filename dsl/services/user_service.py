@@ -113,6 +113,7 @@ class UserService(WebServiceBase):
         # TODO need to deal with parameters if multiple params exist
         metadata = {
             'save_path': save_path,
+            'file_format': self.services[service]['metadata'].get('file_format'),
             'datatype': self.services[service]['metadata'].get('datatype'),
             'parameter': self.services[service]['metadata'].get('parameters')[0],
         }
