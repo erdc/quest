@@ -126,6 +126,9 @@ class UserService(WebServiceBase):
         # TODO need to deal with parameters if multiple params exist
         if len(final_path) == 1:
             final_path = final_path[0]
+        else:
+            final_path = ','.join(final_path)
+            
         metadata = {
             'save_path': final_path,
             'file_format': self.services[service]['metadata'].get('file_format'),
