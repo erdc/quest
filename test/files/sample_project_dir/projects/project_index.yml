@@ -1,0 +1,6 @@
+active_project: default
+projects:
+  addedtest:
+    _folder: addedtest
+  default:
+    _folder: default_project

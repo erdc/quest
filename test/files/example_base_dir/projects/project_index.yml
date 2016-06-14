@@ -1,6 +1,8 @@
-active_project: project1
+active_project: test1
 projects:
   default:
     _folder: default_project
   project1:
     _folder: project1
+  project2:
+    _folder: project2
