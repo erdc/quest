@@ -1,0 +1,20 @@
+{ "VITD2NRMM"
+
+Plugin "ImportGisVITD"
+Method Import
+DataSet "VITD Data Set"
+setSrcFolder Folder "{{src_folder}}"
+#setMBR Rect {{bbox}}
+-----
+
+Plugin "ExportNRMM"
+Method Export
+setGisDataSet DataSet "VITD Data Set"
+setExportFolder Folder "{{dst_folder}}"
+setExportName String "NRMM"
+setResolutionIndex Int 5
+setMBR Rect {{bbox}}
+-----
+
+}
+}
