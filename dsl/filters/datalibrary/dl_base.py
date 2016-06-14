@@ -70,8 +70,8 @@ class DatalibraryBase(FilterBase):
         if options is None:
             options = {}
 
-        options.update({'src': src, 'dst': dst})
-        _run_filter(self.name, **options)
+        options.update({'src': src, 'dst': dst, 'bbox': ','.join(bbox)})
+        _run_filter(self.template, **options)
 
         new_metadata = self._new_dataset_metadata()
 
