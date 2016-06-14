@@ -1,0 +1,36 @@
+
+{ "VITD2RASTER"
+
+Plugin "ImportGisVITD"
+Method Import
+DataSet "VITD Data Set"
+setSrcFolder Folder "{{src_folder}}"
+#setMBR Rect {{bbox}}
+-----
+
+Plugin "TransformGIS2Ras"
+Method Transform
+DataSet "Raster"
+setGisDataSet DataSet "VITD Data Set"
+setMBR Rect {{bbox}}
+setOutputProjectionType string "Geographic"
+setOutputProjectionDatum string "WGS84"
+setResolution Double 0.00083333333333
+setTheme string "smc"
+setAttribute string "STP"
+setMorphTransformType String "TypeCast" #how value is transformed (typecast, offset/scale. etc.)
+setMorphInputValueType String "Int32" #imported type
+setMorphOutputValueType String "Int32" #type to export
+setNoDataValue Int 0
+-----
+
+Plugin "ExportGridAscii"
+Method Export
+setDataSet DataSet "Raster SMC"
+setGridFilename Filename "/Users/rditlwgb/EnvSim/Korea_SMC.txt"
+setFileFormat String "GRASS"
+setOverwrite Bool TRUE
+-----
+
+}
+}
