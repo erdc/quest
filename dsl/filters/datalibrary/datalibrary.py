@@ -30,3 +30,35 @@ class Vitd2Nrmm(DatalibraryBase):
             'datatype': 'nrmm',
             'file_format': 'nrmm',
         }
+
+
+class Vitd2Nrmm(DatalibraryBase):
+    def register(self, name=None):
+        """Register Timeseries
+
+        """
+        self.name = name
+        self.template = 'vitd2raster-veg.txt'
+        self.metadata = {
+            'group': 'vitd',
+            'operates_on': {
+                'datatype': 'vitd',
+                'geotype': 'Polygon',
+                'parameters': 'vitd',
+            },
+            'produces': {
+                'datatype': 'raster',
+                'geotype': 'Polygon',
+                'parameters': 'vegetation',
+            },
+        }
+
+    def apply_filter_options(self):
+        return {}
+
+    def _new_dataset_metadata(self):
+        return {
+            'parameter': 'vegetation',
+            'datatype': 'raster',
+            'file_format': 'gdal-raster',
+        }
