@@ -32,7 +32,7 @@ def bbox2poly(x1, y1, x2, y2, reverse_order=False):
 
     xmin, xmax = sorted([float(x1), float(x2)])
     ymin, ymax = sorted([float(y1), float(y2)])
-    poly = [(xmin, ymin), (xmin, ymax), (xmax, ymax), (xmax, ymin)]
+    poly = [[xmin, ymin], [xmin, ymax], [xmax, ymax], [xmax, ymin]]
     poly.append(poly[0])
 
     return poly
