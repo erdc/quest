@@ -106,7 +106,10 @@ def get_features(services=None, collections=None, features=None,
             tmp_feats.index = tmp_feats['_name']
         all_features.append(tmp_feats)
 
-    features = pd.concat(all_features).drop_duplicates()
+    # drop duplicates fails when some columns have nested list/tuples like
+    # _geom_coords. so drop based on index
+    features = pd.concat(all_features).reset_index().drop_duplicates(subset='index')
+    features = features.set_index('index').sort_index()
 
     # apply any specified filters
     if filters is not None:
