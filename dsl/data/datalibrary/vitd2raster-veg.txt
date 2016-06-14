@@ -4,7 +4,7 @@
 Plugin "ImportGisVITD"
 Method Import
 DataSet "VITD Data Set"
-setSrcFolder Folder "{{src_folder}}"
+setSrcFolder Folder "{{src}}"
 #setMBR Rect {{bbox}}
 -----
 
@@ -20,7 +20,7 @@ setTheme string "veg"
 setAttribute string "VEG"
 setMorphTransformType String "ScaleOffset" #how value is transformed (typecast, offset/scale. etc.)
 setMorphInputValueType String "Int32" #imported type
-setMorphOutputValueType String "Int32" #type to export
+setMorphOutputValueType String "Double" #type to export
 setMorphScale Double 0.0
 setNoDataValue Double 0.0
 -----
