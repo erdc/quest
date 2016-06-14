@@ -73,7 +73,6 @@ def download_datasets(datasets, async=False, raise_on_error=False):
     datasets = datasets.join(features[[
                                 '_service',
                                 '_service_id',
-                                '_collection'
                              ]],
                              on='_feature')
     project_path = os.path.split(active_db())[0]
