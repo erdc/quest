@@ -50,11 +50,12 @@ class DatalibraryBase(FilterBase):
         bbox = _get_bbox(datasets)
         src = _get_src(dataset)
         orig_metadata = get_metadata(dataset)[dataset]
-        display_name = 'Created by filter {}'.format(self.name)
+        if display_name is None:
+            display_name = 'Created by filter {}'.format(self.name)
         geom_coords = [util.bbox2poly(*bbox)]
         cname = orig_metadata['_collection']
         feature = new_feature(cname,
-                              display_name=feature_name, geom_type='Polygon',
+                              display_name=display_name, geom_type='Polygon',
                               geom_coords=geom_coords)
 
         new_dset = new_dataset(feature,
@@ -70,9 +71,10 @@ class DatalibraryBase(FilterBase):
         if options is None:
             options = {}
 
-        options.update({'src': src, 'dst': dst, 'bbox': ','.join(bbox)})
+        options.update({'src': src, 'dst': dst, 'bbox': bbox})
         _run_filter(self.template, **options)
 
+        self.save_path = dst
         new_metadata = self._new_dataset_metadata()
 
         if description is None:
@@ -83,7 +85,7 @@ class DatalibraryBase(FilterBase):
             'filter_applied': self.name,
             'filter_options': options,
             'parent_datasets': ','.join(datasets),
-            # 'save_path': dst,
+            'save_path': self.save_path,
         })
 
         metadata = update_metadata(new_dset,
@@ -101,7 +103,7 @@ class DatalibraryBase(FilterBase):
 
 def _render_template(name, **kwargs):
     if 'bbox' in kwargs.keys():
-        xmin, ymin, xmax, ymax = util.listify(kwargs['bbox'])
+        xmin, ymin, xmax, ymax = kwargs['bbox']
         kwargs['bbox'] = '{} {} {} {}'.format(ymax, xmin, ymin, xmax)
 
     template = env.get_template(name)

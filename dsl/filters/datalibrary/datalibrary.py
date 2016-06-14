@@ -6,7 +6,7 @@ class Vitd2Nrmm(DatalibraryBase):
 
         """
         self.name = name
-        self.template = 'vitd2nrmm'
+        self.template = 'vitd2nrmm.txt'
         self.metadata = {
             'group': 'vitd',
             'operates_on': {
@@ -24,7 +24,7 @@ class Vitd2Nrmm(DatalibraryBase):
     def apply_filter_options(self):
         return {}
 
-    def _new_dataset_metadata():
+    def _new_dataset_metadata(self):
         return {
             'parameter': 'nrmm',
             'datatype': 'nrmm',
