@@ -32,7 +32,7 @@ class Vitd2Nrmm(DatalibraryBase):
         }
 
 
-class Vitd2Nrmm(DatalibraryBase):
+class Vitd2RasterVeg(DatalibraryBase):
     def register(self, name=None):
         """Register Timeseries
 
