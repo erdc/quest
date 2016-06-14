@@ -108,7 +108,9 @@ def get_features(services=None, collections=None, features=None,
 
     # drop duplicates fails when some columns have nested list/tuples like
     # _geom_coords. so drop based on index
-    features = pd.concat(all_features).reset_index().drop_duplicates(subset='index')
+    features = pd.concat(all_features)
+    features['index'] = features.index
+    features = features.drop_duplicates(subset='index')
     features = features.set_index('index').sort_index()
 
     # apply any specified filters

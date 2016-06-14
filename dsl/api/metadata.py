@@ -64,7 +64,10 @@ def get_metadata(uris, as_dataframe=False):
         # get metadata for datasets
         tmp_df = grouped.get_group('datasets')
         datasets = db.read_all(active_db(), 'datasets', as_dataframe=True)
+        # add collection name
+        datasets['_collection'] = get_metadata(datasets['_feature'].tolist(), as_dataframe=True)['_collection'].tolist()
         datasets = datasets.ix[tmp_df['uri'].tolist()]
+
         metadata.append(datasets)
 
     metadata = pd.concat(metadata)

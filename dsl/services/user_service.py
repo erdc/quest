@@ -77,7 +77,9 @@ class UserService(WebServiceBase):
 
         # drop duplicates fails when some columns have nested list/tuples like
         # _geom_coords. so drop based on index
-        features = pd.concat(all_features).reset_index().drop_duplicates(subset='index')
+        features = pd.concat(all_features)
+        features['index'] = features.index
+        features = features.drop_duplicates(subset='index')
         features = features.set_index('index').sort_index()
         return features
 
@@ -128,7 +130,7 @@ class UserService(WebServiceBase):
             final_path = final_path[0]
         else:
             final_path = ','.join(final_path)
-            
+
         metadata = {
             'save_path': final_path,
             'file_format': self.services[service]['metadata'].get('file_format'),
