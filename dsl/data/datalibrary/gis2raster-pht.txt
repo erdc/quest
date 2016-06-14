@@ -10,51 +10,25 @@ setSrcFolder Folder "{{src_folder}}"
 
 Plugin "TransformGIS2Ras"
 Method Transform
-DataSet "Raster PHT"
+DataSet "Raster VEG"
 setGisDataSet DataSet "VITD Data Set"
-setMBR Rect 41.502335 127.497803 41.252361 128.097748
+setMBR Rect {{bbox}}
 setOutputProjectionType string "Geographic"
 setOutputProjectionDatum string "WGS84"
 setResolution Double 0.00083333333333
 setTheme string "veg"
-setAttribute string "PHT"
+setAttribute string "VEG"
 setMorphTransformType String "ScaleOffset" #how value is transformed (typecast, offset/scale. etc.)
 setMorphInputValueType String "Int32" #imported type
-setMorphOutputValueType String "Double" #type to export
-setMorphScale Double 3.28084
+setMorphOutputValueType String "Int32" #type to export
+setMorphScale Double 0.0
 setNoDataValue Double 0.0
 -----
 
 Plugin "ExportGridAscii"
 Method Export
-setDataSet DataSet "Raster PHT"
-setGridFilename Filename "/Users/rditlwgb/EnvSim/Korea_PHT.txt"
-setFileFormat String "GRASS"
-setOverwrite Bool TRUE
------
-
-Plugin "TransformGIS2Ras"
-Method Transform
-DataSet "Raster PHT-m"
-setGisDataSet DataSet "VITD Data Set"
-setMBR Rect 41.502335 127.497803 41.252361 128.097748
-setOutputProjectionType string "Geographic"
-setOutputProjectionDatum string "WGS84"
-setResolution Double 0.00083333333333
-setTheme string "veg"
-setAttribute string "PHT"
-setMorphTransformType String "ScaleOffset" #how value is transformed (typecast, offset/scale. etc.)
-setMorphInputValueType String "Int32" #imported type
-setMorphOutputValueType String "Double" #type to export
-setMorphScale Double 1.0
-setNoDataValue Double 0.0
------
-
-Plugin "ExportGridAscii"
-Method Export
-setDataSet DataSet "Raster PHT-m"
-setGridFilename Filename "/Users/rditlwgb/EnvSim/Korea_PHT-m.txt"
-setFileFormat String "GRASS"
+setDataSet DataSet "Raster Veg"
+setGridFilename Filename "{{dst}}/img.tiff"
 setOverwrite Bool TRUE
 -----
 }
