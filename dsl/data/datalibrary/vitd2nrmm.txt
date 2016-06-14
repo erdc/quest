@@ -3,14 +3,14 @@
 Plugin "ImportGisVITD"
 Method Import
 DataSet "VITD Data Set"
-setSrcFolder Folder "{{src_folder}}"
+setSrcFolder Folder "{{src}}"
 #setMBR Rect {{bbox}}
 -----
 
 Plugin "ExportNRMM"
 Method Export
 setGisDataSet DataSet "VITD Data Set"
-setExportFolder Folder "{{dst_folder}}"
+setExportFolder Folder "{{dst}}"
 setExportName String "NRMM"
 setResolutionIndex Int 5
 setMBR Rect {{bbox}}
