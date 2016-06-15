@@ -4,3 +4,5 @@ projects:
     _folder: default_project
   project1:
     _folder: project1
+  project2:
+    _folder: project2
