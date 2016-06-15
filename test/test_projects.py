@@ -11,8 +11,8 @@ def _setup():
     dsl.api.update_settings({'BASE_DIR': path})
     dsl.api.set_active_project('project1')
 
-def _teardown(uri):
-    dsl.api.delete_project(uri,True)
+def _teardown(proj):
+    dsl.api.delete_project(proj,True)
 
 def test_get_projects():
     _setup()
@@ -27,29 +27,36 @@ def test_default_project():
 
 def test_new_project():
     _setup()
+    dsl.api.delete_project('test')
     dsl.api.new_project('test')
     c = dsl.api.get_projects()
     assert len(c) == 4
     _teardown('test')
 #
-#
+
 def test_add_project():
+    path = os.path.dirname(os.path.realpath(__file__))+ '/files/sample_project_dir'
+    if not path:
+        print "Path doesnt exist"
+    dsl.api.update_settings({'BASE_DIR': path})
+    dsl.api.new_project('newtest')
     _setup()
-    path=os.getcwd()
-    dsl.api.add_project('added_test', path+'/test/files/sample_project_dir/projects/addedTest')
-    c = dsl.api.get_projects()
+    dsl.api.add_project('added_test', path + '/projects/newtest')
+    c=dsl.api.get_projects()
     assert len(list(c)) == 4
     _teardown('added_test')
+    dsl.api.update_settings({'BASE_DIR': path})
+    _teardown('newtest')
+
 
 def test_delete_project():
     _setup()
     dsl.api.new_project('test_project')
     c = dsl.api.get_projects()
     assert len(c) == 4
-    dsl.api.delete_project('test_project')
+    dsl.api.delete_project('test_project',True)
     c=dsl.api.get_projects()
     assert len(c) == 3
-    _teardown('test_project')
 
 
 def test_set_active_project():
