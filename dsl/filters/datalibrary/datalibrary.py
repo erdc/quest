@@ -1,4 +1,5 @@
 from .dl_base import DatalibraryBase
+import os
 
 class Vitd2Nrmm(DatalibraryBase):
     def register(self, name=None):
@@ -57,6 +58,8 @@ class Vitd2RasterVeg(DatalibraryBase):
         return {}
 
     def _new_dataset_metadata(self):
+
+        self.save_path = os.path.join(self.save_path, 'vegetation.tiff')
         return {
             'parameter': 'vegetation',
             'datatype': 'raster',
