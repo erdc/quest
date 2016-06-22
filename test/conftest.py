@@ -8,23 +8,21 @@ base_path = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.join(base_path, 'files/example_base_dir')
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture
 def set_base_dir():
     dsl.api.update_settings({'BASE_DIR': BASE_DIR})
     return BASE_DIR
 
 
 
-@pytest.fixture()
+@pytest.fixture
 def reset_projects_dir(set_base_dir, request):
     projects_dir = os.path.join(BASE_DIR, 'projects')
 
-    def handle_error(function, path, excinfo):
-        print("Ignoring error", function, path, excinfo)
-
     def cleanup():
-        shutil.rmtree(projects_dir, ignore_errors=False, onerror=handle_error)
+        shutil.rmtree(projects_dir, ignore_errors=True)
 
+    cleanup()
     projects_template_dir = os.path.join(BASE_DIR, 'projects_template')
     shutil.copytree(projects_template_dir, projects_dir)
 
@@ -34,7 +32,7 @@ def reset_projects_dir(set_base_dir, request):
     return metadata
 
 
-@pytest.fixture()
+@pytest.fixture
 def set_active_project(set_base_dir, request):
     previous_active_project = dsl.api.get_active_project()
     tests_active_project = getattr(request.module, "ACTIVE_PROJECT", "default")
