@@ -14,8 +14,8 @@ DATASET = 'de160d255665477a93835868e34a03bc'
 pytestmark = pytest.mark.usefixtures('reset_projects_dir', 'set_active_project')
 
 
-@pytest.fixture
-def dataset_save_path(reset_projects_dir):
+@pytest.fixture(scope='session')
+def dataset_save_path():
     save_path = os.path.join(BASE_DIR, 'projects/test_data/test_data/usgs-nwis/dv/de160d255665477a93835868e34a03bc')
     dsl.api.update_metadata(uris=DATASET, dsl_metadata={'save_path': save_path})
 
