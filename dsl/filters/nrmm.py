@@ -1,5 +1,8 @@
 """NRMM Filter
 
+DEPRECIATED .... NOT CURRENTLY WORKING WITH NEW API
+NEW VERSION INSIDE DATALIBRARY
+
 """
 from __future__ import print_function
 from builtins import str

@@ -1,5 +1,7 @@
 """Extract elevations from raster datasources
 
+DEPRECIATED .... NOT CURRENTLY WORKING WITH NEW API
+
 """
 from __future__ import division
 from __future__ import print_function
