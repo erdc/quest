@@ -6,7 +6,7 @@ from functools import partial
 import pandas as pd
 import os
 from ulmo.usgs import nwis
-from .. import util
+from .. import util, get_pkg_data_path
 
 BASE_PATH = 'usgs-nwis'
 
@@ -231,7 +231,7 @@ class NwisService(WebServiceBase):
         # smtk_filename = 'usgs-nwis-download.sbt'
         # schema = {
         #     "type": "smtk",
-        #     "smtk-path": pkg_resources.resource_filename('dsl.smtk', smtk_filename)
+        #     "smtk-path": get_pkg_data_path('smtk', smtk_filename)
         # }
         return schema
 
