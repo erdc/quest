@@ -1,5 +1,7 @@
 """Timeseries Filters
 
+DEPRECIATED .... NOT CURRENTLY WORKING WITH NEW API
+
 """
 from __future__ import print_function
 
