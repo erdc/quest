@@ -73,6 +73,20 @@ class UserService(WebServiceBase):
                     features = FeatureCollection(polys)
                     features = util.to_dataframe(features)
 
+                if fmt.lower() == 'isep-json':
+                    # uses exported json file from ISEP DataBase
+                    # assuming ISEP if a geotypical service for now.
+                    features = pd.read_json(p)
+                    features.rename(columns={'_id': '_service_id'}, inplace=True)
+                    features['_geom_type'] = None
+                    features['_geom_coords'] = None
+                    features['_longitude'] = None
+                    features['_latitude'] = None
+                    features['_download_url'] = features['files'].apply(lambda x: os.path.join(x[0].get('file location'), x[0].get('file name')))
+                    # remove leading slash from file path
+                    features['_download_url'] = features['_download_url'].str.lstrip('/')
+                    features['_parameters'] = 'met'
+
             all_features.append(features)
 
         # drop duplicates fails when some columns have nested list/tuples like
@@ -95,8 +109,12 @@ class UserService(WebServiceBase):
     def _download(self, service, feature, save_path, dataset, parameter=None, **kwargs):
         datasets = self.services[service]['datasets']
         save_folder = datasets.get('save_folder')
-        mapping = datasets['mapping']
-        fname = mapping.replace('<feature>', feature)
+        mapping = datasets.get('mapping')
+        if mapping is not None:
+            fname = mapping.replace('<feature>', feature)
+        else:
+            fname = self._get_features(service)[feature]['_download_url']
+
         final_path = []
         if parameter is not None:
             fname = fname.replace('<parameter>', parameter)
