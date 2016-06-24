@@ -25,7 +25,7 @@ def get_providers(metadata=None):
 
 
 @dispatcher.add_method
-def get_services(metadata=None, parameter=None, service_type=None):
+def get_services(metadata=None, parameter=None, service_type='geo-discrete'):
     """Return list of Services."""
     providers = util.load_services() # util.load_drivers('services')
     services = {}
