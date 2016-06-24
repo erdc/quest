@@ -150,6 +150,35 @@ def get_features(services=None, collections=None, features=None,
 
 
 @dispatcher.add_method
+def get_tags(service):
+    """Get searchable tags for a given service
+
+    Args:
+        service: name of service
+
+    Returns:
+    --------
+        tags : dict keyed by tag name and list of possible values
+    """
+    f = get_features(services=service, as_dataframe=True)
+
+    # potential tags are non underscored column names
+    tags = {}
+    for tag in [x for x in f.columns if not x.startswith('_')]:
+        try:
+            df = f[tag].dropna()
+            tag_list = df.unique().tolist()
+            if len(tag_list) < len(df):
+                tags[tag] = tag_list
+        except TypeError:
+            # for fields that have unhashable types like list
+            # unique doesn't work
+            continue
+
+    return tags
+
+
+@dispatcher.add_method
 def new_feature(collection, display_name=None, geom_type=None, geom_coords=None, metadata=None):
     """Add a new feature to a collection.
 
