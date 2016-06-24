@@ -30,6 +30,7 @@ __all__ = (
     'visualize_dataset_options',
     'add_features',
     'get_features',
+    'get_tags',
     'new_feature',
     'get_filters',
     'apply_filter',
@@ -87,6 +88,7 @@ from .delete import (
 from .features import (
     add_features,
     get_features,
+    get_tags,
     new_feature,
 )
 
