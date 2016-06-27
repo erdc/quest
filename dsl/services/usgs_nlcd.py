@@ -35,7 +35,7 @@ class UsgsNlcdService(SingleFileBase):
                 'unmapped_parameters_available': False,
                 'bounding_boxes': [[-130.232828, 21.742308, -63.672192, 52.877264]],
                 'geom_type': 'polygon',
-                'datatype': 'raster',
+                'datatype': 'discrete-raster',
             }
 
         return services
