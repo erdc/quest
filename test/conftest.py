@@ -8,19 +8,6 @@ base_path = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.join(base_path, 'files/example_base_dir')
 
 
-@pytest.fixture(scope='session')
-def save_settings(request):
-    previous_settings = {}
-    # updating settings like this is required so pytest doesn't override the variable when the finalizer is called
-    previous_settings.update(dsl.api.get_settings())
-
-    def restore_settings():
-        dsl.api.update_settings(previous_settings)
-        dsl.api.save_settings()
-
-    request.addfinalizer(restore_settings)
-
-
 @pytest.fixture
 def reset_settings():
     test_settings = {'BASE_DIR': BASE_DIR,
