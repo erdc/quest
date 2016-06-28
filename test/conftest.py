@@ -14,8 +14,6 @@ def save_settings(request):
     # updating settings like this is required so pytest doesn't override the variable when the finalizer is called
     previous_settings.update(dsl.api.get_settings())
 
-    dsl.api.update_settings()
-
     def restore_settings():
         dsl.api.update_settings(previous_settings)
         dsl.api.save_settings()
@@ -24,14 +22,19 @@ def save_settings(request):
 
 
 @pytest.fixture
-def set_base_dir(save_settings):
-    dsl.api.update_settings({'BASE_DIR': BASE_DIR})
+def reset_settings():
+    test_settings = {'BASE_DIR': BASE_DIR,
+                     'CACHE_DIR': 'cache',
+                     'PROJECTS_DIR': 'projects',
+                     'USER_SERVICES': []
+                     }
+
+    dsl.api.update_settings(test_settings)
     return BASE_DIR
 
 
-
 @pytest.fixture
-def reset_projects_dir(set_base_dir, request):
+def reset_projects_dir(reset_settings, request):
     projects_dir = os.path.join(BASE_DIR, 'projects')
 
     def cleanup():
@@ -48,7 +51,7 @@ def reset_projects_dir(set_base_dir, request):
 
 
 @pytest.fixture
-def set_active_project(set_base_dir, request):
+def set_active_project(reset_settings, request):
     previous_active_project = dsl.api.get_active_project()
     tests_active_project = getattr(request.module, "ACTIVE_PROJECT", "default")
     dsl.api.set_active_project(tests_active_project)

@@ -70,11 +70,11 @@ def update_settings(config={}):
     """
 
     global settings
-    config.setdefault('BASE_DIR', _default_dsl_dir())
-    config.setdefault('CACHE_DIR', 'cache')
-    config.setdefault('PROJECTS_DIR', 'projects')
-    config.setdefault('USER_SERVICES', [])
     settings.update(config)
+    settings.setdefault('BASE_DIR', _default_dsl_dir())
+    settings.setdefault('CACHE_DIR', 'cache')
+    settings.setdefault('PROJECTS_DIR', 'projects')
+    settings.setdefault('USER_SERVICES', [])
 
     return True
 

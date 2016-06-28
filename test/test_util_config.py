@@ -24,8 +24,9 @@ def set_environ(request):
 # this test needs to run first because dsl is set from environment only
 # when BASE_DIR is unset
 def test_set_base_path_with_env_var(set_environ):
-    # os.environ['ENVSIM_DSL_DIR'] = 'dslenv'
-    dsl.api.update_settings({})
+    settings = dsl.api.get_settings()
+    del settings['BASE_DIR']
+    dsl.api.update_settings()
 
     assert dsl.api.get_settings() == {
                 'BASE_DIR': 'dslenv',
