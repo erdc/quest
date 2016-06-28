@@ -1,16 +1,33 @@
 import dsl
 import os
+import pytest
+
+from conftest import BASE_DIR
+
+pytestmark = pytest.mark.usefixtures('reset_projects_dir')
+
+
+def test_add_and_remove_provider():
+    user_provider_path = os.path.join(BASE_DIR, '..', 'user_provider')
+    dsl.api.add_provider(user_provider_path)
+    assert 'user-test-service' in dsl.api.get_providers()
+    assert 'svc://user-test-service:test' in dsl.api.get_services()
+
+    dsl.api.delete_provider(user_provider_path)
+    assert 'user-test-service' not in dsl.api.get_providers()
+    assert 'svc://user-test-service:test' not in dsl.api.get_services()
 
 
 def test_get_providers():
-    path= os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..'))+'/setup.cfg'
-    setup=open(path,'r')
-    counter=0
-    for n,line in enumerate(setup.readlines()):
+    path = os.path.join(BASE_DIR, '..', '..', '..', 'setup.cfg')
+    setup = open(path, 'r')
+    counter = 0
+    for n, line in enumerate(setup.readlines()):
         if 'dsl.services.' in line:
-            if '#' not in line:
+            if '#' not in line and 'user' not in line:  # need to handle user defined providers separately
                 counter += 1
-    assert counter==len(dsl.api.get_providers())
+    providers = dsl.api.get_providers()
+    assert counter == len(providers)
 
 
 def test_get_services():
@@ -30,6 +47,6 @@ def test_get_services():
         'svc://usgs-nlcd:2011',
         'svc://usgs-nwis:dv',
         'svc://usgs-nwis:iv']
-    assert dsl.api.get_services()==services
+    assert dsl.api.get_services() == services
 
 
