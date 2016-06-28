@@ -18,11 +18,8 @@ def init_project_to_add(request):
     project_template_dir = os.path.join(base_path, 'files', 'project_to_add_template')
     project_dir = os.path.join(base_path, 'files', 'project_to_add')
 
-    def handle_error(function, path, excinfo):
-        print("Ignoring error", function, path, excinfo)
-
     def cleanup():
-        shutil.rmtree(project_dir, ignore_errors=False, onerror=handle_error)
+        shutil.rmtree(project_dir, ignore_errors=True)
     cleanup()
 
     shutil.copytree(project_template_dir, project_dir)
@@ -63,10 +60,18 @@ def test_add_project(reset_projects_dir, init_project_to_add):
 
 
 def test_delete_project(reset_projects_dir, test_project):
-    dsl.api.delete_project(test_project, True)
-    c = dsl.api.get_projects()
+    c = dsl.api.delete_project(test_project, True)
     assert len(c) == reset_projects_dir['NUMBER_OF_PROJECTS'] - 1
     assert test_project not in c
+
+    # test that 'default' gets restored after delete on get_projects
+    c = dsl.api.get_projects()
+    if test_project == 'default':
+        assert len(c) == reset_projects_dir['NUMBER_OF_PROJECTS']
+        assert test_project in c
+    else:
+        assert len(c) == reset_projects_dir['NUMBER_OF_PROJECTS'] - 1
+        assert test_project not in c
 
 
 def test_set_active_project(set_active_project):
