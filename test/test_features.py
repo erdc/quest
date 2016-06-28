@@ -28,9 +28,9 @@ def test_new_feature():
 
 def test_update_feature():
     dsl.api.update_metadata('col2', description='test collection2')
-    assert dsl.api.get_metadata('col2')['col2']['_description'] == "['test collection2']"
+    assert dsl.api.get_metadata('col2')['col2']['_description'] == 'test collection2'
     dsl.api.update_metadata('col2', description='test_collection2_sample')
-    assert dsl.api.get_metadata('col2')['col2']['_description'] == "['test_collection2_sample']"
+    assert dsl.api.get_metadata('col2')['col2']['_description'] == 'test_collection2_sample'
 
 
 def test_delete_features():

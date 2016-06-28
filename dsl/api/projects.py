@@ -183,9 +183,8 @@ def _load_projects():
     default_dir = os.path.join(util.get_projects_dir(), 'default_project')
     dbpath = os.path.join(default_dir, PROJECT_DB_FILE)
     if projects is None or not os.path.exists(dbpath):
-        projects = {
-            'default': {'_folder': 'default_project'}
-        }
+        projects = projects or {}
+        projects['default'] = {'_folder': 'default_project'}
         util.mkdir_if_doesnt_exist(default_dir)
         dsl_metadata = {
             'type': 'project',

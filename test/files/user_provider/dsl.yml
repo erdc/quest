@@ -1,0 +1,30 @@
+name: test-service
+metadata:
+    display_name: User Test Service
+    description: Dummy service used for testing
+    organization:
+        abbr:
+        name:
+
+services:
+    test:
+#        service_folder:
+        metadata:
+            display_name: User Test Service
+            description: Dummy service used for testing
+#            geographical area:
+#            bounding_boxes:
+            service_type: geo-discrete
+#            geom_type: Point
+#            datatype: timeseries
+            parameters: [test]
+#            unmapped_parameters_available: False
+#        features:
+#            file:
+#            format:
+#        datasets:
+#            mapping:
+#            save_folder:
+#            metadata:
+#                units:
+#                file_format:
