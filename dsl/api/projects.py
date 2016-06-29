@@ -36,7 +36,7 @@ def add_project(name, path):
         project = _load_project(name)
     except Exception as e:
         projects.pop(name)
-        # print projects
+        # print(projects)
         _write_projects(projects)
         raise ValueError('Invalid Project Folder: %s' % path)
 
@@ -142,7 +142,7 @@ def get_projects(metadata=None):
     if not metadata:
         return _load_projects().keys()
 
-    for name, project in _load_projects().iteritems():
+    for name, project in _load_projects().items():
         path = project['_folder']
         if not os.path.isabs(path):
             path = os.path.join(util.get_projects_dir(), path)
