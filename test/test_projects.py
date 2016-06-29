@@ -18,11 +18,8 @@ def init_project_to_add(request):
     project_template_dir = os.path.join(base_path, 'files', 'project_to_add_template')
     project_dir = os.path.join(base_path, 'files', 'project_to_add')
 
-    def handle_error(function, path, excinfo):
-        print("Ignoring error", function, path, excinfo)
-
     def cleanup():
-        shutil.rmtree(project_dir, ignore_errors=False, onerror=handle_error)
+        shutil.rmtree(project_dir, ignore_errors=True)
     cleanup()
 
     shutil.copytree(project_template_dir, project_dir)

@@ -44,14 +44,14 @@ DOWNLOAD_OPTIONS_FROM_ALL_SERVICES = {'svc://nasa:srtm-3-arc-second': {},
                                                                                        'type': 'string'
                                                                                        },
                                                                                'parameter': {'description': 'parameter',
-                                                                                             'enum': [
+                                                                                             'enum': {
                                                                                                  'air_temperature:daily:mean',
                                                                                                  'air_temperature:daily:minimum',
                                                                                                  'air_temperature:daily:total',
                                                                                                  'snowfall:daily:total',
                                                                                                  'snow_depth:daily:total',
                                                                                                  'rainfall:daily:total'
-                                                                                                 ],
+                                                                                             },
                                                                                              'type': 'string'
                                                                                              },
                                                                                'start': {'description': 'start date',
@@ -65,12 +65,12 @@ DOWNLOAD_OPTIONS_FROM_ALL_SERVICES = {'svc://nasa:srtm-3-arc-second': {},
                                                                                  'type': 'string'
                                                                                  },
                                                                          'parameter': {'description': 'parameter',
-                                                                                       'enum': [
+                                                                                       'enum': {
                                                                                            'snow_depth:daily:total',
                                                                                            'rainfall:daily:total',
                                                                                            'air_temperature:daily:min',
                                                                                            'air_temperature:daily:min'
-                                                                                           ],
+                                                                                       },
                                                                                        'type': 'string'
                                                                                        },
                                                                          'start': {'description': 'start date',
@@ -84,7 +84,7 @@ DOWNLOAD_OPTIONS_FROM_ALL_SERVICES = {'svc://nasa:srtm-3-arc-second': {},
                                                                                   'type': 'string'
                                                                                   },
                                                                           'parameter': {'description': 'parameter',
-                                                                                        'enum': [],
+                                                                                        'enum': set(),
                                                                                         'type': 'string'
                                                                                         },
                                                                           'start': {'description': 'start date',
@@ -98,7 +98,7 @@ DOWNLOAD_OPTIONS_FROM_ALL_SERVICES = {'svc://nasa:srtm-3-arc-second': {},
                                                                                  'type': 'string'
                                                                                  },
                                                                          'parameter': {'description': 'parameter',
-                                                                                       'enum': ['water_level',
+                                                                                       'enum': {'water_level',
                                                                                                 'wave_height',
                                                                                                 'wind_direction',
                                                                                                 'air_pressure',
@@ -108,7 +108,7 @@ DOWNLOAD_OPTIONS_FROM_ALL_SERVICES = {'svc://nasa:srtm-3-arc-second': {},
                                                                                                 'northward_wind',
                                                                                                 'air_temperature',
                                                                                                 'sea_surface_temperature'
-                                                                                                ],
+                                                                                                },
                                                                                        'type': 'string'
                                                                                        },
                                                                          'start': {'description': 'start date',
@@ -129,12 +129,12 @@ DOWNLOAD_OPTIONS_FROM_ALL_SERVICES = {'svc://nasa:srtm-3-arc-second': {},
                                                                                     'type': 'string'
                                                                                     },
                                                                             'parameter': {'description': 'parameter',
-                                                                                          'enum': [
+                                                                                          'enum': {
                                                                                               'water_temperature:daily:max',
                                                                                               'water_temperature:daily:mean',
                                                                                               'water_temperature:daily:min',
                                                                                               'streamflow:mean:daily'
-                                                                                              ],
+                                                                                          },
                                                                                           'type': 'string'
                                                                                           },
                                                                             'period': {'description': 'period date',
@@ -151,10 +151,10 @@ DOWNLOAD_OPTIONS_FROM_ALL_SERVICES = {'svc://nasa:srtm-3-arc-second': {},
                                                                                     'type': 'string'
                                                                                     },
                                                                             'parameter': {'description': 'parameter',
-                                                                                          'enum': ['gage_height',
+                                                                                          'enum': {'gage_height',
                                                                                                    'water_temperature',
                                                                                                    'streamflow'
-                                                                                                   ],
+                                                                                                   },
                                                                                           'type': 'string'
                                                                                           },
                                                                             'period': {'description': 'period date',
