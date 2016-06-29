@@ -88,7 +88,7 @@ class NasaService(SingleFileBase):
 
     def _get_services(self):
         services = {}
-        for service, short_name in self._service_dict().iteritems():
+        for service, short_name in self._service_dict().items():
             metadata = _read_metadata(short_name)
             metadata['display_name'] = metadata.pop('title')
             metadata['description'] = metadata.pop('summary')

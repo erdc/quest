@@ -172,7 +172,7 @@ def get_datasets(metadata=None, filters=None, as_dataframe=None):
         for k, v in filters.items():
             key = '_{}'.format(k)
             if key not in datasets.keys():
-                print 'filter field {} not found, continuing'.format(k)
+                print('filter field {} not found, continuing'.format(k))
                 continue
 
             datasets = datasets.ix[datasets[key] == v]
