@@ -50,8 +50,8 @@ def test_update_settings_from_file():
     dsl.api.update_settings_from_file(os.path.dirname(os.path.realpath(__file__)) + '/files/dsl_config.yml')
     test = test_settings.copy()
     test.update({'USER_SERVICES': ['iraq-vitd', 'usgs-ned1']})
-
-    assert dsl.api.get_settings() == test
+    assert sorted(dsl.api.get_settings()['USER_SERVICES']) == (test["USER_SERVICES"])
+    assert len(dsl.api.get_settings()) == len(test)
 
 
 def test_save_settings():
@@ -60,4 +60,3 @@ def test_save_settings():
     dsl.api.save_settings(filename)
     dsl.api.update_settings_from_file(filename)
 
-    assert dsl.api.get_settings() == test_settings
