@@ -17,7 +17,7 @@ from stevedore import driver
 def get_providers(metadata=None):
     """Return list of Providers."""
     providers = util.load_services() #util.load_drivers('services')
-    p = {k: v.metadata for k, v in providers.iteritems()}
+    p = {k: v.metadata for k, v in providers.items()}
     if not metadata:
         p = sorted(p.keys())
 
@@ -29,8 +29,8 @@ def get_services(metadata=None, parameter=None, service_type='geo-discrete'):
     """Return list of Services."""
     providers = util.load_services() # util.load_drivers('services')
     services = {}
-    for provider, svc in providers.iteritems():
-        for service, svc_metadata in svc.get_services().iteritems():
+    for provider, svc in providers.items():
+        for service, svc_metadata in svc.get_services().items():
             name = 'svc://%s:%s' % (provider, service)
             if service_type == svc_metadata['service_type'] or service_type is None:
                 if parameter in svc_metadata['parameters'] or parameter is None:
