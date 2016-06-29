@@ -26,7 +26,7 @@ class NoaaService(WebServiceBase):
                 'display_name': 'NOAA National Data Buoy Center',
                 'description': 'NDBC Standard Meteorological Buoy Data',
                 'service_type': 'geo-discrete',
-                'parameters': self._parameter_map('ndbc').values(),
+                'parameters': list(self._parameter_map('ndbc').values()),
                 'unmapped_parameters_available': True,
                 'geom_type': 'Point',
                 'datatype': 'timeseries',
@@ -40,7 +40,7 @@ class NoaaService(WebServiceBase):
                 'description': 'Center for Operational Oceanographic Products '
                                'and Services',
                 'service_type': 'geo-discrete',
-                'parameters': self._parameter_map('coops').values(),
+                'parameters': list(self._parameter_map('coops').values()),
                 'unmapped_parameters_available': True,
                 'geom_type': 'Point',
                 'datatype': 'timeseries',
@@ -74,14 +74,14 @@ class NoaaService(WebServiceBase):
         # hardcoding for now
         if service == 'ndbc':
             parameters = {
-                '_parameters': self._parameter_map('ndbc').values(),
-                '_parameter_codes': self._parameter_map('ndbc').keys()
+                '_parameters': list(self._parameter_map('ndbc').values()),
+                '_parameter_codes': list(self._parameter_map('ndbc').keys())
             }
 
         if service == 'coops':
             parameters = {
-                '_parameters': self._parameter_map('coops').values(),
-                '_parameter_codes': self._parameter_map('coops').keys()
+                '_parameters': list(self._parameter_map('coops').values()),
+                '_parameter_codes': list(self._parameter_map('coops').keys())
             }
 
         return parameters
@@ -168,7 +168,7 @@ class NoaaService(WebServiceBase):
             "properties": {
                 "parameter": {
                     "type": "string",
-                    "enum": self._parameter_map(service).values(),
+                    "enum": set(self._parameter_map(service).values()),
                     "description": "parameter",
                 },
                 "start": {
