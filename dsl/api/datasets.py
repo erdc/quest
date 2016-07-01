@@ -103,7 +103,7 @@ def download_datasets(datasets, async=False, raise_on_error=False):
 
             dsl_metadata = {
                 'download_status': 'failed download',
-                'download_message': e.message,
+                'download_message': str(e),
                 }
 
             metadata = None

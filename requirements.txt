@@ -1,6 +1,6 @@
 gdal
 fiona
-futures
+futures; python_version < 3.0
 json-rpc
 rasterio
 numpy
