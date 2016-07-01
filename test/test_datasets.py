@@ -370,7 +370,7 @@ def test_visualize_dataset_options(dataset_save_path):
                                          'type': 'string',
                                          'description': 'start date'
                                          },
-                               'end': {'default': '2016-06-09 00:00:00',
+                               'end': {'default': '2015-06-12 00:00:00',
                                        'type': 'string',
                                        'description': 'end date'
                                        }
