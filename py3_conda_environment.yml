@@ -17,18 +17,15 @@ dependencies:
     - python=3.4
     - gdal
     - fiona>=1.5.1
+    - futures
     - rasterio>=0.23.0
     - numpy
     - geojson
-    - jsonschema
+    - json-rpc
     - ulmo>=0.8.1
     - pyyaml
     - matplotlib>=1.4.0
     - click
     - werkzeug
-    - pip:
-      - fs
-      - json-rpc
-      - jsonrpc-requests
-      - peewee
-      - stevedore
+    - peewee
+    - stevedore
