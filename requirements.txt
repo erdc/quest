@@ -1,13 +1,10 @@
 gdal
 fiona
-fs
 futures
 json-rpc
-jsonrpc-requests
 rasterio
 numpy
 geojson
-jsonschema
 ulmo>=0.8.1
 pyyaml
 matplotlib
