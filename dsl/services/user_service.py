@@ -5,12 +5,13 @@
 from .. import util
 from .base import WebServiceBase
 
-from fs.opener import fsopen, opener
-from fs.utils import copyfile
 import geojson
 from geojson import Feature, FeatureCollection, Polygon
+from io import StringIO
 import pandas as pd
 import os
+import requests
+import shutil
 import yaml
 
 
@@ -18,6 +19,7 @@ class UserService(WebServiceBase):
     def __init__(self, uri, name=None, use_cache=True, update_frequency='M'):
         self.name = name
         self.uri = uri
+        self.is_remote = util.is_remote_uri(uri)
         self.use_cache = use_cache  # not implemented
         self.update_frequency = update_frequency  # not implemented
         self._register(uri)
@@ -26,7 +28,7 @@ class UserService(WebServiceBase):
         """Register user service."""
 
         config_file = self._get_path('dsl.yml')
-        c = yaml.load(fsopen(config_file, 'r'))
+        c = yaml.load(self.uri_open(config_file))
         self.metadata = c['metadata']
         self.metadata['service_uri'] = uri
         self.services = c['services']
@@ -42,7 +44,7 @@ class UserService(WebServiceBase):
 
         all_features = []
         for p in util.listify(path):
-            with fsopen(p) as f:
+            with self.uri_open(p) as f:
                 if fmt.lower() == 'geojson':
                     features = geojson.load(f)
                     features = util.to_dataframe(features)
@@ -121,7 +123,6 @@ class UserService(WebServiceBase):
         path = self._get_path(fname, service)
         service_folder = self.services[service].get('service_folder', [''])
         for src, svc_folder in zip(util.listify(path), util.listify(service_folder)):
-            src_fs, src_file = opener.parse(src)
             dst = save_path
             if save_folder is not None:
                 dst = os.path.join(dst, save_folder, svc_folder)
@@ -129,8 +130,14 @@ class UserService(WebServiceBase):
             util.mkdir_if_doesnt_exist(dst)
             dst = os.path.join(dst, fname)
             final_path.append(dst)
-            dst_fs, dst_file = opener.parse(dst)
-            copyfile(src_fs, src_file, dst_fs, dst_file)
+            if self.is_remote:
+                r = requests.get(src, verify=False)
+                chunk_size = 64 * 1024
+                with open(dst, 'wb') as f:
+                    for content in r.iter_content(chunk_size):
+                        f.write(content)
+            else:
+                shutil.copyfile(src, dst)
 
         # TODO copy common files
         # May not be needed anymore
@@ -187,3 +194,9 @@ class UserService(WebServiceBase):
         if isinstance(path, list) and len(path) == 1:
             path = path[0]
         return path
+
+    def uri_open(self, uri):
+        if self.is_remote:
+            return StringIO(requests.get(uri, verify=False).text)
+        else:
+            return open(uri)
