@@ -53,7 +53,7 @@ def add_provider(uri):
     valid = False
     if uri.startswith('http'):
         url = uri.rstrip('/') + '/dsl.yml'
-        r = requests.head(url)
+        r = requests.head(url, verify=False)
         if (r.status_code == requests.codes.ok):
             valid = True
     else:

@@ -4,6 +4,7 @@ import itertools
 from .config import get_settings
 import os
 import pandas as pd
+import re
 from stevedore import extension, driver
 try:
     import simplejson as json
@@ -75,11 +76,6 @@ def get_dsl_dir():
     return settings['BASE_DIR']
 
 
-def get_projects_dir():
-    settings = get_settings()
-    return _abs_path(settings['PROJECTS_DIR'])
-
-
 def mkdir_if_doesnt_exist(dir_path):
     """makes a directory if it doesn't exist"""
     if not os.path.exists(dir_path):
@@ -89,6 +85,11 @@ def mkdir_if_doesnt_exist(dir_path):
 def get_projects_dir():
     settings = get_settings()
     return _abs_path(settings['PROJECTS_DIR'], mkdir=False)
+
+
+def is_remote_uri(path):
+    """check if uri points to a http/https url."""
+    return bool(re.search('^https?\://', path))
 
 
 def parse_uri(uri):
