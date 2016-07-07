@@ -7,6 +7,7 @@ import pandas as pd
 import os
 from ulmo.usgs import nwis
 from .. import util, get_pkg_data_path
+from builtins import range
 
 BASE_PATH = 'usgs-nwis'
 
@@ -168,7 +169,7 @@ class NwisService(WebServiceBase):
         if not data:
             raise ValueError('No Data Available')
 
-        data = data.values()[0]
+        data = list(data.values())[0]
 
         # convert to dataframe and cleanup bad data
         df = pd.DataFrame(data['values'])
@@ -238,7 +239,7 @@ class NwisService(WebServiceBase):
 
 def _chunks(l, n=100):
     """Yield successive n-sized chunks from l."""
-    for i in xrange(0, len(l), n):
+    for i in range(0, len(l), n):
         yield l[i:i+n]
 
 
