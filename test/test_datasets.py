@@ -44,14 +44,13 @@ DOWNLOAD_OPTIONS_FROM_ALL_SERVICES = {'svc://nasa:srtm-3-arc-second': {},
                                                                                        'type': 'string'
                                                                                        },
                                                                                'parameter': {'description': 'parameter',
-                                                                                             'enum': {
-                                                                                                 'air_temperature:daily:mean',
-                                                                                                 'air_temperature:daily:minimum',
-                                                                                                 'air_temperature:daily:total',
-                                                                                                 'snowfall:daily:total',
-                                                                                                 'snow_depth:daily:total',
-                                                                                                 'rainfall:daily:total'
-                                                                                             },
+                                                                                             'enum': ['air_temperature:daily:mean',
+                                                                                                      'air_temperature:daily:minimum',
+                                                                                                      'air_temperature:daily:total',
+                                                                                                      'rainfall:daily:total',
+                                                                                                      'snow_depth:daily:total',
+                                                                                                      'snowfall:daily:total',
+                                                                                                      ],
                                                                                              'type': 'string'
                                                                                              },
                                                                                'start': {'description': 'start date',
@@ -65,12 +64,11 @@ DOWNLOAD_OPTIONS_FROM_ALL_SERVICES = {'svc://nasa:srtm-3-arc-second': {},
                                                                                  'type': 'string'
                                                                                  },
                                                                          'parameter': {'description': 'parameter',
-                                                                                       'enum': {
-                                                                                           'snow_depth:daily:total',
-                                                                                           'rainfall:daily:total',
-                                                                                           'air_temperature:daily:min',
-                                                                                           'air_temperature:daily:min'
-                                                                                       },
+                                                                                       'enum': ['air_temperature:daily:min',
+                                                                                                'air_temperature:daily:min',
+                                                                                                'rainfall:daily:total',
+                                                                                                'snow_depth:daily:total',
+                                                                                                ],
                                                                                        'type': 'string'
                                                                                        },
                                                                          'start': {'description': 'start date',
@@ -84,7 +82,7 @@ DOWNLOAD_OPTIONS_FROM_ALL_SERVICES = {'svc://nasa:srtm-3-arc-second': {},
                                                                                   'type': 'string'
                                                                                   },
                                                                           'parameter': {'description': 'parameter',
-                                                                                        'enum': set(),
+                                                                                        'enum': [],
                                                                                         'type': 'string'
                                                                                         },
                                                                           'start': {'description': 'start date',
@@ -98,17 +96,17 @@ DOWNLOAD_OPTIONS_FROM_ALL_SERVICES = {'svc://nasa:srtm-3-arc-second': {},
                                                                                  'type': 'string'
                                                                                  },
                                                                          'parameter': {'description': 'parameter',
-                                                                                       'enum': {'water_level',
-                                                                                                'wave_height',
-                                                                                                'wind_direction',
-                                                                                                'air_pressure',
-                                                                                                'wind_speed_of_gust',
-                                                                                                'wind_from_direction',
+                                                                                       'enum': ['air_pressure',
+                                                                                                'air_temperature',
                                                                                                 'eastward_wind',
                                                                                                 'northward_wind',
-                                                                                                'air_temperature',
-                                                                                                'sea_surface_temperature'
-                                                                                                },
+                                                                                                'sea_surface_temperature',
+                                                                                                'water_level',
+                                                                                                'wave_height',
+                                                                                                'wind_direction',
+                                                                                                'wind_from_direction',
+                                                                                                'wind_speed_of_gust',
+                                                                                                ],
                                                                                        'type': 'string'
                                                                                        },
                                                                          'start': {'description': 'start date',
@@ -129,12 +127,11 @@ DOWNLOAD_OPTIONS_FROM_ALL_SERVICES = {'svc://nasa:srtm-3-arc-second': {},
                                                                                     'type': 'string'
                                                                                     },
                                                                             'parameter': {'description': 'parameter',
-                                                                                          'enum': {
-                                                                                              'water_temperature:daily:max',
-                                                                                              'water_temperature:daily:mean',
-                                                                                              'water_temperature:daily:min',
-                                                                                              'streamflow:mean:daily'
-                                                                                          },
+                                                                                          'enum': ['streamflow:mean:daily',
+                                                                                                   'water_temperature:daily:max',
+                                                                                                   'water_temperature:daily:mean',
+                                                                                                   'water_temperature:daily:min',
+                                                                                                   ],
                                                                                           'type': 'string'
                                                                                           },
                                                                             'period': {'description': 'period date',
@@ -151,10 +148,10 @@ DOWNLOAD_OPTIONS_FROM_ALL_SERVICES = {'svc://nasa:srtm-3-arc-second': {},
                                                                                     'type': 'string'
                                                                                     },
                                                                             'parameter': {'description': 'parameter',
-                                                                                          'enum': {'gage_height',
+                                                                                          'enum': ['gage_height',
+                                                                                                   'streamflow',
                                                                                                    'water_temperature',
-                                                                                                   'streamflow'
-                                                                                                   },
+                                                                                                   ],
                                                                                           'type': 'string'
                                                                                           },
                                                                             'period': {'description': 'period date',
@@ -196,7 +193,6 @@ def test_download_options():
         assert actual == expected
 
     # test get download options from single service as string
-
     actual = dsl.api.download_options(SERVICE)
     expected = {SERVICE: DOWNLOAD_OPTIONS_FROM_ALL_SERVICES[SERVICE]}
     assert actual == expected
