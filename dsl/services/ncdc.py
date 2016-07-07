@@ -185,7 +185,7 @@ class NcdcService(WebServiceBase):
             "properties": {
                 "parameter": {
                     "type": "string",
-                    "enum": set(self._parameter_map(service).values()),
+                    "enum": sorted(self._parameter_map(service).values()),
                     "description": "parameter",
                 },
                 "start": {
