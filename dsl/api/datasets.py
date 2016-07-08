@@ -273,12 +273,24 @@ def describe_dataset():
 
 
 @dispatcher.add_method
-def open_dataset():
-    """Open the dataset as a python/VTK object. Not sure this is needed.
+def open_dataset(dataset, fmt=None):
+    """Open the dataset and return in format specified by fmt
 
-    NOTIMPLEMENTED
+    will raise NotImplementedError if format requested is not possible
     """
-    pass
+    m = get_metadata(dataset).get(dataset)
+    file_format = m.get('_file_format')
+    path = m.get('_save_path')
+
+    if path is None:
+        raise ValueError('No dataset file found')
+
+    if file_format not in util.list_drivers('io'):
+        raise ValueError('No reader available for: %s' % file_format)
+
+    io = util.load_drivers('io', file_format)
+    io = io[file_format].driver
+    return io.open(path, fmt=fmt)
 
 
 @dispatcher.add_method

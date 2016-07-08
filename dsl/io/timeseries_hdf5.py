@@ -1,5 +1,6 @@
 """io plugin for timeseries datasets."""
 
+import json
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -39,6 +40,25 @@ class TsHdf5(IoBase):
             h5store.get_storer('dataframe').attrs.metadata = metadata
 
         print('file written to: %s' % save_path)
+
+    def open(self, path, fmt=None):
+        dataframe = self.read(path)
+
+        if fmt == None or fmt.lower() == 'dataframe':
+            return dataframe
+
+        # convert index to datetime in case it is a PeriodIndex
+        dataframe.index = dataframe.index.to_datetime()
+        d = json.loads(dataframe.to_json(date_format='iso'))
+        d['metadata'] = dataframe.metadata
+
+        if fmt.lower() == 'dict':
+            return d
+
+        if fmt.lower() == 'json':
+            return json.dumps(d)
+
+        raise NotImplementedError('format %s not recognized' % fmt)
 
     def vizualize(self, path, title, engine='mpl', start=None, end=None, **kwargs):
         """Vizualize timeseries dataset."""

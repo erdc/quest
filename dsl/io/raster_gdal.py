@@ -1,10 +1,7 @@
 """io plugin for timeseries datasets."""
 
-import os
-import rasterio
-
 from .base import IoBase
-from .. import util
+import os
 
 
 class RasterGdal(IoBase):
@@ -14,6 +11,10 @@ class RasterGdal(IoBase):
         "Register plugin by setting description and io type."
         self.description = 'IO for raster datasets using rasterio/gdal.'
         self.iotype = 'raster'
+
+    def open(self, path, fmt):
+        "Open raster and return in requested format"
+        raise NotImplementedError
 
     def read(self, path):
         "Read raster using rasterio"
