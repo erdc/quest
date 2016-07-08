@@ -23,6 +23,10 @@ class IoBase(with_metaclass(abc.ABCMeta, object)):
         """Write data to format."""
 
     @abc.abstractmethod
+    def open(self):
+        """Open data and return in requested format."""
+    
+    @abc.abstractmethod
     def write(self):
         """Write data to format."""
 
