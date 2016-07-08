@@ -49,7 +49,9 @@ class TsHdf5(IoBase):
 
         # convert index to datetime in case it is a PeriodIndex
         dataframe.index = dataframe.index.to_datetime()
-        d = json.loads(dataframe.to_json(date_format='iso'))
+        jstr = json.loads(dataframe.to_json(date_format='iso'))
+        d = {}
+        d['datasets'] = {k: v.items() for k, v in jstr.items()}
         d['metadata'] = dataframe.metadata
 
         if fmt.lower() == 'dict':
