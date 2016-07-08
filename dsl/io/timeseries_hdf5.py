@@ -51,7 +51,7 @@ class TsHdf5(IoBase):
         dataframe.index = dataframe.index.to_datetime()
         jstr = json.loads(dataframe.to_json(date_format='iso'))
         d = {}
-        d['datasets'] = {k: v.items() for k, v in jstr.items()}
+        d['data'] = {k: sorted(v.items()) for k, v in jstr.items()}
         d['metadata'] = dataframe.metadata
 
         if fmt.lower() == 'dict':
