@@ -92,11 +92,11 @@ class UserService(WebServiceBase):
             all_features.append(features)
 
         # drop duplicates fails when some columns have nested list/tuples like
-        # _geom_coords. so drop based on index
+        # _geom_coords. so drop based on _service_id
         features = pd.concat(all_features)
-        features['index'] = features.index
-        features = features.drop_duplicates(subset='index')
-        features = features.set_index('index').sort_index()
+        features = features.drop_duplicates(subset='_service_id')
+        features.index = features['_service_id']
+        features.sort_index(inplace=True)
         return features
 
     def _get_parameters(self, service, features=None):
