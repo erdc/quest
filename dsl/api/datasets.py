@@ -147,7 +147,7 @@ def download_options(uris):
             service_uri = df
 
         provider, service, feature = util.parse_service_uri(service_uri)
-        driver = util.load_drivers('services', names=provider)[provider].driver
+        driver = util.load_services()[provider]
         download_options[uri] = driver.download_options(service)
 
     return download_options
