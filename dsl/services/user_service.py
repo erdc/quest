@@ -115,7 +115,7 @@ class UserService(WebServiceBase):
         if mapping is not None:
             fname = mapping.replace('<feature>', feature)
         else:
-            fname = self._get_features(service)[feature]['_download_url']
+            fname = self._get_features(service).ix[feature]['_download_url']
 
         final_path = []
         if parameter is not None:
@@ -127,8 +127,9 @@ class UserService(WebServiceBase):
             if save_folder is not None:
                 dst = os.path.join(dst, save_folder, svc_folder)
 
-            util.mkdir_if_doesnt_exist(dst)
             dst = os.path.join(dst, fname)
+            base, _ = os.path.split(dst)
+            util.mkdir_if_doesnt_exist(base)
             final_path.append(dst)
             if self.is_remote:
                 r = requests.get(src, verify=False)
