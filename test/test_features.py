@@ -9,7 +9,7 @@ pytestmark = pytest.mark.usefixtures('reset_projects_dir', 'set_active_project')
 FEATURE_URIS = [
                 'svc://usgs-ned:19-arc-second/53174780e4b0cd4cd83bf20e',
                 'svc://ncdc:gsod/028140-99999',
-                'svc://usgs-nwis:iv/01529950',  # TODO: Doesn't work in Python 3
+                'svc://usgs-nwis:iv/01529950',
                 ]
 
 COL2_FEATURES = ['fa221501cb8348bea19239827796233a', 'f05e841ddc4b457abafad38580ecb8ca']
