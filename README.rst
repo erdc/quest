@@ -47,7 +47,8 @@ development workflow
     `git checkout -b my-bobs-branch`
     etc
 
- **naming branches** use descriptive names
+ **naming branches** use descriptive names following the pattern 'type of branch/name'
 
   - add-dataset/noaa
-  - bugfix/
+  - bugfix/user-services
+  - feature/caching-api
