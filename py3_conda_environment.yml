@@ -15,16 +15,15 @@ channels:
 
 dependencies:
     - python=3.4
-    - fiona>=1.5.1
-    - rasterio>=0.23.0
-    - libgdal>=2.0.0
-    - gdal>=2.0.0
+    - fiona=1.6.0
+    - rasterio=0.25.0
+    - gdal=2.0.0
     - numpy
     - geojson
     - json-rpc
-    - ulmo>=0.8.1
+    - ulmo
     - pyyaml
-    - matplotlib>=1.4.0
+    - matplotlib
     - click
     - werkzeug
     - peewee
