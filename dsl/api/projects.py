@@ -140,7 +140,7 @@ def get_projects(metadata=None):
     """Get list of available projects."""
     projects = {}
     if not metadata:
-        return set(_load_projects().keys())
+        return list(_load_projects().keys())
 
     for name, project in _load_projects().items():
         path = project['_folder']

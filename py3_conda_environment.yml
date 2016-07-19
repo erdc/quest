@@ -15,10 +15,10 @@ channels:
 
 dependencies:
     - python=3.4
-    - gdal
     - fiona>=1.5.1
-    - futures
     - rasterio>=0.23.0
+    - libgdal>=2.0.0
+    - gdal>=2.0.0
     - numpy
     - geojson
     - json-rpc
