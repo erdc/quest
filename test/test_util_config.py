@@ -55,7 +55,7 @@ def test_update_settings_from_file():
 
 
 def test_save_settings():
-    dsl.api.update_settings(config={'BASE_DIR': 'dsl'})
+    dsl.api.update_settings(config={'BASE_DIR': 'dsl', 'USER_SERVICES':[]})
     filename = os.path.join(tempfile.gettempdir(), 'dsl_config.yml')
     dsl.api.save_settings(filename)
     dsl.api.update_settings_from_file(filename)
