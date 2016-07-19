@@ -7,6 +7,7 @@ import pandas as pd
 import os
 from ulmo.usgs import nwis
 from .. import util, get_pkg_data_path
+from builtins import range
 
 BASE_PATH = 'usgs-nwis'
 
@@ -31,7 +32,7 @@ class NwisService(WebServiceBase):
                                 'real-time data for USGS water sites '
                                 'since October 1, 2007'),
                 'service_type': 'geo-discrete',
-                'parameters': self._parameter_map('iv').values(),
+                'parameters': list(self._parameter_map('iv').values()),
                 'unmapped_parameters_available': True,
                 'geom_type': 'Point',
                 'datatype': 'timeseries',
@@ -50,7 +51,7 @@ class NwisService(WebServiceBase):
                                 'median, maximum, minimum, and/or other '
                                 'derived values.'),
                 'service_type': 'geo-discrete',
-                'parameters': self._parameter_map('dv').values(),
+                'parameters': list(self._parameter_map('dv').values()),
                 'unmapped_parameters_available': True,
                 'geom_type': 'Point',
                 'datatype': 'timeseries',
@@ -168,7 +169,7 @@ class NwisService(WebServiceBase):
         if not data:
             raise ValueError('No Data Available')
 
-        data = data.values()[0]
+        data = list(data.values())[0]
 
         # convert to dataframe and cleanup bad data
         df = pd.DataFrame(data['values'])
@@ -211,7 +212,7 @@ class NwisService(WebServiceBase):
             "properties": {
                 "parameter": {
                     "type": "string",
-                    "enum": self._parameter_map(service).values(),
+                    "enum": set(self._parameter_map(service).values()),
                     "description": "parameter",
                 },
                 "start": {
@@ -238,7 +239,7 @@ class NwisService(WebServiceBase):
 
 def _chunks(l, n=100):
     """Yield successive n-sized chunks from l."""
-    for i in xrange(0, len(l), n):
+    for i in range(0, len(l), n):
         yield l[i:i+n]
 
 
@@ -247,7 +248,7 @@ def _nwis_features(state, service):
 
 
 def _nwis_parameters(site, service):
-    return {site: nwis.get_site_data(site, service=service).keys()}
+    return {site: list(nwis.get_site_data(site, service=service).keys())}
 
 
 def _states():

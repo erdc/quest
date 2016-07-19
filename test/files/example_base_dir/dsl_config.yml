@@ -1,0 +1,4 @@
+BASE_DIR: /Users/rditllkw/DSL/data-services-library/test/files/example_base_dir
+CACHE_DIR: cache
+PROJECTS_DIR: projects
+USER_SERVICES: []

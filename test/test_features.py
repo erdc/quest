@@ -15,7 +15,7 @@ def test_add_features():
 
 
 def test_get_features():
-    dsl.api.add_features(collection='col2', features='svc://usgs-nwis:iv/01529500, svc://usgs-nwis:iv/01529950')
+    dsl.api.add_features(collection='col2', features='svc://ncdc:gsod/028150-99999, svc://ncdc:gsod/028140-99999')
     c=dsl.api.get_features(collections='col2')
     assert len(list(c)) == 2
 

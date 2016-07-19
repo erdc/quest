@@ -27,7 +27,10 @@ if save_path=='':
 dsl.util.mkdir_if_doesnt_exist(save_path)
 
 if collection_name=='':
-    collection_name = 'camp_lejeune'
+    if 'camp_lejeune' in dsl.api.get_collections():
+        collection_name=input('A collection named "camp_lejeune" already exists. Enter another collection name ')
+    else:
+         collection_name = 'camp_lejeune'
 
 print('creating collection %s' % collection_name)
 dsl.api.new_collection(collection_name)
@@ -101,11 +104,11 @@ print('~~~~~~~~~~Downloading data for usgs_ned~~~~~~~~~~~')
 print('~~~~~~~~~~Applying filters to usgs_nwis~~~~~~~~~~~')
 # # # remove crazy spike from usgs data
 new_usgs=dsl.api.apply_filter('ts-remove-outliers',datasets=usgs_nwis)
-images.update({'usgs-streamflow-outliers-removed':dsl.api.visualize_dataset(new_usgs.keys()[0])})
+images.update({'usgs-streamflow-outliers-removed':dsl.api.visualize_dataset(list(new_usgs.keys())[0])})
 
 # # # demo calculating monthly max streamflow
 new1_usgs=dsl.api.apply_filter('ts-resample', datasets=usgs_nwis, options={'period':'weekly', 'method':'mean'})
-images.update({'usgs-streamflow-outliers-removed-monthly-max':dsl.api.visualize_dataset(new1_usgs.keys()[0])})
+images.update({'usgs-streamflow-outliers-removed-monthly-max':dsl.api.visualize_dataset(list(new1_usgs.keys())[0])})
 
 
 ##uncomment when ToAdh is implemented 
@@ -121,3 +124,4 @@ print('copying image files to %s' % save_path)
 for name, path in images.items():
     print('copying %s: %s' % (name, path))
     shutil.copy(path, save_path)
+
