@@ -4,3 +4,50 @@ Environmental Simulator Data Services Library
 Python API for Data Services Library
 
 See *.rst files in the docs folder for documentation
+
+Development Workflow
+--------------------
+
+setup dev environment
++++++++++++++++++++++
+
+  - Install miniconda
+  - Install conda-env: `conda install conda-env`
+  - Clone master branch
+  - Create a new conda environment for development
+        `conda env create -n dsl -f py3-conda-requirements.yml`
+        (you can also create a python 2 env but 3 is preferred)
+  - Install dsl in develop mode
+        `python setup.py develop`
+
+development workflow
+++++++++++++++++++++
+
+  - `git checkout master` # change to master branch
+  - `git pull master` # get the latest version of master
+  - `git checkout -b mybranch` # creates a new branch locally
+  - Develop the new features on your local machine, add tests for any new features
+  - `git push -u origin mybranch` # pushes the local branch to gitlab and sets up tracking, later `git push` is all that is required.
+  - run tests on python 2 and python 3 using py.test
+  - Once you have finished developing your branch, check if master has changed
+        `git checkout master`
+        `git pull`
+  - If `git pull` pulls in new changes from master then you need to rebase
+        `git checkout mybranch`
+        `git rebase master` # follow the prompts, you may have to fix conflicts
+  - after a rebase you may have to force push to gitlab on your branch `git push -f`
+  - Run tests again.
+  - If everything looks good, use Gitlab to do a merge request from your branch to master
+  - Once the merge has been accepted, do not continuing working in that branch. make a new branch starting at step 1
+
+  **Never** work on the same branch as someone else, if you need to continue work
+  on a branch started by someone else, checkout that branch and make a new branch. i.e.:
+    `git fetch`
+    `git checkout bobs-branch`
+    `git checkout -b my-bobs-branch`
+    etc
+
+ **naming branches** use descriptive names
+
+  - add-dataset/noaa
+  - bugfix/
