@@ -1,15 +1,14 @@
-gdal
+futures; python_version<'3.0'
 fiona
-futures; python_version < 3.0
-json-rpc
-jsonrpc-requests
 rasterio
+gdal
 numpy
 geojson
-jsonschema
-ulmo>=0.8.1
+json-rpc
+ulmo
 pyyaml
 matplotlib
 click
 werkzeug
+peewee
 stevedore
