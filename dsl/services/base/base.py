@@ -28,7 +28,7 @@ class WebServiceBase(with_metaclass(abc.ABCMeta, object)):
             try:
                 return pd.read_hdf(cache_file, 'table')
             except:
-                print 'updating cache'
+                print('updating cache')
                 pass
 
         features = self._get_features(service)

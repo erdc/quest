@@ -43,12 +43,12 @@ print('--------------------------------------------------')
 
 print('\nChoose a DSL Mapped Parameter:')
 print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-for i, p in enumerate(mapped_parameters):
+for i, p in enumerate(sorted(mapped_parameters)):
     print('{: >2}. {:}'.format(i, p))
 
-choice = input('\nEnter parameter number (default=14, elevation):')
+choice = input('\nEnter parameter number (default=7, elevation):')
 if not choice:
-    choice = '14'
+    choice = '7'
 choice = int(choice)
 
 # get list of services
@@ -67,13 +67,16 @@ services = dsl.api.get_services(metadata=True)
 print('\nChoose a DSL Service(s):')
 print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 svcs = {}
-for i, (k, v) in enumerate(services.items()):
+for i, (k, v) in enumerate(sorted(services.items())):
     svcs[i] = k
     print('{: >2}. {: <50} {: <20}'.format(i, k, v['display_name']))
 
-choice = input('\nEnter services to include (comma seperated) (default=4,8)')
+choice = input('\nEnter services to include (comma seperated) (default=6,8)')
+while ('14' not in choice) and ('4' in choice or '5' in choice):
+    print('NOAA services are not currently available/n')
+    choice=input('Choose another service ')
 if not choice:
-    choice = '4, 8'
+    choice = '6, 8'
 uris = [svcs[int(c)] for c in choice.split(',')]
 print('\n%d DSL Service(s) were selected:' % (len(uris),))
 print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')

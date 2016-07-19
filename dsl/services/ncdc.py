@@ -26,7 +26,7 @@ class NcdcService(WebServiceBase):
                 'description': 'Daily Meteorologic Data from the Global '
                                'Historic Climate Network',
                 'service_type': 'geo-discrete',
-                'parameters': self._parameter_map('ghcn-daily').values(),
+                'parameters': list(self._parameter_map('ghcn-daily').values()),
                 'unmapped_parameters_available': True,
                 'geom_type': 'Point',
                 'datatype': 'timeseries',
@@ -40,7 +40,7 @@ class NcdcService(WebServiceBase):
                 'description': 'Daily Meteorologic Data from the Global '
                                'Summary of the Day',
                 'service_type': 'geo-discrete',
-                'parameters': self._parameter_map('gsod').values(),
+                'parameters': list(self._parameter_map('gsod').values()),
                 'unmapped_parameters_available': True,
                 'geom_type': 'Point',
                 'datatype': 'timeseries',
@@ -87,15 +87,15 @@ class NcdcService(WebServiceBase):
 
             # hardcoding for now
             parameters = {
-                '_parameters': self._parameter_map('ghcn-daily').values(),
-                '_parameter_codes': self._parameter_map('ghcn-daily').keys()
+                '_parameters': list(self._parameter_map('ghcn-daily').values()),
+                '_parameter_codes': list(self._parameter_map('ghcn-daily').keys())
             }
 
         if service=='gsod':
             # this is not the real list of parameters. hardcoding for now
             parameters = {
-                '_parameters': self._parameter_map('gsod').values(),
-                '_parameter_codes': self._parameter_map('gsod').keys()
+                '_parameters': list(self._parameter_map('gsod').values()),
+                '_parameter_codes': list(self._parameter_map('gsod').keys())
             }
 
         return parameters
@@ -185,7 +185,7 @@ class NcdcService(WebServiceBase):
             "properties": {
                 "parameter": {
                     "type": "string",
-                    "enum": self._parameter_map(service).values(),
+                    "enum": set(self._parameter_map(service).values()),
                     "description": "parameter",
                 },
                 "start": {
