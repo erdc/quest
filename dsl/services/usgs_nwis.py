@@ -3,6 +3,7 @@
 from .base import WebServiceBase
 import concurrent.futures
 from functools import partial
+from builtins import range
 import pandas as pd
 import os
 from ulmo.usgs import nwis
@@ -212,7 +213,7 @@ class NwisService(WebServiceBase):
             "properties": {
                 "parameter": {
                     "type": "string",
-                    "enum": set(self._parameter_map(service).values()),
+                    "enum": sorted(self._parameter_map(service).values()),
                     "description": "parameter",
                 },
                 "start": {
