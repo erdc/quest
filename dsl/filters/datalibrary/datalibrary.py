@@ -22,7 +22,7 @@ class Vitd2Nrmm(DatalibraryBase):
             },
         }
 
-    def apply_filter_options(self):
+    def apply_filter_options(self, fmt):
         return {}
 
     def _new_dataset_metadata(self):
@@ -54,7 +54,7 @@ class Vitd2RasterVeg(DatalibraryBase):
             },
         }
 
-    def apply_filter_options(self):
+    def apply_filter_options(self, fmt):
         return {}
 
     def _new_dataset_metadata(self):
