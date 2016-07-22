@@ -54,8 +54,8 @@ class WebServiceBase(with_metaclass(abc.ABCMeta, object)):
     def download(self, service, feature, save_path, **kwargs):
         return self._download(service, feature, save_path, **kwargs)
 
-    def download_options(self, service):
-        return self._download_options(service)
+    def download_options(self, service, fmt):
+        return self._download_options(service, fmt)
 
     @abc.abstractmethod
     def _register(self):
@@ -85,7 +85,7 @@ class WebServiceBase(with_metaclass(abc.ABCMeta, object)):
         """
 
     @abc.abstractmethod
-    def _download_options(self, service):
+    def _download_options(self, service, fmt):
         """
         needs to return dictionary
         eg. {'path': /path/to/dir/or/file, 'format': 'raster'}
@@ -109,7 +109,7 @@ class SingleFileBase(WebServiceBase):
             'datatype': datatype,
         }
 
-    def _download_options(self, service):
+    def _download_options(self, service, fmt):
         return {}
 
     def _download_file(self, path, url, tile_fmt, filename, check_modified=False):
