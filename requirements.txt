@@ -4,6 +4,7 @@ rasterio
 gdal
 numpy
 geojson
+jinja2
 json-rpc
 ulmo
 pyyaml
