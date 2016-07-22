@@ -20,6 +20,6 @@ class FilterBase(with_metaclass(abc.ABCMeta, object)):
         pass
 
     @abc.abstractmethod
-    def apply_filter_options(self):
+    def apply_filter_options(self, fmt):
         """Function that applies filter"""
         pass

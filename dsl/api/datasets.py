@@ -116,7 +116,7 @@ def download_datasets(datasets, async=False, raise_on_error=False):
 
 
 @dispatcher.add_method
-def download_options(uris):
+def download_options(uris, fmt='json-schema'):
     """List optional kwargs that can be specified when downloading a dataset
 
     Parameters
@@ -148,7 +148,7 @@ def download_options(uris):
 
         provider, service, feature = util.parse_service_uri(service_uri)
         driver = util.load_services()[provider]
-        download_options[uri] = driver.download_options(service)
+        download_options[uri] = driver.download_options(service, fmt)
 
     return download_options
 
@@ -330,7 +330,7 @@ def visualize_dataset(dataset, update_cache=False, **kwargs):
 
 
 @dispatcher.add_method
-def visualize_dataset_options(dataset):
+def visualize_dataset_options(dataset, fmt='json-schema'):
     """Return visualization available options for dataset."""
     m = get_metadata(dataset).get(dataset)
     file_format = m.get('_file_format')
@@ -345,4 +345,4 @@ def visualize_dataset_options(dataset):
     io = util.load_drivers('io', file_format)
     io = io[file_format].driver
 
-    return io.vizualize_options(path)
+    return io.vizualize_options(path, fmt)
