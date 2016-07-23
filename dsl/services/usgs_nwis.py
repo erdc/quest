@@ -210,7 +210,8 @@ class NwisService(WebServiceBase):
         if fmt == 'smtk':
             parameters = sorted(self._parameter_map(service).values())
             parameters = [(p.capitalize(), p) for p in parameters]
-            schema = util.build_smtk('start_end_or_period.sbt',
+            schema = util.build_smtk('download_options',
+                                     'start_end_or_period.sbt',
                                      title='USGS NWIS Download Options',
                                      parameters=parameters)
 

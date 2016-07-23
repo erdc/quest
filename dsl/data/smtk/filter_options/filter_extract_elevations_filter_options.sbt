@@ -16,8 +16,8 @@
         <Int Name="Method" Label="Method" NumberOfRequiredValues="1">
           <BriefDescription>Type of interpolation to use in extraction from raster</BriefDescription>
             <DiscreteInfo DefaultIndex="0">
-              <Value Enum="Nearest">0</Value>
-              <Value Enum="Bilinear">1</Value>
+              <Value Enum="nearest">0</Value>
+              <Value Enum="bilinear">1</Value>
             </DiscreteInfo>
         </Int>
       </ItemDefinitions>

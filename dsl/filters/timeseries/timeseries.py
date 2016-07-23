@@ -78,7 +78,7 @@ class TsRemoveOutliers(TsBase):
 
     def apply_filter_options(self, fmt, **kwargs):
         if fmt == 'smtk':
-            schema = util.build_smtk('filter_timeseries_remove_outliers.sbt')
+            schema = util.build_smtk('filter_options','filter_timeseries_remove_outliers.sbt')
 
         if fmt == 'json-schema':
             properties = {
@@ -118,7 +118,7 @@ class TsResample(TsBase):
 
     def apply_filter_options(self, fmt, **kwargs):
         if fmt == 'smtk':
-            schema = util.build_smtk('filter_timeseries_resample.sbt')
+            schema = util.build_smtk('filter_options','filter_timeseries_resample.sbt')
 
         if fmt == 'json-schema':
             properties = {

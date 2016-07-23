@@ -41,11 +41,11 @@ def bbox2poly(x1, y1, x2, y2, reverse_order=False):
     return poly
 
 
-def build_smtk(smtk_filename, **kwargs):
+def build_smtk(smtk_subdir, smtk_filename, **kwargs):
     """build smtk file from template and kwargs and stream as string.
 
     """
-    env = Environment(loader=FileSystemLoader(get_pkg_data_path('smtk')))
+    env = Environment(loader=FileSystemLoader(os.path.join(get_pkg_data_path('smtk'),smtk_subdir)))
     return env.get_template(smtk_filename).render(**kwargs)
 
 

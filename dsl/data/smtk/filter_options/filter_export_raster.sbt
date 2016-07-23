@@ -10,10 +10,10 @@
         </String>
         <Int Name="FileType" Label="File Type" NumberOfRequiredValues="1">
             <DiscreteInfo DefaultIndex="0">
-              <Value Enum="USGSDEM">0</Value>
-              <Value Enum="GTIFF">0</Value>
-              <Value Enum="PNG">0</Value>
-              <Value Enum="JPG">0</Value>
+              <Value Enum="USGSDEM">USGSDEM</Value>
+              <Value Enum="GTIFF">GTIFF</Value>
+              <Value Enum="PNG">PNG</Value>
+              <Value Enum="JPG">JPG</Value>
             </DiscreteInfo>
         </Int>
       </ItemDefinitions>

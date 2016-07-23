@@ -165,7 +165,8 @@ class NoaaService(WebServiceBase):
         if fmt == 'smtk':
             parameters = sorted(self._parameter_map(service).values())
             parameters = [(p.capitalize(), p) for p in parameters]
-            schema = util.build_smtk('start_end.sbt',
+            schema = util.build_smtk('download_options',
+                                     'start_end.sbt',
                                      title='Noaa Coastwatch Download Options',
                                      parameters=parameters)
 
