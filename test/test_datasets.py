@@ -4,7 +4,6 @@ import pytest
 from pandas import DataFrame
 
 import dsl
-from conftest import BASE_DIR
 
 ACTIVE_PROJECT = 'test_data'
 SERVICE = 'svc://usgs-nwis:dv'
@@ -16,7 +15,7 @@ pytestmark = pytest.mark.usefixtures('reset_projects_dir', 'set_active_project')
 
 @pytest.fixture
 def dataset_save_path(reset_projects_dir):
-    save_path = os.path.join(BASE_DIR, 'projects/test_data/test_data/usgs-nwis/dv/de160d255665477a93835868e34a03bc')
+    save_path = os.path.join(reset_projects_dir['BASE_DIR'], 'projects/test_data/test_data/usgs-nwis/dv/de160d255665477a93835868e34a03bc')
     dsl.api.update_metadata(uris=DATASET, dsl_metadata={'save_path': save_path})
 
     return save_path
