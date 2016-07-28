@@ -2,7 +2,7 @@ import dsl
 import os
 import pytest
 
-from .conftest import FILES_DIR
+from conftest import FILES_DIR
 
 pytestmark = pytest.mark.usefixtures('reset_projects_dir')
 
@@ -48,5 +48,3 @@ def test_get_services():
         'svc://usgs-nwis:dv',
         'svc://usgs-nwis:iv']
     assert dsl.api.get_services() == services
-
-
