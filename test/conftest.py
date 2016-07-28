@@ -2,47 +2,63 @@ import pytest
 import os
 import shutil
 import sys
+import tempfile
 
 import dsl
 
 base_path = os.path.dirname(os.path.abspath(__file__))
-BASE_DIR = os.path.join(base_path, 'files/example_base_dir')
+FILES_DIR = os.path.join(base_path, 'files')
 
 TEST_DATA_DIRS = {2: 'python2_data',
                   3: 'python3_data'}
 
 
+@pytest.fixture(scope='session')
+def get_base_dir(request):
+    base_dir = tempfile.mkdtemp()
+
+    def cleanup():
+        shutil.rmtree(base_dir)
+
+    request.addfinalizer(cleanup)
+
+    return base_dir
+
+
 @pytest.fixture
-def reset_settings():
-    test_settings = {'BASE_DIR': BASE_DIR,
+def reset_settings(get_base_dir):
+    test_settings = {'BASE_DIR': get_base_dir,
                      'CACHE_DIR': 'cache',
                      'PROJECTS_DIR': 'projects',
                      'USER_SERVICES': []
                      }
 
     dsl.api.update_settings(test_settings)
-    return BASE_DIR
-
+    return test_settings
 
 
 @pytest.fixture
 def reset_projects_dir(reset_settings, request):
-    projects_dir = os.path.join(BASE_DIR, 'projects')
+    base_dir = reset_settings['BASE_DIR']
+    projects_dir = os.path.join(base_dir, 'projects')
 
     def cleanup():
         shutil.rmtree(projects_dir, ignore_errors=True)
 
     cleanup()
-    projects_template_dir = os.path.join(BASE_DIR, 'projects_template')
+    projects_template_dir = os.path.join(FILES_DIR, 'projects_template')
     shutil.copytree(projects_template_dir, projects_dir)
     python_version = sys.version_info[0]
-    test_data_dir = os.path.join(BASE_DIR, TEST_DATA_DIRS[python_version])
+    test_data_dir = os.path.join(FILES_DIR, TEST_DATA_DIRS[python_version])
     test_data_dest = os.path.join(projects_dir, 'test_data', 'test_data')
     shutil.copytree(test_data_dir, test_data_dest)
 
     request.addfinalizer(cleanup)
 
-    metadata = {'NUMBER_OF_PROJECTS': 4}
+    metadata = {'NUMBER_OF_PROJECTS': 4,
+                'BASE_DIR': reset_settings['BASE_DIR'],
+                }
+
     return metadata
 
 
