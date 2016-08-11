@@ -79,7 +79,7 @@ class TsBase(FilterBase):
 
         return metadata
 
-    def apply_filter_options(self, **kwargs):
+    def apply_filter_options(self, fmt, **kwargs):
         schema = {}
 
         return schema

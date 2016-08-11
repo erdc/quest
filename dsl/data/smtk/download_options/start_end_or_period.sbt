@@ -5,6 +5,13 @@
   <Definitions>
     <AttDef Type="TimeSeriesOptions" BaseType="" Version="0" Unique="true">
       <ItemDefinitions>
+        <String Name="parameter" Label="Parameters to Download">
+          <DiscreteInfo DefaultIndex="0">
+          {% for name, value in parameters %}
+            <Value Enum="{{name}}">{{value}}</Value>
+          {% endfor %}
+          </DiscreteInfo>
+        </String>
         <String Name="DateTime" Label="Specify as:" Version="0" NumberOfRequiredValues="1">
           <ChildrenDefinitions>
             <String Name="start" Label="Start Date" Optional="true" IsEnabledByDefault="true">

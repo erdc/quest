@@ -206,35 +206,40 @@ class NwisService(WebServiceBase):
 
         return metadata
 
-    def _download_options(self, service):
-        schema = {
-            "title": "USGS NWIS Download Options",
-            "type": "object",
-            "properties": {
-                "parameter": {
-                    "type": "string",
-                    "enum": sorted(self._parameter_map(service).values()),
-                    "description": "parameter",
+    def _download_options(self, service, fmt):
+        if fmt == 'smtk':
+            parameters = sorted(self._parameter_map(service).values())
+            parameters = [(p.capitalize(), p) for p in parameters]
+            schema = util.build_smtk('download_options',
+                                     'start_end_or_period.sbt',
+                                     title='USGS NWIS Download Options',
+                                     parameters=parameters)
+
+        if fmt == 'json-schema':
+            schema = {
+                "title": "USGS NWIS Download Options",
+                "type": "object",
+                "properties": {
+                    "parameter": {
+                        "type": "string",
+                        "enum": sorted(self._parameter_map(service).values()),
+                        "description": "parameter",
+                    },
+                    "start": {
+                        "type": "string",
+                        "description": "start date",
+                    },
+                    "end": {
+                        "type": "string",
+                        "description": "end date",
+                    },
+                    "period": {
+                        "type": "string",
+                        "description": "period date",
+                    },
                 },
-                "start": {
-                    "type": "string",
-                    "description": "start date",
-                },
-                "end": {
-                    "type": "string",
-                    "description": "end date",
-                },
-                "period": {
-                    "type": "string",
-                    "description": "period date",
-                },
-            },
-        }
-        # smtk_filename = 'usgs-nwis-download.sbt'
-        # schema = {
-        #     "type": "smtk",
-        #     "smtk-path": get_pkg_data_path('smtk', smtk_filename)
-        # }
+            }
+
         return schema
 
 

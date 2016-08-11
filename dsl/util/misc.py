@@ -1,7 +1,9 @@
 import appdirs
 from geojson import LineString, Point, Polygon, Feature, FeatureCollection
+from jinja2 import Environment, FileSystemLoader
 import itertools
 from .config import get_settings
+from .. import get_pkg_data_path
 import os
 import pandas as pd
 import re
@@ -37,6 +39,14 @@ def bbox2poly(x1, y1, x2, y2, reverse_order=False):
     poly.append(poly[0])
 
     return poly
+
+
+def build_smtk(smtk_subdir, smtk_filename, **kwargs):
+    """build smtk file from template and kwargs and stream as string.
+
+    """
+    env = Environment(loader=FileSystemLoader(os.path.join(get_pkg_data_path('smtk'),smtk_subdir)))
+    return env.get_template(smtk_filename).render(**kwargs)
 
 
 def classify_uris(uris):

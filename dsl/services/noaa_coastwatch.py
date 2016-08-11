@@ -161,24 +161,33 @@ class NoaaService(WebServiceBase):
 
         return metadata
 
-    def _download_options(self, service):
-        schema = {
-            "title": "NOAA Download Options",
-            "type": "object",
-            "properties": {
-                "parameter": {
-                    "type": "string",
-                    "enum": sorted(self._parameter_map(service).values()),
-                    "description": "parameter",
+    def _download_options(self, service, fmt):
+        if fmt == 'smtk':
+            parameters = sorted(self._parameter_map(service).values())
+            parameters = [(p.capitalize(), p) for p in parameters]
+            schema = util.build_smtk('download_options',
+                                     'start_end.sbt',
+                                     title='Noaa Coastwatch Download Options',
+                                     parameters=parameters)
+
+        if fmt == 'json-schema':
+            schema = {
+                "title": "NOAA Download Options",
+                "type": "object",
+                "properties": {
+                    "parameter": {
+                        "type": "string",
+                        "enum": sorted(self._parameter_map(service).values()),
+                        "description": "parameter",
+                    },
+                    "start": {
+                        "type": "string",
+                        "description": "start date",
+                    },
+                    "end": {
+                        "type": "string",
+                        "description": "end date",
+                    },
                 },
-                "start": {
-                    "type": "string",
-                    "description": "start date",
-                },
-                "end": {
-                    "type": "string",
-                    "description": "end date",
-                },
-            },
-        }
+            }
         return schema
