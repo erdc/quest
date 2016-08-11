@@ -94,7 +94,7 @@ class DatalibraryBase(FilterBase):
 
         return metadata
 
-    def apply_filter_options(self):
+    def apply_filter_options(self, fmt):
         raise NotImplementedError
 
     def _new_dataset_metadata():

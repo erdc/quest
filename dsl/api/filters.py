@@ -97,7 +97,7 @@ def apply_filter(name, datasets=None, features=None, options=None, **kwargs):
 
 
 @dispatcher.add_method
-def apply_filter_options(name, **kwargs):
+def apply_filter_options(name, fmt='json-schema'):
     """Retreive kwarg options for apply_filter."""
     driver = util.load_drivers('filters', name)[name].driver
-    return driver.apply_filter_options()
+    return driver.apply_filter_options(fmt)

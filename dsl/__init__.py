@@ -7,7 +7,6 @@
 from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
 from builtins import *
-from . import util, api
 import pbr.version
 import os
 
@@ -22,3 +21,6 @@ def get_pkg_data_path(*args):
     *args: optional tuple to join with the pkg data path
     """
     return os.path.join(_ROOT, 'data', *args)
+
+
+from . import util, api

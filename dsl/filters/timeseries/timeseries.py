@@ -4,6 +4,7 @@
 from __future__ import print_function
 
 from .ts_base import TsBase
+from dsl import util
 import pandas as pd
 import numpy as np
 import numpy.ma as ma
@@ -75,19 +76,23 @@ class TsRemoveOutliers(TsBase):
 
         return df
 
-    def apply_filter_options(self, **kwargs):
-        properties = {
-            "sigma": {
-                "type": "number",
-                "description": "values greater than (sigma * std deviation) from median will be filtered out",
-            },
-        }
+    def apply_filter_options(self, fmt, **kwargs):
+        if fmt == 'smtk':
+            schema = util.build_smtk('filter_options','filter_timeseries_remove_outliers.sbt')
 
-        schema = {
-            "title": "Outlier Timeseries Filter",
-            "type": "object",
-            "properties": properties,
-        }
+        if fmt == 'json-schema':
+            properties = {
+                "sigma": {
+                    "type": "number",
+                    "description": "values greater than (sigma * std deviation) from median will be filtered out",
+                },
+            }
+
+            schema = {
+                "title": "Outlier Timeseries Filter",
+                "type": "object",
+                "properties": properties,
+            }
 
         return schema
 
@@ -111,25 +116,29 @@ class TsResample(TsBase):
         return new_df
 
 
-    def apply_filter_options(self, **kwargs):
-        properties = {
-            "period": {
-                "type": { "enum": [ 'daily', 'weekly', 'monthly', 'annual' ], "default": 'daily' },
-                "description": "resample frequency",
-            },
-            "method": {
-                "type": { "enum": [ 'sum', 'mean', 'std', 'max', 'min', 'median'], "default": 'mean' },
-                "description": "resample method",
+    def apply_filter_options(self, fmt, **kwargs):
+        if fmt == 'smtk':
+            schema = util.build_smtk('filter_options','filter_timeseries_resample.sbt')
+
+        if fmt == 'json-schema':
+            properties = {
+                "period": {
+                    "type": { "enum": [ 'daily', 'weekly', 'monthly', 'annual' ], "default": 'daily' },
+                    "description": "resample frequency",
+                },
+                "method": {
+                    "type": { "enum": [ 'sum', 'mean', 'std', 'max', 'min', 'median'], "default": 'mean' },
+                    "description": "resample method",
+                }
+
             }
 
-        }
-
-        schema = {
-            "title": "Resample Timeseries Filter",
-            "type": "object",
-            "properties": properties,
-            "required": ['period', 'method'],
-        }
+            schema = {
+                "title": "Resample Timeseries Filter",
+                "type": "object",
+                "properties": properties,
+                "required": ['period', 'method'],
+            }
 
         return schema
 

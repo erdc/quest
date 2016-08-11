@@ -21,6 +21,7 @@ dependencies:
     - gdal=2.0.0
     - numpy
     - geojson
+    - jinja2
     - json-rpc
     - ulmo>=0.8.1
     - pyyaml
