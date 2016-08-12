@@ -25,15 +25,15 @@ class IoBase(with_metaclass(abc.ABCMeta, object)):
     @abc.abstractmethod
     def open(self):
         """Open data and return in requested format."""
-    
+
     @abc.abstractmethod
     def write(self):
         """Write data to format."""
 
     @abc.abstractmethod
-    def vizualize(self):
+    def visualize(self):
         """Lightweight vizualization."""
 
     @abc.abstractmethod
-    def vizualize_options(self):
+    def visualize_options(self):
         """Lightweight vizualization options."""
