@@ -345,4 +345,4 @@ def visualize_dataset_options(dataset, fmt='json-schema'):
     io = util.load_drivers('io', file_format)
     io = io[file_format].driver
 
-    return io.vizualize_options(path, fmt)
+    return io.visualize_options(path, fmt)

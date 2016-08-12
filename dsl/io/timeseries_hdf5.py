@@ -62,8 +62,8 @@ class TsHdf5(IoBase):
 
         raise NotImplementedError('format %s not recognized' % fmt)
 
-    def vizualize(self, path, title, engine='mpl', start=None, end=None, **kwargs):
-        """Vizualize timeseries dataset."""
+    def visualize(self, path, title, engine='mpl', start=None, end=None, **kwargs):
+        """Visualize timeseries dataset."""
         if engine is not 'mpl':
             raise NotImplementedError
 
@@ -88,8 +88,8 @@ class TsHdf5(IoBase):
 
         return visualization_path
 
-    def vizualize_options(self, path):
-        """vizualation options for timeseries datasets"""
+    def visualize_options(self, path, fmt='json-schema'):
+        """visualation options for timeseries datasets"""
         df = self.read(path)
         start = df.index[0].strftime('%Y-%m-%d %H:%M:%S')
         end = df.index[-1].strftime('%Y-%m-%d %H:%M:%S')

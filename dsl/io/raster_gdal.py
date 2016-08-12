@@ -24,8 +24,8 @@ class RasterGdal(IoBase):
         "Write raster and metadata"
         raise NotImplementedError
 
-    def vizualize(self, path, **kwargs):
-        """Vizualize raster dataset."""
+    def visualize(self, path, **kwargs):
+        """Visualize raster dataset."""
 
         # TODO python visualization of raster datasets
         # For now raster datasets are just converted to geotiff and returned
@@ -40,7 +40,7 @@ class RasterGdal(IoBase):
 
         return visualization_path
 
-    def vizualize_options(self, path):
-        """vizualation options for raster datasets."""
+    def visualize_options(self, path, fmt='json-schema'):
+        """visualation options for raster datasets."""
         schema = {}
         return schema
