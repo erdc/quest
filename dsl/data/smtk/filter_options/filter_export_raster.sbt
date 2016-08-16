@@ -8,14 +8,14 @@
         <String Name="filename" Label="Filename" >
           <BriefDescription>Without the extension</BriefDescription>
         </String>
-        <Int Name="FileType" Label="File Type" NumberOfRequiredValues="1">
+        <String Name="FileType" Label="File Type" NumberOfRequiredValues="1">
             <DiscreteInfo DefaultIndex="0">
               <Value Enum="USGSDEM">USGSDEM</Value>
               <Value Enum="GTIFF">GTIFF</Value>
               <Value Enum="PNG">PNG</Value>
               <Value Enum="JPG">JPG</Value>
             </DiscreteInfo>
-        </Int>
+        </String>
       </ItemDefinitions>
     </AttDef>
   </Definitions>

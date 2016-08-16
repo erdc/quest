@@ -5,18 +5,18 @@
   <Definitions>
     <AttDef Type="ResampleOptions" BaseType="" Version="0" Unique="true">
       <ItemDefinitions>
-        <Int Name="period" Label="Period" NumberOfRequiredValues="1">
+        <String Name="period" Label="Period" NumberOfRequiredValues="1">
           <BriefDescription>Resample Frequency</BriefDescription>
-            <DiscreteInfo DefaultIndex="daily">
+            <DiscreteInfo DefaultIndex="0">
               <Value Enum="Daily">daily</Value>
               <Value Enum="Weekly">weekly</Value>
               <Value Enum="Monthly">monthly</Value>
               <Value Enum="Annualy">annual</Value>
             </DiscreteInfo>
-        </Int>
-        <Int Name="method" Label="Method" NumberOfRequiredValues="1">
+        </String>
+        <String Name="method" Label="Method" NumberOfRequiredValues="1">
           <BriefDescription>Resample Frequency</BriefDescription>
-            <DiscreteInfo DefaultIndex="mean">
+            <DiscreteInfo DefaultIndex="1">
               <Value Enum="Sum">sum</Value>
               <Value Enum="Mean">mean</Value>
               <Value Enum="Std">std</Value>
@@ -24,7 +24,7 @@
               <Value Enum="Min">min</Value>
               <Value Enum="Median">median</Value>
             </DiscreteInfo>
-        </Int>
+        </String>
       </ItemDefinitions>
     </AttDef>
   </Definitions>
