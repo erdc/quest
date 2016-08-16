@@ -22,8 +22,14 @@ class Vitd2Nrmm(DatalibraryBase):
             },
         }
 
-    def apply_filter_options(self, fmt):
-        return {}
+    def apply_filter_options(self, fmt='json-schema'):
+        if fmt == 'json-schema':
+            schema = {}
+
+        if fmt == 'smtk':
+            schema = ''
+
+        return schema
 
     def _new_dataset_metadata(self):
         return {
@@ -54,8 +60,14 @@ class Vitd2RasterVeg(DatalibraryBase):
             },
         }
 
-    def apply_filter_options(self, fmt):
-        return {}
+    def apply_filter_options(self, fmt='json-schema'):
+        if fmt == 'json-schema':
+            schema = {}
+
+        if fmt == 'smtk':
+            schema = ''
+
+        return schema
 
     def _new_dataset_metadata(self):
 
@@ -63,5 +75,5 @@ class Vitd2RasterVeg(DatalibraryBase):
         return {
             'parameter': 'vegetation',
             'datatype': 'raster',
-            'file_format': 'gdal-raster',
+            'file_format': 'raster-gdal',
         }
