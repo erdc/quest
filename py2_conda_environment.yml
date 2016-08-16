@@ -14,18 +14,18 @@ channels:
     - defaults
 
 dependencies:
-    - python=2.7
+    - python=2
     - futures
-    - fiona=1.6.0
-    - rasterio=0.25.0
-    - gdal=2.0.0
+    - fiona
+    - rasterio
+    - gdal
     - numpy
     - geojson
     - jinja2
     - json-rpc
-    - ulmo>=0.8.1
+    - ulmo
     - pyyaml
-    - matplotlib>=1.4.0
+    - matplotlib
     - click
     - werkzeug
     - peewee
