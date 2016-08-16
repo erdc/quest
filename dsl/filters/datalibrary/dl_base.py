@@ -111,7 +111,7 @@ def _render_template(name, **kwargs):
 
 
 def _run_filter(name, **kwargs):
-    with tempfile.NamedTemporaryFile(delete=False) as t:
+    with tempfile.NamedTemporaryFile(mode='w', delete=False) as t:
         t.write(_render_template(name, **kwargs))
         fname = t.name
 
