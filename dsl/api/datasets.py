@@ -322,7 +322,7 @@ def visualize_dataset(dataset, update_cache=False, **kwargs):
         if title is None:
             title = dataset
 
-        visualization_path = io.vizualize(path, title=title, **kwargs)
+        visualization_path = io.visualize(path, title=title, **kwargs)
         dsl_metadata = {'visualization_path': visualization_path}
         update_metadata(dataset, dsl_metadata=dsl_metadata)
 
