@@ -168,9 +168,15 @@ class UserService(WebServiceBase):
             metadata.update(extra_meta)
         return metadata
 
-    def _download_options(self, service):
+    def _download_options(self, service, fmt='json-schema'):
         # TODO if more than one parameter available
-        return {}
+        if fmt == 'smtk':
+            schema = ''
+
+        if fmt == 'json-schema':
+            schema = {}
+
+        return schema
 
     def _get_path(self, filename, service=None):
         uri = self.uri
