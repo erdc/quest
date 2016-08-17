@@ -73,11 +73,9 @@ class TsBase(FilterBase):
         io.write(save_path, new_df, new_metadata)
 
         new_metadata.update({'save_path': save_path})
-        metadata = update_metadata(new_dset,
-                                   dsl_metadata=new_metadata,
-                                   metadata=metadata)
+        update_metadata(new_dset, dsl_metadata=new_metadata, metadata=metadata)
 
-        return metadata
+        return {'datasets': new_dset}
 
     def apply_filter_options(self, fmt, **kwargs):
         schema = {}

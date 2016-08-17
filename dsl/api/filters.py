@@ -86,14 +86,29 @@ def get_filters(filters=None, metadata=False, **kwargs):
 
 
 @dispatcher.add_method
-def apply_filter(name, datasets=None, features=None, options=None, **kwargs):
+def apply_filter(name, datasets=None, features=None, options=None, as_dataframe=None, metadata=None):
     """Apply Filter to dataset."""
     datasets = util.listify(datasets)
     features = util.listify(features)
     options = util.listify(options)
 
     driver = util.load_drivers('filters', name)[name].driver
-    return driver.apply_filter(datasets, features, options, **kwargs)
+    result = driver.apply_filter(datasets, features, options)
+
+    new_datasets = util.listify(result.get('datasets', []))
+    new_features = util.listify(result.get('features', []))
+
+    if metadata or as_dataframe:
+        new_datasets = get_metadata(new_datasets, as_dataframe=True)
+        new_features = get_metadata(new_features, as_dataframe=True)
+
+        if metadata:
+            new_datasets = list(util.to_metadata(new_datasets).values())
+            new_features = util.to_geojson(new_features)['features']
+
+    result.update({'datasets': new_datasets, 'features': new_features})
+
+    return result
 
 
 @dispatcher.add_method
