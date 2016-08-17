@@ -75,7 +75,7 @@ class NcdcService(WebServiceBase):
         features['_service_id'] = features.index
         features['_geom_type'] = 'Point'
         features['_geom_coords'] = \
-            zip(features['_longitude'], features['_latitude'])
+            list(zip(features['_longitude'], features['_latitude']))
         return features
 
     def _get_parameters(self, service, features=None):

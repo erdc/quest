@@ -83,7 +83,7 @@ class NwisService(WebServiceBase):
                     'longitude': '_longitude',
                     }, inplace=True)
 
-        df['_geom_coords'] = zip(df['_longitude'], df['_latitude'])
+        df['_geom_coords'] = list(zip(df['_longitude'], df['_latitude']))
         return df
 
     def _get_parameters(self, service, features=None):
