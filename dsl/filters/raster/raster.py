@@ -110,11 +110,11 @@ class RasterClip(FilterBase):
                 "bbox": {
                     "type": "string",
                     "description": "bounding box 'xmin, ymin, xmax, ymax'",
+                },
                 "nodata": {
                     "type": "number",
                     "description": "no data value for raster.",
                     "default": 0,
-                },
                 },
             }
 
