@@ -89,7 +89,7 @@ class DatalibraryBase(FilterBase):
         })
         update_metadata(new_dset, dsl_metadata=new_metadata, metadata=metadata)
 
-        return {'datasets': new_dset}
+        return {'datasets': new_dset, 'features': feature}
 
     def apply_filter_options(self, fmt):
         raise NotImplementedError
