@@ -63,7 +63,7 @@ class NoaaService(WebServiceBase):
 
             df['_display_name'] = df['_service_id']
             df['_geom_type'] = 'Point'
-            df['_geom_coords'] = zip(df['_longitude'], df['_latitude'])
+            df['_geom_coords'] = list(zip(df['_longitude'], df['_latitude']))
 
         if service == 'coops':
             raise NotImplementedError
