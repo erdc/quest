@@ -24,6 +24,14 @@ def get_metadata(uris, as_dataframe=False):
     """
     # group uris by type
     df = util.classify_uris(uris)
+
+    # handle case when no uris are passed in
+    if df.empty:
+        metadata = pd.DataFrame()
+        if not as_dataframe:
+            metadata = metadata.to_dict(orient='index')
+        return metadata
+
     grouped = df.groupby('type')
 
     metadata = []
