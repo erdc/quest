@@ -46,15 +46,14 @@ class RasterClip(FilterBase):
 
         # the polygon GeoJSON geometry
         bbox = options.get('bbox')
-        poly = util.bbox2poly(*util.listify(bbox))
+        poly = [util.bbox2poly(*util.listify(bbox))]
         geoms = [{'type': 'Polygon', 'coordinates': poly}]
-        geom_coords = [poly]
 
         # load the raster, mask it by the polygon and crop it
         with rasterio.open(src_path) as src:
             out_image, out_transform = mask(src, geoms, crop=True)
-        out_meta = src.meta.copy()
 
+        out_meta = src.meta.copy()
         nodata = options.get('nodata', 0)
         out_meta.update({'nodata': nodata})
 
@@ -67,7 +66,7 @@ class RasterClip(FilterBase):
         cname = orig_metadata['_collection']
         feature = new_feature(cname,
                               display_name=display_name, geom_type='Polygon',
-                              geom_coords=geom_coords)
+                              geom_coords=poly)
 
         new_dset = new_dataset(feature,
                                dataset_type='derived',
