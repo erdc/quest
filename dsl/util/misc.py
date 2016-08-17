@@ -180,7 +180,7 @@ def listify(liststr, delimiter=','):
     if isinstance(liststr, dict):
         return liststr
 
-    return isinstance(liststr, list) and liststr or [s.strip() for s in liststr.split(delimiter)]
+    return liststr if isinstance(liststr, list) else [s.strip() for s in liststr.split(delimiter)]
 
 
 def list_drivers(namespace):
