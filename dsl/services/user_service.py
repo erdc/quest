@@ -133,12 +133,14 @@ class UserService(WebServiceBase):
             final_path.append(dst)
             if self.is_remote:
                 r = requests.get(src, verify=False)
-                chunk_size = 64 * 1024
-                with open(dst, 'wb') as f:
-                    for content in r.iter_content(chunk_size):
-                        f.write(content)
+                if r.status_code==200: # only download if file exists
+                    chunk_size = 64 * 1024
+                    with open(dst, 'wb') as f:
+                        for content in r.iter_content(chunk_size):
+                            f.write(content)
             else:
-                shutil.copyfile(src, dst)
+                if os.path.exists(src):
+                    shutil.copyfile(src, dst)  # only copy if file exists
 
         # TODO copy common files
         # May not be needed anymore
