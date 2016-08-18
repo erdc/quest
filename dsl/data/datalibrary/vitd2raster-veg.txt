@@ -11,7 +11,7 @@ Plugin "TransformGIS2Ras"
 Method Transform
 DataSet "Raster VEG"
 setGisDataSet DataSet "VITD Data Set"
-setMBR Rect 33.0 42.8 32.5 43.25
+setMBR Rect {{bbox}}
 setOutputProjectionType string "Geographic"
 setOutputProjectionDatum string "WGS84"
 setResolution Double 0.00083333333333
