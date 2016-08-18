@@ -1,7 +1,7 @@
 """Functions required to assemble and run plugins from the C++ DataLibrary."""
 from ..base import FilterBase
 from dsl import get_pkg_data_path, util
-from dsl.api import get_metadata, new_dataset, update_metadata, new_feature
+from dsl.api import get_metadata, get_datasets, new_dataset, update_metadata, new_feature
 from dsl.api.projects import active_db
 
 from geojson import Polygon
@@ -46,6 +46,10 @@ class DatalibraryBase(FilterBase):
         # from different services
         dataset = datasets[0]
         orig_metadata = get_metadata(dataset)[dataset]
+
+        if options.get('apply_to_collection'):
+            filters = {'collection': orig_metadata['_collection'], 'datatype': 'vitd'}
+            datasets = get_datasets(filters=filters)
 
         bbox = _get_bbox(datasets)
         src = _get_src(dataset)
@@ -127,6 +131,7 @@ def _run_filter(name, **kwargs):
 
 
 def _get_bbox(datasets):
+
     f = get_metadata(datasets, as_dataframe=True)['_feature'].tolist()
     geom_coords = get_metadata(f, as_dataframe=True)['_geom_coords'].tolist()
     coords = []
