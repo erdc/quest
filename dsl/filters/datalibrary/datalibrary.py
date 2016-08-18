@@ -116,16 +116,15 @@ class Vitd2Raster(DatalibraryBase):
         """override in inherited classes if more options need to be set"""
         self.parameter = options.pop('theme').lower()
         attr_dict = {
-            'slope': 'SLP',
-            'vegetation': 'VEG',
-            'soil_material_composition': 'SMC',
-            'surface_drainage': 'SDR',
-            'transportation': 'TRN',
-            'obstacles': 'OBS',
+            'slope': ('slp', 'SLP'),
+            'vegetation': ('veg', 'VEG'),
+            'soil_material_composition': ('smc', 'STP'),
+            'surface_drainage': ('sdr', 'SDR'),
+            'transportation': ('trn', 'TRN'),
+            'obstacles': ('obs', 'OBS'),
         }
 
-        attr = attr_dict[self.parameter]
-        theme = attr.lower()
+        theme, attr = attr_dict[self.parameter]
         filename = self.parameter
         options.update({'theme': theme, 'attr': attr, 'filename': filename})
         return options
