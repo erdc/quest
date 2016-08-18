@@ -24,7 +24,23 @@ class Vitd2Nrmm(DatalibraryBase):
 
     def apply_filter_options(self, fmt='json-schema'):
         if fmt == 'json-schema':
-            schema = {}
+            properties = {
+                "apply_to_collection": {
+                    "type": {'enum': ['yes', 'no'], 'default': 'no'},
+                    "description": "Apply filter to all tiles in collection",
+                },
+                "apply_to_collection_flag": {
+                    "type": 'boolean',
+                    "description": "Apply filter to all tiles in collection",
+                    "default": False,
+                },
+            }
+
+            schema = {
+                "title": "VITD2Raster Filter",
+                "type": "object",
+                "properties": properties,
+            }
 
         if fmt == 'smtk':
             schema = ''
@@ -89,6 +105,15 @@ class Vitd2Raster(DatalibraryBase):
                         "default": 'daily'
                     },
                     "description": "Theme to Extract from VITD",
+                },
+                "apply_to_collection": {
+                    "type": {'enum': ['yes', 'no'], 'default': 'no'},
+                    "description": "Apply filter to all tiles in collection",
+                },
+                "apply_to_collection_flag": {
+                    "type": 'boolean',
+                    "description": "Apply filter to all tiles in collection",
+                    "default": False,
                 },
             }
 
