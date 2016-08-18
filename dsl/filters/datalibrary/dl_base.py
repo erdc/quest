@@ -72,6 +72,8 @@ class DatalibraryBase(FilterBase):
             options = {}
 
         options.update({'src': src, 'dst': dst, 'bbox': bbox})
+        # extra options set by plugins
+        options = self._extra_options(options)
         _run_filter(self.template, **options)
 
         self.save_path = dst
@@ -94,8 +96,12 @@ class DatalibraryBase(FilterBase):
     def apply_filter_options(self, fmt):
         raise NotImplementedError
 
-    def _new_dataset_metadata():
+    def _new_dataset_metadata(self):
         raise NotImplementedError
+
+    def _extra_options(self, options):
+        """override in inherited classes if more options need to be set"""
+        return options
 
 
 def _render_template(name, **kwargs):
