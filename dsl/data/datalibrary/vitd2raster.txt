@@ -9,14 +9,14 @@ setMBR Rect {{bbox}}
 
 Plugin "TransformGIS2Ras"
 Method Transform
-DataSet "Raster VEG"
+DataSet "Raster {{attr}}"
 setGisDataSet DataSet "VITD Data Set"
 setMBR Rect {{bbox}}
 setOutputProjectionType string "Geographic"
 setOutputProjectionDatum string "WGS84"
 setResolution Double 0.00083333333333
-setTheme string "veg"
-setAttribute string "VEG"
+setTheme string "{{theme}}"
+setAttribute string "{{attr}}"
 setMorphTransformType String "TypeCast"
 setMorphInputValueType String "Int32"
 setMorphOutputValueType String "Double"
@@ -25,8 +25,8 @@ setNoDataValue Double 0.0
 
 Plugin "ExportGeoTiff"
 Method Export
-setDataSet DataSet "Raster VEG"
-setFilename Filename "{{dst}}/vegetation.tiff"
+setDataSet DataSet "Raster {{attr}}"
+setFilename Filename "{{dst}}/{{filename}}.tiff"
 setTiled Bool TRUE
 setTileSz Int 256
 setGeoTiffRasterType String "RasterPixelIsArea"
