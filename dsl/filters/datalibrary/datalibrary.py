@@ -26,10 +26,6 @@ class Vitd2Nrmm(DatalibraryBase):
         if fmt == 'json-schema':
             properties = {
                 "apply_to_collection": {
-                    "type": {'enum': ['yes', 'no'], 'default': 'no'},
-                    "description": "Apply filter to all tiles in collection",
-                },
-                "apply_to_collection_flag": {
                     "type": 'boolean',
                     "description": "Apply filter to all tiles in collection",
                     "default": False,
@@ -107,10 +103,6 @@ class Vitd2Raster(DatalibraryBase):
                     "description": "Theme to Extract from VITD",
                 },
                 "apply_to_collection": {
-                    "type": {'enum': ['yes', 'no'], 'default': 'no'},
-                    "description": "Apply filter to all tiles in collection",
-                },
-                "apply_to_collection_flag": {
                     "type": 'boolean',
                     "description": "Apply filter to all tiles in collection",
                     "default": False,
