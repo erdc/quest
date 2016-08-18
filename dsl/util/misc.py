@@ -311,7 +311,9 @@ def to_geojson(df):
             geometry = None
             if row['geom_type'] is not None:
                 coords = row['geom_coords']
-                if not isinstance(coords, (list, tuple)):
+                if isinstance(coords, zip):
+                    coords = list(coords)
+                if coords and not isinstance(coords, (list, tuple)):
                     coords = json.loads(coords)
                 geometry = _func[row['geom_type']](coords)
             del row['geom_type']
