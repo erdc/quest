@@ -73,7 +73,8 @@ def get_metadata(uris, as_dataframe=False):
         tmp_df = grouped.get_group('datasets')
         datasets = db.read_all(active_db(), 'datasets', as_dataframe=True)
         # add collection name
-        datasets['_collection'] = get_metadata(datasets['_feature'].tolist(), as_dataframe=True)['_collection'].tolist()
+        features = db.read_all(active_db(), 'features', as_dataframe=True)
+        datasets = datasets.join(features['_collection'], on='_feature')
         datasets = datasets.ix[tmp_df['uri'].tolist()]
 
         metadata.append(datasets)
