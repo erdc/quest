@@ -7,6 +7,8 @@ from .. import get_pkg_data_path
 import os
 import pandas as pd
 import re
+
+from jsonrpc.jsonrpc import JSONRPCRequest
 from stevedore import extension, driver
 try:
     import simplejson as json
@@ -169,6 +171,22 @@ def parse_service_uri(uri):
     provider, service = (svc.split(':') + [None])[:2]
 
     return provider, service, feature
+
+
+def rpc2py(jsonrpc_str):
+    """Convert jsonrpc dict or string to a python dsl function call
+
+    args:
+        jsonrpc_str (string): json rpc request
+
+    returns:
+        converts to python and calls dsl function
+    """
+    import dsl
+    r = JSONRPCRequest.from_json(jsonrpc_str).data
+    fn = getattr(dsl.api, r.get('method'))
+    kwargs = r.get('params')
+    return fn(**kwargs)
 
 
 def listify(liststr, delimiter=','):
