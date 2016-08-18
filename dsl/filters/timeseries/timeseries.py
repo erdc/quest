@@ -54,6 +54,9 @@ periods = {
 
 
 class TsRemoveOutliers(TsBase):
+    def register(self, name='ts-remove-outliers'):
+        TsBase.register(self, name=name)
+
     def _apply(self, df, options):
         metadata = df.metadata
         del metadata['save_path']
@@ -98,6 +101,9 @@ class TsRemoveOutliers(TsBase):
 
 
 class TsResample(TsBase):
+    def register(self, name='ts-resample'):
+        TsBase.register(self, name=name)
+
     def _apply(self, df, options):
         metadata = df.metadata
         del metadata['save_path']
