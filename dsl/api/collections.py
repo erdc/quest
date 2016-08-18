@@ -43,7 +43,7 @@ def get_collections(metadata=None):
     collections = _load_collections()
     collections = {k: util.to_metadata(v) for k, v in collections.items()}
     if not metadata:
-        collections = collections.keys()
+        collections = list(collections.keys())
 
     return collections
 
