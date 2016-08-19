@@ -28,7 +28,7 @@ class Nrmm(IoBase):
             attr_filename = base + '.txt'
 
         with rasterio.open(grid_filename) as src:
-            grid = src.read()
+            grid = src.read().squeeze()
 
         attrs = pd.read_table(attr_filename, skiprows=8)
         return grid, attrs, src.meta.copy()
@@ -54,13 +54,22 @@ class Nrmm(IoBase):
         keys = attrs[col].values
         new_raster = keys[grid-1]
 
+        import matplotlib.pylab as plt
+        plt.style.use('ggplot')
+        fig = plt.figure()
+        plt.imshow(new_raster)
+        dst = os.path.join(path, '{}.png'.format(parameter))
+        plt.savefig(dst)
+        plt.close(fig)
+        return dst
+
         out_meta = src_meta
         # save the resulting raster
         dst = os.path.join(path, '{}.tif'.format(parameter))
-        new_raster = new_raster.astype('int16')
+        new_raster = new_raster.astype('int32')
         out_meta.update({"driver": "GTiff", 'dtype': new_raster.dtype})
         with rasterio.open(dst, 'w', **out_meta) as dest:
-            dest.write(new_raster)
+            dest.write(new_raster.T)
 
         return dst
 
