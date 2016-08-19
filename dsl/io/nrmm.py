@@ -28,10 +28,13 @@ class Nrmm(IoBase):
             attr_filename = base + '.txt'
 
         with rasterio.open(grid_filename) as src:
-            grid = src.read().squeeze()
+            grid = src.read()
+            profile = src.profile
+            profile.update(dtype=rasterio.uint8, driver='GTiff', count=1, compress='lzw')
 
         attrs = pd.read_table(attr_filename, skiprows=8)
-        return grid, attrs, src.meta.copy()
+
+        return grid, attrs, profile.copy()
 
     def write(self, save_path, dataframe, metadata):
         "Write nrmm file"
@@ -40,36 +43,35 @@ class Nrmm(IoBase):
     def open(self, path, fmt=None):
         raise NotImplementedError('NRMM open fn not available')
 
-    def visualize(self, path, title, theme, **kwargs):
+    def visualize(self, path, title, theme, plot_format='geotiff', **kwargs):
         """Visualize nrmm dataset."""
 
-        grid, attrs, src_meta = self.read(path)
+        grid, attrs, profile = self.read(path)
         theme_dict = {
             'Slope': ('slope', 'GRADE'),
             'USCS Soil Type': ('soil_type', 'KUSCS'),
             'Soil Strength': ('soil_strength', 'RCIC(1)'),
         }
 
+        # remap raster according to theme dict
         parameter, col = theme_dict[theme]
         keys = attrs[col].values
         new_raster = keys[grid-1]
 
-        import matplotlib.pylab as plt
-        plt.style.use('ggplot')
-        fig = plt.figure()
-        plt.imshow(new_raster)
-        dst = os.path.join(path, '{}.png'.format(parameter))
-        plt.savefig(dst)
-        plt.close(fig)
-        return dst
-
-        out_meta = src_meta
-        # save the resulting raster
-        dst = os.path.join(path, '{}.tif'.format(parameter))
-        new_raster = new_raster.astype('int32')
-        out_meta.update({"driver": "GTiff", 'dtype': new_raster.dtype})
-        with rasterio.open(dst, 'w', **out_meta) as dest:
-            dest.write(new_raster.T)
+        if plot_format.lower() =='png':
+            import matplotlib.pylab as plt
+            plt.style.use('ggplot')
+            fig = plt.figure()
+            plt.imshow(new_raster.squeeze())
+            dst = os.path.join(path, '{}.png'.format(parameter))
+            plt.savefig(dst)
+            plt.close(fig)
+        else:
+            # save the resulting raster
+            dst = os.path.join(path, '{}.tif'.format(parameter))
+            new_raster = new_raster.astype(rasterio.uint8)
+            with rasterio.open(dst, 'w', **profile) as dest:
+                dest.write(new_raster)
 
         return dst
 
@@ -86,6 +88,10 @@ class Nrmm(IoBase):
                 "theme": {
                     "type": {"enum":['Slope', 'USCS Soil Type', 'Soil Strength'], 'default': 'Slope'},
                     "description": "NRMM theme to visualize",
+                },
+                "plot_format": {
+                    "type": {"enum":['png', 'geotiff'], 'default': 'geotiff'},
+                    "description": "output format",
                 },
             },
         }
