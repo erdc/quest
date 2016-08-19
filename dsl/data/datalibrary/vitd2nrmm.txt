@@ -11,7 +11,7 @@ Plugin "ExportNRMM"
 Method Export
 setGisDataSet DataSet "VITD Data Set"
 setExportFolder Folder "{{dst}}"
-setExportName String "NRMM"
+setExportName String "nrmm"
 setResolutionIndex Int 5
 setMBR Rect {{bbox}}
 -----
