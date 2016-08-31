@@ -35,12 +35,26 @@ class NoaaService(WebServiceBase):
                     [-177.75, -27.705, 179.001, 71.758],
                 ],
             },
-            'coops': {
+            'coops-meterological': {
                 'display_name': 'NOAA COOPS',
                 'description': 'Center for Operational Oceanographic Products '
                                'and Services',
                 'service_type': 'geo-discrete',
-                'parameters': list(self._parameter_map('coops').values()),
+                'parameters': list(self._parameter_map('coops-meteorological').values()),
+                'unmapped_parameters_available': True,
+                'geom_type': 'Point',
+                'datatype': 'timeseries',
+                'geographical_areas': ['Worldwide'],
+                'bounding_boxes': [
+                    [-180, -90, 180, 90],
+                ],
+            },
+            'coops-water': {
+                'display_name': 'NOAA COOPS',
+                'description': 'Center for Operational Oceanographic Products '
+                               'and Services',
+                'service_type': 'geo-discrete',
+                'parameters': list(self._parameter_map('coops-water').values()),
                 'unmapped_parameters_available': True,
                 'geom_type': 'Point',
                 'datatype': 'timeseries',
@@ -63,10 +77,44 @@ class NoaaService(WebServiceBase):
 
             df['_display_name'] = df['_service_id']
             df['_geom_type'] = 'Point'
-            df['_geom_coords'] = list(zip(df['_longitude'], df['_latitude']))
+            df['_geom_coords'] = zip(df['_longitude'], df['_latitude']) #python 3 adjustment
 
-        if service == 'coops':
-            raise NotImplementedError
+        if service == 'coops-meteorological':
+            #hard coding for now
+            dataset_Ids = ['nosCoopsCA','nosCoopsMW','nosCoopsMRF', 'nosCoopsMV', 'nosCoopsMC',
+                        'nosCoopsMAT', 'nosCoopsMRH','nosCoopsMWT', 'nosCoopsMBP']
+
+            coops_url = [BASE_URL + '{}.csvp?stationID%2Clongitude%2Clatitude'.format(id) for id in dataset_Ids]
+            df = pd.concat([pd.read_csv(f) for f in coops_url],ignore_index=True)
+            df.rename(columns={
+                'stationID': '_service_id',
+                'longitude (degrees_east)': '_longitude',
+                'latitude (degrees_north)': '_latitude'
+            }, inplace=True)
+
+
+            df['_display_name'] = df['_service_id']
+            df['_geom_type'] = 'Point'
+            df['_geom_coords'] = zip(df['_longitude'], df['_latitude'])
+            df['_service_id']= df['_service_id'].astype(str)
+
+        if service == 'coops-water':
+            # hard coding for now
+            dataset_Ids = ['nosCoopsWLV6','nosCoopsWLR6' , 'nosCoopsWLTP6','nosCoopsWLV60',
+                           'nosCoopsWLVHL','nosCoopsWLTP60','nosCoopsWLTPHL']
+
+            coops_url = [BASE_URL + '{}.csvp?stationID%2Clongitude%2Clatitude'.format(id) for id in dataset_Ids]
+            df = pd.concat([pd.read_csv(f) for f in coops_url], ignore_index=True) #continues count
+            df.rename(columns={
+                'stationID': '_service_id',
+                'longitude (degrees_east)': '_longitude',
+                'latitude (degrees_north)': '_latitude'
+            }, inplace=True)
+
+            df['_display_name'] = df['_service_id']
+            df['_geom_type'] = 'Point'
+            df['_geom_coords'] = zip(df['_longitude'], df['_latitude'])
+            df['_service_id'] = df['_service_id'].astype(str)
 
         return df
 
@@ -78,13 +126,48 @@ class NoaaService(WebServiceBase):
                 '_parameter_codes': list(self._parameter_map('ndbc').keys())
             }
 
-        if service == 'coops':
+        if service == 'coops-meteorological':
             parameters = {
-                '_parameters': list(self._parameter_map('coops').values()),
-                '_parameter_codes': list(self._parameter_map('coops').keys())
+                '_parameters': list(self._parameter_map('coops-meteorological').values()),
+                '_parameter_codes': list(self._parameter_map('coops-meteorological').keys())
+            }
+        if service == 'coops-water':
+            parameters = {
+                '_parameters': list(self._parameter_map('coops-water').values()),
+                '_parameter_codes': list(self._parameter_map('coops-water').keys())
             }
 
         return parameters
+
+    def _datasetId_map(self,service,parameter, invert=False):
+
+        if service=='coops-meteorological':
+             dmap={
+                'CS':'CA',
+                'CD':'CA',
+                'WS':'MW',
+                'WD':'MW',
+                'WG':'MW',
+                'RF':'MRF',
+                'Vis':'MV',
+                'CN':'MC',
+                'AT':'MAT',
+                'RH':'MRH',
+                'WT':'MWT',
+                'BP':'MBP'
+                 }
+
+        if service=='coops-water':
+            dmap = {
+                'waterLevel':'WL',
+                'predictedWL':'WLTP',
+            }
+
+
+        return dmap[parameter]
+
+        if invert:
+            pmap = {v: k for k, v in pmap.items()}
 
     def _parameter_map(self, service, invert=False):
         if service == 'ndbc':
@@ -101,8 +184,25 @@ class NoaaService(WebServiceBase):
                 'wspv': 'northward_wind',
             }
 
-        if service == 'coops':
+        if service == 'coops-meteorological':
             pmap = {
+                'CS': 'sea_water_speed',
+                'CD': 'direction_of_sea_water_velocity',
+                'WS':'wind_speed',
+                'WD':'wind_from_direction',
+                'WG':'wind_speed_from_gust',
+                'RF':'collective_rainfall',
+                'Vis':'visibility_in_air',
+                'CN':'sea_water_electric_conductivity',
+                'AT':'air_temperature',
+                'RH':'relative_humidity',
+                'WT':'sea_water_temperature',
+                'BP':'barometric_pressure',
+            }
+        if service == 'coops-water':
+            pmap = {
+                'waterLevel':'sea_surface_height_amplitude',
+                'predictedWL':'predicted_waterLevel',
             }
 
         if invert:
@@ -111,7 +211,10 @@ class NoaaService(WebServiceBase):
         return pmap
 
     def _download(self, service, feature, save_path, dataset,
-                  parameter, start=None, end=None):
+                  parameter,start=None,end=None,quality='R',interval='6',datum='MLLW'):
+
+        if dataset is None:
+            dataset = 'station-' + feature
 
         if end is None:
             end = pd.datetime.now().strftime('%Y-%m-%d')
@@ -122,72 +225,185 @@ class NoaaService(WebServiceBase):
 
         pmap = self._parameter_map(service, invert=True)
         parameter_code = pmap[parameter]
+        try:
+            if service == 'ndbc':
+                url = 'cwwcNDBCMet.csvp?time,{}&station="{}"&time>={}&time<={}'.format(parameter_code, feature, start, end)
+                url = BASE_URL + url
+                print('download data from %s' % url)
+                data = pd.read_csv(url)
+                if data.empty:
+                    raise ValueError('No Data Available')
 
-        if service == 'ndbc':
-            url = 'cwwcNDBCMet.csvp?time,{}&station="{}"&time>={}&time<={}'.format(parameter_code, feature, start, end)
-            url = BASE_URL + url
-            print('download data from %s' % url)
-            data = pd.read_csv(url)
-            if data.empty:
-                raise ValueError('No Data Available')
+                rename = {x: x.split()[0] for x in data.columns.tolist()}
+                units = {x.split()[0]: x.split()[-1].strip('()').lower() for x in data.columns.tolist()}
+                data.rename(columns=rename, inplace=True)
+                data = data.set_index('time')
+                data.index = pd.to_datetime(data.index)
+                data.rename(columns={parameter_code: parameter})
 
-            rename = {x: x.split()[0] for x in data.columns.tolist()}
-            units = {x.split()[0]: x.split()[-1].strip('()').lower() for x in data.columns.tolist()}
-            data.rename(columns=rename, inplace=True)
-            data = data.set_index('time')
-            data.index = pd.to_datetime(data.index)
-            data.rename(columns={parameter_code: parameter})
+            if service == 'coops-meteorological':
 
-        if service == 'coops':
-            raise NotImplementedError
+                start = pd.to_datetime(end) - pd.datetools.timedelta(days=28)
+                start = start.strftime('%Y-%m-%d')
 
-        save_path = os.path.join(save_path, BASE_PATH, service)
-        save_path = os.path.join(save_path, dataset)
-        metadata = {
-            'save_path': save_path,
-            'file_format': 'timeseries-hdf5',
-            'datatype': 'timeseries',
-            'timezone': units['time'],
-            'parameter': parameter,
-            'units': units[parameter_code],
-            'service_id': 'svc://noaa:{}/{}'.format(service, feature)
-        }
+                location = self._datasetId_map(service, parameter_code)
+                url = 'nosCoops{}.csvp?time,{}&stationID="{}"&time>={}&time<={}'.format(location,parameter_code,feature, start, end)
+                url = BASE_URL + url
+                print('download data from %s' % url)
+                data = pd.read_csv(url)
+                if data.empty:
+                    raise ValueError('No Data Available')
 
-        # save data to disk
-        io = util.load_drivers('io', 'timeseries-hdf5')
-        io = io['timeseries-hdf5'].driver
-        io.write(save_path, data, metadata)
-        del metadata['service_id']
+                rename = {x: x.split()[0] for x in data.columns.tolist()}
+                units = {x.split()[0]: x.split()[-1].strip('()').lower() for x in data.columns.tolist()}
+                data.rename(columns=rename, inplace=True)
+                data = data.set_index('time')
+                data.index = pd.to_datetime(data.index)
+                data.rename(columns={parameter_code: parameter})
 
-        return metadata
+            if service == 'coops-water':
+                if parameter_code == 'waterLevel':
+                    location = self._datasetId_map(service, parameter_code) + quality[0].capitalize() + interval
+                else:
+                    location=self._datasetId_map(service, parameter_code) + interval
+
+                start = pd.to_datetime(end) - pd.datetools.timedelta(days=28)
+                start = start.strftime('%Y-%m-%d')
+
+                url = 'nosCoops{}.csvp?time,{}&stationID="{}"&time>={}&time<={}&datum="{}"'.format(location,parameter_code,feature, start,end, datum)
+                url = BASE_URL + url
+                print('download data from %s' % url)
+                data = pd.read_csv(url)
+                if data.empty:
+                    raise ValueError('No Data Available')
+
+                rename = {x: x.split()[0] for x in data.columns.tolist()}
+                units = {x.split()[0]: x.split()[-1].strip('()').lower() for x in data.columns.tolist()}
+                data.rename(columns=rename, inplace=True)
+                data = data.set_index('time')
+                data.index = pd.to_datetime(data.index)
+                data.rename(columns={parameter_code: parameter})
+
+            save_path = os.path.join(save_path, BASE_PATH, service)
+            save_path = os.path.join(save_path, dataset)
+            metadata = {
+                'save_path': save_path,
+                'file_format': 'timeseries-hdf5',
+                'datatype': 'timeseries',
+                'timezone': units['time'],
+                'parameter': parameter,
+                'units': units[parameter_code],
+                'service_id': 'svc://noaa:{}/{}'.format(service, feature)
+            }
+
+            # save data to disk
+            io = util.load_drivers('io', 'timeseries-hdf5')
+            io = io['timeseries-hdf5'].driver
+            io.write(save_path, data, metadata)
+            del metadata['service_id']
+
+
+
+            return metadata
+
+        except Exception as error:
+            empty=pd.DataFrame()
+            if str(error) == "HTTP Error 500: Internal Server Error":
+                return empty
+
 
     def _download_options(self, service, fmt):
-        if fmt == 'smtk':
-            parameters = sorted(self._parameter_map(service).values())
-            parameters = [(p.capitalize(), p) for p in parameters]
-            schema = util.build_smtk('download_options',
-                                     'start_end.sbt',
-                                     title='Noaa Coastwatch Download Options',
-                                     parameters=parameters)
+        if service == 'ndbc' or service == 'coops-meteorological':
 
-        if fmt == 'json-schema':
-            schema = {
-                "title": "NOAA Download Options",
-                "type": "object",
-                "properties": {
-                    "parameter": {
-                        "type": "string",
-                        "enum": sorted(self._parameter_map(service).values()),
-                        "description": "parameter",
+            if fmt == 'smtk':
+                parameters = sorted(self._parameter_map(service).values())
+                parameters = [(p.capitalize(), p) for p in parameters]
+                schema = util.build_smtk('download_options',
+                                         'start_end.sbt',
+                                         title='Noaa Coastwatch Download Options',
+                                         parameters=parameters)
+            if fmt == 'json-schema':
+
+                schema = {
+                    "title": "NOAA Download Options",
+                    "type": "object",
+                    "properties": {
+                        "parameter": {
+                            "type": "string",
+                            "enum": sorted(self._parameter_map(service).values()),
+                            "description": "parameter",
+                        },
+                        "start": {
+                            "type": "string",
+                            "description": "start date",
+                        },
+                        "end": {
+                            "type": "string",
+                            "description": "end date",
+                        },
                     },
-                    "start": {
-                        "type": "string",
-                        "description": "start date",
-                    },
-                    "end": {
-                        "type": "string",
-                        "description": "end date",
+                }
+
+        if service == 'coops-water':
+            if fmt == 'smtk':
+                parameters = sorted(self._parameter_map(service).values())
+                parameters = [(p.capitalize(), p) for p in parameters]
+                schema = util.build_smtk('download_options',
+                                         'start_end.sbt',
+                                         title='Noaa Coastwatch Download Options',
+                                         parameters=parameters)
+            if fmt == 'json-schema':
+                schema = {
+                    "title": "NOAA Download Options",
+                    "type": "object",
+                    "properties": {
+                        "parameter": {
+                            "type": "string",
+                            "enum": sorted(self._parameter_map(service).values()),
+                            "description": "parameter",
+                        },
+                        "start": {
+                            "type": "string",
+                            "description": "start date",
+                        },
+                        "end": {
+                            "type": "string",
+                            "description": "end date",
+                        },
+                        "quality": {
+                            "type": "string",
+                            "description": "quality",
+                            "options": ['Preliminary','Verified'],
+                        },
+                        "interval": {
+                            "type": "string",
+                            "type": "string",
+                            "description": "time interval",
+                            "options": ['6', '60'],
+                        },
+                        "datum": {
+                            "type": "string",
+                            "description": "time interval",
+                            "options": [
+                                        {'DHQ':'Mean Diurnal High Water Inequality'},
+                                        {'DLQ':'Mean Diurnal Low Water Inequality'},
+                                        {'DTL':'Mean Diurnal Tide Level'},
+                                        {'GT':'Great Diurnal Range'},
+                                        {'HWI':'Greenwich High Water Interval( in Hours)'},
+                                        {'LWI':'Greenwich Low Water Interval( in Hours)'},
+                                        {'MHHW':'Mean Higher - High Water'},
+                                        {'MHW':'Mean High Water'},
+                                        {'MLLW':'Mean Lower_Low Water'},
+                                        {'MLW':'Mean Low Water'},
+                                        {'MN':'Mean Range of Tide'},
+                                        {'MSL':'Mean Sea Level'},
+                                        {'MTL':'Mean Tide Level'},
+                                        {'NAVD''North American Vertical Datum'},
+                                        {'STND':'Station Datum'},
+                                        ]
+                        }
                     },
                 },
-            }
+
+
         return schema
