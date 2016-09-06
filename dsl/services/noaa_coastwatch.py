@@ -307,9 +307,8 @@ class NoaaService(WebServiceBase):
             return metadata
 
         except Exception as error:
-            empty=pd.DataFrame()
             if str(error) == "HTTP Error 500: Internal Server Error":
-                return empty
+                return pd.DataFrame()
 
 
     def _download_options(self, service, fmt):
@@ -381,13 +380,13 @@ class NoaaService(WebServiceBase):
                             "description": "time interval",
                             "options": ['6', '60'],
                         },
-                        "datum": {
+                        "datum": { #temporary hard coding
                             "type": "string",
                             "description": "time interval",
                             "options": [
                                         {'DHQ':'Mean Diurnal High Water Inequality'},
                                         {'DLQ':'Mean Diurnal Low Water Inequality'},
-                                        {'DTL':'Mean Diurnal Tide Level'},
+                                        {'DTL':'Mean Diurnal Tide L0evel'},
                                         {'GT':'Great Diurnal Range'},
                                         {'HWI':'Greenwich High Water Interval( in Hours)'},
                                         {'LWI':'Greenwich Low Water Interval( in Hours)'},
