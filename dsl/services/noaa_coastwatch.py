@@ -35,7 +35,7 @@ class NoaaService(WebServiceBase):
                     [-177.75, -27.705, 179.001, 71.758],
                 ],
             },
-            'coops-meterological': {
+            'coops-meteorological': {
                 'display_name': 'NOAA COOPS',
                 'description': 'Center for Operational Oceanographic Products '
                                'and Services',
