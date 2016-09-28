@@ -101,7 +101,7 @@ class NwisService(WebServiceBase):
 
         data['_parameter_code'] = data['parm_cd']
         idx = pd.notnull(data['stat_cd'])
-        data[idx]['_parameter_code'] += ':' + data['stat_cd']
+        data.loc[idx, '_parameter_code'] += ':' + data['stat_cd']
         data['_external_vocabulary'] = 'USGS-NWIS'
         data.rename(columns={
                         'site_no': '_service_id',
