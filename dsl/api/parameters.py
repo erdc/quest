@@ -32,7 +32,8 @@ def get_parameters(service_uri, update_cache=False):
     parameters = _read_cached_parameters(provider, service,
                                          update_cache=update_cache)
 
-    if feature:
+
+    if isinstance(parameters,pd.DataFrame) and feature:
         idx = parameters['_service_id'] == feature
         parameters = parameters[idx]
 
