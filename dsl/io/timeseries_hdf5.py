@@ -68,7 +68,7 @@ class TsHdf5(IoBase):
             raise NotImplementedError
 
         df = self.read(path)
-        parameter = df.metadata['parameter']
+        parameter = df.columns[0]#metadata['parameter']
 
         if start is None:
             start = df.index[0]
