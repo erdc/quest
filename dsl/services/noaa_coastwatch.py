@@ -75,6 +75,7 @@ class NoaaService(WebServiceBase):
                 'latitude (degrees_north)': '_latitude'
                 }, inplace=True)
 
+            df.index = df['_service_id']
             df['_display_name'] = df['_service_id']
             df['_geom_type'] = 'Point'
             df['_geom_coords'] = zip(df['_longitude'], df['_latitude']) #python 3 adjustment
@@ -85,18 +86,20 @@ class NoaaService(WebServiceBase):
                         'nosCoopsMAT', 'nosCoopsMRH','nosCoopsMWT', 'nosCoopsMBP']
 
             coops_url = [BASE_URL + '{}.csvp?stationID%2Clongitude%2Clatitude'.format(id) for id in dataset_Ids]
-            df = pd.concat([pd.read_csv(f) for f in coops_url],ignore_index=True)
+            df = pd.concat([pd.read_csv(f) for f in coops_url])#ignore_index=True)
+
             df.rename(columns={
                 'stationID': '_service_id',
                 'longitude (degrees_east)': '_longitude',
                 'latitude (degrees_north)': '_latitude'
             }, inplace=True)
 
-
+           # df = df.drop_duplicates('_service_id')
+            df['_service_id'] = df['_service_id'].apply(str)  # converts ints to strings
+            df.index = df['_service_id']
             df['_display_name'] = df['_service_id']
             df['_geom_type'] = 'Point'
             df['_geom_coords'] = zip(df['_longitude'], df['_latitude'])
-            df['_service_id']= df['_service_id'].astype(str)
 
         if service == 'coops-water':
             # hard coding for now
@@ -104,19 +107,24 @@ class NoaaService(WebServiceBase):
                            'nosCoopsWLVHL','nosCoopsWLTP60','nosCoopsWLTPHL']
 
             coops_url = [BASE_URL + '{}.csvp?stationID%2Clongitude%2Clatitude'.format(id) for id in dataset_Ids]
-            df = pd.concat([pd.read_csv(f) for f in coops_url], ignore_index=True) #continues count
+            df = pd.concat([pd.read_csv(f) for f in coops_url]) #ignore_index=True) #continues count
+
             df.rename(columns={
                 'stationID': '_service_id',
                 'longitude (degrees_east)': '_longitude',
                 'latitude (degrees_north)': '_latitude'
             }, inplace=True)
-
+            #@df = df.drop_duplicates(df['_service_id'],)
+            df['_service_id'] = df['_service_id'].apply(str)  # converts ints to strings
+            df.index = df['_service_id']
             df['_display_name'] = df['_service_id']
             df['_geom_type'] = 'Point'
             df['_geom_coords'] = zip(df['_longitude'], df['_latitude'])
-            df['_service_id'] = df['_service_id'].astype(str)
 
-        return df
+
+
+
+        return df.drop_duplicates()
 
     def _get_parameters(self, service, features=None):
         # hardcoding for now
@@ -353,6 +361,7 @@ class NoaaService(WebServiceBase):
                                          parameters=parameters)
             if fmt == 'json-schema':
                 schema = {
+
                     "title": "NOAA Download Options",
                     "type": "object",
                     "properties": {
@@ -400,9 +409,9 @@ class NoaaService(WebServiceBase):
                                         {'NAVD''North American Vertical Datum'},
                                         {'STND':'Station Datum'},
                                         ]
-                        }
+                        },
                     },
-                },
+                }
 
 
         return schema
