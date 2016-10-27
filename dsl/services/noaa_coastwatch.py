@@ -86,7 +86,7 @@ class NoaaService(WebServiceBase):
                         'nosCoopsMAT', 'nosCoopsMRH','nosCoopsMWT', 'nosCoopsMBP']
 
             coops_url = [BASE_URL + '{}.csvp?stationID%2Clongitude%2Clatitude'.format(id) for id in dataset_Ids]
-            df = pd.concat([pd.read_csv(f) for f in coops_url])#ignore_index=True)
+            df = pd.concat([pd.read_csv(f) for f in coops_url])
 
             df.rename(columns={
                 'stationID': '_service_id',
@@ -94,7 +94,7 @@ class NoaaService(WebServiceBase):
                 'latitude (degrees_north)': '_latitude'
             }, inplace=True)
 
-           # df = df.drop_duplicates('_service_id')
+
             df['_service_id'] = df['_service_id'].apply(str)  # converts ints to strings
             df.index = df['_service_id']
             df['_display_name'] = df['_service_id']
@@ -107,21 +107,19 @@ class NoaaService(WebServiceBase):
                            'nosCoopsWLVHL','nosCoopsWLTP60','nosCoopsWLTPHL']
 
             coops_url = [BASE_URL + '{}.csvp?stationID%2Clongitude%2Clatitude'.format(id) for id in dataset_Ids]
-            df = pd.concat([pd.read_csv(f) for f in coops_url]) #ignore_index=True) #continues count
+            df = pd.concat([pd.read_csv(f) for f in coops_url])
 
             df.rename(columns={
                 'stationID': '_service_id',
                 'longitude (degrees_east)': '_longitude',
                 'latitude (degrees_north)': '_latitude'
             }, inplace=True)
-            #@df = df.drop_duplicates(df['_service_id'],)
+
             df['_service_id'] = df['_service_id'].apply(str)  # converts ints to strings
             df.index = df['_service_id']
             df['_display_name'] = df['_service_id']
             df['_geom_type'] = 'Point'
             df['_geom_coords'] = zip(df['_longitude'], df['_latitude'])
-
-
 
 
         return df.drop_duplicates()
