@@ -5,7 +5,7 @@ import pandas as pd
 import shutil
 
 from .. import util
-from .database import db_session, connect
+from .database import db_session, connect, get_db
 
 
 PROJECT_DB_FILE = 'metadata.db'
@@ -14,7 +14,8 @@ PROJECT_INDEX_FILE = 'project_index.yml'
 
 def active_db():
     """Return path to active project database"""
-    return _get_project_db(get_active_project())
+    dbpath = _get_project_db(get_active_project())
+    return dbpath
 
 
 @dispatcher.add_method
@@ -73,12 +74,12 @@ def new_project(name, display_name=None, description=None, metadata=None,
 
     util.mkdir_if_doesnt_exist(path)
     dbpath = os.path.join(path, PROJECT_DB_FILE)
-    db = connect(dbpath, reconnect=True)
+    db = get_db(dbpath)
     with db_session:
         db.Project(display_name=display_name,
-                        description=description,
-                        metadata=metadata)
-
+                   description=description,
+                   metadata=metadata)
+    db.disconnect()
     projects.update({name: {'folder': folder}})
     _write_projects(projects)
     set_active_project(name)
@@ -176,10 +177,12 @@ def set_active_project(name):
 
 
 def _load_project(name):
-    db = connect(active_db())
+    db = get_db(_get_project_db(name))
     project = db.Project.get().to_dict()
+    db.disconnect()
     del project['id']
     return project
+
 
 def _load_projects():
     """load list of collections."""
@@ -189,13 +192,6 @@ def _load_projects():
         projects = {}
 
     return projects
-
-
-def _write_project(display_name, description, metadata=None):
-    with db_session:
-        db.Project(display_name=display_name,
-                   description=description,
-                   metadata=metadata)
 
 
 def _write_projects(projects):
