@@ -1,19 +1,21 @@
 """API functions related to Projects."""
-import datetime
 from jsonrpc import dispatcher
 import os
+import pandas as pd
 import shutil
+
 from .. import util
-from . import db
+from .database import db_session, connect
+
 
 PROJECT_DB_FILE = 'metadata.db'
 PROJECT_INDEX_FILE = 'project_index.yml'
 
 
 def active_db():
-    """Return path to active project database
-    """
+    """Return path to active project database"""
     return _get_project_db(get_active_project())
+
 
 @dispatcher.add_method
 def add_project(name, path):
@@ -31,7 +33,7 @@ def add_project(name, path):
     try:
         folder = path
         # new_projects = dict(projects)
-        projects.update({name: {'_folder': folder}})
+        projects.update({name: {'folder': folder}})
         _write_projects(projects)
         project = _load_project(name)
     except Exception as e:
@@ -69,18 +71,17 @@ def new_project(name, display_name=None, description=None, metadata=None,
     else:
         path = folder
 
-    dsl_metadata = {
-        'type': 'project',
-        'display_name': display_name,
-        'description': description,
-        'created_on': datetime.datetime.now().isoformat(),
-    }
-
     util.mkdir_if_doesnt_exist(path)
     dbpath = os.path.join(path, PROJECT_DB_FILE)
-    _write_project(dbpath, dsl_metadata, metadata)
-    projects.update({name: {'_folder': folder}})
+    db = connect(dbpath, reconnect=True)
+    with db_session:
+        db.Project(display_name=display_name,
+                        description=description,
+                        metadata=metadata)
+
+    projects.update({name: {'folder': folder}})
     _write_projects(projects)
+    set_active_project(name)
 
     return _load_project(name)
 
@@ -113,7 +114,7 @@ def delete_project(name, delete_data=False):
         return projects
 
     if delete_data:
-        folder = projects[name]['_folder']
+        folder = projects[name]['folder']
         if not os.path.isabs(folder):
             path = os.path.join(util.get_projects_dir(), folder)
         else:
@@ -136,24 +137,27 @@ def get_active_project():
 
 
 @dispatcher.add_method
-def get_projects(metadata=None):
+def get_projects(expand=False, as_dataframe=False):
     """Get list of available projects."""
     projects = {}
-    if not metadata:
+    if not expand and not as_dataframe:
         return list(_load_projects().keys())
 
     for name, project in _load_projects().items():
-        path = project['_folder']
+        path = project['folder']
         if not os.path.isabs(path):
             path = os.path.join(util.get_projects_dir(), path)
 
         data = _load_project(name)
         data.update({
-            '_name': name,
-            '_folder': path,
+            'name': name,
+            'folder': path,
         })
 
-        projects[name] = util.to_metadata(data)
+        projects[name] = data
+
+    if as_dataframe:
+        projects = pd.DataFrame.from_dict(projects, orient='index')
 
     return projects
 
@@ -167,41 +171,31 @@ def set_active_project(name):
         raise ValueError('Project %s does not exist' % name)
     contents.update({'active_project': name})
     util.write_yaml(path, contents)
+    connect(active_db(), reconnect=True)
     return name
 
 
 def _load_project(name):
-    dbpath = _get_project_db(name)
-    return db.read_data(dbpath, 'project', 'project_metadata')
-
+    db = connect(active_db())
+    project = db.Project.get().to_dict()
+    del project['id']
+    return project
 
 def _load_projects():
     """load list of collections."""
     path = _get_projects_index_file()
     projects = util.read_yaml(path).get('projects')
-    # make sure a default project exists
-    default_dir = os.path.join(util.get_projects_dir(), 'default_project')
-    dbpath = os.path.join(default_dir, PROJECT_DB_FILE)
-    if projects is None or not os.path.exists(dbpath):
-        projects = projects or {}
-        projects['default'] = {'_folder': 'default_project'}
-        util.mkdir_if_doesnt_exist(default_dir)
-        dsl_metadata = {
-            'type': 'project',
-            'display_name': 'Default Project',
-            'description': 'Created by DSL',
-            'created_on': datetime.datetime.now().isoformat(),
-        }
-        util.mkdir_if_doesnt_exist(default_dir)
-        _write_project(dbpath, dsl_metadata)
-        _write_projects(projects)
-        set_active_project('default')
+    if not projects:
+        projects = {}
 
     return projects
 
 
-def _write_project(dbpath, dsl_metadata, metadata=None):
-    db.upsert(dbpath, 'project', 'project_metadata', dsl_metadata, metadata)
+def _write_project(display_name, description, metadata=None):
+    with db_session:
+        db.Project(display_name=display_name,
+                   description=description,
+                   metadata=metadata)
 
 
 def _write_projects(projects):
@@ -217,7 +211,7 @@ def _get_project_db(name):
     if name not in projects.keys():
         raise ValueError('Project %s not found' % name)
 
-    path = projects[name]['_folder']
+    path = projects[name]['folder']
     if not os.path.isabs(path):
         path = os.path.join(util.get_projects_dir(), path)
 
