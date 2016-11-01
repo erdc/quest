@@ -124,7 +124,7 @@ from .projects import (
     active_db,
 )
 
-from .database import connect
+from .database import get_db
 
 from .services import (
     get_providers,

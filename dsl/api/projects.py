@@ -5,7 +5,7 @@ import pandas as pd
 import shutil
 
 from .. import util
-from .database import db_session, connect, get_db
+from .database import db_session, init_db
 
 
 PROJECT_DB_FILE = 'metadata.db'
@@ -74,7 +74,7 @@ def new_project(name, display_name=None, description=None, metadata=None,
 
     util.mkdir_if_doesnt_exist(path)
     dbpath = os.path.join(path, PROJECT_DB_FILE)
-    db = get_db(dbpath)
+    db = init_db(dbpath)
     with db_session:
         db.Project(display_name=display_name,
                    description=description,
@@ -177,7 +177,7 @@ def set_active_project(name):
 
 
 def _load_project(name):
-    db = get_db(_get_project_db(name))
+    db = init_db(_get_project_db(name))
     project = db.Project.get().to_dict()
     db.disconnect()
     del project['id']
