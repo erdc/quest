@@ -74,6 +74,12 @@ def connect(dbpath, reconnect=False):
         else:
             db.disconnect()
 
+    db = get_db(dbpath)
+
+    return db
+
+
+def get_db(dbpath):
     db = orm.Database()  # create new database object
     define_models(db)  # define entities for this database
     db.bind('sqlite', dbpath, create_db=True)  # bind this database
