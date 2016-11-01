@@ -32,4 +32,4 @@ if not api.get_projects():
     api.set_active_project('default')
 
 # init active project db
-#api.connect(api.active_db())
+api.get_db(api.active_db())

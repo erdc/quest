@@ -2,7 +2,7 @@ from datetime import datetime
 from pony import orm
 from pony.orm import db_session
 
-db = None
+_connection = None  # global var to hold persistant db connection
 
 def define_models(db):
 
@@ -66,20 +66,20 @@ def define_models(db):
         feature = orm.Required(Feature)
 
 
-def connect(dbpath, reconnect=False):
-    global db
-    if db:
+def get_db(dbpath=None, reconnect=False):
+    global _connection
+    if _connection:
         if reconnect is False:
-            return db
+            return _connection
         else:
-            db.disconnect()
+            _connection.disconnect()
 
-    db = get_db(dbpath)
+    _connection = init_db(dbpath)
 
-    return db
+    return _connection
 
 
-def get_db(dbpath):
+def init_db(dbpath):
     db = orm.Database()  # create new database object
     define_models(db)  # define entities for this database
     db.bind('sqlite', dbpath, create_db=True)  # bind this database
