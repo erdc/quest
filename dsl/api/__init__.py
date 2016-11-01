@@ -121,8 +121,10 @@ from .projects import (
     get_projects,
     get_active_project,
     set_active_project,
+    active_db,
 )
 
+from .database import connect
 
 from .services import (
     get_providers,
