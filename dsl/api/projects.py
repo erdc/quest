@@ -5,7 +5,7 @@ import pandas as pd
 import shutil
 
 from .. import util
-from .database import db_session, init_db
+from .database import db_session, get_db, init_db
 
 
 PROJECT_DB_FILE = 'metadata.db'
@@ -19,7 +19,7 @@ def active_db():
 
 
 @dispatcher.add_method
-def add_project(name, path):
+def add_project(name, path, activate=True):
     """Add a existing DSL project to the list of available projects.
 
     This to add existing dsl projects to current session
@@ -43,12 +43,14 @@ def add_project(name, path):
         _write_projects(projects)
         raise ValueError('Invalid Project Folder: %s' % path)
 
+    if activate:
+        set_active_project(name)
     return project
 
 
 @dispatcher.add_method
 def new_project(name, display_name=None, description=None, metadata=None,
-                folder=None):
+                folder=None, activate=True):
     """Create a new DSL project and add it to list of available projects."""
     name = name.lower()
     projects = _load_projects()
@@ -82,28 +84,23 @@ def new_project(name, display_name=None, description=None, metadata=None,
     db.disconnect()
     projects.update({name: {'folder': folder}})
     _write_projects(projects)
-    set_active_project(name)
 
+    if activate:
+        set_active_project(name)
     return _load_project(name)
 
 
 @dispatcher.add_method
-def delete_project(name, delete_data=False):
+def delete_project(name):
     """delete a project.
 
-    Deletes a collection from the collections metadata file.
-    Optionally deletes all data under collection.
+    Deletes a project and all data in the project folder.
 
-    Parameters
-    ----------
+    Args:
         name : str,
             The name of the collection
 
-        delete_data : bool,
-            if True all data in the collection will be deleted
-
-        Returns
-        -------
+    Returns:
         projects : dict,
             A python dict representation of the list of available collections,
             the updated collections list is also written to a json file.
@@ -114,20 +111,16 @@ def delete_project(name, delete_data=False):
         print('Project not found')
         return projects
 
-    if delete_data:
-        folder = projects[name]['folder']
-        if not os.path.isabs(folder):
-            path = os.path.join(util.get_projects_dir(), folder)
-        else:
-            path = folder
-        if os.path.exists(path):
-            print('deleting all data under path:', path)
-            shutil.rmtree(path)
+    folder = projects[name]['folder']
+    if not os.path.isabs(folder):
+        path = os.path.join(util.get_projects_dir(), folder)
+    else:
+        path = folder
+    if os.path.exists(path):
+        print('deleting all data under path:', path)
+        shutil.rmtree(path)
 
-    print('removing %s from projects' % name)
-    del projects[name]
-    _write_projects(projects)
-    return projects
+    return remove_project(name)
 
 
 @dispatcher.add_method
@@ -164,6 +157,33 @@ def get_projects(expand=False, as_dataframe=False):
 
 
 @dispatcher.add_method
+def remove_project(name):
+    """Remove a project from the list of available projects.
+
+    This does not delete the project folder or data, just removes it from the
+    index of available projects.
+    """
+    projects = _load_projects()
+
+    if name not in list(projects.keys()):
+        print('Project not found')
+        return projects
+
+    if name == get_active_project():
+        if 'default' in projects.keys():
+            active = 'default'
+        else:
+            active = projects.keys()[0]
+        print('changing active project from {} to {}'.format(name, active))
+        set_active_project(active)
+
+    print('removing %s from projects' % name)
+    del projects[name]
+    _write_projects(projects)
+    return projects
+
+
+@dispatcher.add_method
 def set_active_project(name):
     """Set active DSL project."""
     path = _get_projects_index_file()
@@ -172,13 +192,15 @@ def set_active_project(name):
         raise ValueError('Project %s does not exist' % name)
     contents.update({'active_project': name})
     util.write_yaml(path, contents)
-    connect(active_db(), reconnect=True)
+    get_db(active_db(), reconnect=True)  # change active database
     return name
 
 
 def _load_project(name):
     db = init_db(_get_project_db(name))
-    project = db.Project.get().to_dict()
+    with db_session:
+        project = db.Project.get().to_dict()
+
     db.disconnect()
     del project['id']
     return project
