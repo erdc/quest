@@ -5,7 +5,22 @@ from dsl import util
 import os
 import ulmo
 import pandas as pd
+import geopandas as gpd
+from shapely.geometry import box, Point, Polygon, LineString, shape
+import json
 
+reserved_feature_fields = [
+    'display_name',
+    'description',
+    'download_url',
+    'geometry',
+    'latitude',
+    'longitude',
+    'geom_type',
+    'latitudes',
+    'longitudes',
+    'bbox',
+]
 
 class WebServiceBase(with_metaclass(abc.ABCMeta, object)):
     """Base class for data services plugins
@@ -23,15 +38,52 @@ class WebServiceBase(with_metaclass(abc.ABCMeta, object)):
         Take a series of query parameters and return a list of
         locations as a geojson python dictionary
         """
-        cache_file = os.path.join(util.get_cache_dir(self.name), service + '_features.h5')
+        cache_file = os.path.join(util.get_cache_dir(self.name), service + '_features.geojson')
         if not update_cache:
             try:
-                return pd.read_hdf(cache_file, 'table')
+                features = gpd.read_file(cache_file)
+                features.set_index('id', inplace=True)
+                return features
             except:
                 print('updating cache')
                 pass
 
+        # get features from service
         features = self._get_features(service)
+
+        # convert geometry into shapely objects
+        if 'bbox' in features.columns:
+            features['geometry'] = features['bbox'].apply(lambda row: box(*[float(x) for x in row]))
+            del features['bbox']
+
+        if all(x in features.columns for x in ['latitude', 'longitude']):
+            fn = lambda row:Point((
+                                float(row['longitude']),
+                                float(row['latitude'])
+                                ))
+            features['geometry'] = features.apply(fn)
+
+        if 'geometry' in features.columns:
+            # TODO
+            # check for geojson str or shapely object
+            pass
+
+        # if no geometry fields are found then this is a geotypical feature
+        if 'geometry' not in features.columns:
+            features['geometry'] = None
+
+        # add defaults values
+        if 'display_name' not in features.columns:
+            features['display_name'] = features.index
+
+        if 'description' not in features.columns:
+            features['description'] = ''
+
+        # merge extra data columns/fields into metadata as a dictionary
+        extra_fields = list(set(features.columns.tolist()) - set(reserved_feature_fields))
+        features['metadata'] = features[extra_fields].to_dict(orient='records')
+        features.drop(extra_fields, axis=1, inplace=True)
+
         params = self._get_parameters(service, features)
         if isinstance(params, pd.DataFrame):
             groups = params.groupby('_service_id').groups
@@ -41,8 +93,14 @@ class WebServiceBase(with_metaclass(abc.ABCMeta, object)):
             features['_parameters'] = ','.join(params['_parameters'])
             features['_parameter_codes'] = ','.join(params['_parameter_codes'])
 
+        # convert to GeoPandas GeoDataFrame
+        features = gpd.GeoDataFrame(features, geometry='geometry')
+
+        # write to cache_file
         util.mkdir_if_doesnt_exist(os.path.split(cache_file)[0])
-        features.to_hdf(cache_file, 'table')
+        with open(cache_file, 'w') as f:
+            f.write(features.to_json())
+
         return features
 
     def get_services(self):
@@ -70,6 +128,23 @@ class WebServiceBase(with_metaclass(abc.ABCMeta, object)):
     @abc.abstractmethod
     def _get_features(self, service):
         """
+        should return a pandas dataframe or a python dictionary with
+        indexed by feature uid and containing the following columns
+
+        reserved column/field names
+            display_name -> will be set to uid if not provided
+            description -> will be set to '' if not provided
+            download_url -> optional download url
+
+            defining geometry options:
+                1) geometry -> geojson string or shapely object
+                2) latitude & longitude columns/fields
+                3) geometry_type, latitudes, longitudes columns/fields
+                4) bbox column/field -> tuple with order (lon min, lat min, lon max, lat max)
+
+        all other columns/fields will be accumulated in a dict and placed
+        in a metadata field.
+
         """
 
     @abc.abstractmethod

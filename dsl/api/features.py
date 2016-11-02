@@ -7,14 +7,10 @@ from jsonrpc import dispatcher
 import pandas as pd
 
 from .. import util
-from . import db
-from .projects import active_db
-from .collections import (
-        _read_collection_features,
-        _write_collection_features,
-        get_collections,
-    )
+from .database import get_db, db_session
+from .collections import get_collections
 from .metadata import get_metadata
+
 
 @dispatcher.add_method
 def add_features(collection, features):
@@ -38,18 +34,23 @@ def add_features(collection, features):
     Returns:
         uris (list): uri's of features
     """
+
+    if collection not in get_collections():
+        raise ValueError('Collection {} does not exist'.format(collection))
+
     if not isinstance(features, pd.DataFrame):
         features = get_metadata(features, as_dataframe=True)
 
-    #features[~features.index.str.startswith('svc://')]['_service'] = None
-    features['_collection'] = collection
-    return db.upsert_features(active_db(), features)
+    db = get_db()
+    with db_session:
+        pass
+    #return db.upsert_features(active_db(), features)
 
 
 @dispatcher.add_method
 def get_features(services=None, collections=None, features=None,
-                 metadata=None, as_dataframe=False, update_cache=False,
-                 filters=None):
+                 expand=False, as_dataframe=False, as_geojson=False,
+                 update_cache=False, filters=None):
     """Retrieve list of features from resources.
 
     Args:
@@ -140,11 +141,14 @@ def get_features(services=None, collections=None, features=None,
                 idx = features[k] == v
                 features = features[idx]
 
-    if not metadata and not as_dataframe:
+    if not (expand or as_dataframe or as_geojson):
         return features.index.astype('unicode').tolist()
 
+    if as_geojson:
+        features = features.to_json()
+
     if not as_dataframe:
-        features = util.to_geojson(features)
+        features = features.to_dict(orient='index')
 
     return features
 
@@ -311,7 +315,8 @@ def delete_feature(uri):
 def _get_features(provider, service, update_cache):
     driver = util.load_services()[provider]
     features = driver.get_features(service, update_cache=update_cache)
-    features['_service'] = 'svc://{}:{}'.format(provider, service)
-    features.index = features['_service'] + '/' + features['_service_id']
-    features['_name'] = features.index
+    features['service'] = 'svc://{}:{}'.format(provider, service)
+    features['service_id'] = features.index
+    features.index = features['service'] + '/' + features['service_id']
+    features['name'] = features.index
     return features
