@@ -47,6 +47,7 @@ __all__ = (
     'delete_project',
     'get_projects',
     'get_active_project',
+    'remove_project',
     'set_active_project',
     'get_providers',
     'get_services',
@@ -120,6 +121,7 @@ from .projects import (
     delete_project,
     get_projects,
     get_active_project,
+    remove_project,
     set_active_project,
     active_db,
 )
