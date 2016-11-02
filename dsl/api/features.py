@@ -145,7 +145,7 @@ def get_features(services=None, collections=None, features=None,
         return features.index.astype('unicode').tolist()
 
     if as_geojson:
-        features = features.to_json()
+        return json.loads(features.to_json())
 
     if not as_dataframe:
         features = features.to_dict(orient='index')
