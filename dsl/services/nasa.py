@@ -131,9 +131,12 @@ class NasaService(SingleFileBase):
             lambda x: next(iter([link['href'] for link in x if link.get('type') == 'application/zip']), None))
 
         features = features.ix[~features.download_url.isnull()]
+        features['reserved'] = features['download_url'].apply(lambda x: {'download_url': x})
+
         # features['_filename'] = features._download_url.apply(lambda x: x.split('/')[-1])
         # features['_extract_from_zip'] = '.DEM'
         # features['_file_format'] = 'raster-gdal'
+        del features['download_url']
         del features['links']
         del features['boxes']
 
@@ -141,6 +144,6 @@ class NasaService(SingleFileBase):
 
     def _get_parameters(self, service, features=None):
         return {
-            '_parameters': ['elevation'],
-            '_parameter_codes': ['elevation'],
+            'parameters': ['elevation'],
+            #'parameter_codes': ['elevation'],
         }

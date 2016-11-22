@@ -12,7 +12,7 @@ import json
 reserved_feature_fields = [
     'display_name',
     'description',
-    'download_url',
+    'reserved',
     'geometry',
     'latitude',
     'longitude',
@@ -86,12 +86,12 @@ class WebServiceBase(with_metaclass(abc.ABCMeta, object)):
 
         params = self._get_parameters(service, features)
         if isinstance(params, pd.DataFrame):
-            groups = params.groupby('_service_id').groups
-            features['_parameters'] = features.index.map(lambda x: ','.join(filter(None, params.ix[groups[x]]['_parameter'].tolist())) if x in groups.keys() else '')
-            features['_parameter_codes'] = features.index.map(lambda x: ','.join(filter(None, params.ix[groups[x]]['_parameter_code'].tolist())) if x in groups.keys() else '')
+            groups = params.groupby('service_id').groups
+            features['parameters'] = features.index.map(lambda x: ','.join(filter(None, params.ix[groups[x]]['_parameter'].tolist())) if x in groups.keys() else '')
+            #features['parameter_codes'] = features.index.map(lambda x: ','.join(filter(None, params.ix[groups[x]]['_parameter_code'].tolist())) if x in groups.keys() else '')
         else:
-            features['_parameters'] = ','.join(params['_parameters'])
-            features['_parameter_codes'] = ','.join(params['_parameter_codes'])
+            features['parameters'] = ','.join(params['parameters'])
+            #features['parameter_codes'] = ','.join(params['parameter_codes'])
 
         # convert to GeoPandas GeoDataFrame
         features = gpd.GeoDataFrame(features, geometry='geometry')
@@ -172,15 +172,16 @@ class SingleFileBase(WebServiceBase):
     """
     def _download(self, service, feature, save_path, **kwargs):
         feature = self.get_features(service).ix[feature]
-        download_url = feature['_download_url']
-        fmt = feature.get('_extract_from_zip', '')
-        filename = feature.get('_filename', util.uuid('dataset'))
+        reserved = feature.get('reserved')
+        download_url = reserved['download_url']
+        fmt = reserved.get('extract_from_zip', '')
+        filename = reserved.get('filename', util.uuid('dataset'))
         datatype = self._get_services()[service].get('datatype')
         save_path = self._download_file(save_path, download_url, fmt, filename)
         return {
             'save_path': save_path,
-            'file_format': feature.get('_file_format'),
-            'parameter': feature.get('_parameters'),
+            'file_format': feature.get('file_format'),
+            'parameter': feature.get('parameters'),
             'datatype': datatype,
         }
 

@@ -35,6 +35,7 @@ def define_models(db):
         metadata = orm.Optional(orm.Json)
         service = orm.Optional(str)
         service_id = orm.Optional(str)
+        reserved = orm.Optional(orm.Json)
         parameters = orm.Optional(orm.Json)
 
         # setup relationships
