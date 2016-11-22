@@ -107,26 +107,23 @@ class TsUnitConversion(TsBase):
         TsBase.register(self, name=name)
 
     def _apply(self, df, options):
-        unitsMap = {
-            "ft3/s": "cu_ft/s",
-
-        }
         metadata = df.metadata
         if 'save_path' in metadata:
             del metadata['save_path']
 
-        reg = UnitRegistry()
+        path = "/Users/rditllkw/DSL/data-services-library/dsl/filters/timeseries/default_units.txt"
+        reg = UnitRegistry(path)
         from_units = metadata['units']
-        if from_units not in dir(reg):
-            from_units = unitsMap[from_units]
         if '/' in from_units and '/' not in options.get('to_units'):
             beg = from_units.find('/')
             end = len(from_units)
             default_time = from_units[beg:end]
             to_units = options.get('to_units') + default_time
-        conversion = reg.convert(1, src=from_units, dst=options.get('to_units'))
-        df[df.columns[0]] = df[df.columns[0]] * conversion
-        metadata.update({'units': options.get('to_units')})
+        else:
+            to_units = options.get('to_units')
+        conversion = reg.convert(1, src=from_units, dst=to_units)
+        df[df.columns[1]] = df[df.columns[1]] * conversion
+        metadata.update({'units': to_units})
         df.metadata = metadata
 
         return df

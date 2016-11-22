@@ -1,23 +1,29 @@
-"""io plugin for timeseries datasets."""
-
 import json
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
 
 from .base import IoBase
-from .xyHdf5 import XYHdf5
 from .. import util
 
 
-class TsHdf5(XYHdf5):
-    """NetCDF IO for timeseries using xarray."""
-
+class XYHdf5(IoBase):
+    """"""
     def register(self):
         "Register plugin by setting description and io type."
-        self.description = 'HDF5 IO for Timeseries datasets'
-        self.iotype = 'timeseries'
+        self.description = 'Flow duration IO'
+        self.iotype = 'flowDuration'
 
+    def read(self, path):
+        "Read metadata and dataframe from HDF5 store."
+        if not path.endswith('h5'):
+            path += '.h5'
+
+        with pd.get_store(path) as h5store:
+            dataframe = h5store.get('dataframe')
+            dataframe.metadata = h5store.get_storer('dataframe').attrs.metadata
+
+        return dataframe
 
     def write(self, save_path, dataframe, metadata):
         "Write dataframe and metadata to HDF5 store."
@@ -59,7 +65,7 @@ class TsHdf5(XYHdf5):
             raise NotImplementedError
 
         df = self.read(path)
-        parameter = df.columns[1]#metadata['parameter']
+        parameter = df.columns[0]#metadata['parameter']
 
         if start is None:
             start = df.index[0]
@@ -86,7 +92,7 @@ class TsHdf5(XYHdf5):
         end = df.index[-1].strftime('%Y-%m-%d %H:%M:%S')
 
         schema = {
-            "title": "Timeseries Vizualization Options",
+            "title": "XYDataset Vizualization Options",
             "type": "object",
             "properties": {
                 "start": {
