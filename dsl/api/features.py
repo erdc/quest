@@ -5,6 +5,10 @@ Features are unique identifiers with a web service or collection.
 import json
 from jsonrpc import dispatcher
 import pandas as pd
+import geopandas as gpd
+import geojson
+import shapely.wkt
+from shapely.geometry import shape
 
 from .. import util
 from .database import get_db, db_session
@@ -43,8 +47,28 @@ def add_features(collection, features):
 
     db = get_db()
     with db_session:
-        pass
-    #return db.upsert_features(active_db(), features)
+        uris = []  # feature uris inside collection
+        for _, data in features.iterrows():
+            data = data.to_dict()
+            row = db.Feature.select(lambda c:
+                                    c.service == data['service'] and
+                                    c.service_id == data['service_id'] and
+                                    c.collection.name == collection
+                                    ).first()
+            if row is not None:
+                uris.append(row.name)
+                continue
+
+            uri = util.uuid('feature')
+            data.update({
+                    'name': uri,
+                    'collection': collection,
+                    'geometry': data['geometry'].to_wkt(),
+                    })
+            db.Feature(**data)
+            uris.append(uri)
+
+    return uris
 
 
 @dispatcher.add_method
@@ -100,12 +124,20 @@ def get_features(services=None, collections=None, features=None,
         all_features.append(tmp_feats)
 
     # get metadata for features in collections
-    for name in collections or []:
-        tmp_feats = pd.DataFrame(db.read_all(active_db(), 'features')).T
-        if not tmp_feats.empty:
-            tmp_feats = tmp_feats[tmp_feats['_collection'] == name]
-            tmp_feats.index = tmp_feats['_name']
-        all_features.append(tmp_feats)
+    db = get_db()
+    with db_session:
+        for name in collections or []:
+            tmp_feats = [f.to_dict() for f in db.Feature.select(
+                            lambda c: c.collection.name == name
+                        )]
+            tmp_feats = gpd.GeoDataFrame(tmp_feats)
+            tmp_feats['geometry'] = tmp_feats['geometry'].apply(
+                                        lambda x: shapely.wkt.loads(x))
+            tmp_feats.set_geometry('geometry')
+
+            if not tmp_feats.empty:
+                tmp_feats.index = tmp_feats['name']
+            all_features.append(tmp_feats)
 
     # drop duplicates fails when some columns have nested list/tuples like
     # _geom_coords. so drop based on index
@@ -183,12 +215,14 @@ def get_tags(service):
 
 
 @dispatcher.add_method
-def new_feature(collection, display_name=None, geom_type=None, geom_coords=None, metadata=None):
+def new_feature(collection, display_name=None, geom_type=None, geom_coords=None,
+                description=None, metadata=None):
     """Add a new feature to a collection.
 
     Args:
         collection (string): name of collection
         display_name (string): display name of feature
+        description (string): description of feature
         geom_type (string, optional): point/line/polygon
         geom_coords (string or list, optional): geometric coordinates specified
             as valid geojson coordinates (i.e. a list of lists i.e.
@@ -206,6 +240,7 @@ def new_feature(collection, display_name=None, geom_type=None, geom_coords=None,
     if collection not in get_collections():
         raise ValueError('Collection {} not found'.format(collection))
 
+    geometry = None
     if geom_type is not None:
         if geom_type not in ['LineString', 'Point', 'Polygon']:
             raise ValueError(
@@ -215,19 +250,30 @@ def new_feature(collection, display_name=None, geom_type=None, geom_coords=None,
         if isinstance(geom_coords, str):
             geom_coords = json.loads(geom_coords)
 
+        # convert to wkt using gist
+        # https://gist.github.com/drmalex07/5a54fc4f1db06a66679e
+        o = {"coordinates": geom_coords, "type": geom_type}
+        s = json.dumps(o)
+        g1 = geojson.loads(s)
+        g2 = shape(g1)
+        geometry = g2.wkt
+
     uri = util.uuid('feature')
     if display_name is None:
         display_name = uri
 
-    dsl_metadata = {
-        'display_name': display_name,
-        'geom_type': geom_type,
-        'geom_coords': geom_coords,
-        'collection': collection,
-        }
+    data = {
+            'name': uri,
+            'display_name': display_name,
+            'description': description,
+            'collection': collection,
+            'geometry': geometry,
+            'metadata': metadata,
+            }
 
-    db.upsert(active_db(), 'features', uri, dsl_metadata=dsl_metadata,
-              metadata=metadata)
+    db = get_db()
+    with db_session:
+        db.Feature(**data)
 
     return uri
 
