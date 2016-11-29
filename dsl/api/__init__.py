@@ -53,6 +53,7 @@ __all__ = (
     'get_services',
     'add_provider',  # add custom url or local folder as a service
     'delete_provider',
+    'move_feature',
 )
 
 from ..util import (
@@ -86,6 +87,8 @@ from .datasets import (
 
 from .delete import (
     delete,
+    move,
+    copy,
 )
 
 from .features import (
