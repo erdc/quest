@@ -15,7 +15,7 @@ def get_mapped_parameters():
     parameters : list of str,
         list of parameters available
     """
-    services = get_services(metadata=True)
+    services = get_services(expand=True)
     parameters = []
     for service in services.values():
         parameters += service['parameters']

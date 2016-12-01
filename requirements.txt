@@ -13,3 +13,5 @@ click
 werkzeug
 peewee
 stevedore
+geopandas
+pony

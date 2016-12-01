@@ -216,7 +216,7 @@ def test_get_datasets(dataset_save_path):
     expected = [DATASET]
     assert actual == expected
 
-    actual = dsl.api.get_datasets(metadata=True)
+    actual = dsl.api.get_datasets(expand=True)
     expected = {DATASET: {'download_status': 'downloaded',
                                              'download_message': 'success',
                                              'name': 'de160d255665477a93835868e34a03bc',

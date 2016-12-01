@@ -30,3 +30,6 @@ dependencies:
     - werkzeug
     - peewee
     - stevedore
+    - geopandas
+    - pip:
+      - pony
