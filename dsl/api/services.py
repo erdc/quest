@@ -14,18 +14,18 @@ from stevedore import driver
 
 
 @dispatcher.add_method
-def get_providers(metadata=None):
+def get_providers(expand=None):
     """Return list of Providers."""
     providers = util.load_services() #util.load_drivers('services')
     p = {k: v.metadata for k, v in providers.items()}
-    if not metadata:
+    if not expand:
         p = sorted(p.keys())
 
     return p
 
 
 @dispatcher.add_method
-def get_services(metadata=None, parameter=None, service_type='geo-discrete'):
+def get_services(expand=None, parameter=None, service_type='geo-discrete'):
     """Return list of Services."""
     providers = util.load_services() # util.load_drivers('services')
     services = {}
@@ -37,7 +37,7 @@ def get_services(metadata=None, parameter=None, service_type='geo-discrete'):
                     svc_metadata.update({'name': name})
                     services[name] = svc_metadata
 
-    if not metadata:
+    if not expand:
         services = sorted(services.keys())
 
     return services
@@ -83,7 +83,7 @@ def delete_provider(uri):
         if not provider.startswith('user'):
             raise ValueError('Can only remove user services')
 
-        uri = get_providers(metadata=True)[provider].get('service_uri')
+        uri = get_providers(expand=True)[provider].get('service_uri')
 
     user_services = util.get_settings()['USER_SERVICES']
     if uri in user_services:

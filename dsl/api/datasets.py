@@ -154,12 +154,12 @@ def download_options(uris, fmt='json-schema'):
 
 
 @dispatcher.add_method
-def get_datasets(metadata=None, filters=None, as_dataframe=None):
+def get_datasets(expand=None, filters=None, as_dataframe=None):
     """
     """
     datasets = db.read_all(active_db(), 'datasets', as_dataframe=True)
     if datasets.empty:
-        if not metadata and not as_dataframe:
+        if not expand and not as_dataframe:
             datasets = []
         elif not as_dataframe:
             datasets = {}
@@ -177,7 +177,7 @@ def get_datasets(metadata=None, filters=None, as_dataframe=None):
 
             datasets = datasets.ix[datasets[key] == v]
 
-    if not metadata and not as_dataframe:
+    if not expand and not as_dataframe:
         datasets = datasets['_name'].tolist()
     elif not as_dataframe:
         # reformat metadata

@@ -14,14 +14,14 @@ print('\nDSL version %s' % dsl.api.get_dsl_version())
 print('\nDSL API version %s' % dsl.api.get_api_version())
 
 # get list of providers
-providers = dsl.api.get_providers(metadata=True)
+providers = dsl.api.get_providers(expand=True)
 print('\n%s DSL providers are available:' % len(providers))
 print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 for k, v in providers.items():
     print('{: <20} {: <20}'.format(k, v['display_name']))
 
 # get list of services
-services = dsl.api.get_services(metadata=True)
+services = dsl.api.get_services(expand=True)
 print('\n%s DSL services are available:' % len(services))
 print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 for k, v in services.items():
@@ -52,7 +52,7 @@ if not choice:
 choice = int(choice)
 
 # get list of services
-services = dsl.api.get_services(metadata=True, parameter=mapped_parameters[choice])
+services = dsl.api.get_services(expand=True, parameter=mapped_parameters[choice])
 print('\n%s DSL services contain the %s parameter:' % (len(services), mapped_parameters[choice]))
 print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 for k, v in services.items():
@@ -63,7 +63,7 @@ print('\n--------------------------------------------------')
 print('      Get Features from Service')
 print('--------------------------------------------------')
 
-services = dsl.api.get_services(metadata=True)
+services = dsl.api.get_services(expand=True)
 print('\nChoose a DSL Service(s):')
 print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 svcs = {}
