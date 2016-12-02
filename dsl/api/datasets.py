@@ -38,7 +38,7 @@ def download(feature, save_path, dataset=None, async=False, **kwargs):
     service_uri = feature
     if not service_uri.startswith('svc://'):
         df = get_metadata(feature, as_dataframe=True)[0]
-        df = df['_service'] + '/' + df['_service_id']
+        df = df['service'] + '/' + df['service_id']
         service_uri = df.tolist()[0]
 
     if save_path is None:
@@ -67,12 +67,12 @@ def download_datasets(datasets, async=False, raise_on_error=False):
     datasets = get_metadata(datasets, as_dataframe=True)
 
     # filter out non download datasets
-    datasets = datasets[datasets['_dataset_type'] == 'download']
-    features = datasets['_feature'].tolist()
+    datasets = datasets[datasets['dataset_type'] == 'download']
+    features = datasets['feature'].tolist()
     features = get_metadata(features, as_dataframe=True)
     datasets = datasets.join(features[[
-                                '_service',
-                                '_service_id',
+                                'service',
+                                'service_id',
                              ]],
                              on='_feature')
     project_path = os.path.split(active_db())[0]
