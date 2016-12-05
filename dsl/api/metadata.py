@@ -6,9 +6,8 @@ get/update metadata for projects/collections/datasets.
 from jsonrpc import dispatcher
 import pandas as pd
 
-from .projects import active_db
 from .. import util
-from . import db
+from .database import get_db, db_session
 
 
 @dispatcher.add_method
@@ -41,7 +40,7 @@ def get_metadata(uris, as_dataframe=False):
         svc_df = pd.DataFrame(svc_df['uri'].apply(util.parse_service_uri).tolist(),
                               columns=['provider', 'service', 'feature'])
 
-        for (provider,service), grp in svc_df.groupby(['provider', 'service']):
+        for (provider, service), grp in svc_df.groupby(['provider', 'service']):
             svc = 'svc://{}:{}'.format(provider, service)
             driver = util.load_services()[provider]
             features = driver.get_features(service)
@@ -49,33 +48,42 @@ def get_metadata(uris, as_dataframe=False):
             if None not in selected_features:
                 features = features.ix[selected_features]
 
-            features['_service'] = svc
-            features.index = features['_service'] + '/' + features['_service_id']
-            features['_name'] = features.index
+            features['service'] = svc
+            features['service_id'] = features.index
+            features.index = features['service'] + '/' + features['service_id']
+            features['name'] = features.index
             metadata.append(features)
 
     if 'collections' in grouped.groups.keys():
         # get metadata for collections
         tmp_df = grouped.get_group('collections')
-        collections = db.read_all(active_db(), 'collections', as_dataframe=True)
-        collections = collections.ix[tmp_df['uri'].tolist()]
+        db = get_db()
+        with db_session:
+            collections = [c.to_dict() for c in db.Collection.select(lambda c: c.name in tmp_df['uri'].tolist())]
+            collections = pd.DataFrame(collections)
+            collections.set_index('name', inplace=True, drop=False)
+
         metadata.append(collections)
 
     if 'features' in grouped.groups.keys():
         # get metadata for features
         tmp_df = grouped.get_group('features')
-        features = db.read_all(active_db(), 'features', as_dataframe=True)
-        features = features.ix[tmp_df['uri'].tolist()]
+        db = get_db()
+        with db_session:
+            features = [f.to_dict() for f in db.Feature.select(lambda c: c.name in tmp_df['uri'].tolist())]
+            features = pd.DataFrame(features)
+            features.set_index('name', inplace=True, drop=False)
         metadata.append(features)
 
     if 'datasets' in grouped.groups.keys():
         # get metadata for datasets
         tmp_df = grouped.get_group('datasets')
-        datasets = db.read_all(active_db(), 'datasets', as_dataframe=True)
-        # add collection name
-        features = db.read_all(active_db(), 'features', as_dataframe=True)
-        datasets = datasets.join(features['_collection'], on='_feature')
-        datasets = datasets.ix[tmp_df['uri'].tolist()]
+        db = get_db()
+        with db_session:
+            datasets = [dict(d.to_dict(), **{'collection': d.feature.collection.name})
+                        for d in db.Dataset.select(lambda c: c.name in tmp_df['uri'].tolist())]
+            datasets = pd.DataFrame(datasets)
+            datasets.set_index('name', inplace=True, drop=False)
 
         metadata.append(datasets)
 
@@ -147,9 +155,18 @@ def update_metadata(uris, display_name=None, description=None,
             dsl_meta.update({'display_name': name})
         if desc:
             dsl_meta.update({'description': desc})
+        if meta:
+            dsl_meta.update({'metadata': meta})
 
-        db.upsert(active_db(), resource, uri,
-                  dsl_metadata=dsl_meta,
-                  metadata=meta)
+        db = get_db()
+        with db_session:
+            if resource == 'collection':
+                entity = db.Collection[uri]
+            elif resource == 'feature':
+                entity = db.Feature[uri]
+            elif resource == 'dataset':
+                entity = db.Dataset[uri]
+
+            entity.set(**dsl_meta)
 
     return get_metadata(uris)
