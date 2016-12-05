@@ -45,7 +45,7 @@ def define_models(db):
     class Dataset(db.Entity):
         name = orm.PrimaryKey(str)
         display_name = orm.Optional(str)
-        description = orm.Optional(str)
+        description = orm.Optional(str, nullable=True)
         created_at = orm.Required(datetime, default=datetime.now())
         updated_at = orm.Optional(datetime)
         metadata = orm.Optional(orm.Json)
@@ -59,7 +59,7 @@ def define_models(db):
         options = orm.Optional(orm.Json)
         status = orm.Optional(str)
         message = orm.Optional(str)
-        file_path = orm.Optional(str)
+        file_path = orm.Optional(str, nullable=True)
         visualization_path = orm.Optional(str)
         parent_datasets = orm.Optional(orm.Json)
 

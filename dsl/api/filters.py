@@ -86,7 +86,7 @@ def get_filters(filters=None, metadata=False, **kwargs):
 
 
 @dispatcher.add_method
-def apply_filter(name, datasets=None, features=None, options=None, as_dataframe=None, metadata=None):
+def apply_filter(name, datasets=None, features=None, options=None, as_dataframe=None, expand=None):
     """Apply Filter to dataset."""
     datasets = util.listify(datasets)
     features = util.listify(features)
@@ -98,12 +98,12 @@ def apply_filter(name, datasets=None, features=None, options=None, as_dataframe=
     new_datasets = util.listify(result.get('datasets', []))
     new_features = util.listify(result.get('features', []))
 
-    if metadata or as_dataframe:
+    if expand or as_dataframe:
         new_datasets = get_metadata(new_datasets, as_dataframe=True)
         new_features = get_metadata(new_features, as_dataframe=True)
 
-        if metadata:
-            new_datasets = list(util.to_metadata(new_datasets).values())
+        if expand:
+            new_datasets = list(new_datasets.to_dict(orient='index').values())
             new_features = util.to_geojson(new_features)['features']
 
     result.update({'datasets': new_datasets, 'features': new_features})
