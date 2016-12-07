@@ -11,8 +11,8 @@ class XYHdf5(IoBase):
     """"""
     def register(self):
         "Register plugin by setting description and io type."
-        self.description = 'Flow duration IO'
-        self.iotype = 'flowDuration'
+        self.description = 'Hdf5 for XY datasets '
+        self.iotype = 'XYdata'
 
     def read(self, path):
         "Read metadata and dataframe from HDF5 store."
@@ -44,9 +44,9 @@ class XYHdf5(IoBase):
         if fmt == None or fmt.lower() == 'dataframe':
             return dataframe
 
-        # convert index to datetime in case it is a PeriodIndex
-        dataframe.index = dataframe.index.to_datetime()
-        jstr = json.loads(dataframe.to_json(date_format='iso'))
+        # # convert index to datetime in case it is a PeriodIndex
+        # dataframe.index = dataframe.index.to_datetime()
+        jstr = json.loads(dataframe.to_json())
         d = {}
         d['data'] = {k: sorted(v.items()) for k, v in jstr.items()}
         d['metadata'] = dataframe.metadata
@@ -65,7 +65,7 @@ class XYHdf5(IoBase):
             raise NotImplementedError
 
         df = self.read(path)
-        parameter = df.columns[0]#metadata['parameter']
+        parameter = df.metadata['parameter']
 
         if start is None:
             start = df.index[0]
@@ -88,8 +88,8 @@ class XYHdf5(IoBase):
     def visualize_options(self, path, fmt='json-schema'):
         """visualation options for timeseries datasets"""
         df = self.read(path)
-        start = df.index[0].strftime('%Y-%m-%d %H:%M:%S')
-        end = df.index[-1].strftime('%Y-%m-%d %H:%M:%S')
+        start = df.index[0]
+        end = df.index[-1]
 
         schema = {
             "title": "XYDataset Vizualization Options",
