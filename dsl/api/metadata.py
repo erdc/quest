@@ -134,8 +134,8 @@ def update_metadata(uris, display_name=None, description=None,
         elif not isinstance(description, list):
             raise ValueError('description must be a list if more that one uri is passed in')
 
-        if not isinstance(metadata, list):
-            metadata = [metadata] * n
+        # if not isinstance(metadata, list):
+        #     metadata = [metadata] * n
 
         if not isinstance(dsl_metadata, list):
                     dsl_metadata = [dsl_metadata] * n

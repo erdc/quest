@@ -19,19 +19,6 @@ class TsHdf5(XYHdf5):
         self.iotype = 'timeseries'
 
 
-    def write(self, save_path, dataframe, metadata):
-        "Write dataframe and metadata to HDF5 store."
-        base, fname = os.path.split(save_path)
-        if not save_path.endswith('h5'):
-            save_path += '.h5'
-
-        util.mkdir_if_doesnt_exist(base)
-        with pd.get_store(save_path) as h5store:
-            h5store.put('dataframe', dataframe)
-            h5store.get_storer('dataframe').attrs.metadata = metadata
-
-        print('file written to: %s' % save_path)
-
     def open(self, path, fmt=None):
         dataframe = self.read(path)
 
@@ -53,31 +40,6 @@ class TsHdf5(XYHdf5):
 
         raise NotImplementedError('format %s not recognized' % fmt)
 
-    def visualize(self, path, title, engine='mpl', start=None, end=None, **kwargs):
-        """Visualize timeseries dataset."""
-        if engine is not 'mpl':
-            raise NotImplementedError
-
-        df = self.read(path)
-        parameter = df.columns[1]#metadata['parameter']
-
-        if start is None:
-            start = df.index[0]
-
-        if end is None:
-            end = df.index[-1]
-
-        plt.style.use('ggplot')
-        fig = plt.figure()
-        ax = df[parameter][start:end].plot(legend=True, figsize=(8, 6))
-        ax.set_title(title)
-        ax.set_ylabel(df.metadata['units'])
-        base, ext = os.path.splitext(path)
-        visualization_path = base + '.png'
-        plt.savefig(visualization_path)
-        plt.close(fig)
-
-        return visualization_path
 
     def visualize_options(self, path, fmt='json-schema'):
         """visualation options for timeseries datasets"""
