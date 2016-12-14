@@ -87,10 +87,12 @@ def _get_project_dir():
 def _load_collection(name):
     """load collection."""
     db = get_db()
-    return db.Collection.select(lambda c: c.name == name).first().to_dict()
+    with db_session:
+        return db.Collection.select(lambda c: c.name == name).first().to_dict()
 
 
 def _load_collections():
     """load list of collections."""
     db = get_db()
-    return {c.name: c.to_dict() for c in db.Collection.select(lambda c: c)}
+    with db_session:
+        return {c.name: c.to_dict() for c in db.Collection.select(lambda c: c)}
