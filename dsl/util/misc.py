@@ -282,11 +282,11 @@ def to_dataframe(feature_collection):
         if len(coords.shape) > 1:
             coords = coords.mean(axis=1)
         data.update({
-            '_geom_type': feature['geometry']['type'],
-            '_geom_coords': feature['geometry']['coordinates'],
-            '_longitude': coords.flatten()[0],
-            '_latitude': coords.flatten()[1],
-            '_service_id': feature['id']
+            'geom_type': feature['geometry']['type'],
+            'geom_coords': feature['geometry']['coordinates'],
+            'longitude': coords.flatten()[0],
+            'latitude': coords.flatten()[1],
+            'service_id': feature['id']
         })
 
         features[feature['id']] = data
@@ -301,6 +301,7 @@ def to_geojson(df):
     }
     features = []
     if not df.empty:
+        # TODO what is this code doing and is it now obsolete with the new DB?
         idx = df.columns.str.startswith('_')
         r = {field: field[1:] for field in df.columns[idx]}
         for uid, row in df.iterrows():
@@ -334,14 +335,16 @@ def to_metadata(data):
     metadata property
     """
     if isinstance(data, dict):
-        properties = {k[1:]: v for k, v in data.items() if k.startswith('_')}
-        metadata = {k: v for k, v in data.items() if not k.startswith('_')}
-        properties.update({'metadata': metadata})
+        # properties = {k[1:]: v for k, v in data.items() if k.startswith('_')}
+        # metadata = {k: v for k, v in data.items() if not k.startswith('_')}
+        # properties.update({'metadata': metadata})
+        return data
     else:
-        idx = data.columns.str.startswith('_')
-        r = {field: field[1:] for field in data.columns[idx]}
-        properties = data[data.columns[idx]].rename(columns=r)
-        properties['metadata'] = data[data.columns[~idx]].to_dict(orient='records')
+        # idx = data.columns.str.startswith('_')
+        # r = {field: field[1:] for field in data.columns[idx]}
+        # properties = data[data.columns[idx]].rename(columns=r)
+        # properties['metadata'] = data[data.columns[~idx]].to_dict(orient='records')
+        properties = data
         properties.index.name = 'name'
         properties = properties.to_dict(orient='index')
 
