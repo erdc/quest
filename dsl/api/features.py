@@ -8,7 +8,7 @@ import pandas as pd
 import geopandas as gpd
 import geojson
 import shapely.wkt
-from shapely.geometry import shape
+from shapely.geometry import shape, Polygon
 
 from .. import util
 from .database import get_db, db_session
@@ -149,29 +149,25 @@ def get_features(services=None, collections=None, features=None,
     # apply any specified filters
     if filters is not None:
         for k, v in filters.items():
-            if k == 'bbox':
-                xmin, ymin, xmax, ymax = [float(x) for x in util.listify(v)]
-                idx = (features._longitude > xmin) \
-                    & (features._longitude < xmax) \
-                    & (features._latitude > ymin) \
-                    & (features._latitude < ymax)
-                features = features[idx]
-
-            elif k == 'geom_type':
-                idx = features._geom_type.str.lower() == v.lower()
-                features = features[idx]
-
-            elif k == 'parameter':
-                idx = features._parameters.str.contains(v)
-                features = features[idx]
-
-            elif k == 'parameter_code':
-                idx = features._parameter_codes.str.contains(v)
-                features = features[idx]
-
+            if features.empty:
+                break  # if dataframe is empty then doen't try filtering any further
             else:
-                idx = features[k] == v
-                features = features[idx]
+                if k == 'bbox':
+                    bbox = Polygon(util.bbox2poly(*[float(x) for x in util.listify(v)]))
+                    idx = features.intersects(bbox)  # http://geopandas.org/reference.html#GeoSeries.intersects
+                    features = features[idx]
+
+                elif k == 'geom_type':
+                    features.geom_type.str.contains(v)  # will not work if features is empty
+                    features = features[idx]
+
+                elif k == 'parameter':
+                    idx = features.parameters.str.contains(v)
+                    features = features[idx]
+
+                else:
+                    idx = features.metadata.map(lambda x: x.get(k) == v)
+                    features = features[idx]
 
     if not (expand or as_dataframe or as_geojson):
         return features.index.astype('unicode').tolist()
