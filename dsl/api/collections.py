@@ -2,8 +2,7 @@
 from __future__ import print_function
 from jsonrpc import dispatcher
 from .. import util
-from .projects import get_active_project, get_projects
-import os
+from .projects import _get_project_dir
 import pandas as pd
 from .database import get_db, db_session
 
@@ -78,10 +77,6 @@ def new_collection(name, display_name=None, description=None, metadata=None):
                       metadata=metadata)
 
     return _load_collection(name)
-
-
-def _get_project_dir():
-    return get_projects(expand=True)[get_active_project()]['folder']
 
 
 def _load_collection(name):

@@ -7,6 +7,7 @@ from .. import util
 from .database import get_db, db_session
 import pandas as pd
 from .metadata import get_metadata, update_metadata
+from .projects import _get_project_dir
 
 
 @dispatcher.add_method
@@ -67,7 +68,7 @@ def download_datasets(datasets, async=False, raise_on_error=False):
     datasets = get_metadata(datasets, as_dataframe=True)
 
     # filter out non download datasets
-    datasets = datasets[datasets['dataset_type'] == 'download']
+    datasets = datasets[datasets['datatype'] == 'download']
     features = datasets['feature'].tolist()
     features = get_metadata(features, as_dataframe=True)
     datasets = datasets.join(features[[
@@ -77,7 +78,7 @@ def download_datasets(datasets, async=False, raise_on_error=False):
                              on='feature')
 
     db = get_db()
-    project_path = os.path.split(db)[0]
+    project_path = _get_project_dir()
     status = {}
     for idx, dataset in datasets.iterrows():
         collection_path = os.path.join(project_path, dataset['collection'])
