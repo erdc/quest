@@ -179,8 +179,8 @@ class SingleFileBase(WebServiceBase):
         datatype = self._get_services()[service].get('datatype')
         save_path = self._download_file(save_path, download_url, fmt, filename)
         return {
-            'save_path': save_path,
-            'file_format': feature.get('file_format'),
+            'file_path': save_path,
+            'file_format': reserved.get('file_format'),
             'parameter': feature.get('parameters'),
             'datatype': datatype,
         }

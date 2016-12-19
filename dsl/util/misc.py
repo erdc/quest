@@ -327,30 +327,6 @@ def to_geojson(df):
     return FeatureCollection(features)
 
 
-def to_metadata(data):
-    """Convert dataframe/dict with reserved keywords to output format.
-
-    (i.e. starting with '_'). Returns dict with
-    regular keywords and non-reserved keywords in
-    metadata property
-    """
-    if isinstance(data, dict):
-        # properties = {k[1:]: v for k, v in data.items() if k.startswith('_')}
-        # metadata = {k: v for k, v in data.items() if not k.startswith('_')}
-        # properties.update({'metadata': metadata})
-        return data
-    else:
-        # idx = data.columns.str.startswith('_')
-        # r = {field: field[1:] for field in data.columns[idx]}
-        # properties = data[data.columns[idx]].rename(columns=r)
-        # properties['metadata'] = data[data.columns[~idx]].to_dict(orient='records')
-        properties = data
-        properties.index.name = 'name'
-        properties = properties.to_dict(orient='index')
-
-    return properties
-
-
 def uuid(resource_type):
     """Generate new uuid.
 

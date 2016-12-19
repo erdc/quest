@@ -224,6 +224,10 @@ def _write_projects(projects):
     util.write_yaml(path, contents)
 
 
+def _get_project_dir():
+    return get_projects(expand=True)[get_active_project()]['folder']
+
+
 def _get_project_db(name):
     projects = _load_projects()
     if name not in projects.keys():

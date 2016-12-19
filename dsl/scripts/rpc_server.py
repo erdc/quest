@@ -103,6 +103,8 @@ def shutdown_server(environ):
 
 
 def _sanitize_dict(d):
+    """Recursively converts datetime values to iso formatted strings so they can be JSON serialized.
+    """
     for k, v in d.items():
         if isinstance(v, datetime.datetime):
             d[k] = v.isoformat()
