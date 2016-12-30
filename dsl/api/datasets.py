@@ -168,7 +168,8 @@ def get_datasets(expand=None, filters=None, as_dataframe=None):
     with db_session:
         datasets = [dict(d.to_dict(), **{'collection': d.feature.collection.name}) for d in db.Dataset.select()]
         datasets = pd.DataFrame(datasets)
-        datasets.set_index('name', inplace=True, drop=False)
+        if not datasets.empty:
+            datasets.set_index('name', inplace=True, drop=False)
 
     if datasets.empty:
         if not expand and not as_dataframe:
