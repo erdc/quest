@@ -131,11 +131,12 @@ def get_features(services=None, collections=None, features=None,
                             lambda c: c.collection.name == name
                         )]
             tmp_feats = gpd.GeoDataFrame(tmp_feats)
-            tmp_feats['geometry'] = tmp_feats['geometry'].apply(
-                                        lambda x: shapely.wkt.loads(x))
-            tmp_feats.set_geometry('geometry')
 
             if not tmp_feats.empty:
+                tmp_feats['geometry'] = tmp_feats['geometry'].apply(
+                                            lambda x: shapely.wkt.loads(x))
+                tmp_feats.set_geometry('geometry')
+
                 tmp_feats.index = tmp_feats['name']
             all_features.append(tmp_feats)
 
