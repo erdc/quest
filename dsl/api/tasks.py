@@ -6,17 +6,26 @@ import pandas as pd
 from ..util import listify
 
 
-_ncores = psutil.cpu_count()
-_client = None
+_cluster = None
 tasks = {}
 
 
+class StartCluster():
+    def __init__(self, n_cores=None):
+        if n_cores is None:
+            n_cores = psutil.cpu_count()
+        self.cluster = LocalCluster(nanny=False, n_workers=n_cores)
+        self.client = Client(self.cluster)
+
+    def __exit__(self, type, value, traceback):
+        self.cluster.close()
+
+
 def _get_client():
-    global _client
-    if _client is None:
-        cluster = LocalCluster(nanny=False, n_workers=_ncores)
-        _client = Client(cluster)
-    return _client
+    global _cluster
+    if _cluster is None:
+        _cluster = StartCluster()
+    return _cluster.client
 
 
 def add_async(f):
