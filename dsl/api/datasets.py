@@ -328,26 +328,26 @@ def visualize_dataset(dataset, update_cache=False, **kwargs):
 
     # TODO if vizualize_dataset is called with different options for a given
     # dataset the update cache.
-    if update_cache or visualization_path is None:
-        file_format = m.get('file_format')
-        path = m.get('file_path')
+    #if update_cache or visualization_path is None:
+    file_format = m.get('file_format')
+    path = m.get('file_path')
 
-        if path is None:
+    if path is None:
             raise ValueError('No dataset file found')
 
-        if file_format not in util.list_drivers('io'):
+    if file_format not in util.list_drivers('io'):
             raise ValueError('No reader available for: %s' % file_format)
 
-        io = util.load_drivers('io', file_format)
-        io = io[file_format].driver
+    io = util.load_drivers('io', file_format)
+    io = io[file_format].driver
 
-        title = m.get('display_name')
-        if title is None:
-            title = dataset
+    title = m.get('display_name')
+    if title is None:
+        title = dataset
 
-        visualization_path = io.visualize(path, title=title, **kwargs)
-        dsl_metadata = {'visualization_path': visualization_path}
-        update_metadata(dataset, dsl_metadata=dsl_metadata)
+    visualization_path = io.visualize(path, title=title, **kwargs)
+    dsl_metadata = {'visualization_path': visualization_path}
+    update_metadata(dataset, dsl_metadata=dsl_metadata)
 
     return visualization_path
 

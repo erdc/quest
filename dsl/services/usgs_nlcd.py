@@ -65,16 +65,17 @@ class UsgsNlcdService(SingleFileBase):
         features = features.ix[~features.title.str.contains('Imperv')]
         features = features.ix[~features.title.str.contains('by State')]
         features = features.ix[~features.title.str.contains('Tree Canopy')]
-        features['_download_url'] = features.webLinks.apply(_parse_links)
-        features['_extract_from_zip'] = '.tif'
-        features['_filename'] = features['_download_url'].str.split('FNAME=', expand=True)[1]
-        features['_geom_type'] = 'Polygon'
-        features['_geom_coords'] = features.spatial.apply(_bbox2poly)
-        features['_parameters'] = 'landcover'
-        features['_file_format'] = 'raster-gdal'
-        coords = features['_geom_coords'].apply(lambda x: pd.np.array(x).mean(axis=1))
-        features['_longitude'] = coords.apply(lambda x: x.flatten()[0])
-        features['_latitude'] = coords.apply(lambda x: x.flatten()[1])
+        features['download_url'] = features.webLinks.apply(_parse_links)
+        features['extract_from_zip'] = '.tif'
+        features['filename'] = features['download_url'].str.split('FNAME=', expand=True)[1]
+        features['reserved'] = features['download_url'].apply(
+            lambda x: {'download_url': x, 'file_format': 'raster-gdal'})
+
+        features['parameters'] = 'landcover'
+        features['file_format'] = 'raster-gdal'
+        # coords = features['geom_coords'].apply(lambda x: pd.np.array(x).mean(axis=1))
+        # features['longitude'] = coords.apply(lambda x: x.flatten()[0])
+        # features['latitude'] = coords.apply(lambda x: x.flatten()[1])
         features.rename(columns={'id': '_service_id', 'title': '_display_name'},
                   inplace=True)
         features.index = features['_service_id']
@@ -89,8 +90,8 @@ class UsgsNlcdService(SingleFileBase):
 
     def _get_parameters(self, service, features=None):
         return {
-            '_parameters': ['landcover'],
-            '_parameter_codes': ['landcover'],
+            'parameters': ['landcover'],
+            'parameter_codes': ['landcover'],
         }
 
 

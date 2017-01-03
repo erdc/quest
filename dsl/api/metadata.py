@@ -164,7 +164,7 @@ def update_metadata(uris, display_name=None, description=None,
                 entity = db.Collection[uri]
             elif resource == 'feature':
                 entity = db.Feature[uri]
-            elif resource == 'dataset':
+            elif resource == 'datasets':
                 entity = db.Dataset[uri]
 
             entity.set(**dsl_meta)
