@@ -108,12 +108,12 @@ class TsUnitConversion(TsBase):
 
     def _apply(self, df, options):
         metadata = df.metadata
-        if 'save_path' in metadata:
-            del metadata['save_path']
+        if 'file_path' in metadata:
+            del metadata['file_path']
 
         path = "/Users/rditllkw/DSL/data-services-library/dsl/filters/timeseries/default_units.txt"
         reg = UnitRegistry(path)
-        from_units = metadata['units']
+        from_units = metadata['unit']
         if '/' in from_units and '/' not in options.get('to_units'):
             beg = from_units.find('/')
             end = len(from_units)

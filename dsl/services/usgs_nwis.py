@@ -72,18 +72,17 @@ class NwisService(WebServiceBase):
 
         sites = {k: v for d in sites for k, v in d.items()}
         df = pd.DataFrame.from_dict(sites, orient='index')
-        df['_geom_type'] = 'Point'
+        # df['_geom_type'] = 'Point'
         for col in ['latitude', 'longitude']:
             df[col] = df['location'].apply(lambda x: float(x[col]))
 
         df.rename(columns={
-                    'code': '_service_id',
-                    'name': '_display_name',
-                    'latitude': '_latitude',
-                    'longitude': '_longitude',
+                    'code': 'service_id',
+                    'name': 'display_name',
+
                     }, inplace=True)
 
-        df['_geom_coords'] = list(zip(df['_longitude'], df['_latitude']))
+        # df['_geom_coords'] = list(zip(df['_longitude'], df['_latitude']))
         return df
 
     def _get_parameters(self, service, features=None):
@@ -99,29 +98,29 @@ class NwisService(WebServiceBase):
 
         data = pd.concat(data, ignore_index=True)
 
-        data['_parameter_code'] = data['parm_cd']
+        data['parameter_code'] = data['parm_cd']
         idx = pd.notnull(data['stat_cd'])
-        data.loc[idx, '_parameter_code'] += ':' + data['stat_cd']
-        data['_external_vocabulary'] = 'USGS-NWIS'
+        data.loc[idx, 'parameter_code'] += ':' + data['stat_cd']
+        data['external_vocabulary'] = 'USGS-NWIS'
         data.rename(columns={
-                        'site_no': '_service_id',
-                        'count_nu': '_count'
+                        'site_no': 'service_id',
+                        'count_nu': 'count'
                         },
                     inplace=True)
-        data = data[pd.notnull(data['_parameter_code'])]
-        data['_parameter'] = data['_parameter_code'].apply(
+        data = data[pd.notnull(data['parameter_code'])]
+        data['parameter'] = data['parameter_code'].apply(
             lambda x: self._parameter_map(service).get(x)
             )
         pm_codes = _pm_codes()
-        data['_description'] = data['parm_cd'].apply(
+        data['description'] = data['parm_cd'].apply(
             lambda x: pm_codes.ix[x]['SRSName'] if x in pm_codes.index else ''
             )
-        data['_unit'] = data['parm_cd'].apply(
+        data['unit'] = data['parm_cd'].apply(
             lambda x: pm_codes.ix[x]['parm_unit'] if x in pm_codes.index else ''
             )
-        cols = ['_parameter', '_parameter_code', '_external_vocabulary',
-                '_service_id', '_description', 'begin_date',
-                'end_date', '_count',
+        cols = ['parameter', 'parameter_code', 'external_vocabulary',
+                'service_id', 'description', 'begin_date',
+                'end_date', 'count',
                 ]
         data = data[cols]
 
@@ -151,6 +150,9 @@ class NwisService(WebServiceBase):
 
     def _download(self, service, feature, save_path, dataset,
                   parameter, start=None, end=None, period=None):
+
+        if dataset is None:
+            dataset = 'station-' + feature
 
         if not any([start, end, period]):
             period = 'P365D'  # default to past 1yr of data
@@ -188,13 +190,15 @@ class NwisService(WebServiceBase):
 
         save_path = os.path.join(save_path, BASE_PATH, service)
         save_path = os.path.join(save_path, dataset)
+        del data['values']
+
         metadata = {
-            'save_path': save_path,
+            'metadata': data,
+            'file_path': save_path,
             'file_format': 'timeseries-hdf5',
             'datatype': 'timeseries',
             'parameter': parameter,
-            'units': data['variable']['units']['code'],
-            'timezone': 'utc',
+            'unit': data['variable']['units']['code'],
             'service_id': 'svc://usgs-nwis:{}/{}'.format(service, feature)
         }
 

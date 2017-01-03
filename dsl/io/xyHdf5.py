@@ -77,7 +77,7 @@ class XYHdf5(IoBase):
         fig = plt.figure()
         ax = df[parameter][start:end].plot(legend=True, figsize=(8, 6))
         ax.set_title(title)
-        ax.set_ylabel(df.metadata['units'])
+        ax.set_ylabel(df.metadata['unit'])
         base, ext = os.path.splitext(path)
         visualization_path = base + '.png'
         plt.savefig(visualization_path)

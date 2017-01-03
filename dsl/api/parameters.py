@@ -34,7 +34,7 @@ def get_parameters(service_uri, update_cache=False):
 
 
     if isinstance(parameters,pd.DataFrame) and feature:
-        idx = parameters['_service_id'] == feature
+        idx = parameters['service_id'] == feature
         parameters = parameters[idx]
 
     return parameters
