@@ -5,16 +5,16 @@ from jsonrpc import dispatcher
 import pandas as pd
 from ..util import listify
 
-
 _cluster = None
 tasks = {}
+futures = {}
 
 
 class StartCluster():
     def __init__(self, n_cores=None):
         if n_cores is None:
-            n_cores = psutil.cpu_count()
-        self.cluster = LocalCluster(nanny=False, n_workers=n_cores)
+            n_cores = psutil.cpu_count()-2
+        self.cluster = LocalCluster(nanny=True, n_workers=1)
         self.client = Client(self.cluster)
 
     def __exit__(self, type, value, traceback):
@@ -35,16 +35,14 @@ def add_async(f):
         if async:
             client = _get_client()
             future = client.submit(f, *args, **kwargs)
-            task = {
+            futures[future.key] = future
+            tasks[future.key] = {
                 'fn': f.__name__,
                 'args': args,
                 'kwargs': kwargs,
-                'future': future,
-                'status': future.status,
+                'status': None,
                 'result': None,
             }
-            tasks[future.key] = task
-            future.add_done_callback(_completed)
             return future.key
         else:
             return f(*args, **kwargs)
@@ -74,14 +72,14 @@ def get_tasks(filters=None, expand=None, as_dataframe=None, with_future=None):
             task_list = {k: v for k, v in task_list.items() if v[fk] == fv}
 
     task_list = pd.DataFrame.from_dict(task_list, orient='index')
-    if not with_future:
-        task_list.drop(['future'], inplace=True, axis=1, errors='ignore')
+    if with_future:
+        task_list['future'] = [futures[k] for k in task_list.index]
 
     if not expand and not as_dataframe:
         task_list = task_list.index.tolist()
 
     if expand:
-        task_list = task_list.to_dict()
+        task_list = task_list.to_dict(orient='index')
 
     return task_list
 
@@ -114,16 +112,15 @@ def remove_tasks(status=None):
         print('cannot remove pending tasks, please cancel them first')
         status.remove('pending')
 
-    tasks = {k: v for k, v in tasks.items() if v['status'] in status}
-    return
-
-
-def _completed(future):
-    tasks[future.key]['status'] = future.status
-    tasks[future.key]['result'] = future.result()
+    for key in [k for k, v in tasks.items() if v['status'] in status]:
+        del tasks[key]
+        del futures[key]
     return
 
 
 def _update_status():
     for k in tasks.keys():
-        tasks[k]['status'] = tasks[k]['future'].status
+        future = futures[k]
+        tasks[k]['status'] = future.status
+        if future.status == 'finished':
+            tasks[k]['result'] = future.result()
