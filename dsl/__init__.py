@@ -25,6 +25,7 @@ def get_pkg_data_path(*args):
 
 from . import util, api
 
+
 def init():
     # ensure at least one project exists
     # create a default project if needed
