@@ -17,3 +17,4 @@ geopandas
 pony
 distributed
 psutil
+pint

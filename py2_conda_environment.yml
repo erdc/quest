@@ -33,5 +33,6 @@ dependencies:
     - geopandas
     - distributed
     - psutil
+    - pint
     - pip:
       - pony
