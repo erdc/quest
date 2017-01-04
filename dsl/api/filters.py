@@ -6,6 +6,7 @@ from .. import util
 from jsonrpc import dispatcher
 from .metadata import get_metadata
 from pint import UnitRegistry
+from .tasks import add_async
 
 
 @dispatcher.add_method
@@ -87,6 +88,7 @@ def get_filters(filters=None, expand=False, **kwargs):
 
 
 @dispatcher.add_method
+@add_async
 def apply_filter(name, datasets=None, features=None, options=None, as_dataframe=None, expand=None):
     """Apply Filter to dataset."""
     datasets = util.listify(datasets)

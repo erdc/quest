@@ -31,5 +31,7 @@ dependencies:
     - peewee
     - stevedore
     - geopandas
+    - distributed
+    - psutil
     - pip:
       - pony

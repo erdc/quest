@@ -8,10 +8,12 @@ from .database import get_db, db_session
 import pandas as pd
 from .metadata import get_metadata, update_metadata
 from .projects import _get_project_dir
+from .tasks import add_async
 
 
 @dispatcher.add_method
-def download(feature, save_path, dataset=None, async=False, **kwargs):
+@add_async
+def download(feature, save_path, dataset=None, **kwargs):
     """Download dataset and save it locally.
 
     Parameters
@@ -53,10 +55,9 @@ def download(feature, save_path, dataset=None, async=False, **kwargs):
 
 
 @dispatcher.add_method
-def download_datasets(datasets, async=False, raise_on_error=False):
+@add_async
+def download_datasets(datasets, raise_on_error=False):
     """download staged datasets.
-
-    TODO: ASYNC NOT IMPLEMENTED
 
     Download datasets that have been staged with stage_for_download
     args:

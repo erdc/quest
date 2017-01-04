@@ -54,6 +54,10 @@ __all__ = (
     'add_provider',  # add custom url or local folder as a service
     'delete_provider',
     'move_feature',
+    'get_task',
+    'get_tasks',
+    'cancel_tasks',
+    'remove_tasks',
 )
 
 from ..util import (
@@ -136,4 +140,12 @@ from .services import (
     get_services,
     add_provider,
     delete_provider,
+)
+
+
+from .tasks import (
+    get_task,
+    get_tasks,
+    cancel_tasks,
+    remove_tasks,
 )
