@@ -1,49 +1,95 @@
-"""Functions required run raster filters"""
-from ..base import FilterBase
+
 from dsl import util
 
 from dsl.api import get_metadata, new_dataset, update_metadata, new_feature
 from dsl.api.projects import active_db
 
-import os
+from .rst_base import RstBase
+from pint import UnitRegistry
 import rasterio
-from rasterio.tools.mask import mask
+from rasterio.mask import mask
 
-class RasterClip(FilterBase):
-    def register(self, name=None):
-        """Register Timeseries
 
-        """
-        self.name = 'raster-clip'
-        self.metadata = {
-            'group': 'raster',
-            'operates_on': {
-                'datatype': ['raster'],
-                'geotype': None,
-                'parameters': None,
-            },
-            'produces': {
-                'datatype': 'raster',
-                'geotype': None,
-                'parameters': None,
-            },
+
+
+class RstUnitConversion(RstBase):
+    def register(self, name='raster-unit-conversion'):
+        RstBase.register(self, name=name)
+
+
+    def _apply(self, df, options):
+        df = df.read()
+        unitsMap = {
+            "ft3/s": "cu_ft/s",
+
         }
+        metadata = options.get('orig_meta')
+        if 'save_path' in metadata:
+            del metadata['save_path']
+
+        reg = UnitRegistry()
+        from_units = metadata['_units']
+        if from_units is None:
+            raise NotImplementedError('This dataset does not contain units')
+        if from_units not in dir(reg):
+            from_units = unitsMap[from_units]
+        if '/' in from_units and '/' not in options.get('to_units'):
+            beg = from_units.find('/')
+            end = len(from_units)
+            default_time = from_units[beg:end]
+            to_units = options.get('to_units') + default_time
+        conversion = reg.convert(1, src=from_units, dst=options.get('to_units'))
+        df[df.columns[0]] = df[df.columns[0]] * conversion
+        metadata.update({'units': options.get('to_units')})
+        df.metadata = metadata
 
 
-    def apply_filter(self, datasets, features=None, options=None,
-                     display_name=None, description=None, metadata=None):
 
-        datasets = util.listify(datasets)
+        return from_units
 
-        # get metadata, path etc from first dataset, i.e. assume all datasets
-        # are in same folder. This will break if you try and combine datasets
-        # from different services
-        dataset = datasets[0]
-        orig_metadata = get_metadata(dataset)[dataset]
-        src_path = orig_metadata['_save_path']
-        if display_name is None:
-            display_name = 'Created by filter {}'.format(self.name)
+    def apply_filter_options(self, fmt, **kwargs):
+       raise NotImplementedError
 
+class RstMerge(RstBase):
+        def register(self, name='raster-merge-datasets'):
+            RstBase.register(self, name=name)
+
+        def _apply(self, df, options):
+            df = df.read()
+            unitsMap = {
+                "ft3/s": "cu_ft/s",
+
+            }
+            metadata = options.get('orig_meta')
+            if 'save_path' in metadata:
+                del metadata['save_path']
+
+            reg = UnitRegistry()
+            from_units = metadata['_units']
+            if from_units is None:
+                raise NotImplementedError('This dataset does not contain units')
+            if from_units not in dir(reg):
+                from_units = unitsMap[from_units]
+            if '/' in from_units and '/' not in options.get('to_units'):
+                beg = from_units.find('/')
+                end = len(from_units)
+                default_time = from_units[beg:end]
+                to_units = options.get('to_units') + default_time
+            conversion = reg.convert(1, src=from_units, dst=options.get('to_units'))
+            df[df.columns[0]] = df[df.columns[0]] * conversion
+            metadata.update({'units': options.get('to_units')})
+            df.metadata = metadata
+
+            return from_units
+
+        def apply_filter_options(self, fmt, **kwargs):
+            raise NotImplementedError
+
+class RstClipPolygon(RstBase):
+    def register(self, name='raster-clip-polygon'):
+        RstBase.register(self, name=name)
+
+    def _apply(self, df, options):
         # the polygon GeoJSON geometry
         bbox = options.get('bbox')
         poly = [util.bbox2poly(*util.listify(bbox))]
@@ -56,75 +102,7 @@ class RasterClip(FilterBase):
         out_meta = src.meta.copy()
         nodata = options.get('nodata', 0)
         out_meta.update({'nodata': nodata})
+        return df
 
-        # save the resulting raster
-        out_meta.update({"driver": "GTiff",
-                         "height": out_image.shape[1],
-                         "width": out_image.shape[2],
-                         "transform": out_transform})
-
-        cname = orig_metadata['_collection']
-        feature = new_feature(cname,
-                              display_name=display_name, geom_type='Polygon',
-                              geom_coords=poly)
-
-        new_dset = new_dataset(feature,
-                               dataset_type='derived',
-                               display_name=display_name,
-                               description=description)
-
-        prj = os.path.dirname(active_db())
-        dst = os.path.join(prj, cname, new_dset)
-        util.mkdir_if_doesnt_exist(dst)
-        dst = os.path.join(dst, new_dset+'.tif')
-
-        with rasterio.open(dst, "w", **out_meta) as dest:
-            dest.write(out_image)
-
-        self.save_path = dst
-
-        new_metadata = {
-            'parameter': orig_metadata['_parameter'],
-            'datatype': orig_metadata['_datatype'],
-            'file_format': orig_metadata['_file_format'],
-        }
-
-        if description is None:
-            description = 'raster-clip filter applied'
-
-        # update metadata
-        new_metadata.update({
-            'filter_applied': self.name,
-            'filter_options': options,
-            'parent_datasets': ','.join(datasets),
-            'save_path': self.save_path,
-        })
-        update_metadata(new_dset, dsl_metadata=new_metadata, metadata=metadata)
-
-        return {'datasets': new_dset, 'features': feature}
-
-    def apply_filter_options(self, fmt='json-schema'):
-        if fmt == 'json-schema':
-            properties = {
-                "bbox": {
-                    "type": "string",
-                    "description": "bounding box 'xmin, ymin, xmax, ymax'",
-                },
-                "nodata": {
-                    "type": "number",
-                    "description": "no data value for raster.",
-                    "default": 0,
-                },
-            }
-
-            schema = {
-                "title": "Raster Clip",
-                "type": "object",
-                "properties": properties,
-                "required": ['bbox'],
-            }
-
-        if fmt == 'smtk':
-            schema = ''
-
-        return schema
+    def apply_filter_options(self, fmt, **kwargs):
+        raise NotImplementedError

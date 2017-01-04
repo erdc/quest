@@ -9,6 +9,7 @@ import json
 from jsonrpc import JSONRPCResponseManager, dispatcher
 
 import requests
+import datetime
 
 from werkzeug.wrappers import Request, Response
 from werkzeug.serving import run_simple
@@ -101,6 +102,15 @@ def shutdown_server(environ):
     return fn
 
 
+def _sanitize_dict(d):
+    """Recursively converts datetime values to iso formatted strings so they can be JSON serialized.
+    """
+    for k, v in d.items():
+        if isinstance(v, datetime.datetime):
+            d[k] = v.isoformat()
+        elif isinstance(v, dict):
+            _sanitize_dict(v)
+
 @Request.application
 def wsgi_app(request):
     # Dispatcher is a dictionary {<method_name>: callable}
@@ -108,6 +118,11 @@ def wsgi_app(request):
     dispatcher["shutdown"] = shutdown_server(request.environ)
 
     response = JSONRPCResponseManager.handle(request.data, dispatcher)
+
+    result = response.data.get('result')
+    if isinstance(result, dict):
+        _sanitize_dict(result)
+
     return Response(response.json, mimetype='application/json')
 
 

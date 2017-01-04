@@ -15,7 +15,7 @@ def get_mapped_parameters():
     parameters : list of str,
         list of parameters available
     """
-    services = get_services(metadata=True)
+    services = get_services(expand=True)
     parameters = []
     for service in services.values():
         parameters += service['parameters']
@@ -34,7 +34,7 @@ def get_parameters(service_uri, update_cache=False):
 
 
     if isinstance(parameters,pd.DataFrame) and feature:
-        idx = parameters['_service_id'] == feature
+        idx = parameters['service_id'] == feature
         parameters = parameters[idx]
 
     return parameters

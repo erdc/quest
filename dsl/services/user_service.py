@@ -57,7 +57,7 @@ class UserService(WebServiceBase):
                     f.readline()
                     for line in f:
                         feature_id, x1, y1, x2, y2 = line.split()
-                        properties = {'_service_id': feature_id}
+                        properties = {}  # '_service_id': feature_id}
                         polys.append(Feature(geometry=Polygon([util.bbox2poly(x1, y1, x2, y2)]), properties=properties, id=feature_id))
                     features = FeatureCollection(polys)
                     features = util.to_dataframe(features)
@@ -70,7 +70,7 @@ class UserService(WebServiceBase):
                     for line in f:
                         feature_id, y1, x1, y2, x2 = line.split(',')
                         feature_id = feature_id.split('.')[0]
-                        properties = {'_service_id': feature_id}
+                        properties = {}  # '_service_id': feature_id}
                         polys.append(Feature(geometry=Polygon([util.bbox2poly(x1, y1, x2, y2)]), properties=properties, id=feature_id))
                     features = FeatureCollection(polys)
                     features = util.to_dataframe(features)
@@ -94,8 +94,8 @@ class UserService(WebServiceBase):
         # drop duplicates fails when some columns have nested list/tuples like
         # _geom_coords. so drop based on _service_id
         features = pd.concat(all_features)
-        features = features.drop_duplicates(subset='_service_id')
-        features.index = features['_service_id']
+        features = features.drop_duplicates(subset='service_id')
+        features.index = features['service_id']
         features.sort_index(inplace=True)
         return features
 
@@ -104,8 +104,8 @@ class UserService(WebServiceBase):
         params = metadata['parameters']
         param_codes = metadata.get('parameter_codes', params)
         return {
-            '_parameters': params,
-            '_parameter_codes': param_codes,
+            'parameters': params,
+            'parameter_codes': param_codes,
         }
 
     def _download(self, service, feature, save_path, dataset, parameter=None, **kwargs):

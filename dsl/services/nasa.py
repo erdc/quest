@@ -124,26 +124,26 @@ class NasaService(SingleFileBase):
             data += granules
 
         features = pd.DataFrame(data)
-        features.rename(columns = {'id': '_service_id'}, inplace=True)
-        features.index = features['_service_id']
-        features['_geom_type'] = 'Polygon'
-        features['_geom_coords'] = features['boxes'].apply(lambda x: [util.bbox2poly(*x[0].split(), reverse_order=True)])
-        coords = features['_geom_coords'].apply(lambda x: pd.np.array(x).mean(axis=1))
-        features['_longitude'] = coords.apply(lambda x: x.flatten()[0])
-        features['_latitude'] = coords.apply(lambda x: x.flatten()[1])
-        features['_download_url'] = features['links'].apply(
+        features.set_index('id', inplace=True)
+        features['bbox'] = features['boxes'].apply(lambda x: x[0].split())
+        features['bbox'] = features['bbox'].apply(lambda x: [x[i] for i in [1, 0, 3, 2]])
+        features['download_url'] = features['links'].apply(
             lambda x: next(iter([link['href'] for link in x if link.get('type') == 'application/zip']), None))
 
-        features = features.ix[~features._download_url.isnull()]
-        features['_filename'] = features._download_url.apply(lambda x: x.split('/')[-1])
-        features['_extract_from_zip'] = '.DEM'
-        features['_file_format'] = 'raster-gdal'
+        features = features.ix[~features.download_url.isnull()]
+        features['reserved'] = features['download_url'].apply(lambda x: {'download_url': x, 'file_format': 'raster-gdal'})
+
+        # features['_filename'] = features._download_url.apply(lambda x: x.split('/')[-1])
+        # features['_extract_from_zip'] = '.DEM'
+        # features['_file_format'] = 'raster-gdal'
+        del features['download_url']
         del features['links']
+        del features['boxes']
 
         return features
 
     def _get_parameters(self, service, features=None):
         return {
-            '_parameters': ['elevation'],
-            '_parameter_codes': ['elevation'],
+            'parameters': ['elevation'],
+            #'parameter_codes': ['elevation'],
         }

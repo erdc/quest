@@ -4,9 +4,10 @@ from jsonrpc import dispatcher
 import os
 
 from .. import util
-from . import db
-from .projects import active_db
+from .database import get_db, db_session
+import pandas as pd
 from .metadata import get_metadata, update_metadata
+from .projects import _get_project_dir
 
 
 @dispatcher.add_method
@@ -38,7 +39,7 @@ def download(feature, save_path, dataset=None, async=False, **kwargs):
     service_uri = feature
     if not service_uri.startswith('svc://'):
         df = get_metadata(feature, as_dataframe=True)[0]
-        df = df['_service'] + '/' + df['_service_id']
+        df = df['service'] + '/' + df['service_id']
         service_uri = df.tolist()[0]
 
     if save_path is None:
@@ -67,21 +68,23 @@ def download_datasets(datasets, async=False, raise_on_error=False):
     datasets = get_metadata(datasets, as_dataframe=True)
 
     # filter out non download datasets
-    datasets = datasets[datasets['_dataset_type'] == 'download']
-    features = datasets['_feature'].tolist()
+    datasets = datasets[datasets['datatype'] == 'download']
+    features = datasets['feature'].tolist()
     features = get_metadata(features, as_dataframe=True)
     datasets = datasets.join(features[[
-                                '_service',
-                                '_service_id',
+                                'service',
+                                'service_id',
                              ]],
-                             on='_feature')
-    project_path = os.path.split(active_db())[0]
+                             on='feature')
+
+    db = get_db()
+    project_path = _get_project_dir()
     status = {}
     for idx, dataset in datasets.iterrows():
-        collection_path = os.path.join(project_path, dataset['_collection'])
-        feature_uri = dataset['_service'] + '/' + dataset['_service_id']
+        collection_path = os.path.join(project_path, dataset['collection'])
+        feature_uri = dataset['service'] + '/' + dataset['service_id']
         try:
-            kwargs = json.loads(dataset['_download_options'])
+            kwargs = json.loads(dataset['options'])
             if kwargs is not None:
                 all_metadata = download(feature_uri,
                                     save_path=collection_path,
@@ -94,23 +97,27 @@ def download_datasets(datasets, async=False, raise_on_error=False):
             metadata = all_metadata.pop('metadata', None)
             dsl_metadata = all_metadata
             dsl_metadata.update({
-                'download_status': 'downloaded',
-                'download_message': 'success',
+                'status': 'downloaded',
+                'message': 'success',
                 })
         except Exception as e:
             if raise_on_error:
                 raise
 
             dsl_metadata = {
-                'download_status': 'failed download',
-                'download_message': str(e),
+                'status': 'failed download',
+                'message': str(e),
                 }
 
             metadata = None
 
-        status[idx] = dsl_metadata['download_status']
-        db.upsert(active_db(), 'datasets', idx, dsl_metadata=dsl_metadata,
-                  metadata=metadata)
+        status[idx] = dsl_metadata['status']
+
+        dsl_metadata.update({'metadata': metadata})
+
+        with db_session:
+            dataset = db.Dataset[idx]
+            dataset.set(**dsl_metadata)
 
     return status
 
@@ -140,10 +147,10 @@ def download_options(uris, fmt='json-schema'):
         if not service_uri.startswith('svc://'):
             feature = uri
             if feature.startswith('d'):
-                feature = get_metadata(uri)[uri]['_feature']
+                feature = get_metadata(uri)[uri]['feature']
 
             df = get_metadata(feature, as_dataframe=True).ix[0]
-            df = df['_service'] + '/' + df['_service_id']
+            df = df['service'] + '/' + df['service_id']
             service_uri = df
 
         provider, service, feature = util.parse_service_uri(service_uri)
@@ -154,34 +161,35 @@ def download_options(uris, fmt='json-schema'):
 
 
 @dispatcher.add_method
-def get_datasets(metadata=None, filters=None, as_dataframe=None):
+def get_datasets(expand=None, filters=None, as_dataframe=None):
     """
     """
-    datasets = db.read_all(active_db(), 'datasets', as_dataframe=True)
+    db = get_db()
+    with db_session:
+        datasets = [dict(d.to_dict(), **{'collection': d.feature.collection.name}) for d in db.Dataset.select()]
+        datasets = pd.DataFrame(datasets)
+        if not datasets.empty:
+            datasets.set_index('name', inplace=True, drop=False)
+
     if datasets.empty:
-        if not metadata and not as_dataframe:
+        if not expand and not as_dataframe:
             datasets = []
         elif not as_dataframe:
             datasets = {}
         return datasets
 
-    features = db.read_all(active_db(), 'features', as_dataframe=True)
-    datasets = datasets.join(features['_collection'], on='_feature')
-
     if filters is not None:
         for k, v in filters.items():
-            key = '_{}'.format(k)
-            if key not in datasets.keys():
+            if k not in datasets.keys():
                 print('filter field {} not found, continuing'.format(k))
                 continue
 
-            datasets = datasets.ix[datasets[key] == v]
+            datasets = datasets.ix[datasets[k] == v]
 
-    if not metadata and not as_dataframe:
-        datasets = datasets['_name'].tolist()
+    if not expand and not as_dataframe:
+        datasets = datasets['name'].tolist()
     elif not as_dataframe:
-        # reformat metadata
-        datasets = util.to_metadata(datasets)
+        datasets = datasets.to_dict(orient='index')
 
     return datasets
 
@@ -198,8 +206,11 @@ def new_dataset(feature, dataset_type=None, display_name=None,
         uid of dataset
     """
     # check if feature exists
-    if db.read_data(active_db(), 'features', feature) is None:
-        raise ValueError('feature {} does not exist'.format(feature))
+    db = get_db()
+    with db_session:
+        f = db.Feature[feature]
+        if f is None:
+            raise ValueError('feature {} does not exist'.format(feature))
 
     name = util.uuid('dataset')
     if dataset_type is None:
@@ -208,16 +219,23 @@ def new_dataset(feature, dataset_type=None, display_name=None,
     if display_name is None:
         display_name = name
 
+    if metadata is None:
+        metadata = {}
+
     dsl_metadata = {
+        'name': name,
         'feature': feature,
-        'dataset_type': dataset_type,
+        'datatype': dataset_type,
         'display_name': display_name,
         'description': description,
+        'file_path': save_path,
+        'metadata': metadata,
     }
     if dataset_type == 'download':
-        dsl_metadata.update({'download_status': 'not staged'})
+        dsl_metadata.update({'status': 'not staged'})
 
-    db.upsert(active_db(), 'datasets', name, dsl_metadata, metadata)
+    with db_session:
+        db.Dataset(**dsl_metadata)
 
     return name
 
@@ -242,6 +260,8 @@ def stage_for_download(uris, download_options=None):
     if not isinstance(download_options, list):
         download_options = [download_options] * len(uris)
 
+    db = get_db()
+
     for uri, kwargs in zip(uris, download_options):
         # if uid is a feature, create new dataset
         dataset_uri = uri
@@ -249,11 +269,14 @@ def stage_for_download(uris, download_options=None):
             dataset_uri = new_dataset(uri, dataset_type='download')
 
         dsl_metadata = {
-            'download_options': json.dumps(kwargs),
-            'download_status': 'staged for download',
+            'options': json.dumps(kwargs),
+            'status': 'staged for download',
         }
-        db.upsert(active_db(), 'datasets', dataset_uri,
-                  dsl_metadata=dsl_metadata)
+
+        with db_session:
+            dataset = db.Dataset[dataset_uri]
+            dataset.set(**dsl_metadata)
+
         datasets.append(dataset_uri)
 
     return datasets
@@ -279,8 +302,8 @@ def open_dataset(dataset, fmt=None):
     will raise NotImplementedError if format requested is not possible
     """
     m = get_metadata(dataset).get(dataset)
-    file_format = m.get('_file_format')
-    path = m.get('_save_path')
+    file_format = m.get('file_format')
+    path = m.get('file_path')
 
     if path is None:
         raise ValueError('No dataset file found')
@@ -301,30 +324,30 @@ def visualize_dataset(dataset, update_cache=False, **kwargs):
     driver.
     """
     m = get_metadata(dataset).get(dataset)
-    visualization_path = m.get('_visualization_path')
+    visualization_path = m.get('visualization_path')
 
     # TODO if vizualize_dataset is called with different options for a given
     # dataset the update cache.
-    if update_cache or visualization_path is None:
-        file_format = m.get('_file_format')
-        path = m.get('_save_path')
+    #if update_cache or visualization_path is None:
+    file_format = m.get('file_format')
+    path = m.get('file_path')
 
-        if path is None:
+    if path is None:
             raise ValueError('No dataset file found')
 
-        if file_format not in util.list_drivers('io'):
+    if file_format not in util.list_drivers('io'):
             raise ValueError('No reader available for: %s' % file_format)
 
-        io = util.load_drivers('io', file_format)
-        io = io[file_format].driver
+    io = util.load_drivers('io', file_format)
+    io = io[file_format].driver
 
-        title = m.get('_display_name')
-        if title is None:
-            title = dataset
+    title = m.get('display_name')
+    if title is None:
+        title = dataset
 
-        visualization_path = io.visualize(path, title=title, **kwargs)
-        dsl_metadata = {'visualization_path': visualization_path}
-        update_metadata(dataset, dsl_metadata=dsl_metadata)
+    visualization_path = io.visualize(path, title=title, **kwargs)
+    dsl_metadata = {'visualization_path': visualization_path}
+    update_metadata(dataset, dsl_metadata=dsl_metadata)
 
     return visualization_path
 
@@ -333,8 +356,8 @@ def visualize_dataset(dataset, update_cache=False, **kwargs):
 def visualize_dataset_options(dataset, fmt='json-schema'):
     """Return visualization available options for dataset."""
     m = get_metadata(dataset).get(dataset)
-    file_format = m.get('_file_format')
-    path = m.get('_save_path')
+    file_format = m.get('file_format')
+    path = m.get('file_path')
 
     if path is None:
         raise ValueError('No dataset file found')

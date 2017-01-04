@@ -1,49 +1,38 @@
 """API functions related to Collections."""
 from __future__ import print_function
-import datetime
+import os
 from jsonrpc import dispatcher
 from .. import util
-from . import db
-from .projects import get_active_project, get_projects, active_db
-import os
+from .projects import _get_project_dir
 import pandas as pd
-import shutil
+from .database import get_db, db_session
+import os
 
 
 @dispatcher.add_method
-def delete_from_collection(collection, uris):
-    """Remove uris from collection.
+def get_collections(expand=False, as_dataframe=False):
+    """Get available collections
 
-    TODO
-    """
-    uris = util.listify(uris)
-    for uri in uris:
-        _delete_from_collection(collection, uri)
+    Collections are folders on the local disk that contain downloaded or
+    created data along with associated metadata.
 
-    return
+    Args:
+        expand (bool, optional, default=False):
+            include collection details and format as dict
+        as_dataframe (bool, optional, default=False):
+            include collection details and format as pandas dataframe
 
-
-@dispatcher.add_method
-def get_collections(metadata=None):
-    """Get available collections.
-
-    Collections are folders on the local disk that contain downloaded or created data
-    along with associated metadata.
-
-    args:
-        metadata (bool, optional):
-            Optionally return collection metadata
-
-    Returns
-    -------
-    collections (list or dict):
-        Available collections
+    Returns:
+        If expand/as_dataframe are True the returns available collections
+        as a dict/dataframe otherwise returns list of collection names.
     """
 
     collections = _load_collections()
-    collections = {k: util.to_metadata(v) for k, v in collections.items()}
-    if not metadata:
+    if not expand and not as_dataframe:
         collections = list(collections.keys())
+
+    if as_dataframe:
+        collections = pd.DataFrame.from_dict(collections, orient='index')
 
     return collections
 
@@ -82,106 +71,25 @@ def new_collection(name, display_name=None, description=None, metadata=None):
     path = os.path.join(_get_project_dir(), name)
     util.mkdir_if_doesnt_exist(path)
 
-    dsl_metadata = {
-        'type': 'collection',
-        'display_name': display_name,
-        'description': description,
-        'created_on': datetime.datetime.now().isoformat(),
-    }
-    db.upsert(active_db(), 'collections', name, dsl_metadata, metadata)
+    db = get_db()
+    with db_session:
+        db.Collection(name=name,
+                      display_name=display_name,
+                      description=description,
+                      metadata=metadata)
+
     return _load_collection(name)
-
-
-@dispatcher.add_method
-def update_collection(name, display_name=None, description=None, metadata=None):
-    """Update metadata of collection.
-
-    TODO - REPLACE WITH GENERIC UPDATE METADATA CALL
-    """
-    c = _load_collection(name)
-
-    if display_name is not None:
-        c['metadata'].update({'_display_name': display_name})
-
-    if description is not None:
-        c['metadata'].update({'_description': description})
-
-    if metadata is not None:
-        c['metadata'].update(metadata)
-
-    db.upsert(active_db(), 'collections', name, dsl_metadata, metadata)
-    return c
-
-
-@dispatcher.add_method
-def delete_collection(name, delete_data=True):
-    """delete a collection.
-
-    TODO FIX THIS TO WORK WITH DB
-
-    Deletes a collection from the collections metadata file.
-    Optionally deletes all data under collection.
-
-    Parameters
-    ----------
-        name : str,
-            The name of the collection
-
-        delete_data : bool,
-            if True all data in the collection will be deleted
-
-        Returns
-        -------
-        collections : dict,
-            A python dict representation of the list of available collections,
-            the updated collections list is also written to a json file.
-    """
-    collections = _load_collections()
-
-    if name not in collections:
-        raise ValueError('Collection %s not found' % name)
-
-    if delete_data:
-        path = os.path.join(_get_project_dir(), name)
-        if os.path.exists(path):
-            print('deleting all data under path:', path)
-            shutil.rmtree(path)
-
-    print('removing %s from collections' % name)
-    collections.remove(name)
-    _write_collections(collections)
-    return collections
-
-
-def _read_collection_features(collection):
-    """
-    TODO REPLACE WITH GENERIC GET FEATURES
-    """
-    features_file = _collection_features_file(collection)
-    try:
-        features = pd.read_hdf(features_file, 'table')
-    except:
-        features = pd.DataFrame()
-    return features
-
-
-def _write_collection_features(collection, features):
-    """
-    TODO MAKE WORK WITH DB
-    """
-    features = _collection_features_file(collection)
-    features.to_hdf(features_file, 'table')
-
-
-def _get_project_dir():
-    return get_projects(metadata=True)[get_active_project()]['folder']
 
 
 def _load_collection(name):
     """load collection."""
-    return db.read_data(active_db(), 'collections', name)
+    db = get_db()
+    with db_session:
+        return db.Collection.select(lambda c: c.name == name).first().to_dict()
 
 
 def _load_collections():
     """load list of collections."""
-    return db.read_all(active_db(), 'collections')
+    db = get_db()
+    with db_session:
+        return {c.name: c.to_dict() for c in db.Collection.select(lambda c: c)}

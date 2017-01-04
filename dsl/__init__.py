@@ -24,3 +24,16 @@ def get_pkg_data_path(*args):
 
 
 from . import util, api
+
+
+def init():
+    # ensure at least one project exists
+    # create a default project if needed
+    if not api.get_projects():
+        api.new_project('default', 'Default Project', 'Created by DSL')
+        api.set_active_project('default')
+
+    # init active project db
+    api.get_db(api.active_db())
+
+init()

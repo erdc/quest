@@ -5,7 +5,27 @@ from dsl import util
 import os
 import ulmo
 import pandas as pd
+import geopandas as gpd
+from shapely.geometry import box, Point, Polygon, LineString, shape
+import json
 
+reserved_feature_fields = [
+    'display_name',
+    'description',
+    'reserved',
+    'geometry',
+
+]
+reserved_geometry_fields = [
+    'latitude',
+    'longitude',
+    'geom_type',
+    'latitudes',
+    'longitudes',
+    'bbox',
+]
+
+reserved_feature_fields.extend(reserved_geometry_fields)
 
 class WebServiceBase(with_metaclass(abc.ABCMeta, object)):
     """Base class for data services plugins
@@ -23,26 +43,71 @@ class WebServiceBase(with_metaclass(abc.ABCMeta, object)):
         Take a series of query parameters and return a list of
         locations as a geojson python dictionary
         """
-        cache_file = os.path.join(util.get_cache_dir(self.name), service + '_features.h5')
+        cache_file = os.path.join(util.get_cache_dir(self.name), service + '_features.geojson')
         if not update_cache:
             try:
-                return pd.read_hdf(cache_file, 'table')
+                features = gpd.read_file(cache_file)
+                features.set_index('id', inplace=True)
+                return features
             except:
                 print('updating cache')
                 pass
 
+        # get features from service
         features = self._get_features(service)
+
+        # convert geometry into shapely objects
+        if 'bbox' in features.columns:
+            features['geometry'] = features['bbox'].apply(lambda row: box(*[float(x) for x in row]))
+            del features['bbox']
+
+        if all(x in features.columns for x in ['latitude', 'longitude']):
+            fn = lambda row:Point((
+                                float(row['longitude']),
+                                float(row['latitude'])
+                                ))
+            features['geometry'] = features.apply(fn,axis=1)
+
+        if 'geometry' in features.columns:
+            # TODO
+            # check for geojson str or shapely object
+            pass
+
+        # if no geometry fields are found then this is a geotypical feature
+        if 'geometry' not in features.columns:
+            features['geometry'] = None
+
+        # add defaults values
+        if 'display_name' not in features.columns:
+            features['display_name'] = features.index
+
+        if 'description' not in features.columns:
+            features['description'] = ''
+
+        # merge extra data columns/fields into metadata as a dictionary
+        extra_fields = list(set(features.columns.tolist()) - set(reserved_feature_fields))
+        features['metadata'] = features[extra_fields].to_dict(orient='records')
+        features.drop(extra_fields, axis=1, inplace=True)
+        columns = list(set(features.columns.tolist()).intersection(reserved_geometry_fields))
+        features.drop(columns, axis=1, inplace=True)
+
         params = self._get_parameters(service, features)
         if isinstance(params, pd.DataFrame):
-            groups = params.groupby('_service_id').groups
-            features['_parameters'] = features.index.map(lambda x: ','.join(filter(None, params.ix[groups[x]]['_parameter'].tolist())) if x in groups.keys() else '')
-            features['_parameter_codes'] = features.index.map(lambda x: ','.join(filter(None, params.ix[groups[x]]['_parameter_code'].tolist())) if x in groups.keys() else '')
+            groups = params.groupby('service_id').groups
+            features['parameters'] = features.index.map(lambda x: ','.join(filter(None, params.ix[groups[x]]['parameter'].tolist())) if x in groups.keys() else '')
+            #features['parameter_codes'] = features.index.map(lambda x: ','.join(filter(None, params.ix[groups[x]]['_parameter_code'].tolist())) if x in groups.keys() else '')
         else:
-            features['_parameters'] = ','.join(params['_parameters'])
-            features['_parameter_codes'] = ','.join(params['_parameter_codes'])
+            features['parameters'] = ','.join(params['parameters'])
+            #features['parameter_codes'] = ','.join(params['parameter_codes'])
 
+        # convert to GeoPandas GeoDataFrame
+        features = gpd.GeoDataFrame(features, geometry='geometry')
+
+        # write to cache_file
         util.mkdir_if_doesnt_exist(os.path.split(cache_file)[0])
-        features.to_hdf(cache_file, 'table')
+        with open(cache_file, 'w') as f:
+            f.write(features.to_json())
+
         return features
 
     def get_services(self):
@@ -70,6 +135,23 @@ class WebServiceBase(with_metaclass(abc.ABCMeta, object)):
     @abc.abstractmethod
     def _get_features(self, service):
         """
+        should return a pandas dataframe or a python dictionary with
+        indexed by feature uid and containing the following columns
+
+        reserved column/field names
+            display_name -> will be set to uid if not provided
+            description -> will be set to '' if not provided
+            download_url -> optional download url
+
+            defining geometry options:
+                1) geometry -> geojson string or shapely object
+                2) latitude & longitude columns/fields
+                3) geometry_type, latitudes, longitudes columns/fields
+                4) bbox column/field -> tuple with order (lon min, lat min, lon max, lat max)
+
+        all other columns/fields will be accumulated in a dict and placed
+        in a metadata field.
+
         """
 
     @abc.abstractmethod
@@ -97,15 +179,16 @@ class SingleFileBase(WebServiceBase):
     """
     def _download(self, service, feature, save_path, **kwargs):
         feature = self.get_features(service).ix[feature]
-        download_url = feature['_download_url']
-        fmt = feature.get('_extract_from_zip', '')
-        filename = feature.get('_filename', util.uuid('dataset'))
+        reserved = feature.get('reserved')
+        download_url = reserved['download_url']
+        fmt = reserved.get('extract_from_zip', '')
+        filename = reserved.get('filename', util.uuid('dataset'))
         datatype = self._get_services()[service].get('datatype')
         save_path = self._download_file(save_path, download_url, fmt, filename)
         return {
-            'save_path': save_path,
-            'file_format': feature.get('_file_format'),
-            'parameter': feature.get('_parameters'),
+            'file_path': save_path,
+            'file_format': reserved.get('file_format'),
+            'parameter': feature.get('parameters'),
             'datatype': datatype,
         }
 
