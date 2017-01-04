@@ -85,7 +85,7 @@ from .datasets import (
     visualize_dataset_options,
 )
 
-from .delete import (
+from .manage import (
     delete,
     move,
     copy,

@@ -8,11 +8,10 @@ import pandas as pd
 import os
 import shutil
 
-from .projects import active_db
-from .features import get_features
+from .projects import _get_project_dir
+from .features import get_features, add_features
 from .datasets import get_datasets
 from .. import util
-from . import db
 
 from .metadata import get_metadata, update_metadata
 from ..util import mkdir_if_doesnt_exist
@@ -97,41 +96,29 @@ def move(uris, destination_collection):
     elif resource == 'collections':
         raise ValueError('Collections cannot be moved')
 
+    project_path = _get_project_dir()
+    destination_collection_path = os.path.join(project_path, destination_collection)
+
     for uri in uris:
         if resource == 'features':
             feature_metadata = get_metadata(uri)[uri]
 
-            project_path = os.path.split(active_db())[0]
-            collection_path = os.path.join(project_path, feature_metadata['_collection'])
-            destination_collection_path = os.path.join(project_path, destination_collection)
+            collection_path = os.path.join(project_path, feature_metadata['collection'])
 
             datasets = get_datasets(metadata=True, filters={'feature': uri})
-            for dataset_name, dataset in datasets.items():
-                _move_dataset(dataset, collection_path, destination_collection_path, destination_collection)
+            for dataset_name, dataset_metadata in datasets.items():
+                _move_dataset(dataset_metadata, collection_path, destination_collection_path, destination_collection)
 
             update_metadata(uri, dsl_metadata={'collection': destination_collection})
 
         if resource == 'datasets':
-            dataset = get_metadata(uri)[uri]
+            dataset_metadata = get_metadata(uri)[uri]
 
-            project_path = os.path.split(active_db())[0]
-            collection_path = os.path.join(project_path, dataset['_collection'])
-            destination_collection_path = os.path.join(project_path, destination_collection)
+            collection_path = os.path.join(project_path, dataset_metadata['collection'])
 
-            _move_dataset(dataset, collection_path, destination_collection_path, destination_collection)
+            _move_dataset(dataset_metadata, collection_path, destination_collection_path, destination_collection)
 
     return True
-
-
-def _move_dataset(dataset, collection_path, destination_collection_path, destination_collection):
-    save_path = dataset['_save_path']
-    rel_path = os.path.relpath(save_path, collection_path)
-    new_save_path = os.path.normpath(os.path.join(destination_collection_path, rel_path))
-
-    mkdir_if_doesnt_exist(os.path.split(new_save_path)[0])
-    shutil.move(save_path, new_save_path)
-
-    update_metadata(dataset['_name'], dsl_metadata={'save_path': new_save_path, 'collection': destination_collection})
 
 
 
@@ -151,16 +138,63 @@ def copy(uris, destination_collection):
 
     resource = resource[0]
     if resource == 'service':
-        raise ValueError('Service uris cannot be moved')
+        raise ValueError('Service uris cannot be copied')
+
+    project_path = _get_project_dir()
+    destination_collection_path = os.path.join(project_path, destination_collection)
 
     for uri in uris:
         if resource == 'collections':
-            process_collections(uri)
+            pass
+            # if destination collection exists:
+                # copy all features from collection to destination
+
+            # else:
+                # rename collection
 
         if resource == 'features':
-            process_features(uri)
+            feature_metadata = get_metadata(uri)[uri]
+
+            collection_path = os.path.join(project_path, feature_metadata['collection'])
+
+            new_feature = add_features(destination_collection, uri)[0]
+
+            datasets = get_datasets(metadata=True, filters={'feature': uri})
+            for dataset_name, dataset_metadata in datasets.items():
+                _copy_dataset(dataset_metadata, collection_path, destination_collection_path, destination_collection, new_feature)
 
         if resource == 'datasets':
-            process_datasets(uri)
+            dataset_metadata = get_metadata(uri)[uri]
+
+            collection_path = os.path.join(project_path, feature_metadata['collection'])
+
+            feature = dataset_metadata['feature']
+
+            new_feature = add_features(destination_collection, feature)[0]
+
+            _copy_dataset(dataset_metadata, collection_path, destination_collection_path, destination_collection, new_feature)
 
     return True
+
+
+def _copy_dataset(dataset_metadata, collection_path, destination_collection_path, destination_collection, feature):
+    save_path = dataset_metadata['file_path']
+    rel_path = os.path.relpath(save_path, collection_path)
+    new_save_path = os.path.normpath(os.path.join(destination_collection_path, rel_path))
+
+    mkdir_if_doesnt_exist(os.path.split(new_save_path)[0])
+    shutil.copy2(save_path, new_save_path)
+
+    update_metadata(dataset_metadata['name'],
+                    dsl_metadata={'file_path': new_save_path, 'collection': destination_collection, 'feature': feature})
+
+
+def _move_dataset(dataset_metadata, collection_path, destination_collection_path, destination_collection):
+    save_path = dataset_metadata['file_path']
+    rel_path = os.path.relpath(save_path, collection_path)
+    new_save_path = os.path.normpath(os.path.join(destination_collection_path, rel_path))
+
+    mkdir_if_doesnt_exist(os.path.split(new_save_path)[0])
+    shutil.move(save_path, new_save_path)
+
+    update_metadata(dataset_metadata['name'], dsl_metadata={'file_path': new_save_path, 'collection': destination_collection})
