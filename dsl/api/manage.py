@@ -17,7 +17,6 @@ from .metadata import get_metadata, update_metadata
 from .. import util
 
 
-
 @dispatcher.add_method
 def delete(uris):
     """Update metadata for resource(s)
@@ -112,9 +111,9 @@ def move(uris, destination_collection):
 
             collection_path = os.path.join(project_path, feature_metadata['collection'])
 
-            datasets = get_datasets(metadata=True, filters={'feature': uri})
+            datasets = get_datasets(expand=True, filters={'feature': uri})
             for dataset_name, dataset_metadata in datasets.items():
-                _move_dataset(dataset_metadata, collection_path, destination_collection_path, destination_collection)
+                _move_dataset(dataset_metadata, collection_path, destination_collection_path, uri)
 
             update_metadata(uri, dsl_metadata={'collection': destination_collection})
 
@@ -123,10 +122,13 @@ def move(uris, destination_collection):
 
             collection_path = os.path.join(project_path, dataset_metadata['collection'])
 
-            _move_dataset(dataset_metadata, collection_path, destination_collection_path, destination_collection)
+            feature = dataset_metadata['feature']
+
+            new_feature = add_features(destination_collection, feature)[0]
+
+            _move_dataset(dataset_metadata, collection_path, destination_collection_path, new_feature)
 
     return True
-
 
 
 @dispatcher.add_method
@@ -156,9 +158,6 @@ def copy(uris, destination_collection):
             # if destination collection exists:
                 # copy all features from collection to destination
 
-            # else:
-                # rename collection
-
         if resource == 'features':
             feature_metadata = get_metadata(uri)[uri]
 
@@ -166,9 +165,9 @@ def copy(uris, destination_collection):
 
             new_feature = add_features(destination_collection, uri)[0]
 
-            datasets = get_datasets(metadata=True, filters={'feature': uri})
+            datasets = get_datasets(expand=True, filters={'feature': uri})
             for dataset_name, dataset_metadata in datasets.items():
-                _copy_dataset(dataset_metadata, collection_path, destination_collection_path, destination_collection, new_feature)
+                _copy_dataset(dataset_metadata, collection_path, destination_collection_path, new_feature)
 
         if resource == 'datasets':
             dataset_metadata = get_metadata(uri)[uri]
@@ -179,29 +178,28 @@ def copy(uris, destination_collection):
 
             new_feature = add_features(destination_collection, feature)[0]
 
-            _copy_dataset(dataset_metadata, collection_path, destination_collection_path, destination_collection, new_feature)
+            _copy_dataset(dataset_metadata, collection_path, destination_collection_path, new_feature)
 
     return True
 
 
-def _copy_dataset(dataset_metadata, collection_path, destination_collection_path, destination_collection, feature):
+def _copy_dataset(dataset_metadata, collection_path, destination_collection_path, feature):
+    _update_dataset_file_location(shutil.copy2, dataset_metadata, collection_path, destination_collection_path, feature)
+
+
+def _move_dataset(dataset_metadata, collection_path, destination_collection_path, feature):
+    _update_dataset_file_location(shutil.move, dataset_metadata, collection_path, destination_collection_path, feature)
+
+
+def _update_dataset_file_location(func, dataset_metadata, collection_path, destination_collection_path, feature):
+    dsl_metadata = {'feature': feature}
     save_path = dataset_metadata['file_path']
-    rel_path = os.path.relpath(save_path, collection_path)
-    new_save_path = os.path.normpath(os.path.join(destination_collection_path, rel_path))
+    if save_path is not None:
+        rel_path = os.path.relpath(save_path, collection_path)
+        new_save_path = os.path.normpath(os.path.join(destination_collection_path, rel_path))
+        dsl_metadata['file_path'] = new_save_path
 
-    util.mkdir_if_doesnt_exist(os.path.split(new_save_path)[0])
-    shutil.copy2(save_path, new_save_path)
+        util.mkdir_if_doesnt_exist(os.path.split(new_save_path)[0])
+        func(save_path, new_save_path)
 
-    update_metadata(dataset_metadata['name'],
-                    dsl_metadata={'file_path': new_save_path, 'collection': destination_collection, 'feature': feature})
-
-
-def _move_dataset(dataset_metadata, collection_path, destination_collection_path, destination_collection):
-    save_path = dataset_metadata['file_path']
-    rel_path = os.path.relpath(save_path, collection_path)
-    new_save_path = os.path.normpath(os.path.join(destination_collection_path, rel_path))
-
-    util.mkdir_if_doesnt_exist(os.path.split(new_save_path)[0])
-    shutil.move(save_path, new_save_path)
-
-    update_metadata(dataset_metadata['name'], dsl_metadata={'file_path': new_save_path, 'collection': destination_collection})
+    update_metadata(dataset_metadata['name'], dsl_metadata=dsl_metadata)
