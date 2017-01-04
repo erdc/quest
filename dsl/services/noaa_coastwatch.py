@@ -70,15 +70,14 @@ class NoaaService(WebServiceBase):
             ndbc_url = BASE_URL + 'cwwcNDBCMet.csvp?station%2Clongitude%2Clatitude'
             df = pd.read_csv(ndbc_url)
             df.rename(columns={
-                'station': '_service_id',
-                'longitude (degrees_east)': '_longitude',
-                'latitude (degrees_north)': '_latitude'
+                'station': 'service_id',
+                'longitude (degrees_east)': 'longitude',
+                'latitude (degrees_north)': 'latitude'
                 }, inplace=True)
 
-            df.index = df['_service_id']
-            df['_display_name'] = df['_service_id']
-            df['_geom_type'] = 'Point'
-            df['_geom_coords'] = zip(df['_longitude'], df['_latitude']) #python 3 adjustment
+            df['service_id'] = df['service_id'].apply(str)  # converts ints to strings
+            df.index = df['service_id']
+            df['display_name'] = df['service_id']
 
         if service == 'coops-meteorological':
             #hard coding for now
@@ -89,17 +88,15 @@ class NoaaService(WebServiceBase):
             df = pd.concat([pd.read_csv(f) for f in coops_url])
 
             df.rename(columns={
-                'stationID': '_service_id',
-                'longitude (degrees_east)': '_longitude',
-                'latitude (degrees_north)': '_latitude'
+                'stationID': 'service_id',
+                'longitude (degrees_east)': 'longitude',
+                'parameter' : 'parameters',
+                'latitude (degrees_north)': 'latitude'
             }, inplace=True)
 
-
-            df['_service_id'] = df['_service_id'].apply(str)  # converts ints to strings
-            df.index = df['_service_id']
-            df['_display_name'] = df['_service_id']
-            df['_geom_type'] = 'Point'
-            df['_geom_coords'] = zip(df['_longitude'], df['_latitude'])
+            df['service_id'] = df['service_id'].apply(str)  # converts ints to strings
+            df.index = df['service_id']
+            df['display_name'] = df['service_id']
 
         if service == 'coops-water':
             # hard coding for now
@@ -110,16 +107,15 @@ class NoaaService(WebServiceBase):
             df = pd.concat([pd.read_csv(f) for f in coops_url])
 
             df.rename(columns={
-                'stationID': '_service_id',
-                'longitude (degrees_east)': '_longitude',
-                'latitude (degrees_north)': '_latitude'
+                'stationID': 'service_id',
+                'longitude (degrees_east)': 'longitude',
+                'latitude (degrees_north)': 'latitude'
             }, inplace=True)
 
-            df['_service_id'] = df['_service_id'].apply(str)  # converts ints to strings
-            df.index = df['_service_id']
-            df['_display_name'] = df['_service_id']
-            df['_geom_type'] = 'Point'
-            df['_geom_coords'] = zip(df['_longitude'], df['_latitude'])
+            df['service_id'] = df['service_id'].apply(str)  # converts ints to strings
+            df.index = df['service_id']
+            df['display_name'] = df['service_id']
+
 
 
         return df.drop_duplicates()
@@ -128,19 +124,19 @@ class NoaaService(WebServiceBase):
         # hardcoding for now
         if service == 'ndbc':
             parameters = {
-                '_parameters': list(self._parameter_map('ndbc').values()),
-                '_parameter_codes': list(self._parameter_map('ndbc').keys())
+                'parameters': list(self._parameter_map('ndbc').values()),
+                'parameter_codes': list(self._parameter_map('ndbc').keys())
             }
 
         if service == 'coops-meteorological':
             parameters = {
-                '_parameters': list(self._parameter_map('coops-meteorological').values()),
-                '_parameter_codes': list(self._parameter_map('coops-meteorological').keys())
+                'parameters': list(self._parameter_map('coops-meteorological').values()),
+                'parameter_codes': list(self._parameter_map('coops-meteorological').keys())
             }
         if service == 'coops-water':
             parameters = {
-                '_parameters': list(self._parameter_map('coops-water').values()),
-                '_parameter_codes': list(self._parameter_map('coops-water').keys())
+                'parameters': list(self._parameter_map('coops-water').values()),
+                'parameter_codes': list(self._parameter_map('coops-water').keys())
             }
 
         return parameters
@@ -215,6 +211,7 @@ class NoaaService(WebServiceBase):
             pmap = {v: k for k, v in pmap.items()}
 
         return pmap
+
 
     def _download(self, service, feature, save_path, dataset,
                   parameter,start=None,end=None,quality='R',interval='6',datum='MLLW'):
@@ -293,12 +290,11 @@ class NoaaService(WebServiceBase):
             save_path = os.path.join(save_path, BASE_PATH, service)
             save_path = os.path.join(save_path, dataset)
             metadata = {
-                'save_path': save_path,
+                'file_path': save_path,
                 'file_format': 'timeseries-hdf5',
                 'datatype': 'timeseries',
-                'timezone': units['time'],
-                'parameter': parameter,
-                'units': units[parameter_code],
+                'parameters': parameter,
+                'unit': units[parameter_code],
                 'service_id': 'svc://noaa:{}/{}'.format(service, feature)
             }
 

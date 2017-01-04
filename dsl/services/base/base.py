@@ -14,6 +14,9 @@ reserved_feature_fields = [
     'description',
     'reserved',
     'geometry',
+
+]
+reserved_geometry_fields = [
     'latitude',
     'longitude',
     'geom_type',
@@ -21,6 +24,8 @@ reserved_feature_fields = [
     'longitudes',
     'bbox',
 ]
+
+reserved_feature_fields.extend(reserved_geometry_fields)
 
 class WebServiceBase(with_metaclass(abc.ABCMeta, object)):
     """Base class for data services plugins
@@ -61,7 +66,7 @@ class WebServiceBase(with_metaclass(abc.ABCMeta, object)):
                                 float(row['longitude']),
                                 float(row['latitude'])
                                 ))
-            features['geometry'] = features.apply(fn)
+            features['geometry'] = features.apply(fn,axis=1)
 
         if 'geometry' in features.columns:
             # TODO
@@ -83,11 +88,13 @@ class WebServiceBase(with_metaclass(abc.ABCMeta, object)):
         extra_fields = list(set(features.columns.tolist()) - set(reserved_feature_fields))
         features['metadata'] = features[extra_fields].to_dict(orient='records')
         features.drop(extra_fields, axis=1, inplace=True)
+        columns = list(set(features.columns.tolist()).intersection(reserved_geometry_fields))
+        features.drop(columns, axis=1, inplace=True)
 
         params = self._get_parameters(service, features)
         if isinstance(params, pd.DataFrame):
             groups = params.groupby('service_id').groups
-            features['parameters'] = features.index.map(lambda x: ','.join(filter(None, params.ix[groups[x]]['_parameter'].tolist())) if x in groups.keys() else '')
+            features['parameters'] = features.index.map(lambda x: ','.join(filter(None, params.ix[groups[x]]['parameter'].tolist())) if x in groups.keys() else '')
             #features['parameter_codes'] = features.index.map(lambda x: ','.join(filter(None, params.ix[groups[x]]['_parameter_code'].tolist())) if x in groups.keys() else '')
         else:
             features['parameters'] = ','.join(params['parameters'])

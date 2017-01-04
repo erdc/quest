@@ -134,8 +134,8 @@ def update_metadata(uris, display_name=None, description=None,
         elif not isinstance(description, list):
             raise ValueError('description must be a list if more that one uri is passed in')
 
-        if not isinstance(metadata, list):
-            metadata = [metadata] * n
+        # if not isinstance(metadata, list):
+        #     metadata = [metadata] * n
 
         if not isinstance(dsl_metadata, list):
                     dsl_metadata = [dsl_metadata] * n
@@ -164,7 +164,7 @@ def update_metadata(uris, display_name=None, description=None,
                 entity = db.Collection[uri]
             elif resource == 'feature':
                 entity = db.Feature[uri]
-            elif resource == 'dataset':
+            elif resource == 'datasets':
                 entity = db.Dataset[uri]
 
             entity.set(**dsl_meta)

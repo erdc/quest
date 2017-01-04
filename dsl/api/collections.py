@@ -1,5 +1,6 @@
 """API functions related to Collections."""
 from __future__ import print_function
+import os
 from jsonrpc import dispatcher
 from .. import util
 from .projects import _get_project_dir
