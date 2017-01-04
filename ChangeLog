@@ -1,0 +1,110 @@
+CHANGES
+=======
+
+2.0
+---
+
+* backend refactor to use sqlite database with schema through 'pony' ORM
+* remove reserved fields that started with underscore
+* switch to geopandas to hold geospatial info.
+* refactor more functionality into base classes to make writing plugins simpler
+* make api functions and resources consistent across codebase
+* replace 'metadata' kwarg with 'expand' kwarg across api
+* added api functions: move, copy
+* added beta async capability with api functions: get_tasks, get_task, cancel_tasks and remove_tasks
+* add new filters
+* add units to datasets
+
+1.0.4
+-----
+
+* minor clean up
+* add noaa coops/ndbc services
+
+1.0.3
+-----
+
+* add apply_to_collection flag that applies filter to all vitd files in collection
+* fix edge cases for converting geom_coords to json
+* bugfixes
+
+1.0.2
+-----
+
+* generalize vitd2raster for all themes
+* add utility fn rpc2py so that we can run jsonrpc strings from databrowser for debugging
+* add raster clip filter.
+* implement new return signature for apply_filter
+* bugfixes
+
+1.0.1
+-----
+
+* Refactored tests to they run in temp directory rather
+* add jinja2 renderer for smtk files
+* bugfixes
+
+1.0.0
+-----
+
+* add ability to use smtk for window definitions
+* add vitd2raster and vitd2nrmm filters
+* add ability and examples to use VITD 'local' services
+* add raster visualization
+* add api calls: visualize_dataset, visualize_dataset_options
+* add NLCD landcover service
+* tweak api
+* bugfixes
+
+
+0.6
+---
+
+* Switch backend from yaml to sqlite schemaless 'document' database
+* Unify metadata calls accross resources
+* tweak api
+* add 'local' services
+* bugfixes
+
+0.5
+---
+
+* refactor of api and backend
+* add collections and download api
+* add tag based search in features api
+* add ghcn, nasa services
+* bugfixes
+
+0.4
+---
+
+* bad version tag, ignore
+
+
+0.3
+---
+
+* Add RPC server
+* Python 2/3 compatible codebase
+* Switch to conda as primary method of installing dependencies
+* add features api
+* add tests
+* bugfixes
+
+
+0.2
+---
+
+* basic API implemented
+* metadata stored in yaml files
+* add generic services for testing
+* implement services, filters, collections
+* rename data_services_library to dsl
+* add usgs, ned services
+* bugfixes
+
+
+0.1
+---
+
+* Initial Release
