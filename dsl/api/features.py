@@ -60,10 +60,13 @@ def add_features(collection, features):
                 continue
 
             uri = util.uuid('feature')
+            geometry = data['geometry']
+            if hasattr(geometry, '.to_wkt'):
+                geometry = geometry.to_wkt()
             data.update({
                     'name': uri,
                     'collection': collection,
-                    'geometry': data['geometry'].to_wkt(),
+                    'geometry': geometry,
                     })
             db.Feature(**data)
             uris.append(uri)
