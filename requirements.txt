@@ -13,10 +13,7 @@ click
 werkzeug
 peewee
 stevedore
-<<<<<<< HEAD
 geopandas
 pony
-=======
 distributed
 psutil
->>>>>>> add distributed, psutil to requirements
