@@ -180,12 +180,11 @@ def get_datasets(expand=None, filters=None, as_dataframe=None):
 
     if filters is not None:
         for k, v in filters.items():
-            key = '_{}'.format(k)
-            if key not in datasets.keys():
+            if k not in datasets.keys():
                 print('filter field {} not found, continuing'.format(k))
                 continue
 
-            datasets = datasets.ix[datasets[key] == v]
+            datasets = datasets.ix[datasets[k] == v]
 
     if not expand and not as_dataframe:
         datasets = datasets['name'].tolist()

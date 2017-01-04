@@ -162,7 +162,7 @@ def update_metadata(uris, display_name=None, description=None,
         with db_session:
             if resource == 'collection':
                 entity = db.Collection[uri]
-            elif resource == 'feature':
+            elif resource == 'features':
                 entity = db.Feature[uri]
             elif resource == 'datasets':
                 entity = db.Dataset[uri]
