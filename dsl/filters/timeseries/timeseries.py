@@ -5,10 +5,12 @@ from __future__ import print_function
 
 from .ts_base import TsBase
 from dsl import util
+from ...api.metadata import get_metadata
 import pandas as pd
 import numpy as np
 import numpy.ma as ma
 import os
+from pint import UnitRegistry
 
 periods = {
     'daily': 'D',
@@ -100,6 +102,53 @@ class TsRemoveOutliers(TsBase):
 
         return schema
 
+class TsUnitConversion(TsBase):
+    def register(self, name='ts-unit-conversion'):
+        TsBase.register(self, name=name)
+
+    def _apply(self, df, options):
+        metadata = df.metadata
+        if 'file_path' in metadata:
+            del metadata['file_path']
+
+        path = "/Users/rditllkw/DSL/data-services-library/dsl/filters/timeseries/default_units.txt"
+        reg = UnitRegistry(path)
+        from_units = metadata['unit']
+        if '/' in from_units and '/' not in options.get('to_units'):
+            beg = from_units.find('/')
+            end = len(from_units)
+            default_time = from_units[beg:end]
+            to_units = options.get('to_units') + default_time
+        else:
+            to_units = options.get('to_units')
+        conversion = reg.convert(1, src=from_units, dst=to_units)
+        df[df.columns[1]] = df[df.columns[1]] * conversion
+        metadata.update({'units': to_units})
+        df.metadata = metadata
+
+        return df
+
+    def apply_filter_options(self, fmt, **kwargs):
+        # if fmt == 'smtk':
+        #     schema = util.build_smtk('filter_options','filter_timeseries_remove_outliers.sbt')
+
+        if fmt == 'json-schema':
+            properties = {
+                "to_units": {
+                    "type": "string",
+                    "description": "the unit to convert to ",
+                },
+            }
+
+            schema = {
+                "title": "Conversion Timeseries Filter",
+                "type": "object",
+                "properties": properties,
+                "required":["to_units"],
+            }
+
+        return schema
+
 
 class TsResample(TsBase):
     def register(self, name='ts-resample'):
@@ -152,7 +201,7 @@ class TsResample(TsBase):
 
 
 # class ToAdh(TsBase):
-#     def register(self):
+#     def register(self,name='ts-adh'):
 #         """Register Timeseries
 #
 #         """
@@ -166,8 +215,10 @@ class TsResample(TsBase):
 #                 'level': ['parameter']
 #             },
 #             'produces': None,
+#
 #         }
 #
+#         TsBase.register(self, name=name)
 #
 #     def apply_filter(self, collection_name, service, location, parameter, export_path, filename, start_time=None):
 #

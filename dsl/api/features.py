@@ -5,16 +5,16 @@ Features are unique identifiers with a web service or collection.
 import json
 from jsonrpc import dispatcher
 import pandas as pd
+import geopandas as gpd
+import geojson
+import shapely.wkt
+from shapely.geometry import shape, Polygon
 
 from .. import util
-from . import db
-from .projects import active_db
-from .collections import (
-        _read_collection_features,
-        _write_collection_features,
-        get_collections,
-    )
+from .database import get_db, db_session
+from .collections import get_collections
 from .metadata import get_metadata
+
 
 @dispatcher.add_method
 def add_features(collection, features):
@@ -38,18 +38,43 @@ def add_features(collection, features):
     Returns:
         uris (list): uri's of features
     """
+
+    if collection not in get_collections():
+        raise ValueError('Collection {} does not exist'.format(collection))
+
     if not isinstance(features, pd.DataFrame):
         features = get_metadata(features, as_dataframe=True)
 
-    #features[~features.index.str.startswith('svc://')]['_service'] = None
-    features['_collection'] = collection
-    return db.upsert_features(active_db(), features)
+    db = get_db()
+    with db_session:
+        uris = []  # feature uris inside collection
+        for _, data in features.iterrows():
+            data = data.to_dict()
+            row = db.Feature.select(lambda c:
+                                    c.service == data['service'] and
+                                    c.service_id == data['service_id'] and
+                                    c.collection.name == collection
+                                    ).first()
+            if row is not None:
+                uris.append(row.name)
+                continue
+
+            uri = util.uuid('feature')
+            data.update({
+                    'name': uri,
+                    'collection': collection,
+                    'geometry': data['geometry'].to_wkt(),
+                    })
+            db.Feature(**data)
+            uris.append(uri)
+
+    return uris
 
 
 @dispatcher.add_method
 def get_features(services=None, collections=None, features=None,
-                 metadata=None, as_dataframe=False, update_cache=False,
-                 filters=None):
+                 expand=False, as_dataframe=False, as_geojson=False,
+                 update_cache=False, filters=None):
     """Retrieve list of features from resources.
 
     Args:
@@ -99,12 +124,21 @@ def get_features(services=None, collections=None, features=None,
         all_features.append(tmp_feats)
 
     # get metadata for features in collections
-    for name in collections or []:
-        tmp_feats = pd.DataFrame(db.read_all(active_db(), 'features')).T
-        if not tmp_feats.empty:
-            tmp_feats = tmp_feats[tmp_feats['_collection'] == name]
-            tmp_feats.index = tmp_feats['_name']
-        all_features.append(tmp_feats)
+    db = get_db()
+    with db_session:
+        for name in collections or []:
+            tmp_feats = [f.to_dict() for f in db.Feature.select(
+                            lambda c: c.collection.name == name
+                        )]
+            tmp_feats = gpd.GeoDataFrame(tmp_feats)
+
+            if not tmp_feats.empty:
+                tmp_feats['geometry'] = tmp_feats['geometry'].apply(
+                                            lambda x: shapely.wkt.loads(x))
+                tmp_feats.set_geometry('geometry')
+
+                tmp_feats.index = tmp_feats['name']
+            all_features.append(tmp_feats)
 
     # drop duplicates fails when some columns have nested list/tuples like
     # _geom_coords. so drop based on index
@@ -116,35 +150,34 @@ def get_features(services=None, collections=None, features=None,
     # apply any specified filters
     if filters is not None:
         for k, v in filters.items():
-            if k == 'bbox':
-                xmin, ymin, xmax, ymax = [float(x) for x in util.listify(v)]
-                idx = (features._longitude > xmin) \
-                    & (features._longitude < xmax) \
-                    & (features._latitude > ymin) \
-                    & (features._latitude < ymax)
-                features = features[idx]
-
-            elif k == 'geom_type':
-                idx = features._geom_type.str.lower() == v.lower()
-                features = features[idx]
-
-            elif k == 'parameter':
-                idx = features._parameters.str.contains(v)
-                features = features[idx]
-
-            elif k == 'parameter_code':
-                idx = features._parameter_codes.str.contains(v)
-                features = features[idx]
-
+            if features.empty:
+                break  # if dataframe is empty then doen't try filtering any further
             else:
-                idx = features[k] == v
-                features = features[idx]
+                if k == 'bbox':
+                    bbox = Polygon(util.bbox2poly(*[float(x) for x in util.listify(v)]))
+                    idx = features.intersects(bbox)  # http://geopandas.org/reference.html#GeoSeries.intersects
+                    features = features[idx]
 
-    if not metadata and not as_dataframe:
+                elif k == 'geom_type':
+                    features.geom_type.str.contains(v)  # will not work if features is empty
+                    features = features[idx]
+
+                elif k == 'parameter':
+                    idx = features.parameters.str.contains(v)
+                    features = features[idx]
+
+                else:
+                    idx = features.metadata.map(lambda x: x.get(k) == v)
+                    features = features[idx]
+
+    if not (expand or as_dataframe or as_geojson):
         return features.index.astype('unicode').tolist()
 
+    if as_geojson:
+        return json.loads(features.to_json())
+
     if not as_dataframe:
-        features = util.to_geojson(features)
+        features = features.to_dict(orient='index')
 
     return features
 
@@ -179,12 +212,14 @@ def get_tags(service):
 
 
 @dispatcher.add_method
-def new_feature(collection, display_name=None, geom_type=None, geom_coords=None, metadata=None):
+def new_feature(collection, display_name=None, geom_type=None, geom_coords=None,
+                description=None, metadata=None):
     """Add a new feature to a collection.
 
     Args:
         collection (string): name of collection
         display_name (string): display name of feature
+        description (string): description of feature
         geom_type (string, optional): point/line/polygon
         geom_coords (string or list, optional): geometric coordinates specified
             as valid geojson coordinates (i.e. a list of lists i.e.
@@ -202,6 +237,7 @@ def new_feature(collection, display_name=None, geom_type=None, geom_coords=None,
     if collection not in get_collections():
         raise ValueError('Collection {} not found'.format(collection))
 
+    geometry = None
     if geom_type is not None:
         if geom_type not in ['LineString', 'Point', 'Polygon']:
             raise ValueError(
@@ -211,107 +247,39 @@ def new_feature(collection, display_name=None, geom_type=None, geom_coords=None,
         if isinstance(geom_coords, str):
             geom_coords = json.loads(geom_coords)
 
+        # convert to wkt using gist
+        # https://gist.github.com/drmalex07/5a54fc4f1db06a66679e
+        o = {"coordinates": geom_coords, "type": geom_type}
+        s = json.dumps(o)
+        g1 = geojson.loads(s)
+        g2 = shape(g1)
+        geometry = g2.wkt
+
     uri = util.uuid('feature')
     if display_name is None:
         display_name = uri
 
-    dsl_metadata = {
-        'display_name': display_name,
-        'geom_type': geom_type,
-        'geom_coords': geom_coords,
-        'collection': collection,
-        }
+    data = {
+            'name': uri,
+            'display_name': display_name,
+            'description': description,
+            'collection': collection,
+            'geometry': geometry,
+            'metadata': metadata,
+            }
 
-    db.upsert(active_db(), 'features', uri, dsl_metadata=dsl_metadata,
-              metadata=metadata)
+    db = get_db()
+    with db_session:
+        db.Feature(**data)
 
     return uri
-
-
-@dispatcher.add_method
-def update_features(feature, metadata):
-    """Change metadata feature in collection.
-
-    TODO make work with db
-
-
-    (ignore feature/parameter/dataset in uri)
-
-    Args:
-        features (string, comma separated strings, list of strings): uri of
-            features to update
-        metadata (dict): metadata to be updated
-
-    Returns
-    -------
-        True on successful update
-
-    """
-    raise NotImplementedError
-    features = util.listify(features)
-
-    for uri in uri_list:
-        uri_str = uri
-        uri = util.parse_uri(uri)
-        if uri['resource'] != 'collection':
-            raise NotImplementedError
-
-        collection = uri['name']
-        existing = _read_collection_features(collection)
-        if uri_str not in existing.index:
-            print('%s not found in features' % uri)
-            return False
-
-        feature = existing.ix[uri_str].to_dict()
-        feature.update(metadata)
-        df = pd.DataFrame({uri_str: feature}).T
-        updated = pd.concat([existing.drop(uri_str), df])
-        _write_collection_features(collection, updated)
-
-        print('%s updated' % uri_str)
-
-    return True
-
-
-@dispatcher.add_method
-def delete_feature(uri):
-    """Delete feature from collection).
-
-    TODO make work with db
-
-    (ignore parameter/dataset in uri)
-
-        Args:
-            uri (string): uri of feature inside collection
-
-        Returns
-        -------
-            True on successful update
-    """
-    raise NotImplementedError
-    uri_str = uri
-    uri = util.parse_uri(uri)
-    if uri['resource'] != 'collection':
-        raise NotImplementedError
-
-    collection = uri['name']
-    existing = _read_collection_features(collection)
-
-    if uri_str not in existing.index:
-        print('%s not found in features' % uri)
-        return False
-
-    updated = existing.drop(uri_str)
-    _write_collection_features(collection, updated)
-
-    print('%s deleted from collection' % uri_str)
-    return True
 
 
 def _get_features(provider, service, update_cache):
     driver = util.load_services()[provider]
     features = driver.get_features(service, update_cache=update_cache)
-    features['_service'] = 'svc://{}:{}'.format(provider, service)
-    features.index = features['_service'] + '/' + features['_service_id']
-    features['_name'] = features.index
+    features['service'] = 'svc://{}:{}'.format(provider, service)
+    features['service_id'] = features.index
+    features.index = features['service'] + '/' + features['service_id']
+    features['name'] = features.index
     return features

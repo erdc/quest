@@ -47,11 +47,13 @@ __all__ = (
     'delete_project',
     'get_projects',
     'get_active_project',
+    'remove_project',
     'set_active_project',
     'get_providers',
     'get_services',
     'add_provider',  # add custom url or local folder as a service
     'delete_provider',
+    'move_feature',
 )
 
 from ..util import (
@@ -83,8 +85,10 @@ from .datasets import (
     visualize_dataset_options,
 )
 
-from .delete import (
+from .manage import (
     delete,
+    move,
+    copy,
 )
 
 from .features import (
@@ -120,9 +124,12 @@ from .projects import (
     delete_project,
     get_projects,
     get_active_project,
+    remove_project,
     set_active_project,
+    active_db,
 )
 
+from .database import get_db
 
 from .services import (
     get_providers,
