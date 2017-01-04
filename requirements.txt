@@ -15,3 +15,5 @@ peewee
 stevedore
 geopandas
 pony
+distributed
+psutil
