@@ -1,6 +1,6 @@
 """API functions related to deleting resources.
 
-delete fn for collections/features/datasets
+delete, move, and copy fn for collections/features/datasets
 """
 
 from jsonrpc import dispatcher
@@ -8,13 +8,14 @@ import pandas as pd
 import os
 import shutil
 
-from .projects import _get_project_dir
+
 from .features import get_features, add_features
 from .datasets import get_datasets
+from .database import get_db, db_session
+from .projects import _get_project_dir
+from .metadata import get_metadata, update_metadata
 from .. import util
 
-from .metadata import get_metadata, update_metadata
-from ..util import mkdir_if_doesnt_exist
 
 
 @dispatcher.add_method
@@ -50,13 +51,16 @@ def delete(uris):
     if resource == 'service':
         raise ValueError('Service uris cannot be deleted')
 
+    db = get_db()
     for uri in uris:
         if resource == 'collections':
             # delete all datasets and all features and folder
             features = get_features(collections=uri)
             delete(features)
-            db.delete(active_db(), 'collections', uri)
-            path = os.path.split(active_db())[0]
+            with db_session:
+                db.Collection[uri].delete()
+
+            path = _get_project_dir()
             path = os.path.join(path, uri)
             if os.path.exists(path):
                 print('deleting all data under path: %s' % path)
@@ -66,11 +70,14 @@ def delete(uris):
             # delete feature and associated datasets
             datasets = get_datasets(filters={'feature': uri})
             delete(datasets)
-            db.delete(active_db(), 'features', uri)
+
+            with db_session:
+                db.Feature[uri].delete()
 
         if resource == 'datasets':
             # delete dataset and associated dataset files
-            db.delete(active_db(), 'datasets', uri)
+            with db_session:
+                db.Dataset[uri].delete()
             # TODO delete data files/folders
 
     return True
@@ -182,7 +189,7 @@ def _copy_dataset(dataset_metadata, collection_path, destination_collection_path
     rel_path = os.path.relpath(save_path, collection_path)
     new_save_path = os.path.normpath(os.path.join(destination_collection_path, rel_path))
 
-    mkdir_if_doesnt_exist(os.path.split(new_save_path)[0])
+    util.mkdir_if_doesnt_exist(os.path.split(new_save_path)[0])
     shutil.copy2(save_path, new_save_path)
 
     update_metadata(dataset_metadata['name'],
@@ -194,7 +201,7 @@ def _move_dataset(dataset_metadata, collection_path, destination_collection_path
     rel_path = os.path.relpath(save_path, collection_path)
     new_save_path = os.path.normpath(os.path.join(destination_collection_path, rel_path))
 
-    mkdir_if_doesnt_exist(os.path.split(new_save_path)[0])
+    util.mkdir_if_doesnt_exist(os.path.split(new_save_path)[0])
     shutil.move(save_path, new_save_path)
 
     update_metadata(dataset_metadata['name'], dsl_metadata={'file_path': new_save_path, 'collection': destination_collection})
