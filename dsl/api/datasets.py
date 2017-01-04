@@ -13,7 +13,7 @@ from .tasks import add_async
 
 @dispatcher.add_method
 @add_async
-def download(feature, save_path, dataset=None, async=False, **kwargs):
+def download(feature, save_path, dataset=None, **kwargs):
     """Download dataset and save it locally.
 
     Parameters
@@ -56,7 +56,7 @@ def download(feature, save_path, dataset=None, async=False, **kwargs):
 
 @dispatcher.add_method
 @add_async
-def download_datasets(datasets, async=False, raise_on_error=False):
+def download_datasets(datasets, raise_on_error=False):
     """download staged datasets.
 
     TODO: ASYNC NOT IMPLEMENTED
