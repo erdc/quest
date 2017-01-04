@@ -5,6 +5,7 @@ This will eventually hold filter related functionality
 from .. import util
 from jsonrpc import dispatcher
 from .metadata import get_metadata
+from pint import UnitRegistry
 
 
 @dispatcher.add_method

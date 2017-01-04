@@ -8,11 +8,13 @@ import pandas as pd
 import os
 import shutil
 
-from .projects import active_db
+# from .projects import active_db
 from .features import get_features
 from .datasets import get_datasets
 from .. import util
-from . import db
+from .database import get_db, db_session
+from .projects import _get_project_dir
+# from . import db
 
 
 @dispatcher.add_method
@@ -48,13 +50,16 @@ def delete(uris):
     if resource == 'service':
         raise ValueError('Service uris cannot be deleted')
 
+    db = get_db()
     for uri in uris:
         if resource == 'collections':
             # delete all datasets and all features and folder
             features = get_features(collections=uri)
             delete(features)
-            db.delete(active_db(), 'collections', uri)
-            path = os.path.split(active_db())[0]
+            with db_session:
+                db.Collection[uri].delete()
+
+            path = _get_project_dir()
             path = os.path.join(path, uri)
             if os.path.exists(path):
                 print('deleting all data under path: %s' % path)
@@ -64,11 +69,14 @@ def delete(uris):
             # delete feature and associated datasets
             datasets = get_datasets(filters={'feature': uri})
             delete(datasets)
-            db.delete(active_db(), 'features', uri)
+
+            with db_session:
+                db.Feature[uri].delete()
 
         if resource == 'datasets':
             # delete dataset and associated dataset files
-            db.delete(active_db(), 'datasets', uri)
+            with db_session:
+                db.Dataset[uri].delete()
             # TODO delete data files/folders
 
     return True

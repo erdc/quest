@@ -68,14 +68,12 @@ class NcdcService(WebServiceBase):
         valid = pd.notnull(features.latitude) & pd.notnull(features.longitude)
         features = features[valid]
         features.rename(columns={
-                            'name': '_display_name',
-                            'longitude': '_longitude',
-                            'latitude': '_latitude'
+                            'name': 'display_name',
+                            'longitude': 'longitude',
+                            'latitude': 'latitude'
                         }, inplace=True)
         features['_service_id'] = features.index
-        features['_geom_type'] = 'Point'
-        features['_geom_coords'] = \
-            list(zip(features['_longitude'], features['_latitude']))
+
         return features
 
     def _get_parameters(self, service, features=None):
@@ -87,15 +85,15 @@ class NcdcService(WebServiceBase):
 
             # hardcoding for now
             parameters = {
-                '_parameters': list(self._parameter_map('ghcn-daily').values()),
-                '_parameter_codes': list(self._parameter_map('ghcn-daily').keys())
+                'parameters': list(self._parameter_map('ghcn-daily').values()),
+                'parameter_codes': list(self._parameter_map('ghcn-daily').keys())
             }
 
         if service=='gsod':
             # this is not the real list of parameters. hardcoding for now
             parameters = {
-                '_parameters': list(self._parameter_map('gsod').values()),
-                '_parameter_codes': list(self._parameter_map('gsod').keys())
+                'parameters': list(self._parameter_map('gsod').values()),
+                'parameter_codes': list(self._parameter_map('gsod').keys())
             }
 
         return parameters
@@ -117,7 +115,7 @@ class NcdcService(WebServiceBase):
                 'snow_depth': 'snow_depth:daily:total',
                 'max_temp': 'air_temperature:daily:max',
                 'min_temp': 'air_temperature:daily:min',
-                'max_temp': 'air_temperature:daily:min',
+                'max_temp': 'air_temperature:daily:max',
             }
 
         if invert:
@@ -127,6 +125,9 @@ class NcdcService(WebServiceBase):
 
     def _download(self, service, feature, save_path, dataset,
                   parameter, start=None, end=None):
+
+        if dataset is None:
+            dataset = 'station-' + feature
 
         if end is None:
             end = pd.datetime.now().strftime('%Y-%m-%d')
@@ -162,11 +163,11 @@ class NcdcService(WebServiceBase):
         save_path = os.path.join(save_path, BASE_PATH, service)
         save_path = os.path.join(save_path, dataset)
         metadata = {
-            'save_path': save_path,
+            'file_path': save_path,
             'file_format': 'timeseries-hdf5',
             'datatype': 'timeseries',
             'parameter': parameter,
-            'units': self._unit_map(service)[parameter],
+            'unit': self._unit_map(service)[parameter],
             'service_id': 'svc://ncdc:{}/{}'.format(service, feature)
         }
 
