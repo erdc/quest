@@ -59,8 +59,6 @@ def download(feature, save_path, dataset=None, **kwargs):
 def download_datasets(datasets, raise_on_error=False):
     """download staged datasets.
 
-    TODO: ASYNC NOT IMPLEMENTED
-
     Download datasets that have been staged with stage_for_download
     args:
         datasets (string, list): list of datasets to download
