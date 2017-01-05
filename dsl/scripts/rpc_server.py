@@ -5,6 +5,7 @@ This script wraps dsl.api functions and exposes them through RPC
 
 import click
 from dsl import api
+from dsl.util.log import logger
 import json
 from jsonrpc import JSONRPCResponseManager, dispatcher
 
@@ -46,7 +47,7 @@ def start_server(port, threaded, processes):
     <port>   : Port number to run rpc server. Default(4000)
     """
     if threaded and processes>1:
-        print('RPC server can either be started multithreaded or multiprocess. Not both. Please pick one.')
+        logger.error('RPC server can either be started multithreaded or multiprocess. Not both. Please pick one.')
         exit(0)
         
     run_simple('localhost', port, wsgi_app, threaded=threaded, processes=processes)
@@ -74,13 +75,13 @@ def stop_server(port):
         "id": 0,
     }
     response = requests.post(url, data=json.dumps(payload), headers=headers)
-    print('DSL RPC Server shutting down...')
+    logger.info('DSL RPC Server shutting down...')
 
 
 @dispatcher.add_method
 def long_download(delay=1):
     global jobid
-    print('Job {0}. sleeping for: {1} seconds'.format(jobid, delay))
+    logger.info('Job {0}. sleeping for: {1} seconds'.format(jobid, delay))
     jobid += 1
     thr = Thread(target=run_download, args=[jobid-1, delay])
     thr.start()
@@ -88,7 +89,7 @@ def long_download(delay=1):
 
 def run_download(jobid, delay):
     time.sleep(delay)
-    print('-> Job {0}. {1} seconds task is finished'.format(jobid, delay))
+    logger.info('-> Job {0}. {1} seconds task is finished'.format(jobid, delay))
 
 
 def shutdown_server(environ):

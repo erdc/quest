@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 from .base import IoBase
 from .. import util
-
+from ..util.log import logger
 
 class XYHdf5(IoBase):
     """"""
@@ -36,7 +36,8 @@ class XYHdf5(IoBase):
             h5store.put('dataframe', dataframe)
             h5store.get_storer('dataframe').attrs.metadata = metadata
 
-        print('file written to: %s' % save_path)
+        logger.info('file written to: %s' % save_path)
+
 
     def open(self, path, fmt=None):
         dataframe = self.read(path)

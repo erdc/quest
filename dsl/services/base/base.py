@@ -7,6 +7,7 @@ import ulmo
 import pandas as pd
 import geopandas as gpd
 from shapely.geometry import box, Point, Polygon, LineString, shape
+from dsl.util.log import logger
 import json
 
 reserved_feature_fields = [
@@ -50,7 +51,7 @@ class WebServiceBase(with_metaclass(abc.ABCMeta, object)):
                 features.set_index('id', inplace=True)
                 return features
             except:
-                print('updating cache')
+                logger.info('updating cache')
                 pass
 
         # get features from service
@@ -199,13 +200,14 @@ class SingleFileBase(WebServiceBase):
         util.mkdir_if_doesnt_exist(path)
         util.mkdir_if_doesnt_exist(os.path.join(path, 'zip'))
         tile_path = os.path.join(path, filename)
-        print('... downloading %s' % url)
+        logger.info('... downloading %s' % url)
+
         if tile_fmt == '':
             ulmo.util.download_if_new(url, tile_path, check_modified=check_modified)
         else:
             zip_path = os.path.join(path, 'zip', filename)
             ulmo.util.download_if_new(url, zip_path, check_modified=check_modified)
-            print('... ... zipfile saved at %s' % zip_path)
+            logger.info('... ... zipfile saved at %s' % zip_path)
             tile_path = ulmo.util.extract_from_zip(zip_path, tile_path, tile_fmt)
 
         return tile_path
