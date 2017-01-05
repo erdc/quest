@@ -142,16 +142,19 @@ class NcdcService(WebServiceBase):
         if service == 'ghcn-daily':
             data = ghcn_daily.get_data(feature,
                                        elements=parameter_code,
-                                       as_dataframe=True)[parameter_code]
-            if data.empty:
+                                       as_dataframe=True)#[parameter_code]
+            if not data:
                 raise ValueError('No Data Available')
+
+            data = data[parameter_code]
+
 
             data = data[start:end]
             data.rename(columns={'value': parameter}, inplace=True)
 
         if service == 'gsod':
             data = gsod.get_data(feature, start=start, end=end,
-                                 parameters=parameter_code)[feature]
+                                 parameters=parameter_code)#[feature]
             data = pd.DataFrame(data)
             if data.empty:
                 raise ValueError('No Data Available')
