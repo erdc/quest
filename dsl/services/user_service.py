@@ -58,7 +58,7 @@ class UserService(WebServiceBase):
                     for line in f:
                         feature_id, x1, y1, x2, y2 = line.split()
                         properties = {}  # '_service_id': feature_id}
-                        polys.append(Feature(geometry=Polygon([util.bbox2poly(x1, y1, x2, y2)]), properties=properties, id=feature_id))
+                        polys.append(Feature(geometry=util.bbox2poly(x1, y1, x2, y2, as_geojson=True), properties=properties, id=feature_id))
                     features = FeatureCollection(polys)
                     features = util.to_dataframe(features)
 
@@ -71,7 +71,7 @@ class UserService(WebServiceBase):
                         feature_id, y1, x1, y2, x2 = line.split(',')
                         feature_id = feature_id.split('.')[0]
                         properties = {}  # '_service_id': feature_id}
-                        polys.append(Feature(geometry=Polygon([util.bbox2poly(x1, y1, x2, y2)]), properties=properties, id=feature_id))
+                        polys.append(Feature(geometry=util.bbox2poly(x1, y1, x2, y2, as_geojson=True), properties=properties, id=feature_id))
                     features = FeatureCollection(polys)
                     features = util.to_dataframe(features)
 
