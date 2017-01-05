@@ -2,6 +2,7 @@
 import json
 from jsonrpc import dispatcher
 import os
+from ..util.log import logger
 
 from .. import util
 from .database import get_db, db_session
@@ -182,7 +183,7 @@ def get_datasets(expand=None, filters=None, as_dataframe=None):
     if filters is not None:
         for k, v in filters.items():
             if k not in datasets.keys():
-                print('filter field {} not found, continuing'.format(k))
+                logger.warning('filter field {} not found, continuing'.format(k))
                 continue
 
             datasets = datasets.ix[datasets[k] == v]

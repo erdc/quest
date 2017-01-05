@@ -3,7 +3,7 @@ from jsonrpc import dispatcher
 import os
 import pandas as pd
 import shutil
-
+from ..util.log import logger
 from .. import util
 from .database import db_session, get_db, init_db
 
@@ -39,7 +39,6 @@ def add_project(name, path, activate=True):
         project = _load_project(name)
     except Exception as e:
         projects.pop(name)
-        # print(projects)
         _write_projects(projects)
         raise ValueError('Invalid Project Folder: %s' % path)
 
@@ -108,7 +107,7 @@ def delete_project(name):
     projects = _load_projects()
 
     if name not in list(projects.keys()):
-        print('Project not found')
+        logger.error('Project not found')
         return projects
 
     folder = projects[name]['folder']
@@ -117,7 +116,7 @@ def delete_project(name):
     else:
         path = folder
     if os.path.exists(path):
-        print('deleting all data under path:', path)
+        logger.info('deleting all data under path:', path)
         shutil.rmtree(path)
 
     return remove_project(name)
@@ -166,7 +165,7 @@ def remove_project(name):
     projects = _load_projects()
 
     if name not in list(projects.keys()):
-        print('Project not found')
+        logger.error('Project not found')
         return projects
 
     if name == get_active_project():
@@ -174,10 +173,11 @@ def remove_project(name):
             active = 'default'
         else:
             active = projects.keys()[0]
-        print('changing active project from {} to {}'.format(name, active))
+        logger.info('changing active project from {} to {}'.format(name, active))
         set_active_project(active)
 
-    print('removing %s from projects' % name)
+    logger.info('removing %s from projects' % name)
+
     del projects[name]
     _write_projects(projects)
     return projects
