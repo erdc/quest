@@ -11,6 +11,7 @@ import numpy as np
 import os
 from subprocess import check_output
 import tempfile
+from dsl.util.log import logger
 
 env = Environment(loader=FileSystemLoader(get_pkg_data_path('datalibrary')))
 
@@ -126,7 +127,7 @@ def _run_filter(name, **kwargs):
     if runplugin is None:
         raise ValueError('Environment Variable DSL_RUNPLUGIN not set')
     output = check_output([runplugin, fname])
-    print(output)
+    logger.info(output)
     return output
 
 
