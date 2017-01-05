@@ -102,14 +102,22 @@ def shutdown_server(environ):
     return fn
 
 
-def _sanitize_dict(d):
+def _sanitize(obj):
     """Recursively converts datetime values to iso formatted strings so they can be JSON serialized.
     """
-    for k, v in d.items():
-        if isinstance(v, datetime.datetime):
-            d[k] = v.isoformat()
-        elif isinstance(v, dict):
-            _sanitize_dict(v)
+
+    if isinstance(obj, datetime.datetime):
+        return obj.isoformat()
+    elif obj != obj:  # check if v is nan
+        return None
+    elif isinstance(obj, dict):
+        for k, v in obj.items():
+            obj[k] = _sanitize(v)
+        return obj
+    elif isinstance(obj, list):
+        return [_sanitize(i) for i in obj]
+    else:
+        return obj
 
 @Request.application
 def wsgi_app(request):
@@ -121,7 +129,7 @@ def wsgi_app(request):
 
     result = response.data.get('result')
     if isinstance(result, dict):
-        _sanitize_dict(result)
+        _sanitize(result)
 
     return Response(response.json, mimetype='application/json')
 
