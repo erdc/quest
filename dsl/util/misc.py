@@ -1,5 +1,6 @@
 import appdirs
-from geojson import LineString, Point, Polygon, Feature, FeatureCollection
+from geojson import LineString, Point, Polygon, Feature, FeatureCollection, MultiPolygon
+import shapely.geometry
 from jinja2 import Environment, FileSystemLoader
 import itertools
 from .config import get_settings
@@ -30,17 +31,52 @@ def append_features(old, new):
     return old
 
 
-def bbox2poly(x1, y1, x2, y2, reverse_order=False):
+def bbox2poly(x1, y1, x2, y2, reverse_order=False, as_geojson=False, as_shapely=False):
     if reverse_order:
         x1, y1 = y1, x1
         x2, y2 = y2, x2
 
-    xmin, xmax = sorted([float(x1), float(x2)])
-    ymin, ymax = sorted([float(y1), float(y2)])
+    xmin, xmax = [float(x1), float(x2)]
+    ymin, ymax = [float(y1), float(y2)]
+
+
     poly = [[xmin, ymin], [xmin, ymax], [xmax, ymax], [xmax, ymin]]
     poly.append(poly[0])
 
-    return poly
+    if not (as_geojson or as_shapely):
+        return poly
+
+    if as_geojson:
+        polygon = Polygon
+        multi_polygon = MultiPolygon
+
+    if as_shapely:
+        polygon = shapely.geometry.Polygon
+        multi_polygon = shapely.geometry.MultiPolygon
+
+    xmin2 = xmax2 = None
+    if xmin < -180:
+        xmin2 = 360 + xmin
+        xmin = -180
+    if xmax > 180:
+        xmax2 = xmax - 360
+        xmax = 180
+
+    if xmin2 is None and xmax2 is None:
+        return polygon(poly)
+    # else bbox spans 180 longitude so create multipolygon
+
+
+    poly1 = [[xmin, ymin], [xmin, ymax], [xmax, ymax], [xmax, ymin]]
+    poly1.append(poly1[0])
+
+    xmin = xmin2 or -180
+    xmax = xmax2 or 180
+
+    poly2 = [[xmin, ymin], [xmin, ymax], [xmax, ymax], [xmax, ymin]]
+    poly2.append(poly2[0])
+
+    return multi_polygon(polygons=[polygon(poly1), polygon(poly2)])
 
 
 def build_smtk(smtk_subdir, smtk_filename, **kwargs):
@@ -291,6 +327,11 @@ def to_dataframe(feature_collection):
 
         features[feature['id']] = data
     return pd.DataFrame.from_dict(features, orient='index')
+
+
+def to_json_default_handler(obj):
+    if hasattr(obj, 'isoformat'):
+        return obj.isoformat()
 
 
 def to_geojson(df):

@@ -60,10 +60,13 @@ def add_features(collection, features):
                 continue
 
             uri = util.uuid('feature')
+            geometry = data['geometry']
+            if hasattr(geometry, '.to_wkt'):
+                geometry = geometry.to_wkt()
             data.update({
                     'name': uri,
                     'collection': collection,
-                    'geometry': data['geometry'].to_wkt(),
+                    'geometry': geometry,
                     })
             db.Feature(**data)
             uris.append(uri)
@@ -154,7 +157,7 @@ def get_features(services=None, collections=None, features=None,
                 break  # if dataframe is empty then doen't try filtering any further
             else:
                 if k == 'bbox':
-                    bbox = Polygon(util.bbox2poly(*[float(x) for x in util.listify(v)]))
+                    bbox = util.bbox2poly(*[float(x) for x in util.listify(v)], as_shapely=True)
                     idx = features.intersects(bbox)  # http://geopandas.org/reference.html#GeoSeries.intersects
                     features = features[idx]
 
@@ -174,7 +177,10 @@ def get_features(services=None, collections=None, features=None,
         return features.index.astype('unicode').tolist()
 
     if as_geojson:
-        return json.loads(features.to_json())
+        if features.empty:
+            return geojson.FeatureCollection([])
+        else:
+            return json.loads(features.to_json(default=util.to_json_default_handler))
 
     if not as_dataframe:
         features = features.to_dict(orient='index')
