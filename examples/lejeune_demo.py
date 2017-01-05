@@ -43,13 +43,14 @@ print('adding sites to collection')
 #ndbc=dsl.api.add_features(collection_name, "svc://noaa:ndbc/41036, svc://noaa:ndbc/41037")
 
 # usgs nwis iv
-usgs_nwis=dsl.api.add_features(collection_name, "svc://usgs-nwis:iv/02093000")
+usgs_nwis=dsl.api.add_features(collection_name, 'svc://usgs-nwis:iv/02093000')
 
 # coops
 # dsl.api.add_features(collection_name, 'noaa-coops', '8658163')
 
 # ned 1/9 arc second
-usgs_ned=dsl.api.add_features(collection_name, "svc://usgs-ned:19-arc-second/53174dbde4b0cd4cd83c4421")
+usgs_ned=dsl.api.add_features(collection_name,'svc://usgs-ned:19-arc-second/581d2561e4b08da350d5a3b2')
+
 
 ##Usgs-Ero-Nlcd2008 is not listed as a service
 # # nlcd 2006
@@ -97,18 +98,19 @@ usgs_ned=dsl.api.stage_for_download(usgs_ned, download_options={'parameters':'el
 print('~~~~~~~~~~Downloading data for usgs_nwis~~~~~~~~~~~')
 stat_nwis=dsl.api.download_datasets(usgs_nwis)
 print('~~~~~~~~~~Downloading data for usgs_ned~~~~~~~~~~~')
-#stat_ned=dsl.api.download_datasets(usgs_ned)
+stat_ned=dsl.api.download_datasets(usgs_ned)
 
 # # ######################################################################################################################
 # # # apply some filters
 print('~~~~~~~~~~Applying filters to usgs_nwis~~~~~~~~~~~')
 # # # remove crazy spike from usgs data
 new_usgs=dsl.api.apply_filter('ts-remove-outliers',datasets=usgs_nwis)
-images.update({'usgs-streamflow-outliers-removed':dsl.api.visualize_dataset(list(new_usgs.keys())[0])})
+images.update({'usgs-streamflow-outliers-removed':dsl.api.visualize_dataset(new_usgs['datasets'][0])})
 
-# # # demo calculating monthly max streamflow
+# # # # demo calculating monthly max streamflow
 new1_usgs=dsl.api.apply_filter('ts-resample', datasets=usgs_nwis, options={'period':'weekly', 'method':'mean'})
-images.update({'usgs-streamflow-outliers-removed-monthly-max':dsl.api.visualize_dataset(list(new1_usgs.keys())[0])})
+images.update({'usgs-streamflow-outliers-removed-monthly-max':dsl.api.visualize_dataset(new_usgs['datasets'][0])})
+
 
 
 ##uncomment when ToAdh is implemented 
