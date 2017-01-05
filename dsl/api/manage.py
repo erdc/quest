@@ -7,12 +7,14 @@ from jsonrpc import dispatcher
 import pandas as pd
 import os
 import shutil
+from ..util.log import logger
 
 
 from .features import get_features, add_features
 from .datasets import get_datasets
 from .database import get_db, db_session
 from .projects import _get_project_dir
+from .collections import get_collections
 from .metadata import get_metadata, update_metadata
 from .. import util
 
@@ -53,6 +55,11 @@ def delete(uris):
     db = get_db()
     for uri in uris:
         if resource == 'collections':
+            if uri not in get_collections():
+                logger.error('Collection does not exist: ',uri)
+                raise ValueError('Collection does not exists')
+
+
             # delete all datasets and all features and folder
             features = get_features(collections=uri)
             delete(features)
@@ -62,8 +69,9 @@ def delete(uris):
             path = _get_project_dir()
             path = os.path.join(path, uri)
             if os.path.exists(path):
-                print('deleting all data under path: %s' % path)
+                logger.info('deleting all data under path: %s' % path)
                 shutil.rmtree(path)
+
 
         if resource == 'features':
             # delete feature and associated datasets
