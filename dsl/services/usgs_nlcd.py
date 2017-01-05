@@ -76,9 +76,9 @@ class UsgsNlcdService(SingleFileBase):
         # coords = features['geom_coords'].apply(lambda x: pd.np.array(x).mean(axis=1))
         # features['longitude'] = coords.apply(lambda x: x.flatten()[0])
         # features['latitude'] = coords.apply(lambda x: x.flatten()[1])
-        features.rename(columns={'id': '_service_id', 'title': '_display_name'},
+        features.rename(columns={'id': 'service_id', 'title': 'display_name'},
                   inplace=True)
-        features.index = features['_service_id']
+        features.index = features['service_id']
 
         # remove extra fields. nested dicts can cause problems
         del features['relatedItems']
