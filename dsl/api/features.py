@@ -61,7 +61,7 @@ def add_features(collection, features):
 
             uri = util.uuid('feature')
             geometry = data['geometry']
-            if hasattr(geometry, '.to_wkt'):
+            if hasattr(geometry, 'to_wkt'):
                 geometry = geometry.to_wkt()
             data.update({
                     'name': uri,
@@ -162,7 +162,7 @@ def get_features(services=None, collections=None, features=None,
                     features = features[idx]
 
                 elif k == 'geom_type':
-                    features.geom_type.str.contains(v)  # will not work if features is empty
+                    idx = features.geom_type.str.contains(v)  # will not work if features is empty
                     features = features[idx]
 
                 elif k == 'parameter':
