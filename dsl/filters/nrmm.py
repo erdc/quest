@@ -94,7 +94,7 @@ class NrmmFromFfd(FilterBase):
         if resolution is not None:
             args += ['-r', str(resolution)]
 
-        print('--> %s' % (' '.join(args)))
+        logger.info('--> %s' % (' '.join(args)))
         try:
             subprocess.call(' '.join(args))
             logger.info('success')
@@ -240,7 +240,7 @@ class NrmmFromVitd(FilterBase):
         if resolution is not None:
             args += ['-r', str(resolution)]
 
-        print('--> %s' % (' '.join(args)))
+        logger.info('--> %s' % (' '.join(args)))
         try:
             subprocess.call(' '.join(args))
             logger.info('success')
