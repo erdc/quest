@@ -134,8 +134,8 @@ def wsgi_app(request):
     response = JSONRPCResponseManager.handle(request.data, dispatcher)
 
     result = copy.deepcopy(response.data.get('result'))
-    #if isinstance(result, dict):
-    _sanitize(result)
+    if isinstance(result, dict):
+        _sanitize(result)
 
     response.data = result
     return Response(response.json, mimetype='application/json')
