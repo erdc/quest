@@ -12,9 +12,9 @@ def _get_available_parameters(parameters):
     """helper function to extract a parameter list from the result of dsl.api.get_parameters
     """
     if isinstance(parameters, dict):
-        available_parameters = parameters['_parameters']
+        available_parameters = parameters['parameters']
     else:  # if parameters is a DataFrame
-        available_parameters = set(parameters['_parameter'])
+        available_parameters = set(parameters['parameter'])
         if available_parameters:
             available_parameters.discard(None)
         available_parameters = list(available_parameters)
@@ -60,18 +60,18 @@ for svc in chosen_services:
     print('\t%s - %s  -> %s features retrieved' % (svc, svc_dict[svc], len(features[svc])))
 
 # get the project path
-active_project = dsl.api.get_projects(metadata=True)[dsl.api.get_active_project()]
-project_path = active_project['folder']
+project_path = dsl.api.get_projects(as_dataframe=True)['folder'][dsl.api.get_active_project()]
 
-collections = dsl.api.get_collections(metadata=True)
+
+collections = dsl.api.get_collections()
 print('Available Collections:')
 print('~~~~~~~~~~~~~~~~~~~~~~')
-for name, metadata in collections.items():
+for name in collections:
     print('%s - path:%s' % (name, os.path.join(project_path, name)))
 print('~~~~~~~~~~~~~~~~~~~~~~')
 collection_name = input('Type collection name to use (will be created if it is not in list above, '
                         'default is no collection):')
-if collection_name and collection_name not in list(collections.keys()):
+if collection_name and collection_name not in collections:
     dsl.api.new_collection(collection_name)
     col = dsl.api.get_collections(collection_name)
     print('collection created at %s' % os.path.join(project_path, collection_name))
