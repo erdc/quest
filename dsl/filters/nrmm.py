@@ -72,7 +72,7 @@ class NrmmFromFfd(FilterBase):
         nrmm_file = os.path.join('fdd2nrmm', 'NRMM', 'NRMM.grd')
         #open(os.path.join(collection['path'], dest), 'w').close() #make fake empty file
         properties = {'metadata': 'generated using ffd2nrmm plugin', 'relative_path': nrmm_file}
-        new_locs = FeatureCollection([Feature(geometry=Polygon([util.bbox2poly(south, west, north, east)]), properties=properties, id=nrmm_id)])
+        new_locs = FeatureCollection([Feature(geometry=util.bbox2poly(south, west, north, east, as_geojson=True), properties=properties, id=nrmm_id)])
         path = collection['path']
         vitd_dir = os.path.join(path, 'terrain-ffd')
         #call plugin.
@@ -94,7 +94,7 @@ class NrmmFromFfd(FilterBase):
         if resolution is not None:
             args += ['-r', str(resolution)]
 
-        print('--> %s' % (' '.join(args)))
+        logger.info('--> %s' % (' '.join(args)))
         try:
             subprocess.call(' '.join(args))
             logger.info('success')
@@ -218,7 +218,7 @@ class NrmmFromVitd(FilterBase):
         nrmm_file = 'vitd2nrmm/NRMM/NRMM.grd'
         #open(os.path.join(collection['path'], dest), 'w').close() #make fake empty file
         properties = {'metadata': 'generated using vitd2nrmm plugin', 'relative_path': nrmm_file}
-        new_locs = FeatureCollection([Feature(geometry=Polygon([util.bbox2poly(south, west, north, east)]), properties=properties, id=nrmm_id)])
+        new_locs = FeatureCollection([Feature(geometry=util.bbox2poly(south, west, north, east, as_geojson=True), properties=properties, id=nrmm_id)])
         path = collection['path']
         vitd_dir = os.path.join(path, 'terrain-vitd')
         #call plugin.
@@ -240,7 +240,7 @@ class NrmmFromVitd(FilterBase):
         if resolution is not None:
             args += ['-r', str(resolution)]
 
-        print('--> %s' % (' '.join(args)))
+        logger.info('--> %s' % (' '.join(args)))
         try:
             subprocess.call(' '.join(args))
             logger.info('success')
