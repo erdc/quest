@@ -4,6 +4,7 @@ This script wraps dsl.api functions and exposes them through RPC
 """
 
 import click
+import copy
 from dsl import api
 import json
 from jsonrpc import JSONRPCResponseManager, dispatcher
@@ -11,6 +12,7 @@ from jsonrpc import JSONRPCResponseManager, dispatcher
 import requests
 import datetime
 
+from shapely.geometry import Point, Polygon, LineString, mapping
 from werkzeug.wrappers import Request, Response
 from werkzeug.serving import run_simple
 
@@ -48,7 +50,7 @@ def start_server(port, threaded, processes):
     if threaded and processes>1:
         print('RPC server can either be started multithreaded or multiprocess. Not both. Please pick one.')
         exit(0)
-        
+
     run_simple('localhost', port, wsgi_app, threaded=threaded, processes=processes)
 
 
@@ -110,6 +112,10 @@ def _sanitize(obj):
         return obj.isoformat()
     elif obj != obj:  # check if v is nan
         return None
+    elif hasattr(obj, 'to_json'): # for dataframes etc
+        return obj.to_json()
+    elif isinstance(obj, (Point, Polygon, LineString)): # for shapely geometries
+        return mapping(obj)
     elif isinstance(obj, dict):
         for k, v in obj.items():
             obj[k] = _sanitize(v)
@@ -127,10 +133,11 @@ def wsgi_app(request):
 
     response = JSONRPCResponseManager.handle(request.data, dispatcher)
 
-    result = response.data.get('result')
-    if isinstance(result, dict):
-        _sanitize(result)
+    result = copy.deepcopy(response.data.get('result'))
+    #if isinstance(result, dict):
+    _sanitize(result)
 
+    response.data = result
     return Response(response.json, mimetype='application/json')
 
 
