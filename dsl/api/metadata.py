@@ -5,6 +5,8 @@ get/update metadata for projects/collections/datasets.
 
 from jsonrpc import dispatcher
 import pandas as pd
+import geopandas as gpd
+import shapely.wkt
 
 from .. import util
 from .database import get_db, db_session
@@ -71,8 +73,12 @@ def get_metadata(uris, as_dataframe=False):
         db = get_db()
         with db_session:
             features = [f.to_dict() for f in db.Feature.select(lambda c: c.name in tmp_df['uri'].tolist())]
-            features = pd.DataFrame(features)
-            features.set_index('name', inplace=True, drop=False)
+            features = gpd.GeoDataFrame(features)
+            if not features.empty:
+                features['geometry'] = features['geometry'].apply(
+                                            lambda x: shapely.wkt.loads(x))
+                features.set_geometry('geometry')
+                features.index = features['name']
         metadata.append(features)
 
     if 'datasets' in grouped.groups.keys():
