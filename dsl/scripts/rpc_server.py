@@ -137,7 +137,7 @@ def wsgi_app(request):
     if isinstance(result, dict):
         _sanitize(result)
 
-    response.data = result
+    response.data['result'] = result
     return Response(response.json, mimetype='application/json')
 
 
