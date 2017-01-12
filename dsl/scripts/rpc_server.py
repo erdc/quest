@@ -132,12 +132,11 @@ def wsgi_app(request):
     dispatcher["shutdown"] = shutdown_server(request.environ)
 
     response = JSONRPCResponseManager.handle(request.data, dispatcher)
-
     result = copy.deepcopy(response.data.get('result'))
     if isinstance(result, dict):
         _sanitize(result)
+        response.data['result'].update(result)
 
-    response.data['result'] = result
     return Response(response.json, mimetype='application/json')
 
 
