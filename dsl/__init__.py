@@ -34,6 +34,6 @@ def init():
         api.set_active_project('default')
 
     # init active project db
-    api.get_db(api.active_db())
+    api.get_db(api.active_db(), reconnect=True)
 
 init()

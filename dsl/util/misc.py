@@ -7,6 +7,7 @@ from .config import get_settings
 from .. import get_pkg_data_path
 import os
 import pandas as pd
+import geopandas as gpd
 import re
 
 from jsonrpc.jsonrpc import JSONRPCRequest
@@ -328,6 +329,18 @@ def to_dataframe(feature_collection):
         features[feature['id']] = data
     return pd.DataFrame.from_dict(features, orient='index')
 
+
+def to_geodataframe(feature_collection):
+    features = {}
+    for feature in feature_collection['features']:
+        data = feature['properties']
+        data.update({
+            'service_id': feature['id'],
+            'geometry': shapely.geometry.shape(feature['geometry'])
+        })
+
+        features[feature['id']] = data
+    return gpd.GeoDataFrame.from_dict(features, orient='index')
 
 def to_json_default_handler(obj):
     if hasattr(obj, 'isoformat'):
