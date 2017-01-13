@@ -76,6 +76,11 @@ def update_settings(config={}):
     settings.setdefault('PROJECTS_DIR', 'projects')
     settings.setdefault('USER_SERVICES', [])
 
+    # initialize projects and reconnect to database in new BASE_DIR
+    if 'BASE_DIR' in config.keys():
+        from .. import init
+        init()
+
     return True
 
 

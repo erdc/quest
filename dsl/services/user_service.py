@@ -47,7 +47,7 @@ class UserService(WebServiceBase):
             with self.uri_open(p) as f:
                 if fmt.lower() == 'geojson':
                     features = geojson.load(f)
-                    features = util.to_dataframe(features)
+                    features = util.to_geodataframe(features)
 
                 if fmt.lower() == 'mbr':
                     # TODO creating FeatureCollection not needed anymore
