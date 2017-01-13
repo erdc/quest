@@ -272,6 +272,7 @@ def stage_for_download(uris, download_options=None):
         dsl_metadata = {
             'options': json.dumps(kwargs),
             'status': 'staged for download',
+            'parameters': kwargs.get('parameter')
         }
 
         with db_session:
