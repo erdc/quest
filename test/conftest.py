@@ -9,6 +9,7 @@ import dsl
 base_path = os.path.dirname(os.path.abspath(__file__))
 FILES_DIR = os.path.join(base_path, 'files')
 
+
 TEST_DATA_DIRS = {2: 'python2_data',
                   3: 'python3_data'}
 
@@ -46,13 +47,13 @@ def reset_projects_dir(reset_settings, request):
         shutil.rmtree(projects_dir, ignore_errors=True)
 
     cleanup()
+    print(FILES_DIR)
     projects_template_dir = os.path.join(FILES_DIR, 'projects_template')
     shutil.copytree(projects_template_dir, projects_dir)
     python_version = sys.version_info[0]
-    test_data_dir = os.path.join(FILES_DIR, TEST_DATA_DIRS[python_version])
-    test_data_dest = os.path.join(projects_dir, 'test_data', 'test_data')
+    test_data_dir = os.path.join(FILES_DIR, TEST_DATA_DIRS[python_version], 'usgs-nwis')
+    test_data_dest = os.path.join(projects_dir, 'test_data', 'test_data', 'usgs-nwis')
     shutil.copytree(test_data_dir, test_data_dest)
-
     request.addfinalizer(cleanup)
 
     metadata = {'NUMBER_OF_PROJECTS': 4,
