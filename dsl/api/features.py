@@ -265,6 +265,9 @@ def new_feature(collection, display_name=None, geom_type=None, geom_coords=None,
     if display_name is None:
         display_name = uri
 
+    if description is None:
+        description = uri
+
     data = {
             'name': uri,
             'display_name': display_name,
