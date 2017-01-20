@@ -60,7 +60,7 @@ class UserService(WebServiceBase):
                         properties = {}  # '_service_id': feature_id}
                         polys.append(Feature(geometry=util.bbox2poly(x1, y1, x2, y2, as_geojson=True), properties=properties, id=feature_id))
                     features = FeatureCollection(polys)
-                    features = util.to_dataframe(features)
+                    features = util.to_geodataframe(features)
 
                 if fmt.lower() == 'mbr-csv':
                     # TODO merge this with the above,
@@ -73,21 +73,17 @@ class UserService(WebServiceBase):
                         properties = {}  # '_service_id': feature_id}
                         polys.append(Feature(geometry=util.bbox2poly(x1, y1, x2, y2, as_geojson=True), properties=properties, id=feature_id))
                     features = FeatureCollection(polys)
-                    features = util.to_dataframe(features)
+                    features = util.to_geodataframe(features)
 
                 if fmt.lower() == 'isep-json':
                     # uses exported json file from ISEP DataBase
                     # assuming ISEP if a geotypical service for now.
                     features = pd.read_json(p)
-                    features.rename(columns={'_id': '_service_id'}, inplace=True)
-                    features['_geom_type'] = None
-                    features['_geom_coords'] = None
-                    features['_longitude'] = None
-                    features['_latitude'] = None
-                    features['_download_url'] = features['files'].apply(lambda x: os.path.join(x[0].get('file location'), x[0].get('file name')))
+                    features.rename(columns={'_id': 'service_id'}, inplace=True)
+                    features['download_url'] = features['files'].apply(lambda x: os.path.join(x[0].get('file location'), x[0].get('file name')))
                     # remove leading slash from file path
-                    features['_download_url'] = features['_download_url'].str.lstrip('/')
-                    features['_parameters'] = 'met'
+                    features['download_url'] = features['download_url'].str.lstrip('/')
+                    features['parameters'] = 'met'
 
             all_features.append(features)
 
