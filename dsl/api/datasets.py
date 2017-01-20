@@ -69,7 +69,7 @@ def download_datasets(datasets, raise_on_error=False):
     datasets = get_metadata(datasets, as_dataframe=True)
 
     # filter out non download datasets
-    datasets = datasets[datasets['datatype'] == 'download']
+    datasets = datasets[datasets['source'] == 'download']
     features = datasets['feature'].tolist()
     features = get_metadata(features, as_dataframe=True)
     datasets = datasets.join(features[[
@@ -226,7 +226,7 @@ def new_dataset(feature, dataset_type=None, display_name=None,
     dsl_metadata = {
         'name': name,
         'feature': feature,
-        'datatype': dataset_type,
+        'source': dataset_type,
         'display_name': display_name,
         'description': description,
         'file_path': save_path,
