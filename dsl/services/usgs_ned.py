@@ -50,7 +50,7 @@ class UsgsNedService(SingleFileBase):
 
     def _get_features(self, service):
         service = self._layers()[service]
-        features = util.to_dataframe(
+        features = util.to_geodataframe(
             ned.get_raster_availability(service, (-180, -90, 180, 90))
         )
         features['parameters'] = 'elevation'
