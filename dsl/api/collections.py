@@ -17,14 +17,15 @@ def get_collections(expand=False, as_dataframe=False):
     created data along with associated metadata.
 
     Args:
-        expand (bool, optional, default=False):
+        expand (bool, Optional, Default=False):
             include collection details and format as dict
-        as_dataframe (bool, optional, default=False):
+        as_dataframe (bool, Optional, Default=False):
             include collection details and format as pandas dataframe
 
     Returns:
-        If expand/as_dataframe are True the returns available collections
-        as a dict/dataframe otherwise returns list of collection names.
+        collections (list, dict, or pandas Dataframe, Default=list):
+            list of collections if expand/as_dataframe are False
+
     """
 
     collections = _load_collections()
@@ -45,14 +46,18 @@ def new_collection(name, display_name=None, description=None, metadata=None):
     and adding collection metadata in project database.
 
     Args:
-        name (string): name of the collection used in all dsl function calls,
-            must be unique. Will also be the folder name of the collection.
-        display_name (string, optional): Display name for collection.
-        description (string, optional): Description of collection.
-        metadata (dict, optional): user defined metadata
+        name (string, Required):
+            Name of the collection used in all dsl function calls,must be unique. Will also be the folder name of the collection
+        display_name (string, Optional, Default=None):
+            display name for collection
+        description (string, Optional, Default=None):
+            description of collection
+        metadata (dict, Optional, Default=None):
+            user defined metadata
 
     Returns:
-        A dict representing the collection keyed on name
+        collection_details (dict)
+            details of the newly created collection
     """
     name = name.lower()
     collections = _load_collections()

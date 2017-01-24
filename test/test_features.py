@@ -22,11 +22,11 @@ def feature(request):
     return request.param
 
 
-# def test_add_features(feature):
-#     b = dsl.api.add_features('col1', feature)
-#     c = dsl.api.get_features(collections='col1')
-#     assert len(list(c)) == 1
-#     assert b == c
+def test_add_features(feature):
+    b = dsl.api.add_features('col1', feature)
+    c = dsl.api.get_features(collections='col1')
+    assert len(list(c)) == 1
+    assert b == c
 
 
 

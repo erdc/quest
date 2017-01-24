@@ -13,16 +13,26 @@ PROJECT_INDEX_FILE = 'project_index.yml'
 
 
 def active_db():
-    """Return path to active project database"""
+    """Get the active database
+    Returns:
+         path (string):
+            file path to active project database
+    """
     dbpath = _get_project_db(get_active_project())
     return dbpath
 
 
 @dispatcher.add_method
 def add_project(name, path, activate=True):
-    """Add a existing DSL project to the list of available projects.
+    """Add a existing DSL project to the list of available projects
 
-    This to add existing dsl projects to current session
+    Args:
+        name (string, Required):
+            name of project; existing name can be used or  project can be renamed
+        path (string, Required):
+            path to existing project
+        activate (bool, Optional, Default=True):
+            if True, the added project is set as the currently active project
     """
     name = name.lower()
     projects = _load_projects()
@@ -50,7 +60,23 @@ def add_project(name, path, activate=True):
 @dispatcher.add_method
 def new_project(name, display_name=None, description=None, metadata=None,
                 folder=None, activate=True):
-    """Create a new DSL project and add it to list of available projects."""
+    """Create a new DSL project and add it to list of available projects.
+
+    Args:
+        name (string, Required):
+            name of newly created project
+        display_name (string, Optional, Default=None):
+            display name for project
+        description (string, Optional, Default=None):
+            description of project
+        metadata (dict, Optional, Default=None):
+            user defined metadata
+        folder (string, Optional, Default=None):
+            folder where all project data will reside
+        activate (bool, Optional, Default=True):
+            if True, set newly created project as currently active project
+
+    """
     name = name.lower()
     projects = _load_projects()
     if name in projects.keys():
@@ -91,18 +117,17 @@ def new_project(name, display_name=None, description=None, metadata=None,
 
 @dispatcher.add_method
 def delete_project(name):
-    """delete a project.
+    """Delete a project.
 
     Deletes a project and all data in the project folder.
 
     Args:
-        name : str,
-            The name of the collection
+        name (string, Required):
+             name of a project
 
     Returns:
-        projects : dict,
-            A python dict representation of the list of available collections,
-            the updated collections list is also written to a json file.
+        projects (dict):
+            all remaining projects and their respective folders
     """
     projects = _load_projects()
 
@@ -124,14 +149,33 @@ def delete_project(name):
 
 @dispatcher.add_method
 def get_active_project():
-    """Get active project name."""
+    """Get active project name.
+
+    Returns:
+        name (string):
+            name of currently active project
+
+    """
     path = _get_projects_index_file()
     return util.read_yaml(path).get('active_project', 'default')
 
 
 @dispatcher.add_method
 def get_projects(expand=False, as_dataframe=False):
-    """Get list of available projects."""
+    """Get list of available projects.
+
+    Args:
+         expand (bool, Optional, Default=False):
+            include collection details and format as dict
+        as_dataframe (bool, Optional, Default=False):
+            include collection details and format as pandas dataframe
+
+    Returns:
+        projects (list, dict, or pandas Dataframe):
+            if expand/as_dataframe are False, return list of all available projects
+
+
+    """
     projects = {}
     if not expand and not as_dataframe:
         return list(_load_projects().keys())
@@ -161,6 +205,16 @@ def remove_project(name):
 
     This does not delete the project folder or data, just removes it from the
     index of available projects.
+
+    Args:
+        name (string,Required):
+            name of project
+
+     Returns:
+        projects (dict):
+            all remaining projects and their respective folders
+
+
     """
     projects = _load_projects()
 
@@ -185,7 +239,17 @@ def remove_project(name):
 
 @dispatcher.add_method
 def set_active_project(name):
-    """Set active DSL project."""
+    """Set active DSL project.
+
+    Args:
+        name (string, Required):
+            name of a project
+
+    Returns:
+        project (string):
+            name of project newly set as active
+
+    """
     path = _get_projects_index_file()
     contents = util.read_yaml(path)
     if name not in contents['projects'].keys():
@@ -207,7 +271,7 @@ def _load_project(name):
 
 
 def _load_projects():
-    """load list of collections."""
+   # """load list of collections."""
     path = _get_projects_index_file()
     projects = util.read_yaml(path).get('projects')
     if not projects:
@@ -217,7 +281,7 @@ def _load_projects():
 
 
 def _write_projects(projects):
-    """write list of collections to file."""
+   # """write list of collections to file."""
     path = _get_projects_index_file()
     contents = util.read_yaml(path)
     contents.update({'projects': projects})
