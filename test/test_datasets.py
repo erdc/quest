@@ -363,7 +363,7 @@ def test_stage_for_download():
 
         # test set download_options
         download_options = {'parameter': 'streamflow'}
-        quest.api.stage_for_download(new_dataset, download_options=download_options)
+        quest.api.stage_for_download(new_dataset, options=download_options)
         metadata = quest.api.get_metadata(uris=new_dataset)
         assert json.loads(metadata[new_dataset]['options']) == download_options
         assert metadata[new_dataset]['status'] == 'staged for download'
@@ -381,7 +381,7 @@ def test_stage_for_download():
     # test stage list of datasets/features
     download_options = {'parameter': 'streamflow'}
     new_dataset = quest.api.new_dataset(FEATURE)
-    new_datasets = quest.api.stage_for_download([FEATURE, new_dataset], download_options=download_options)
+    new_datasets = quest.api.stage_for_download([FEATURE, new_dataset], options=download_options)
     try:
         metadata = quest.api.get_metadata(uris=new_datasets)
         for dataset, metadata in metadata.items():
@@ -390,7 +390,7 @@ def test_stage_for_download():
 
         # test different download options
         download_options = [{'parameter': 'streamflow'}, {'parameter': 'water_temperature:daily:mean'}]
-        quest.api.stage_for_download(new_datasets, download_options=download_options)
+        quest.api.stage_for_download(new_datasets, options=download_options)
         metadata = quest.api.get_metadata(uris=new_datasets)
         for i, dataset in enumerate(new_datasets):
             assert json.loads(metadata[dataset]['options']) == download_options[i]

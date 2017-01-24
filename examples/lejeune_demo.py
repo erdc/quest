@@ -77,7 +77,7 @@ end = today.strftime('%Y-%m-%d')
 #     })
 
 # # usgs
-usgs_nwis=quest.api.stage_for_download(usgs_nwis,download_options={'parameter':'streamflow','period':'P1825D'})
+usgs_nwis=quest.api.stage_for_download(usgs_nwis, options={'parameter':'streamflow','period':'P1825D'})
 #images.update({'usgs-streamflow': quest.api.view_in_collection(collection_name, service="usgs-nwis-iv", location="02093000", parameter="streamflow")})
 
 # ndbc THIS IS VERY FLAKY DISABLING
@@ -90,7 +90,7 @@ usgs_nwis=quest.api.stage_for_download(usgs_nwis,download_options={'parameter':'
 #    })
 
 # # raster sites (these might take a while)
-usgs_ned=quest.api.stage_for_download(usgs_ned, download_options={'parameters':'elevation'})
+usgs_ned=quest.api.stage_for_download(usgs_ned, options={'parameters':'elevation'})
 # # images.update({'usgs-ned-1/9arc-second': quest.api.view_in_collection(collection_name, service="usgs-ned-19", location="53174dbde4b0cd4cd83c4421", parameter="elevation")})
 
 # # # usgs landcover service is not working on usgs side

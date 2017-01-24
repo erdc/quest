@@ -213,8 +213,8 @@ class NoaaService(WebServiceBase):
         return pmap
 
 
-    def _download(self, service, feature, save_path, dataset,
-                  parameter,start=None,end=None,quality='R',interval='6',datum='MLLW'):
+    def _download(self, service, feature, file_path, dataset,
+                  parameter, start=None, end=None, quality='R', interval='6', datum='MLLW'):
 
         if dataset is None:
             dataset = 'station-' + feature
@@ -287,10 +287,10 @@ class NoaaService(WebServiceBase):
                 data.index = pd.to_datetime(data.index)
                 data.rename(columns={parameter_code: parameter})
 
-            save_path = os.path.join(save_path, BASE_PATH, service)
-            save_path = os.path.join(save_path, dataset)
+            file_path = os.path.join(file_path, BASE_PATH, service)
+            file_path = os.path.join(file_path, dataset)
             metadata = {
-                'file_path': save_path,
+                'file_path': file_path,
                 'file_format': 'timeseries-hdf5',
                 'datatype': 'timeseries',
                 'parameters': parameter,
@@ -301,7 +301,7 @@ class NoaaService(WebServiceBase):
             # save data to disk
             io = util.load_drivers('io', 'timeseries-hdf5')
             io = io['timeseries-hdf5'].driver
-            io.write(save_path, data, metadata)
+            io.write(file_path, data, metadata)
             del metadata['service_id']
 
 

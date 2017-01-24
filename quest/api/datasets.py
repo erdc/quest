@@ -14,7 +14,7 @@ from .tasks import add_async
 
 @dispatcher.add_method
 @add_async
-def download(feature, save_path, dataset=None, **kwargs):
+def download(feature, file_path, dataset=None, **kwargs):
     """Download dataset and save it locally.
 
     Args:
@@ -40,13 +40,13 @@ def download(feature, save_path, dataset=None, **kwargs):
         df = df['service'] + '/' + df['service_id']
         service_uri = df.tolist()[0]
 
-    if save_path is None:
+    if file_path is None:
         pass
 
     provider, service, feature = util.parse_service_uri(service_uri)
     driver = util.load_services()[provider]
     data = driver.download(service=service, feature=feature,
-                           save_path=save_path, dataset=dataset, **kwargs)
+                           file_path=file_path, dataset=dataset, **kwargs)
     return data
 
 
@@ -89,12 +89,12 @@ def download_datasets(datasets, raise_on_error=False):
             kwargs = json.loads(dataset['options'])
             if kwargs is not None:
                 all_metadata = download(feature_uri,
-                                    save_path=collection_path,
-                                    dataset=idx, **kwargs)
+                                        file_path=collection_path,
+                                        dataset=idx, **kwargs)
             else:
                 all_metadata = download(feature_uri,
-                                    save_path=collection_path,
-                                    dataset=idx)
+                                        file_path=collection_path,
+                                        dataset=idx)
 
             metadata = all_metadata.pop('metadata', None)
             quest_metadata = all_metadata
@@ -141,7 +141,7 @@ def download_options(uris, fmt='json-schema'):
             quest.api.stage_for_download or quest.api.download
     """
     uris = util.listify(uris)
-    download_options = {}
+    options = {}
     for uri in uris:
         service_uri = uri
         if not service_uri.startswith('svc://'):
@@ -155,9 +155,9 @@ def download_options(uris, fmt='json-schema'):
 
         provider, service, feature = util.parse_service_uri(service_uri)
         driver = util.load_services()[provider]
-        download_options[uri] = driver.download_options(service, fmt)
+        options[uri] = driver.download_options(service, fmt)
 
-    return download_options
+    return options
 
 
 @dispatcher.add_method
@@ -207,8 +207,8 @@ def get_datasets(expand=None, filters=None, as_dataframe=None):
 
 
 @dispatcher.add_method
-def new_dataset(feature, dataset_type=None, display_name=None,
-                description=None, save_path=None, metadata=None):
+def new_dataset(feature, source=None, display_name=None,
+                description=None, file_path=None, metadata=None):
     """Create a new dataset at a feature.
 
     Args:
@@ -237,8 +237,8 @@ def new_dataset(feature, dataset_type=None, display_name=None,
             raise ValueError('feature {} does not exist'.format(feature))
 
     name = util.uuid('dataset')
-    if dataset_type is None:
-        dataset_type = 'user_created'
+    if source is None:
+        source = 'user_created'
 
     if display_name is None:
         display_name = name
@@ -249,13 +249,13 @@ def new_dataset(feature, dataset_type=None, display_name=None,
     quest_metadata = {
         'name': name,
         'feature': feature,
-        'source': dataset_type,
+        'source': source,
         'display_name': display_name,
         'description': description,
-        'file_path': save_path,
+        'file_path': file_path,
         'metadata': metadata,
     }
-    if dataset_type == 'download':
+    if source == 'download':
         quest_metadata.update({'status': 'not staged'})
 
     with db_session:
@@ -265,7 +265,7 @@ def new_dataset(feature, dataset_type=None, display_name=None,
 
 
 @dispatcher.add_method
-def stage_for_download(uris, download_options=None):
+def stage_for_download(uris, options=None):
     """Apply download options before downloading
     Args:
         uris (string or list, Required):
@@ -273,10 +273,10 @@ def stage_for_download(uris, download_options=None):
 
             If uri is a feature, a new dataset will be created
 
-        download_options (dict or list of dicts, Optional, Default=None):
+        options (dict or list of dicts, Optional, Default=None):
             options to be passed to quest.api.download function specified for each dataset
 
-            If download_options is a dict, then apply same options to all datasets,
+            If options is a dict, then apply same options to all datasets,
             else each dict in list is used for each respective dataset
 
     Returns:
@@ -286,16 +286,16 @@ def stage_for_download(uris, download_options=None):
     uris = util.listify(uris)
     datasets = []
 
-    if not isinstance(download_options, list):
-        download_options = [download_options] * len(uris)
+    if not isinstance(options, list):
+        options = [options] * len(uris)
 
     db = get_db()
 
-    for uri, kwargs in zip(uris, download_options):
+    for uri, kwargs in zip(uris, options):
         # if uid is a feature, create new dataset
         dataset_uri = uri
         if uri.startswith('f'):
-            dataset_uri = new_dataset(uri, dataset_type='download')
+            dataset_uri = new_dataset(uri, source='download')
 
         quest_metadata = {
             'options': json.dumps(kwargs),

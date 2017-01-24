@@ -60,16 +60,16 @@ class TsBase(FilterBase):
             description = 'TS Filter Applied'
 
         new_dset = new_dataset(orig_metadata['feature'],
-                               dataset_type='derived',
+                               source='derived',
                                display_name=display_name,
                                description=description)
 
         # save dataframe
-        save_path = os.path.split(orig_metadata['file_path'])[0]
-        save_path = os.path.join(save_path, new_dset)
-        io.write(save_path, new_df, new_metadata)
+        file_path = os.path.split(orig_metadata['file_path'])[0]
+        file_path = os.path.join(file_path, new_dset)
+        io.write(file_path, new_df, new_metadata)
 
-        new_metadata.update({'file_path': save_path})
+        new_metadata.update({'file_path': file_path})
         update_metadata(new_dset, quest_metadata=new_metadata, metadata=metadata)
 
         return {'datasets': new_dset}
