@@ -108,6 +108,9 @@ class TsUnitConversion(TsBase):
         TsBase.register(self, name=name)
 
     def _apply(self, df, options):
+        if not options.get('to_units'):
+            raise ValueError('To_units cannot be None')
+
         metadata = df.metadata
         if 'file_path' in metadata:
             del metadata['file_path']
@@ -124,7 +127,7 @@ class TsUnitConversion(TsBase):
             to_units = options.get('to_units')
         conversion = reg.convert(1, src=from_units, dst=to_units)
         df[df.columns[1]] = df[df.columns[1]] * conversion
-        metadata.update({'units': to_units})
+        metadata.update({'unit': to_units})
         df.metadata = metadata
 
         return df

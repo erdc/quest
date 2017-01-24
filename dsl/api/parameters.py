@@ -8,12 +8,12 @@ from .. import util
 
 @dispatcher.add_method
 def get_mapped_parameters():
-    """get list common parameters.
+    """Get list of  common parameters
 
-    Returns
-    -------
-    parameters : list of str,
-        list of parameters available
+    Returns:
+     parameters (list):
+           list of common parameters
+
     """
     services = get_services(expand=True)
     parameters = []
@@ -24,9 +24,19 @@ def get_mapped_parameters():
 
 @dispatcher.add_method
 def get_parameters(service_uri, update_cache=False):
-    """Get dataframe of available parameters.
+    """Get available parameters, even unmapped ones, for specified service
 
-    get list of all parameters available, even unmapped ones.
+    Args:
+        service_uri (string, Required):
+            uri of service to get parameters for
+        update_cache (bool, Optional, Default=True):
+            if True, update metadata cache
+
+    Returns:
+        parameters (list):
+            all available parameters for specified service
+
+
     """
     provider, service, feature = util.parse_service_uri(service_uri)
     parameters = _read_cached_parameters(provider, service,
