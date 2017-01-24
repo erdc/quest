@@ -3,6 +3,7 @@
 import pandas as pd
 import requests
 from .base import SingleFileBase
+from .. import util
 
 
 class UsgsNlcdService(SingleFileBase):
@@ -65,6 +66,7 @@ class UsgsNlcdService(SingleFileBase):
         features = features.ix[~features.title.str.contains('Imperv')]
         features = features.ix[~features.title.str.contains('by State')]
         features = features.ix[~features.title.str.contains('Tree Canopy')]
+        features['geometry'] = features['spatial'].apply(_bbox2poly)
         features['download_url'] = features.webLinks.apply(_parse_links)
         features['extract_from_zip'] = '.tif'
         features['filename'] = features['download_url'].str.split('FNAME=', expand=True)[1]
@@ -73,9 +75,6 @@ class UsgsNlcdService(SingleFileBase):
 
         features['parameters'] = 'landcover'
         features['file_format'] = 'raster-gdal'
-        # coords = features['geom_coords'].apply(lambda x: pd.np.array(x).mean(axis=1))
-        # features['longitude'] = coords.apply(lambda x: x.flatten()[0])
-        # features['latitude'] = coords.apply(lambda x: x.flatten()[1])
         features.rename(columns={'id': 'service_id', 'title': 'display_name'},
                   inplace=True)
         features.index = features['service_id']
@@ -101,13 +100,7 @@ def _bbox2poly(bbox):
     ymin = bbox['boundingBox']['minY']
     ymax = bbox['boundingBox']['maxY']
 
-    return [[
-        [xmin, ymin],
-        [xmin, ymax],
-        [xmax, ymax],
-        [xmax, ymin],
-        [xmin, ymin]
-        ]]
+    return util.bbox2poly(xmin, ymin, xmax, ymax, as_shapely=True)
 
 
 def _parse_links(links):
