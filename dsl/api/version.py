@@ -5,23 +5,21 @@ from jsonrpc import dispatcher
 
 @dispatcher.add_method
 def get_dsl_version():
-    """Return DSL version.
+    """Get DSL version.
 
-    Returns
-    -------
-        str
-            DSL version
+   Returns:
+        DSL version (string):
+            version of DSL being used
     """
     return dsl.__version__
 
 
 @dispatcher.add_method
 def get_api_version():
-    """Return DSL API version.
+    """Get DSL API version.
 
-    Returns
-    -------
-        str
-            DSL version
+    Returns:
+        DSL version (string):
+            version of DSL API being used
     """
     return dsl.api.__version__

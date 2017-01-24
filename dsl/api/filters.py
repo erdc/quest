@@ -15,18 +15,25 @@ def get_filters(filters=None, expand=False, **kwargs):
     """List available filter plugins
     Parameters
     ----------
-        filters (dict):
-            optional kwargs filter the list of filters
-            allowed filters are dataset, group, datatype, geotype, parameter
-            if dataset is used it overides the others and sets them from the
-            dataset metadata.
+        filters (dict, Optional, Default=None):
+            filter the list of filters by one or more of the available filters
+            available filters:
+                    dataset (string, Optional):
+                    group (string, Optional)
+                    geotype (string, Optional)
+                    datatype (string, Optional)
+                    parameter (string, Optional)
+            if a dataset filter is used, all other filters are overridden and set from the dataset's metadata.
+        expand (bool, Optional, Default=None):
+            if True, return details of the filters as a dict
+        kwargs:
+            optional filter kwargs
 
-        metadata: bool (default False)
-            If true return a dict of metadata
 
     Return
     ------
-        available filters (list or dict)
+        filters (list or dict):
+            all available filters
 
     Examples:
 
@@ -90,7 +97,27 @@ def get_filters(filters=None, expand=False, **kwargs):
 @dispatcher.add_method
 @add_async
 def apply_filter(name, datasets=None, features=None, options=None, as_dataframe=None, expand=None):
-    """Apply Filter to dataset."""
+    """Apply Filter to dataset
+
+    Args:
+        name (string):
+            name of filter
+        datasets (string, list of strings, or dict, Required):
+            datasets to which the filter is to be applied
+        features (string, list of strings, or dict, Optional, Default=False)
+            features to which the filter is to be applied
+        expand (bool, Optional, Default=False):
+            return details of newly created dataset as a dict
+        as_dataframe (bool, Optional, Default=False):
+           return details of newly created dataset as a pandas Dataframe
+
+
+    Returns:
+        dataset/feature uris (dict or pandas Dataframe):
+             resulting datasets and/or features
+
+
+    """
     datasets = util.listify(datasets)
     features = util.listify(features)
     options = util.listify(options)
@@ -116,6 +143,16 @@ def apply_filter(name, datasets=None, features=None, options=None, as_dataframe=
 
 @dispatcher.add_method
 def apply_filter_options(name, fmt='json-schema'):
-    """Retreive kwarg options for apply_filter."""
+    """Retreive kwarg options for apply_filter.
+
+    Args:
+        name (string, Required):
+            name of filter
+        fmt (string, Required, Default='json-schema'):
+            format in which to return options
+    Returns:
+        filter options (json-schema or smtk scheme):
+            filter options that can be applied when calling dsl.api.apply_filter
+    """
     driver = util.load_drivers('filters', name)[name].driver
     return driver.apply_filter_options(fmt)
