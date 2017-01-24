@@ -24,19 +24,19 @@ def add_features(collection, features):
     When the features are added into a collection they are given a new
     feature id.
 
-    If a featuture from a service already exists then it is not re-added the
+    If a feature from a service already exists, then it is not re-added the
     uri of the existing feature is returned (i.e. Feature was originally from
     usgs-nwis but is being copied from one collection to another) then does
     not overwrite external_uri.
 
     Args:
-        collection (string): name of collection
-        features (string, comma separated strings,
-                  list of strings, pandas DataFrame): list of
-            features to add to the collection.
+        collection (string, Required): name of collection
+        features (string, comma separated strings,list of strings, or pandas DataFrame, Required):
+            list of features to add to the collection.
 
     Returns:
-        uris (list): uri's of features
+        uris (list):
+            uri's of features
     """
 
     if collection not in get_collections():
@@ -78,33 +78,34 @@ def add_features(collection, features):
 def get_features(services=None, collections=None, features=None,
                  expand=False, as_dataframe=False, as_geojson=False,
                  update_cache=False, filters=None):
-    """Retrieve list of features from resources.
+    """Retrieve list of features from resources
 
     Args:
-        services (comma separated strings, list of strings): list of services
-            to search in for features.
-        collections (comma separated strings, list of strings): list of
-            collections to search in for features.
-        features (comma separated strings, list of strings): list of features
-            to include in search.
-        metadata (bool, optional): Defaults to False. If True return feature
-            metadata
-        as_dataframe (bool, optional): Defaults to False, return features as
-            a pandas DataFrame indexed by feature uris instead of geojson
-        as_cache (bool, optional): Defaults to False, if True, update metadata
-            cache.
-        filters (dict, optional): filter features
-            available filters:
-                geom_type (string, optional): filter features by geom_type,
-                    i.e. point/line/polygon
-                parameter (string, optional): filter features by parameter
-                parameter_code (string, optional): filter features by
-                    parameter code
-                bbox (string, optional): filter features by bounding box
+        services (comma separated strings, or list of strings, Required):
+            list of services to search in for features
+        collections (comma separated strings or list of strings):
+            list of collections to search in for features
+        features (comma separated strings or list of strings, Optional, Default=None):
+            list of features to include in search
+        as_dataframe (bool, Optional, Default=False):
+            if True, return features as a pandas DataFrame indexed by feature uris
+        as_geojson (bool, Optional, Default=False):
+            if True, return features as a geojson scheme indexed by feature uris
+        update_cache (bool, Optional,Default=False):
+            if True, update metadata cache
+        filters (dict, Optional, Default=None):
+            filter features by one or more of the available filters
+                available filters:
+                    geom_type (string, optional): filter features by geom_type,
+                        i.e. point/line/polygon
+                    parameter (string, optional): filter features by parameter
+                    parameter_code (string, optional): filter features by
+                        parameter code
+                    bbox (string, optional): filter features by bounding box
 
     Returns:
-        features (dict|pandas.DataFrame): geojson style dict (default) or
-            pandas.DataFrame
+        features (list, geo-json dict or pandas.DataFrame):
+             features of specified service(s), collection(s) or feature(s)
 
     """
     if services is None and collections is None and features is None:
@@ -193,11 +194,13 @@ def get_tags(service):
     """Get searchable tags for a given service
 
     Args:
-        service: name of service
+        service(string):
+         name of service
 
     Returns:
     --------
-        tags : dict keyed by tag name and list of possible values
+        tags (dict):
+         dict keyed by tag name and list of possible values
     """
     f = get_features(services=service, as_dataframe=True)
 
@@ -223,20 +226,25 @@ def new_feature(collection, display_name=None, geom_type=None, geom_coords=None,
     """Add a new feature to a collection.
 
     Args:
-        collection (string): name of collection
-        display_name (string): display name of feature
-        description (string): description of feature
-        geom_type (string, optional): point/line/polygon
-        geom_coords (string or list, optional): geometric coordinates specified
-            as valid geojson coordinates (i.e. a list of lists i.e.
+        collection (string, Required):
+            name of collection
+        display_name (string, Optional, Default=None):
+            display name of feature
+        geom_type (string, Optional, Default=None):
+            point/line/polygon
+        geom_coords (string or list, Optional, Default=None):
+            geometric coordinates specified as valid geojson coordinates (i.e. a list of lists i.e.
             '[[-94.0, 23.2], [-94.2, 23.4] ...]'
             --------- OR ---------
             [[-94.0, 23.2], [-94.2, 23.4] ...] etc)
-        metadata (dict, optional): optional metadata at the new feature
+        description (string, Optional, Default=None):
+            description of feature
+        metadata (dict, Optional, Default=None):
+            optional metadata at the new feature
 
     Returns
     -------
-        uri : str
+        uri (string):
             uri of newly created feature
 
     """
