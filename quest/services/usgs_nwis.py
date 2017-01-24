@@ -148,7 +148,7 @@ class NwisService(WebServiceBase):
 
         return pmap
 
-    def _download(self, service, feature, save_path, dataset,
+    def _download(self, service, feature, file_path, dataset,
                   parameter, start=None, end=None, period=None):
 
         if dataset is None:
@@ -188,13 +188,13 @@ class NwisService(WebServiceBase):
         df[df.values == -999999] = pd.np.nan
         df.rename(columns={'value': parameter}, inplace=True)
 
-        save_path = os.path.join(save_path, BASE_PATH, service)
-        save_path = os.path.join(save_path, dataset)
+        file_path = os.path.join(file_path, BASE_PATH, service)
+        file_path = os.path.join(file_path, dataset)
         del data['values']
 
         metadata = {
             'metadata': data,
-            'file_path': save_path,
+            'file_path': file_path,
             'file_format': 'timeseries-hdf5',
             'datatype': 'timeseries',
             'parameter': parameter,
@@ -205,7 +205,7 @@ class NwisService(WebServiceBase):
         # save data to disk
         io = util.load_drivers('io', 'timeseries-hdf5')
         io = io['timeseries-hdf5'].driver
-        io.write(save_path, df, metadata)
+        io.write(file_path, df, metadata)
         del metadata['service_id']
 
         return metadata

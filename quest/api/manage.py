@@ -225,13 +225,13 @@ def _move_dataset(dataset_metadata, collection_path, destination_collection_path
 
 def _update_dataset_file_location(func, dataset_metadata, collection_path, destination_collection_path, feature):
     quest_metadata = {'feature': feature}
-    save_path = dataset_metadata['file_path']
-    if save_path is not None:
-        rel_path = os.path.relpath(save_path, collection_path)
-        new_save_path = os.path.normpath(os.path.join(destination_collection_path, rel_path))
-        quest_metadata['file_path'] = new_save_path
+    file_path = dataset_metadata['file_path']
+    if file_path is not None:
+        rel_path = os.path.relpath(file_path, collection_path)
+        new_file_path = os.path.normpath(os.path.join(destination_collection_path, rel_path))
+        quest_metadata['file_path'] = new_file_path
 
-        util.mkdir_if_doesnt_exist(os.path.split(new_save_path)[0])
-        func(save_path, new_save_path)
+        util.mkdir_if_doesnt_exist(os.path.split(new_file_path)[0])
+        func(file_path, new_file_path)
 
     update_metadata(dataset_metadata['name'], quest_metadata=quest_metadata)

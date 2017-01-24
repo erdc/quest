@@ -25,18 +25,18 @@ class XYHdf5(IoBase):
 
         return dataframe
 
-    def write(self, save_path, dataframe, metadata):
+    def write(self, file_path, dataframe, metadata):
         "Write dataframe and metadata to HDF5 store."
-        base, fname = os.path.split(save_path)
-        if not save_path.endswith('h5'):
-            save_path += '.h5'
+        base, fname = os.path.split(file_path)
+        if not file_path.endswith('h5'):
+            file_path += '.h5'
 
         util.mkdir_if_doesnt_exist(base)
-        with pd.get_store(save_path) as h5store:
+        with pd.get_store(file_path) as h5store:
             h5store.put('dataframe', dataframe)
             h5store.get_storer('dataframe').attrs.metadata = metadata
 
-        logger.info('file written to: %s' % save_path)
+        logger.info('file written to: %s' % file_path)
 
 
     def open(self, path, fmt=None):

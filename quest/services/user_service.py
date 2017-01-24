@@ -104,7 +104,7 @@ class UserService(WebServiceBase):
             'parameter_codes': param_codes,
         }
 
-    def _download(self, service, feature, save_path, dataset, parameter=None, **kwargs):
+    def _download(self, service, feature, file_path, dataset, parameter=None, **kwargs):
         datasets = self.services[service]['datasets']
         save_folder = datasets.get('save_folder')
         mapping = datasets.get('mapping')
@@ -119,7 +119,7 @@ class UserService(WebServiceBase):
         path = self._get_path(fname, service)
         service_folder = self.services[service].get('service_folder', [''])
         for src, svc_folder in zip(util.listify(path), util.listify(service_folder)):
-            dst = save_path
+            dst = file_path
             if save_folder is not None:
                 dst = os.path.join(dst, save_folder, svc_folder)
 
@@ -156,7 +156,7 @@ class UserService(WebServiceBase):
             final_path = ','.join(final_path)
 
         metadata = {
-            'save_path': final_path,
+            'file_path': final_path,
             'file_format': self.services[service]['metadata'].get('file_format'),
             'datatype': self.services[service]['metadata'].get('datatype'),
             'parameter': self.services[service]['metadata'].get('parameters')[0],

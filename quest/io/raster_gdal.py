@@ -20,7 +20,7 @@ class RasterGdal(IoBase):
         "Read raster using rasterio"
         raise NotImplementedError
 
-    def write(self, save_path, raster, metadata):
+    def write(self, file_path, raster, metadata):
         "Write raster and metadata"
         raise NotImplementedError
 
