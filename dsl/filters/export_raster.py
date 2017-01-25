@@ -9,7 +9,7 @@ from .base import FilterBase
 #from ..api import get_collection
 from .. import util
 import os
-
+from ..util.log import logger
 
 class ExportRaster(FilterBase):
     def register(self):
@@ -39,7 +39,8 @@ class ExportRaster(FilterBase):
         export_path = os.path.join(export_path, filename)
 
         if not datatype=='raster':
-            print('Cannot apply this plugin to not timeseries data')
+            logger.error('Cannot apply this plugin to not timeseries data')
+
             return
 
         try:
@@ -47,10 +48,12 @@ class ExportRaster(FilterBase):
             with rasterio.drivers():
                 rasterio.copy(datafile, export_path, driver=fmt)
 
-            print('File exported to %s' % export_path)
+            logger.info('File exported to %s' % export_path)
+
 
         except:
-            print('export failed')
+            logger.errror('export failed')
+
 
         return collection
 
