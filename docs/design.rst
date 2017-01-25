@@ -1,6 +1,48 @@
 DSL Design
 ==========
 
+DSL has several (sometimes conflicting) design goals. The current design aims
+for a practical balance between these goals.
+
+Architectural Goals:
+  - Cross platform: OS X, Windows, Linux
+  - Needs to be easily extendable.
+
+API Goals:
+  - The api should be optimized to allow ease of scripting and interactive in python
+  - The api should allow for use as a backend library to drive web and gui interfaces
+
+Data Goals:
+  - Downloaded data should be reasonably structured, portable and usable even if you don't use DSL later
+  - Should allow reasonable tracking of provenance and transformations of data
+  - Provide mechanisms to publish/share data that has been downloaded/transformed
+  - Easily publish structured data as user defined services
+
+Core Concepts
+-------------
+
+Projects
+^^^^^^^^
+
+A DSL Project is the base organizing factor. The first time DSL is started a
+default project is created. Only one project can be active at a time and
+currently the api does not allow copying data from one project to another.
+
+Physically, a project maps to a folder on the computer. All data and metadata
+associated with a project is stored under the project folder. The metadata is
+stored in a sqlite database.
+
+Collections
+^^^^^^^^^^^
+
+Collections are a was of organizing data within a project. Collection names are
+unique and the name maps directly to a folder name in the project folder.
+
+Features
+^^^^^^^^
+
+Features are a unique identifiers that //todo ...... 
+
 DSL can be configured in three ways:
 
   1. Setting Environmental Variables
@@ -24,10 +66,7 @@ DSL_USER_SERVICES       list of web/file uris to user defined DSL services      
 
 You can add any extra settings needed by a plugin here as well using the keyword:arg structure.
 
-Design Goals:
-  - Data downloaded through DSL should be reasonably structured, portable and usable even if you don't use DSL later
-  - A DSL project (defined below), should be usable as a user defined DSL service from either a folder or http url
-  - Be able to easily convert a folder of structured data into a read-only user defined DSL service by adding a few metadata files
+
 
 
 Projects and Collections:
