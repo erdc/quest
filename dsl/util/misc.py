@@ -9,6 +9,7 @@ import os
 import pandas as pd
 import geopandas as gpd
 import re
+from ..util.log import logger
 
 from jsonrpc.jsonrpc import JSONRPCRequest
 from stevedore import extension, driver
@@ -282,7 +283,7 @@ def load_services():
                 drv = driver.DriverManager('dsl.services', 'user', invoke_on_load='True', invoke_kwds={'uri': uri}).driver
                 services['user-' + drv.name] = drv
             except Exception as e:
-                print('Failed to load local service from %s, with exception: %s' % (uri, str(e)))
+                logger.error('Failed to load local service from %s, with exception: %s' % (uri, str(e)))
 
     return services
 

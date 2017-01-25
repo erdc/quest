@@ -15,7 +15,7 @@ import numpy as np
 import os
 import subprocess
 import time
-
+from ..util.log import logger
 
 class NrmmFromFfd(FilterBase):
     def register(self):
@@ -54,7 +54,7 @@ class NrmmFromFfd(FilterBase):
         #calculate bounding box
         service = self.find_service_name(collection)
         if service is None:
-            print('no terrain-ffd data available in collection: %s' % collection_name)
+            logger.error('no terrain-ffd data available in collection: %s' % collection_name)
             return collection
 
         locations = collection['datasets'][service]['locations']['features']
@@ -76,7 +76,7 @@ class NrmmFromFfd(FilterBase):
         path = collection['path']
         vitd_dir = os.path.join(path, 'terrain-ffd')
         #call plugin.
-        print('calling FFD to NRMM plugin for bounding box - %s, with themes - %s' % (bounding_box, themes))
+        logger.info('calling FFD to NRMM plugin for bounding box - %s, with themes - %s' % (bounding_box, themes))
         args = [
             'ffd2nrmm',
             '-i', '"%s"' % vitd_dir,
@@ -94,14 +94,14 @@ class NrmmFromFfd(FilterBase):
         if resolution is not None:
             args += ['-r', str(resolution)]
 
-        print('--> %s' % (' '.join(args)))
+        logger.info('--> %s' % (' '.join(args)))
         try:
             subprocess.call(' '.join(args))
-            print('success')
-            print('nrmm file written to: %s' % os.path.join(path, nrmm_file))
+            logger.info('success')
+            logger.info('nrmm file written to: %s' % os.path.join(path, nrmm_file))
             collection = add_to_collection(collection_name, 'local', new_locs, parameters='terrain-ffd')
         except:
-            print('plugin call failed, using dummy output')
+            logger.error('plugin call failed, using dummy output')
             time.sleep(10)
             collection = add_to_collection(collection_name, 'local', new_locs, parameters='terrain-ffd')
 
@@ -200,7 +200,7 @@ class NrmmFromVitd(FilterBase):
         #calculate bounding box
         service = self.find_service_name(collection)
         if service is None:
-            print('no terrain-vitd data available in collection: %s' % collection_name)
+            logger.error('no terrain-vitd data available in collection: %s' % collection_name)
             return collection
 
         locations = collection['datasets'][service]['locations']['features']
@@ -222,7 +222,7 @@ class NrmmFromVitd(FilterBase):
         path = collection['path']
         vitd_dir = os.path.join(path, 'terrain-vitd')
         #call plugin.
-        print('calling VITD to NRMM plugin for bounding box - %s, with themes - %s' % (bounding_box, themes))
+        logger.info('calling VITD to NRMM plugin for bounding box - %s, with themes - %s' % (bounding_box, themes))
         args = [
             'vitd2nrmm',
             '-i', '"%s"' % vitd_dir,
@@ -240,14 +240,14 @@ class NrmmFromVitd(FilterBase):
         if resolution is not None:
             args += ['-r', str(resolution)]
 
-        print('--> %s' % (' '.join(args)))
+        logger.info('--> %s' % (' '.join(args)))
         try:
             subprocess.call(' '.join(args))
-            print('success')
-            print('nrmm file written to: %s' % os.path.join(path, nrmm_file))
+            logger.info('success')
+            logger.info('nrmm file written to: %s' % os.path.join(path, nrmm_file))
             collection = add_to_collection(collection_name, 'local', new_locs, parameters='terrain-nrmm')
         except:
-            print('plugin call failed, using dummy output')
+            logger.error('plugin call failed, using dummy output')
             time.sleep(10)
             collection = add_to_collection(collection_name, 'local', new_locs, parameters='terrain-nrmm')
 

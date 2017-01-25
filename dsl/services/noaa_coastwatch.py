@@ -3,7 +3,7 @@ from .base import WebServiceBase
 from .. import util
 import pandas as pd
 import os
-
+from ..util.log import logger
 BASE_PATH = 'noaa'
 BASE_URL = 'http://coastwatch.pfeg.noaa.gov/erddap/tabledap/'
 
@@ -232,7 +232,7 @@ class NoaaService(WebServiceBase):
             if service == 'ndbc':
                 url = 'cwwcNDBCMet.csvp?time,{}&station="{}"&time>={}&time<={}'.format(parameter_code, feature, start, end)
                 url = BASE_URL + url
-                print('download data from %s' % url)
+                logger.info('downloading data from %s' % url)
                 data = pd.read_csv(url)
                 if data.empty:
                     raise ValueError('No Data Available')
@@ -252,7 +252,7 @@ class NoaaService(WebServiceBase):
                 location = self._datasetId_map(service, parameter_code)
                 url = 'nosCoops{}.csvp?time,{}&stationID="{}"&time>={}&time<={}'.format(location,parameter_code,feature, start, end)
                 url = BASE_URL + url
-                print('download data from %s' % url)
+                logger.info('downloading data from %s' % url)
                 data = pd.read_csv(url)
                 if data.empty:
                     raise ValueError('No Data Available')
@@ -275,7 +275,7 @@ class NoaaService(WebServiceBase):
 
                 url = 'nosCoops{}.csvp?time,{}&stationID="{}"&time>={}&time<={}&datum="{}"'.format(location,parameter_code,feature, start,end, datum)
                 url = BASE_URL + url
-                print('download data from %s' % url)
+                logger.info('downloading data from %s' % url)
                 data = pd.read_csv(url)
                 if data.empty:
                     raise ValueError('No Data Available')

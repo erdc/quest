@@ -4,6 +4,7 @@ import psutil
 from jsonrpc import dispatcher
 import pandas as pd
 from ..util import listify
+from ..util.log import logger
 
 _cluster = None
 tasks = {}
@@ -53,7 +54,8 @@ def add_async(f):
 def get_task(task_id, with_future=None):
     task = get_tasks(expand=True, with_future=with_future).get(task_id)
     if task is None:
-        print('task {} not found'.format(task_id))
+        logger.error('task {} not found'.format(task_id))
+
     return task
 
 
@@ -109,7 +111,7 @@ def remove_tasks(status=None):
         status = ['cancelled', 'finished', 'lost', 'error']
 
     if 'pending' in status:
-        print('cannot remove pending tasks, please cancel them first')
+        logger.error('cannot remove pending tasks, please cancel them first')
         status.remove('pending')
 
     for key in [k for k, v in tasks.items() if v['status'] in status]:
