@@ -4,16 +4,16 @@ import inspect
 import sys
 
 logger = logging.getLogger('dsl')
-null_hdlr = logging.NullHandler()
+null_handler = logging.NullHandler()
 logger.setLevel(logging.DEBUG)
 formatter = logging.Formatter('%(asctime)s - %(levelname)s : %(message)s')
-null_hdlr.setFormatter(formatter)
-logger.addHandler(null_hdlr)
+null_handler.setFormatter(formatter)
+logger.addHandler(null_handler)
 logger.propagate = False
-defaultLog = os.getenv('DSL_DIR') + '/Log.log'
+default_log_file = os.getenv('DSL_DIR') + '/Log.log'
 
 
-def log_to_file(status=True, filename=defaultLog, log_level=None):
+def log_to_file(status=True, filename=default_log_file, log_level=None):
     """Log events to a file.
 
     Args:
@@ -41,14 +41,14 @@ def log_to_file(status=True, filename=defaultLog, log_level=None):
             if True, logging to file was successful
       """
 
-    file_hdlr = logging.FileHandler(filename)
+    file_handler = logging.FileHandler(filename)
 
     if log_level is not None:
         logger.setLevel(log_level)
 
     if status is True:
 
-        logger.addHandler(file_hdlr)
+        logger.addHandler(file_handler)
 
     else:
         for i, j in enumerate(logger.handlers):
@@ -84,14 +84,14 @@ def log_to_console(status=True, log_level=None):
             if True, logging to console was successful
       """
 
-    console_hdlr = logging.StreamHandler()
+    console_handler = logging.StreamHandler()
 
     if log_level is not None:
         logger.setLevel(log_level)
 
     if status is True:
 
-        logger.addHandler(console_hdlr)
+        logger.addHandler(console_handler)
 
     else:
         for i, j in enumerate(logger.handlers):
