@@ -17,26 +17,21 @@ from .tasks import add_async
 def download(feature, save_path, dataset=None, **kwargs):
     """Download dataset and save it locally.
 
-    Parameters
-    ----------
-        feature (string):
-            uri of feature within service or collection.
-        save_path: ``None`` or str
-            filepath to save data
-        dataset (string, optional):
-        async: bool (default False)
-            If true download in background
-
+    Args:
+        feature (string, Required):
+            uri of feature within a service or collection
+        file_path (string, Required):
+            path location to save downloaded data
+        dataset (string, Optional, Default=None):
+            maybe only be used by some services
+        async: (bool, Optional, Default=False)
+            if True, download in background
         kwargs:
             optional download kwargs
 
-    Return
-    ------
+    Returns:
         data (dict):
             details of downloaded data
-
-    Examples:
-        TODO add examples
 
     """
     service_uri = feature
@@ -58,14 +53,19 @@ def download(feature, save_path, dataset=None, **kwargs):
 @dispatcher.add_method
 @add_async
 def download_datasets(datasets, raise_on_error=False):
-    """download staged datasets.
+    """Download datasets that have been staged with stage_for_download.
 
-    Download datasets that have been staged with stage_for_download
-    args:
-        datasets (string, list): list of datasets to download
+    Args:
+        datasets (string or list, Required):
+            datasets to download
+        raise_on_error (bool, Optional, Default=False):
+            if True, if an error occurs raise an exception
+        async: (bool, Optional, Default=False)
+            if True, download in background
 
-    return:
-        status (dict): download status of datasets
+    Returns:
+        status (dict):
+            download status of datasets
     """
     datasets = get_metadata(datasets, as_dataframe=True)
 
@@ -126,21 +126,19 @@ def download_datasets(datasets, raise_on_error=False):
 
 @dispatcher.add_method
 def download_options(uris, fmt='json-schema'):
-    """List optional kwargs that can be specified when downloading a dataset
+    """List optional kwargs that can be specified when downloading a dataset.
 
-    Parameters
-    ----------
-        uris (string or list):
+   Args:
+        uris (string or list, Required):
             uris of features or datasets
+        fmt (string, Required, Default='json-schema'):
+            format in which to return download_options
 
-    Return
-    ------
-        download_options: dict
+
+    Returns:
+        download_options (dict):
             download options that can be specified when calling
             dsl.api.stage_for_download or dsl.api.download
-
-    Examples:
-        TODO add examples
     """
     uris = util.listify(uris)
     download_options = {}
@@ -164,7 +162,19 @@ def download_options(uris, fmt='json-schema'):
 
 @dispatcher.add_method
 def get_datasets(expand=None, filters=None, as_dataframe=None):
-    """
+    """Return all available datasets in active project.
+
+    Args:
+        expand (bool, Optional, Default=None):
+            include dataset details and format as dict
+        filters(dict, Optional, Default=None):
+             filter dataset by any metadata field
+        as_dataframe (bool or None, Optional, Default=None):
+            include dataset details and format as pandas dataframe
+    Returns:
+        uris (list, dict, pandas Dataframe, Default=list):
+            staged dataset uids
+
     """
     db = get_db()
     with db_session:
@@ -202,10 +212,22 @@ def new_dataset(feature, dataset_type=None, display_name=None,
     """Create a new dataset at a feature.
 
     Args:
-        feature (string): uid of feature
+        feature (string, Required):
+            uid of a feature
+        source (string, Optional, Default=None):
+            type of the dataset such as timeseries or raster
+        display_name (string, Optional, Default=None):
+            display name for dataset
+        description (string, Optional, Default=None):
+            description of dataset
+        file_path (string, Optional, Default=None):
+            path location to save new dataset's data
+        metadata (dict, Optional, Default=None):
+            user defined metadata
 
     Returns:
-        uid of dataset
+        uri (string):
+            uid of dataset
     """
     # check if feature exists
     db = get_db()
@@ -244,17 +266,22 @@ def new_dataset(feature, dataset_type=None, display_name=None,
 
 @dispatcher.add_method
 def stage_for_download(uris, download_options=None):
-    """
-    args:
-        uris (string or list): uris of features/datasets to stage for download,
-            if uri is a feature a new dataset will be created.
-        download_kwargs (dict or list of dicts): kwargs to be passed to the
-            download function specified for each dataset. if dict then apply
-            same kwargs to all datasets, else each dict in list is used for
-            respective dataset
+    """Apply download options before downloading
+    Args:
+        uris (string or list, Required):
+            uris of features/datasets to stage for download
 
-    return:
-        uris (list): staged dataset uids
+            If uri is a feature, a new dataset will be created
+
+        download_options (dict or list of dicts, Optional, Default=None):
+            options to be passed to dsl.api.download function specified for each dataset
+
+            If download_options is a dict, then apply same options to all datasets,
+            else each dict in list is used for each respective dataset
+
+    Returns:
+        uris (list):
+            staged dataset uids
     """
     uris = util.listify(uris)
     datasets = []
@@ -302,7 +329,17 @@ def describe_dataset():
 def open_dataset(dataset, fmt=None):
     """Open the dataset and return in format specified by fmt
 
-    will raise NotImplementedError if format requested is not possible
+    Args:
+        dataset (string, Required):
+            uid of dataset to be opened
+        fmt (string, Optional, Default=None)
+             format in which dataset should be returned
+             will raise NotImplementedError if format requested is not possible
+
+    Returns:
+        data (pandas dataframe, json-schema, or dict, Default=dataframe):
+            contents of dataset
+
     """
     m = get_metadata(dataset).get(dataset)
     file_format = m.get('file_format')
@@ -325,6 +362,19 @@ def visualize_dataset(dataset, update_cache=False, **kwargs):
 
     Check for existence of dataset on disk and call appropriate file format
     driver.
+
+    Args:
+        dataset (string, Required):
+            uri of dataset to be visualized
+        update_cache (bool, Optional, Default=False):
+            currently unused
+        kwargs:
+            optional download kwargs
+
+    Returns:
+        path (string):
+            path to the  newly visualized dataset
+
     """
     m = get_metadata(dataset).get(dataset)
     visualization_path = m.get('visualization_path')
@@ -357,7 +407,19 @@ def visualize_dataset(dataset, update_cache=False, **kwargs):
 
 @dispatcher.add_method
 def visualize_dataset_options(dataset, fmt='json-schema'):
-    """Return visualization available options for dataset."""
+    """Return visualization available options for dataset.
+
+    Args:
+        dataset (string, Required):
+            uid of dataset
+        fmt (string, Required, Default='json-schema'):
+            format in which to return options
+
+    Returns:
+        visualize_dataset_options  (dict):
+            options that can be specified when calling
+            dsl.api.visualize_dataset
+    """
     m = get_metadata(dataset).get(dataset)
     file_format = m.get('file_format')
     path = m.get('file_path')

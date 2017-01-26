@@ -21,7 +21,7 @@ from .. import util
 
 @dispatcher.add_method
 def delete(uris):
-    """Update metadata for resource(s)
+    """Delete metadata for resource(s)
 
     WARNING:
         deleting a feature deletes all associated datasets
@@ -29,12 +29,13 @@ def delete(uris):
         TODO deleting dataset files/folders
 
     Args:
-        uris (string, comma separated string, list of strings):
-            list of uris to update metadata for.
-        delete_data (bool, optional): delete associated data
+        uris (string, comma separated string or list of strings, Required):
+            uri(s) of collection, feature, and/or service to delete
 
     Returns:
-        status (bool): True on success
+        status (bool):
+            True on success
+
     """
     # if uri list is empty do nothing
     if not uris:
@@ -92,6 +93,18 @@ def delete(uris):
 
 @dispatcher.add_method
 def move(uris, destination_collection):
+    """Move feature/dataset from one collection to another.
+
+    Args:
+        uris (string or list of strings, Required):
+            uris of features/datasets to move
+        destination_collection (string):
+            collection name
+    Returns:
+        status (bool):
+            True on success
+    """
+
     # if uri list is empty do nothing
     if not uris:
         return True
@@ -141,6 +154,17 @@ def move(uris, destination_collection):
 
 @dispatcher.add_method
 def copy(uris, destination_collection):
+    """Copy feature/dataset from one collection to another.
+
+       Args:
+           uris (string or list of strings, Required):
+               uris of features/datasets to copy
+           destination_collection (string):
+               collection name
+       Returns:
+           status (bool):
+               True on success
+       """
     # if uri list is empty do nothing
     if not uris:
         return True

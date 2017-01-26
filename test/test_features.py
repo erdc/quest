@@ -20,11 +20,11 @@ def feature(request):
     return request.param
 
 
-# def test_add_features(feature):
-#     b = dsl.api.add_features('col1', feature)
-#     c = dsl.api.get_features(collections='col1')
-#     assert len(list(c)) == 1
-#     assert b == c
+def test_add_features(feature):
+    b = dsl.api.add_features('col1', feature)
+    c = dsl.api.get_features(collections='col1')
+    assert len(list(c)) == 1
+    assert b == c
 
 
 def test_get_features():
@@ -46,7 +46,6 @@ def test_update_feature():
     metadata = {'new_field': 'test'}
 
     c = dsl.api.update_metadata(COL2_FEATURES, display_name=['New Name', 'New Name'], metadata=metadata)
-
     for feature in COL2_FEATURES:
         assert c[feature]['display_name'] == 'New Name'
         assert c[feature]['metadata']['new_field'] == 'test'

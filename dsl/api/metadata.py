@@ -17,11 +17,14 @@ def get_metadata(uris, as_dataframe=False):
     """Get metadata for uris.
 
     Args:
-        uris (string, comma separated string, list of strings):
-            list of uris to retrieve metadata for.
+        uris (string, comma separated string, or list of strings, Required):
+            list of uris to retrieve metadata for
+        as_dataframe (bool, Optional, Default=False):
+           include details of newly created dataset as a pandas Dataframe
 
     Returns:
-        metadata (dict or pd.DataFrame): metadata at each uri keyed on uris
+        metadata (dict or pd.DataFrame, Default=dict):
+            metadata at each uri keyed on uris
     """
     # group uris by type
     df = util.classify_uris(uris)
@@ -107,14 +110,19 @@ def update_metadata(uris, display_name=None, description=None,
     """Update metadata for resource(s)
 
     Args:
-        uris (string, comma separated string, list of strings):
+        uris (string, comma separated string, or list of strings, Required):
             list of uris to update metadata for.
-        display_name (string or list, optional): display name for each uri
-        description (string or list, optional): description for each uri
-        metadata (dict or list of dicts): metadata to be updated
-
+        display_name (string or list, Optional,Default=None):
+            display name for each uri
+        description (string or list, Optional,Default=None):
+            description for each uri
+        metadata (dict or list of dicts, Optional, Default=None):
+            user defiend metadata
+        dsl_metadata (dict or list of dicts, Optional, Default=None):
+            metadata used by DSL
     Returns:
-        metadata (dict or pd.DataFrame): metadata at each uri keyed on uris
+        metadata (dict):
+            metadata at each uri keyed on uris
     """
     # group uris by type
     df = util.classify_uris(uris)
