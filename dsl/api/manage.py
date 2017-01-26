@@ -93,7 +93,16 @@ def delete(uris):
 
 @dispatcher.add_method
 def move(uris, destination_collection):
-    """
+    """Move feature/dataset from one collection to another.
+
+    Args:
+        uris (string or list of strings, Required):
+            uris of features/datasets to move
+        destination_collection (string):
+            collection name
+    Returns:
+        status (bool):
+            True on success
     """
 
     # if uri list is empty do nothing
@@ -145,8 +154,17 @@ def move(uris, destination_collection):
 
 @dispatcher.add_method
 def copy(uris, destination_collection):
-    """
-    """
+    """Copy feature/dataset from one collection to another.
+
+       Args:
+           uris (string or list of strings, Required):
+               uris of features/datasets to copy
+           destination_collection (string):
+               collection name
+       Returns:
+           status (bool):
+               True on success
+       """
     # if uri list is empty do nothing
     if not uris:
         return True

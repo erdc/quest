@@ -8,7 +8,7 @@ from .. import util
 
 @dispatcher.add_method
 def get_mapped_parameters():
-    """Get list of  common parameters
+    """Get list of common parameters.
 
     Returns:
      parameters (list):
@@ -24,7 +24,7 @@ def get_mapped_parameters():
 
 @dispatcher.add_method
 def get_parameters(service_uri, update_cache=False):
-    """Get available parameters, even unmapped ones, for specified service
+    """Get available parameters, even unmapped ones, for specified service.
 
     Args:
         service_uri (string, Required):

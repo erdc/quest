@@ -24,19 +24,20 @@ def add_features(collection, features):
     When the features are added into a collection they are given a new
     feature id.
 
-    If a feature from a service already exists, then it is not re-added the
+    If a feature from a service already exists, then it is not re-added instead the
     uri of the existing feature is returned (i.e. Feature was originally from
-    usgs-nwis but is being copied from one collection to another) then does
-    not overwrite external_uri.
+    usgs-nwis but is being copied from one collection to another) without
+    over writing external_uri.
 
     Args:
-        collection (string, Required): name of collection
+        collection (string, Required):
+            name of collection
         features (string, comma separated strings,list of strings, or pandas DataFrame, Required):
             list of features to add to the collection.
 
     Returns:
         uris (list):
-            uri's of features
+            uris of features
     """
 
     if collection not in get_collections():
@@ -88,9 +89,9 @@ def get_features(services=None, collections=None, features=None,
         features (comma separated strings or list of strings, Optional, Default=None):
             list of features to include in search
         as_dataframe (bool, Optional, Default=False):
-            if True, return features as a pandas DataFrame indexed by feature uris
+           include feature details and format as a pandas DataFrame indexed by feature uris
         as_geojson (bool, Optional, Default=False):
-            if True, return features as a geojson scheme indexed by feature uris
+            include feature details and format as a geojson scheme indexed by feature uris
         update_cache (bool, Optional,Default=False):
             if True, update metadata cache
         filters (dict, Optional, Default=None):
@@ -99,12 +100,12 @@ def get_features(services=None, collections=None, features=None,
                     geom_type (string, optional): filter features by geom_type,
                         i.e. point/line/polygon
                     parameter (string, optional): filter features by parameter
-                    parameter_code (string, optional): filter features by
-                        parameter code
                     bbox (string, optional): filter features by bounding box
 
+            Features can also be filtered by any other metadata fields
+
     Returns:
-        features (list, geo-json dict or pandas.DataFrame):
+        features (list, geo-json dict or pandas.DataFrame, Default=list):
              features of specified service(s), collection(s) or feature(s)
 
     """
@@ -191,7 +192,7 @@ def get_features(services=None, collections=None, features=None,
 
 @dispatcher.add_method
 def get_tags(service):
-    """Get searchable tags for a given service
+    """Get searchable tags for a given service.
 
     Args:
         service(string):
@@ -231,7 +232,7 @@ def new_feature(collection, display_name=None, geom_type=None, geom_coords=None,
         display_name (string, Optional, Default=None):
             display name of feature
         geom_type (string, Optional, Default=None):
-            point/line/polygon
+             geometry type of feature (i.e. point/line/polygon)
         geom_coords (string or list, Optional, Default=None):
             geometric coordinates specified as valid geojson coordinates (i.e. a list of lists i.e.
             '[[-94.0, 23.2], [-94.2, 23.4] ...]'

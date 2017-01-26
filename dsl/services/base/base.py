@@ -68,6 +68,7 @@ class WebServiceBase(with_metaclass(abc.ABCMeta, object)):
                                 float(row['latitude'])
                                 ))
             features['geometry'] = features.apply(fn,axis=1)
+            features['geometry'] = features.apply(fn,axis=1)
 
         if 'geometry' in features.columns:
             # TODO
