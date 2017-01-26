@@ -13,55 +13,27 @@ from .tasks import add_async
 def get_filters(filters=None, expand=False, **kwargs):
 
     """List available filter plugins
-    Parameters
-    ----------
-        filters (dict):
-            optional kwargs filter the list of filters
-            allowed filters are dataset, group, datatype, geotype, parameter
-            if dataset is used it overides the others and sets them from the
-            dataset metadata.
 
-        metadata: bool (default False)
-            If true return a dict of metadata
+    Args:
+        filters (dict, Optional, Default=None):
+            filter the list of filters by one or more of the available filters
+            available filters:
+                    dataset (string, Optional):
+                    group (string, Optional)
+                    geotype (string, Optional)
+                    datatype (string, Optional)
+                    parameter (string, Optional)
+            if a dataset filter is used, all other filters are overridden and set from the dataset's metadata.
+        expand (bool, Optional, Default=None):
+            if True, return details of the filters as a dict
+        kwargs:
+            optional filter kwargs
 
-    Return
-    ------
-        available filters (list or dict)
 
-    Examples:
+    Returns:
+        filters (list or dict, Default=list):
+            all available filters
 
-        In [1]: import dsl
-        In [2]: dsl.api.get_filters(filters={'group':'Raster'})
-        Out[2]: ['get-elevations-along-path', 'export-raster']
-
-        In [3]: dsl.api.get_filters(filters={'group':'Terrain'})
-        Out[3]: ['vitd2nrmm', 'ffd2nrmm']
-
-        In [4]: dsl.api.get_filters(filters={'group':'Timeseries'})
-        Out[4]: ['ts-resample', 'ts-remove-outliers']
-
-        In [5]: dsl.api.get_filters(filters={'datatype':'timeseries', 'parameters': 'streamflow'})
-        Out[5]: ['ts-resample', 'ts-remove-outliers']
-
-        In [6]: dsl.api.get_filters(filters={'dataset': 'd086ecbbb71947509493f785177b60be'})
-        Out[6]: ['ts-resample', 'ts-remove-outliers']
-
-        In [7]: dsl.api.get_filters(filters={'dataset': 'd086ecbbb71947509493f785177b60be'}, metadata=True)
-        Out[7]:
-        {'ts-remove-outliers': {'group': 'Timeseries',
-          'operates_on': {'datatype': ['timeseries'],
-           'geotype': None,
-           'parameters': None},
-          'produces': {'datatype': ['timeseries'],
-           'geotype': None,
-           'parameters': None}},
-         'ts-resample': {'group': 'Timeseries',
-          'operates_on': {'datatype': ['timeseries'],
-           'geotype': None,
-           'parameters': None},
-          'produces': {'datatype': ['timeseries'],
-           'geotype': None,
-           'parameters': None}}}
     """
     avail = [dict(name=k, **v.metadata) for k,v in util.load_drivers('filters').items()]
 
@@ -90,7 +62,29 @@ def get_filters(filters=None, expand=False, **kwargs):
 @dispatcher.add_method
 @add_async
 def apply_filter(name, datasets=None, features=None, options=None, as_dataframe=None, expand=None):
-    """Apply Filter to dataset."""
+    """Apply Filter to dataset.
+
+    Args:
+        name (string,Required):
+            name of filter
+        datasets (string, list of strings, or dict, Required):
+            datasets to which the filter is to be applied
+        features (string, list of strings, or dict, Optional, Default=False)
+            features to which the filter is to be applied
+        expand (bool, Optional, Default=False):
+            include details of newly created dataset and format as a dict
+        as_dataframe (bool, Optional, Default=False):
+            include details of newly created dataset and format as a pandas dataframe
+        async (bool,Optional):
+            if True, run filter in the background
+
+
+    Returns:
+        dataset/feature uris (dict or pandas dataframe, Default=dict):
+             resulting datasets and/or features
+
+
+    """
     datasets = util.listify(datasets)
     features = util.listify(features)
     options = util.listify(options)
@@ -116,6 +110,16 @@ def apply_filter(name, datasets=None, features=None, options=None, as_dataframe=
 
 @dispatcher.add_method
 def apply_filter_options(name, fmt='json-schema'):
-    """Retreive kwarg options for apply_filter."""
+    """Retreive kwarg options for apply_filter.
+
+    Args:
+        name (string, Required):
+            name of filter
+        fmt (string, Required, Default='json-schema'):
+            format in which to return options
+    Returns:
+        filter options (json-schema or smtk scheme):
+            filter options that can be applied when calling dsl.api.apply_filter
+    """
     driver = util.load_drivers('filters', name)[name].driver
     return driver.apply_filter_options(fmt)

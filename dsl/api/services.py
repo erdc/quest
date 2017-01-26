@@ -15,7 +15,16 @@ from stevedore import driver
 
 @dispatcher.add_method
 def get_providers(expand=None):
-    """Return list of Providers."""
+    """Return list of Providers.
+
+    Args:
+         expand (bool, Optional, Default=None):
+            include providers' details and format as dict
+    Returns:
+        providers (list or dict,Default=list):
+            list of all available providers
+
+    """
     providers = util.load_services() #util.load_drivers('services')
     p = {k: v.metadata for k, v in providers.items()}
     if not expand:
@@ -26,7 +35,19 @@ def get_providers(expand=None):
 
 @dispatcher.add_method
 def get_services(expand=None, parameter=None, service_type='geo-discrete'):
-    """Return list of Services."""
+    """Return list of Services.
+
+    Args:
+         expand (bool, Optional, Default=False):
+            include services' details and format as dict
+         parameter (string, Optional, Default=None):
+         service_type (string, Optional, Default='geo-discrete'):
+
+    Returns:
+          services (list or dict, Default=dict):
+            all available services
+
+    """
     providers = util.load_services() # util.load_drivers('services')
     services = {}
     for provider, svc in providers.items():
@@ -45,10 +66,18 @@ def get_services(expand=None, parameter=None, service_type='geo-discrete'):
 
 @dispatcher.add_method
 def add_provider(uri):
-    """Add a custom web service created from a file or http folder
+    """Add a custom web service created from a file or http folder.
 
     Converts a local/network or http folder that contains a dsl.yml
     and associated data into a service that can be accessed through dsl
+
+
+    Args:
+        uri (string, Required):
+            uri of new 'user' service
+    Returns:
+        message (string):
+            status of adding service (i.e. failed/success)
     """
     valid = False
     if uri.startswith('http'):
@@ -77,7 +106,16 @@ def add_provider(uri):
 
 @dispatcher.add_method
 def delete_provider(uri):
-    """Remove 'user' service."""
+    """Remove 'user' service.
+
+    Args:
+        uri (string, Required):
+            uri of 'user service'
+     Returns:
+        message (string):
+            status of deleting service
+
+    """
     if uri.startswith('svc://'):
         provider, service, _ = util.parse_service_uri(uri)
         if not provider.startswith('user'):

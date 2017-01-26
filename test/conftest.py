@@ -47,7 +47,6 @@ def reset_projects_dir(reset_settings, request):
         shutil.rmtree(projects_dir, ignore_errors=True)
 
     cleanup()
-
     projects_template_dir = os.path.join(FILES_DIR, 'projects_template')
     shutil.copytree(projects_template_dir, projects_dir)
     python_version = sys.version_info[0]
@@ -73,5 +72,3 @@ def set_active_project(reset_settings, request):
         dsl.api.set_active_project(previous_active_project)
 
     request.addfinalizer(teardown)
-
-

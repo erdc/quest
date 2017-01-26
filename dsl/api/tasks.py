@@ -52,6 +52,15 @@ def add_async(f):
 
 @dispatcher.add_method
 def get_task(task_id, with_future=None):
+    """Get details for a task.
+
+    Args:
+        task_id (string,Required):
+            id of a task
+        with_future (bool, Optional, Default=None):
+           If true include the task ‘future’ objects in the returned dataframe/dictionary
+
+    """
     task = get_tasks(expand=True, with_future=with_future).get(task_id)
     if task is None:
         logger.error('task {} not found'.format(task_id))
@@ -61,9 +70,20 @@ def get_task(task_id, with_future=None):
 
 @dispatcher.add_method
 def get_tasks(filters=None, expand=None, as_dataframe=None, with_future=None):
-    """
-        filters: any of the dict keys i.e. status, fn
-        status = (pending, cancelled, finished, lost, error)
+    """Get all available tasks.
+
+    Args:
+        filters #comback
+        expand (bool, Optional, Default=None):
+            include details of tasks and format as a dict
+        as_dataframe (bool, Optional, Default=None):
+            include details of tasks and format as a pandas dataframe
+        with_future (bool, Optional, Default=None):
+           If true include the task ‘future’ objects in the returned dataframe/dictionary
+
+    Returns:
+        tasks (list, dict, or pandas dataframe, Default=list):
+            all available tasks
     """
     # update status
     _update_status()
@@ -88,6 +108,12 @@ def get_tasks(filters=None, expand=None, as_dataframe=None, with_future=None):
 
 @dispatcher.add_method
 def cancel_tasks(task_ids):
+    """Cancel tasks.
+
+       Args:
+         task_ids (string or list of strings, Required):
+            id of tasks to be cancelled
+       """
     task_ids = listify(task_ids)
     df = get_tasks(with_future=True, as_dataframe=True)
     futures = df['future'][task_ids].tolist()
@@ -98,10 +124,14 @@ def cancel_tasks(task_ids):
 
 @dispatcher.add_method
 def remove_tasks(status=None):
-    """
-        status can be a list of statuses, default removes
-        tasks with status = ['cancelled', 'finished', 'lost', 'error']
-        from task list
+    """Remove tasks.
+
+    Args:
+        status (string, Optional, Default=None):
+            tasks with this status will be removed
+
+        If no status is specified, remove tasks with
+        status = ['cancelled', 'finished', 'lost', 'error'] from task list
     """
     global tasks
     _update_status()

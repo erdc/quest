@@ -44,4 +44,3 @@ def test_update_collection():
     c = dsl.api.update_metadata('test1', metadata=metadata)
     assert c['test1']['metadata']['display_name'] == 'New Name'
     assert c['test1']['metadata']['new_field'] == 'test'
-
