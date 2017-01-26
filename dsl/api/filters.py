@@ -13,8 +13,8 @@ from .tasks import add_async
 def get_filters(filters=None, expand=False, **kwargs):
 
     """List available filter plugins
-    Parameters
-    ----------
+
+    Args:
         filters (dict, Optional, Default=None):
             filter the list of filters by one or more of the available filters
             available filters:
@@ -30,45 +30,10 @@ def get_filters(filters=None, expand=False, **kwargs):
             optional filter kwargs
 
 
-    Return
-    ------
-        filters (list or dict):
+    Returns:
+        filters (list or dict, Default=list):
             all available filters
 
-    Examples:
-
-        In [1]: import dsl
-        In [2]: dsl.api.get_filters(filters={'group':'Raster'})
-        Out[2]: ['get-elevations-along-path', 'export-raster']
-
-        In [3]: dsl.api.get_filters(filters={'group':'Terrain'})
-        Out[3]: ['vitd2nrmm', 'ffd2nrmm']
-
-        In [4]: dsl.api.get_filters(filters={'group':'Timeseries'})
-        Out[4]: ['ts-resample', 'ts-remove-outliers']
-
-        In [5]: dsl.api.get_filters(filters={'datatype':'timeseries', 'parameters': 'streamflow'})
-        Out[5]: ['ts-resample', 'ts-remove-outliers']
-
-        In [6]: dsl.api.get_filters(filters={'dataset': 'd086ecbbb71947509493f785177b60be'})
-        Out[6]: ['ts-resample', 'ts-remove-outliers']
-
-        In [7]: dsl.api.get_filters(filters={'dataset': 'd086ecbbb71947509493f785177b60be'}, metadata=True)
-        Out[7]:
-        {'ts-remove-outliers': {'group': 'Timeseries',
-          'operates_on': {'datatype': ['timeseries'],
-           'geotype': None,
-           'parameters': None},
-          'produces': {'datatype': ['timeseries'],
-           'geotype': None,
-           'parameters': None}},
-         'ts-resample': {'group': 'Timeseries',
-          'operates_on': {'datatype': ['timeseries'],
-           'geotype': None,
-           'parameters': None},
-          'produces': {'datatype': ['timeseries'],
-           'geotype': None,
-           'parameters': None}}}
     """
     avail = [dict(name=k, **v.metadata) for k,v in util.load_drivers('filters').items()]
 
@@ -97,23 +62,25 @@ def get_filters(filters=None, expand=False, **kwargs):
 @dispatcher.add_method
 @add_async
 def apply_filter(name, datasets=None, features=None, options=None, as_dataframe=None, expand=None):
-    """Apply Filter to dataset
+    """Apply Filter to dataset.
 
     Args:
-        name (string):
+        name (string,Required):
             name of filter
         datasets (string, list of strings, or dict, Required):
             datasets to which the filter is to be applied
         features (string, list of strings, or dict, Optional, Default=False)
             features to which the filter is to be applied
         expand (bool, Optional, Default=False):
-            return details of newly created dataset as a dict
+            include details of newly created dataset and format as a dict
         as_dataframe (bool, Optional, Default=False):
-           return details of newly created dataset as a pandas Dataframe
+            include details of newly created dataset and format as a pandas dataframe
+        async (bool,Optional):
+            if True, run filter in the background
 
 
     Returns:
-        dataset/feature uris (dict or pandas Dataframe):
+        dataset/feature uris (dict or pandas dataframe, Default=dict):
              resulting datasets and/or features
 
 

@@ -13,7 +13,8 @@ PROJECT_INDEX_FILE = 'project_index.yml'
 
 
 def active_db():
-    """Get the active database
+    """Get the active database.
+
     Returns:
          path (string):
             file path to active project database
@@ -72,7 +73,7 @@ def new_project(name, display_name=None, description=None, metadata=None,
         metadata (dict, Optional, Default=None):
             user defined metadata
         folder (string, Optional, Default=None):
-            folder where all project data will reside
+            folder where all project data will be saved
         activate (bool, Optional, Default=True):
             if True, set newly created project as currently active project
 
@@ -171,8 +172,8 @@ def get_projects(expand=False, as_dataframe=False):
             include collection details and format as pandas dataframe
 
     Returns:
-        projects (list, dict, or pandas Dataframe):
-            if expand/as_dataframe are False, return list of all available projects
+        projects (list, dict, or pandas Dataframe,Default=list):
+             all available projects
 
 
     """
@@ -247,7 +248,7 @@ def set_active_project(name):
 
     Returns:
         project (string):
-            name of project newly set as active
+            name of project currently set as active
 
     """
     path = _get_projects_index_file()

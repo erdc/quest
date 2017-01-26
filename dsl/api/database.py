@@ -68,6 +68,21 @@ def define_models(db):
 
 
 def get_db(dbpath=None, reconnect=False):
+    """Get database object.
+
+       Args:
+          dbpath (string, Optional, Default=None):
+            path to the database
+
+            dbpath must be set at least once in a session before being called without arguments
+
+          reconnect (bool, Optional, Default=None):
+            if True, reconnect to the database
+
+       Returns:
+           database (object):
+               database object
+       """
     global _connection
     if _connection:
         if reconnect is False:

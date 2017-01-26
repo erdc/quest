@@ -18,11 +18,11 @@ def get_providers(expand=None):
     """Return list of Providers.
 
     Args:
-         expand (bool, Optional, Default=False):
+         expand (bool, Optional, Default=None):
             include providers' details and format as dict
     Returns:
-        providers (list or dict):
-         if expand not True, return list of providers
+        providers (list or dict,Default=list):
+            list of all available providers
 
     """
     providers = util.load_services() #util.load_drivers('services')
@@ -43,8 +43,9 @@ def get_services(expand=None, parameter=None, service_type='geo-discrete'):
          parameter (string, Optional, Default=None):
          service_type (string, Optional, Default='geo-discrete'):
 
-
-
+    Returns:
+          services (list or dict, Default=dict):
+            all available services
 
     """
     providers = util.load_services() # util.load_drivers('services')
@@ -65,7 +66,7 @@ def get_services(expand=None, parameter=None, service_type='geo-discrete'):
 
 @dispatcher.add_method
 def add_provider(uri):
-    """Add a custom web service created from a file or http folder
+    """Add a custom web service created from a file or http folder.
 
     Converts a local/network or http folder that contains a dsl.yml
     and associated data into a service that can be accessed through dsl
@@ -76,7 +77,7 @@ def add_provider(uri):
             uri of new 'user' service
     Returns:
         message (string):
-            status of adding service
+            status of adding service (i.e. failed/success)
     """
     valid = False
     if uri.startswith('http'):
