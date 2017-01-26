@@ -31,7 +31,8 @@ def test_get_providers():
 
 
 def test_get_services():
-    services = ['svc://nasa:srtm-3-arc-second',
+    services = [
+                 'svc://nasa:srtm-3-arc-second',
                  'svc://nasa:srtm-30-arc-second',
                  'svc://ncdc:ghcn-daily',
                  'svc://ncdc:gsod',
@@ -46,6 +47,7 @@ def test_get_services():
                  'svc://usgs-nlcd:2006',
                  'svc://usgs-nlcd:2011',
                  'svc://usgs-nwis:dv',
-                 'svc://usgs-nwis:iv']
+                 'svc://usgs-nwis:iv'
+                ]
 
     assert dsl.api.get_services() == services
