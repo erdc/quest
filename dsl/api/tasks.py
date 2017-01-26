@@ -58,7 +58,7 @@ def get_task(task_id, with_future=None):
         task_id (string,Required):
             id of a task
         with_future (bool, Optional, Default=None):
-           If true include the task ‘future’ objects in the returned dataframe/dictionary
+           If true include the task `future` objects in the returned dataframe/dictionary
 
     """
     task = get_tasks(expand=True, with_future=with_future).get(task_id)
@@ -79,7 +79,7 @@ def get_tasks(filters=None, expand=None, as_dataframe=None, with_future=None):
         as_dataframe (bool, Optional, Default=None):
             include details of tasks and format as a pandas dataframe
         with_future (bool, Optional, Default=None):
-           If true include the task ‘future’ objects in the returned dataframe/dictionary
+           If true include the task `future` objects in the returned dataframe/dictionary
 
     Returns:
         tasks (list, dict, or pandas dataframe, Default=list):
