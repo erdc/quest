@@ -20,6 +20,10 @@ def set_environ(request):
 
     request.addfinalizer(clear_environ)
 
+@pytest.fixture(params=[tempfile.mkdtemp(), 'dsl'])
+def base_dir(request):
+    return request.param
+
 
 # this test needs to run first because dsl is set from environment only
 # when BASE_DIR is unset
@@ -36,11 +40,16 @@ def test_set_base_path_with_env_var(set_environ):
                 }
 
 
-def test_update_settings():
+def test_update_settings(base_dir):
     """Basic test that paths are set correctly and defaults are used
 
     """
-    dsl.api.update_settings(config={'BASE_DIR': 'dsl'})
+
+    dsl.api.update_settings(config={'BASE_DIR': base_dir})
+
+    base_dir = base_dir if os.path.isabs(base_dir) else os.path.join(os.getcwd(), base_dir)
+
+    test_settings.update({'BASE_DIR': base_dir})
 
     assert dsl.api.get_settings() == test_settings
 

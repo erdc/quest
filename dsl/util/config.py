@@ -70,6 +70,8 @@ def update_settings(config={}):
     """
 
     global settings
+    if 'BASE_DIR' in config.keys() and not os.path.isabs(config['BASE_DIR']):
+        config['BASE_DIR'] = os.path.join(os.getcwd(), config['BASE_DIR'])
     settings.update(config)
     settings.setdefault('BASE_DIR', _default_dsl_dir())
     settings.setdefault('CACHE_DIR', 'cache')
