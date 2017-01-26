@@ -1,22 +1,24 @@
 import os
 import json
 import pytest
-from pandas import DataFrame
 
+from pandas import DataFrame
 import dsl
 
+
 ACTIVE_PROJECT = 'test_data'
-SERVICE = 'svc://usgs-nwis:dv'
-FEATURE = 'fabfffb9db344b0ebb61d157789e96c8'
-DATASET = 'de160d255665477a93835868e34a03bc'
+SERVICE = 'svc://usgs-nwis:iv'
+FEATURE = 'f92ad0e35d04402ab1b1d4621b48a636'
+DATASET = 'df5c3df3229441fa9c779443f03635e7'
+
 
 pytestmark = pytest.mark.usefixtures('reset_projects_dir', 'set_active_project')
 
 
 @pytest.fixture
 def dataset_save_path(reset_projects_dir):
-    save_path = os.path.join(reset_projects_dir['BASE_DIR'], 'projects/test_data/test_data/usgs-nwis/dv/de160d255665477a93835868e34a03bc')
-    dsl.api.update_metadata(uris=DATASET, dsl_metadata={'save_path': save_path})
+    save_path = os.path.join(reset_projects_dir['BASE_DIR'], 'projects/test_data/test_data/usgs-nwis/iv/df5c3df3229441fa9c779443f03635e7')
+    dsl.api.update_metadata(uris=DATASET, dsl_metadata={'file_path': save_path})
 
     return save_path
 
@@ -63,7 +65,7 @@ DOWNLOAD_OPTIONS_FROM_ALL_SERVICES = {'svc://nasa:srtm-3-arc-second': {},
                                                                                  'type': 'string'
                                                                                  },
                                                                          'parameter': {'description': 'parameter',
-                                                                                       'enum': ['air_temperature:daily:min',
+                                                                                       'enum': ['air_temperature:daily:max',
                                                                                                 'air_temperature:daily:min',
                                                                                                 'rainfall:daily:total',
                                                                                                 'snow_depth:daily:total',
@@ -77,20 +79,87 @@ DOWNLOAD_OPTIONS_FROM_ALL_SERVICES = {'svc://nasa:srtm-3-arc-second': {},
                                                           'title': 'NCDC Download Options',
                                                           'type': 'object'
                                                           },
-                                      'svc://noaa:coops': {'properties': {'end': {'description': 'end date',
-                                                                                  'type': 'string'
-                                                                                  },
-                                                                          'parameter': {'description': 'parameter',
-                                                                                        'enum': [],
-                                                                                        'type': 'string'
+                                      'svc://noaa:coops-water':  {
+
+                                                                                    "title": "NOAA Download Options",
+                                                                                    "type": "object",
+                                                                                    "properties": {
+                                                                                        "parameter": {
+                                                                                            "type": "string",
+                                                                                            "enum": [ 'predicted_waterLevel',
+                                                                                                      'sea_surface_height_amplitude'],
+                                                                                            "description": "parameter",
                                                                                         },
-                                                                          'start': {'description': 'start date',
-                                                                                    'type': 'string'
-                                                                                    }
-                                                                          },
-                                                           'title': 'NOAA Download Options',
-                                                           'type': 'object'
-                                                           },
+                                                                                        "start": {
+                                                                                            "type": "string",
+                                                                                            "description": "start date",
+                                                                                        },
+                                                                                        "end": {
+                                                                                            "type": "string",
+                                                                                            "description": "end date",
+                                                                                        },
+                                                                                        "quality": {
+                                                                                            "type": "string",
+                                                                                            "description": "quality",
+                                                                                            "options": ['Preliminary','Verified'],
+                                                                                        },
+                                                                                        "interval": {
+                                                                                            "type": "string",
+                                                                                            "type": "string",
+                                                                                            "description": "time interval",
+                                                                                            "options": ['6', '60'],
+                                                                                        },
+                                                                                        "datum": { #temporary hard coding
+                                                                                            "type": "string",
+                                                                                            "description": "time interval",
+                                                                                            "options": [
+                                                                                                        {'DHQ':'Mean Diurnal High Water Inequality'},
+                                                                                                        {'DLQ':'Mean Diurnal Low Water Inequality'},
+                                                                                                        {'DTL':'Mean Diurnal Tide L0evel'},
+                                                                                                        {'GT':'Great Diurnal Range'},
+                                                                                                        {'HWI':'Greenwich High Water Interval( in Hours)'},
+                                                                                                        {'LWI':'Greenwich Low Water Interval( in Hours)'},
+                                                                                                        {'MHHW':'Mean Higher - High Water'},
+                                                                                                        {'MHW':'Mean High Water'},
+                                                                                                        {'MLLW':'Mean Lower_Low Water'},
+                                                                                                        {'MLW':'Mean Low Water'},
+                                                                                                        {'MN':'Mean Range of Tide'},
+                                                                                                        {'MSL':'Mean Sea Level'},
+                                                                                                        {'MTL':'Mean Tide Level'},
+                                                                                                        {'NAVD''North American Vertical Datum'},
+                                                                                                        {'STND':'Station Datum'},
+                                                                                                        ]
+                                                                                        },
+                                                                                    },
+                                                                                },
+
+                                      'svc://noaa:coops-meteorological': {'properties': {'end': {'description': 'end date',
+                                                                                 'type': 'string'
+                                                                                 },
+                                                                          'parameter': {'description': 'parameter',
+                                                                                           'enum': ['air_temperature',
+                                                                                                    'barometric_pressure',
+                                                                                                    'collective_rainfall',
+                                                                                                    'direction_of_sea_water_velocity',
+                                                                                                    'relative_humidity',
+                                                                                                    'sea_water_electric_conductivity',
+                                                                                                    'sea_water_speed',
+                                                                                                    'sea_water_temperature',
+                                                                                                    'visibility_in_air',
+                                                                                                    'wind_from_direction',
+                                                                                                    'wind_speed',
+                                                                                                    'wind_speed_from_gust'],
+
+                                                                                           'type': 'string'
+                                                                                       },
+                                                                         'start': {'description': 'start date',
+                                                                                   'type': 'string'
+                                                                                   }
+                                                                         },
+                                                          'title': 'NOAA Download Options',
+                                                          'type': 'object'
+                                                          },
+
                                       'svc://noaa:ndbc': {'properties': {'end': {'description': 'end date',
                                                                                  'type': 'string'
                                                                                  },
@@ -212,6 +281,7 @@ def test_get_datasets(dataset_save_path):
     metadata=None, filters=None, as_dataframe=None
     """
     # test generic get datasets
+
     actual = dsl.api.get_datasets()
     expected = [DATASET]
     assert actual == expected
@@ -219,22 +289,24 @@ def test_get_datasets(dataset_save_path):
     actual = dsl.api.get_datasets(expand=True)
     expected = {DATASET: {'download_status': 'downloaded',
                                              'download_message': 'success',
-                                             'name': 'de160d255665477a93835868e34a03bc',
+                                             'name': 'df5c3df3229441fa9c779443f03635e7',
                                              'file_format': 'timeseries-hdf5',
                                              'datatype': 'timeseries',
-                                             'feature': 'fabfffb9db344b0ebb61d157789e96c8',
+                                             'feature': 'f92ad0e35d04402ab1b1d4621b48a636',
                                              'collection': 'test_data',
-                                             'download_options': '{"parameter": "streamflow:mean:daily"}',
+                                             'download_options': '{"parameter": "streamflow"}',
                                              'dataset_type': 'download',
                                              'timezone': 'utc',
-                                             'units': 'ft3/s',
-                                             'display_name': 'de160d255665477a93835868e34a03bc',
-                                             'parameter': 'streamflow:mean:daily',
+                                             'unit': 'ft3/s',
+                                             'display_name': 'df5c3df3229441fa9c779443f03635e7',
+                                             'parameter': 'streamflow',
                                              'metadata': {}
                           }
                 }
-    expected[DATASET].update({'save_path': dataset_save_path})
-    assert actual == expected
+    expected[DATASET].update({'file_path': dataset_save_path})
+    assert expected[DATASET]['feature'] == actual[DATASET]['feature']
+    assert expected[DATASET]['name'] == actual[DATASET]['name']
+    # assert actual == expected
     actual = dsl.api.get_datasets(as_dataframe=True)
     assert isinstance(actual, DataFrame)
 
@@ -282,20 +354,19 @@ def test_stage_for_download():
         uris (list): staged dataset uids
     """
 
-
     # test stage new dataset
     new_dataset = dsl.api.new_dataset(FEATURE)
     try:
         dsl.api.stage_for_download(new_dataset)
         metadata = dsl.api.get_metadata(uris=new_dataset)
-        assert metadata[new_dataset]['_download_status'] == 'staged for download'
+        assert metadata[new_dataset]['status'] == 'staged for download'
 
         # test set download_options
         download_options = {'parameter': 'streamflow'}
         dsl.api.stage_for_download(new_dataset, download_options=download_options)
         metadata = dsl.api.get_metadata(uris=new_dataset)
-        assert json.loads(metadata[new_dataset]['_download_options']) == download_options
-        assert metadata[new_dataset]['_download_status'] == 'staged for download'
+        assert json.loads(metadata[new_dataset]['options']) == download_options
+        assert metadata[new_dataset]['status'] == 'staged for download'
     finally:
         dsl.api.delete(new_dataset)
 
@@ -303,7 +374,7 @@ def test_stage_for_download():
     new_dataset = dsl.api.stage_for_download(FEATURE)[0]
     try:
         metadata = dsl.api.get_metadata(uris=new_dataset)
-        assert metadata[new_dataset]['_download_status'] == 'staged for download'
+        assert metadata[new_dataset]['status'] == 'staged for download'
     finally:
         dsl.api.delete(new_dataset)
 
@@ -314,16 +385,16 @@ def test_stage_for_download():
     try:
         metadata = dsl.api.get_metadata(uris=new_datasets)
         for dataset, metadata in metadata.items():
-            assert json.loads(metadata['_download_options']) == download_options
-            assert metadata['_download_status'] == 'staged for download'
+            assert json.loads(metadata['options']) == download_options
+            assert metadata['status'] == 'staged for download'
 
         # test different download options
         download_options = [{'parameter': 'streamflow'}, {'parameter': 'water_temperature:daily:mean'}]
         dsl.api.stage_for_download(new_datasets, download_options=download_options)
         metadata = dsl.api.get_metadata(uris=new_datasets)
         for i, dataset in enumerate(new_datasets):
-            assert json.loads(metadata[dataset]['_download_options']) == download_options[i]
-            assert metadata[dataset]['_download_status'] == 'staged for download'
+            assert json.loads(metadata[dataset]['options']) == download_options[i]
+            assert metadata[dataset]['status'] == 'staged for download'
     finally:
         dsl.api.delete(new_datasets)
 
@@ -359,13 +430,12 @@ def test_visualize_dataset():
 
 def test_visualize_dataset_options(dataset_save_path):
     """Return visualization available options for dataset."""
-
     expected = {'type': 'object',
-                'properties': {'start': {'default': '2015-06-11 00:00:00',
+                'properties': {'start': {'default': '2016-01-19 17:00:00',
                                          'type': 'string',
                                          'description': 'start date'
                                          },
-                               'end': {'default': '2015-06-12 00:00:00',
+                               'end': {'default': '2017-01-18 16:00:00',
                                        'type': 'string',
                                        'description': 'end date'
                                        }

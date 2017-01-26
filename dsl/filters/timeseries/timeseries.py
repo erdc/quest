@@ -75,6 +75,7 @@ class TsRemoveOutliers(TsBase):
         df = df[(df[param] < vmax)]
         df.metadata = metadata
 
+
         #if despike:
         #    kw = dict(n1=2, n2=20, block=6)
         #    df = despike(df, **kw)
