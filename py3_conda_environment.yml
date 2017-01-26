@@ -33,5 +33,4 @@ dependencies:
     - distributed
     - psutil
     - pint
-    - pip:
-      - pony
+    - pony

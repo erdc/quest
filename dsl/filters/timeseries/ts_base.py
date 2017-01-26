@@ -53,7 +53,7 @@ class TsBase(FilterBase):
             'datatype': orig_metadata['datatype'],
             'parent_datasets': {'dataset':dataset, 'filter_applied': self.name, 'filter_options': options},
             'file_format': orig_metadata['file_format'],
-            'unit': new_df.metadata.get('units'),
+            'unit': new_df.metadata.get('unit'),
         }
 
         if description is None:

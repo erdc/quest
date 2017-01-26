@@ -31,20 +31,21 @@ def test_get_providers():
 
 
 def test_get_services():
-    services = [
-        'svc://nasa:srtm-3-arc-second',
-        'svc://nasa:srtm-30-arc-second',
-        'svc://ncdc:ghcn-daily',
-        'svc://ncdc:gsod',
-        'svc://noaa:coops',
-        'svc://noaa:ndbc',
-        'svc://usgs-ned:1-arc-second',
-        'svc://usgs-ned:13-arc-second',
-        'svc://usgs-ned:19-arc-second',
-        'svc://usgs-ned:alaska-2-arc-second',
-        'svc://usgs-nlcd:2001',
-        'svc://usgs-nlcd:2006',
-        'svc://usgs-nlcd:2011',
-        'svc://usgs-nwis:dv',
-        'svc://usgs-nwis:iv']
+    services = ['svc://nasa:srtm-3-arc-second',
+                 'svc://nasa:srtm-30-arc-second',
+                 'svc://ncdc:ghcn-daily',
+                 'svc://ncdc:gsod',
+                 'svc://noaa:coops-meteorological',
+                 'svc://noaa:coops-water',
+                 'svc://noaa:ndbc',
+                 'svc://usgs-ned:1-arc-second',
+                 'svc://usgs-ned:13-arc-second',
+                 'svc://usgs-ned:19-arc-second',
+                 'svc://usgs-ned:alaska-2-arc-second',
+                 'svc://usgs-nlcd:2001',
+                 'svc://usgs-nlcd:2006',
+                 'svc://usgs-nlcd:2011',
+                 'svc://usgs-nwis:dv',
+                 'svc://usgs-nwis:iv']
+
     assert dsl.api.get_services() == services
