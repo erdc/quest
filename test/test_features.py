@@ -46,7 +46,7 @@ def test_update_feature():
     metadata = {'new_field': 'test'}
 
     c = dsl.api.update_metadata(COL2_FEATURES, display_name=['New Name', 'New Name'], metadata=metadata)
-    print(c)
+
     for feature in COL2_FEATURES:
         assert c[feature]['display_name'] == 'New Name'
         assert c[feature]['metadata']['new_field'] == 'test'
