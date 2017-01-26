@@ -20,10 +20,10 @@ def get_metadata(uris, as_dataframe=False):
         uris (string, comma separated string, or list of strings, Required):
             list of uris to retrieve metadata for
         as_dataframe (bool, Optional, Default=False):
-           return details of newly created dataset as a pandas Dataframe
+           include details of newly created dataset as a pandas Dataframe
 
     Returns:
-        metadata (dict or pd.DataFrame):
+        metadata (dict or pd.DataFrame, Default=dict):
             metadata at each uri keyed on uris
     """
     # group uris by type
@@ -117,11 +117,11 @@ def update_metadata(uris, display_name=None, description=None,
         description (string or list, Optional,Default=None):
             description for each uri
         metadata (dict or list of dicts, Optional, Default=None):
-            metadata to be updated
+            user defiend metadata
         dsl_metadata (dict or list of dicts, Optional, Default=None):
-            metadata used by DSL to be updated
+            metadata used by DSL
     Returns:
-        metadata (dict or pd.DataFrame):
+        metadata (dict):
             metadata at each uri keyed on uris
     """
     # group uris by type
