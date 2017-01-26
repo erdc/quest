@@ -11,7 +11,7 @@ import os
 
 @dispatcher.add_method
 def get_collections(expand=False, as_dataframe=False):
-    """Get available collections
+    """Get available collections.
 
     Collections are folders on the local disk that contain downloaded or
     created data along with associated metadata.
@@ -23,8 +23,8 @@ def get_collections(expand=False, as_dataframe=False):
             include collection details and format as pandas dataframe
 
     Returns:
-        collections (list, dict, or pandas Dataframe, Default=list):
-            list of collections if expand/as_dataframe are False
+        collections (list, dict, or pandas dataframe, Default=list):
+            all available collections
 
     """
 
@@ -56,7 +56,7 @@ def new_collection(name, display_name=None, description=None, metadata=None):
             user defined metadata
 
     Returns:
-        collection_details (dict)
+        collection (dict)
             details of the newly created collection
     """
     name = name.lower()
