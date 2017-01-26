@@ -30,8 +30,6 @@ def test_delete():
     dsl.api.new_collection('test2')
     dsl.api.new_collection('test3')
 
-
-
     dsl.api.delete('test2')
     assert len(list(dsl.api.get_collections())) == 5
 
@@ -46,4 +44,3 @@ def test_update_collection():
     c = dsl.api.update_metadata('test1', metadata=metadata)
     assert c['test1']['metadata']['display_name'] == 'New Name'
     assert c['test1']['metadata']['new_field'] == 'test'
-
