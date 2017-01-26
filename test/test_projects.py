@@ -53,7 +53,7 @@ def test_new_project(reset_projects_dir):
 
 def test_add_project(reset_projects_dir, init_project_to_add):
     added_project_name = 'added_test_project'
-    print(init_project_to_add)
+
     dsl.api.add_project(added_project_name, init_project_to_add)
     c = dsl.api.get_projects()
     assert len(list(c)) == reset_projects_dir['NUMBER_OF_PROJECTS'] + 1
