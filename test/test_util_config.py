@@ -33,6 +33,7 @@ def set_environ(request):
 
     request.addfinalizer(clear_environ)
 
+
 @pytest.fixture(params=[tempfile.mkdtemp(), 'dsl'])
 def base_dir(request):
     return request.param

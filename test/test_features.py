@@ -12,9 +12,7 @@ FEATURE_URIS = [
                 'svc://usgs-nwis:iv/01529950',
                 ]
 
-COL2_FEATURES =['f0cedc0e2652404cb40d03109252961c', 'f623d290dcf54d858905e15a098bf300']
-
-
+COL2_FEATURES = ['f0cedc0e2652404cb40d03109252961c', 'f623d290dcf54d858905e15a098bf300']
 
 
 @pytest.fixture(params=FEATURE_URIS)
@@ -29,13 +27,12 @@ def feature(request):
 #     assert b == c
 
 
-
 def test_get_features():
     c = dsl.api.get_features(collections='col2')
     assert len(list(c)) == 2
     for feature in COL2_FEATURES:
         assert feature in c
-#
+
 
 def test_new_feature():
 
@@ -54,7 +51,7 @@ def test_update_feature():
         assert c[feature]['display_name'] == 'New Name'
         assert c[feature]['metadata']['new_field'] == 'test'
 
-#
+
 def test_delete_features():
     c = dsl.api.new_feature(collection='col1', display_name='New', geom_type='Point', geom_coords=[-93.2, 21.4])
     d = dsl.api.new_feature(collection='col1', display_name='AnotherFeat', geom_type='Point',geom_coords=[-84.2, 22.4])
