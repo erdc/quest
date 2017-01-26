@@ -354,7 +354,6 @@ def test_stage_for_download():
         uris (list): staged dataset uids
     """
 
-
     # test stage new dataset
     new_dataset = dsl.api.new_dataset(FEATURE)
     try:
@@ -410,7 +409,7 @@ def test_describe_dataset():
 
     """
     pass
-#
+
 
 def test_open_dataset():
     """Open the dataset as a python/VTK object. Not sure this is needed.

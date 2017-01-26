@@ -30,8 +30,6 @@ def test_delete():
     dsl.api.new_collection('test2')
     dsl.api.new_collection('test3')
 
-
-
     dsl.api.delete('test2')
     assert len(list(dsl.api.get_collections())) == 5
 
