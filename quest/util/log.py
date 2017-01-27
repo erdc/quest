@@ -11,7 +11,7 @@ null_handler.setFormatter(formatter)
 logger.addHandler(null_handler)
 logger.propagate = False
 
-default_log_dir = appdirs.user_log_dir('quest', 'envsim')
+default_log_dir = appdirs.user_log_dir('erdc', 'quest')
 default_log_file = os.path.join(default_log_dir, 'quest.log')
 
 
