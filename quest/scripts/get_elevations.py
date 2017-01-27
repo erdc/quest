@@ -3,7 +3,7 @@ import quest
 
 @click.group()
 def cli():
-    """Data Services Library script to extract elevation data along a path/polygon from raster elevation web services
+    """Quest script to extract elevation data along a path/polygon from raster elevation web services
     """
     pass
 

@@ -1,7 +1,7 @@
-Environmental Simulator Data Services Library
+Environmental Simulator Quest
 ---------------------------------------------
 
-Python API for Data Services Library
+Python API for Quest
 
 See *.rst files in the docs folder for documentation
 

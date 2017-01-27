@@ -1,4 +1,4 @@
-"""Python API for Environmental Simulator Data Services Library (QUEST).
+"""Python API for Environmental Simulator Quest (QUEST).
 
 This module defines the Python API for the Environmental Simulator Data
 Services Library.
