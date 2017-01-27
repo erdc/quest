@@ -89,7 +89,7 @@ def build_smtk(smtk_subdir, smtk_filename, **kwargs):
     return env.get_template(smtk_filename).render(**kwargs)
 
 
-def classify_uris(uris):
+def classify_uris(uris, grouped=True, as_dataframe=True, require_same_type=False, exclude=None):
     """convert list of uris into a pandas dataframe.
 
     classified by resource type
@@ -108,6 +108,23 @@ def classify_uris(uris):
     df['type'][feature_idx] = 'features'
     df['type'][dataset_idx] = 'datasets'
     df.set_index('uri', drop=False, inplace=True)
+
+    grouped_df = df.groupby('type')
+
+    if exclude is not None:
+        for uri_type in exclude:
+            if uri_type in grouped_df.groups:
+                raise ValueError('Uris for {0} are not allowed.'.format(uri_type))
+
+    if require_same_type and len(grouped_df.groups.keys()) > 1:
+        raise ValueError('All uris must be of the same type')
+
+    if not as_dataframe:
+        groups = {k: list(v) for k, v in grouped_df.groups.items()}
+        return groups
+
+    if grouped:
+        return grouped_df
 
     return df
 
