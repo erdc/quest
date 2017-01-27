@@ -1,4 +1,4 @@
-"""data services library
+"""Quest
     ~~~~~~~~~~~~~~~~~~~~~
 
     A library for environmental data services.
