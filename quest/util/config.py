@@ -167,7 +167,7 @@ def _default_config_file():
 def _default_quest_dir():
     quest_dir = os.environ.get('QUEST_DIR')
     if quest_dir is None:
-        quest_dir = appdirs.user_data_dir('erdc', 'quest')
+        quest_dir = appdirs.user_data_dir('quest', 'erdc')
 
     return quest_dir
 
