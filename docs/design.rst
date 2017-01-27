@@ -41,7 +41,17 @@ unique and the name maps directly to a folder name in the project folder.
 Features
 ^^^^^^^^
 
-Features are a unique identifiers that //todo ...... 
+Features are a unique identifiers that indicate a group of datasets. Typically,
+these are geospatial locations, i.e., monitoring stations, counties, lakes,
+roads at which data exists. Features can also just be a tag or name to group data
+that does not have a geospatial component (i.e. geotypical datasets). Features
+are
+
+Datasets
+^^^^^^^^
+
+These are the actual individual data files or in some cases a folder of data.
+Datasets are a
 
 DSL can be configured in three ways:
 
