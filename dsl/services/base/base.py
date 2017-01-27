@@ -1,13 +1,13 @@
 from builtins import object
 import abc
 from future.utils import with_metaclass
-from dsl import util
+from quest import util
 import os
 import ulmo
 import pandas as pd
 import geopandas as gpd
 from shapely.geometry import box, Point, Polygon, LineString, shape
-from dsl.util.log import logger
+from quest.util.log import logger
 import json
 
 reserved_feature_fields = [

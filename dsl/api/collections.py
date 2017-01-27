@@ -47,7 +47,7 @@ def new_collection(name, display_name=None, description=None, metadata=None):
 
     Args:
         name (string, Required):
-            Name of the collection used in all dsl function calls,must be unique. Will also be the folder name of the collection
+            Name of the collection used in all quest function calls,must be unique. Will also be the folder name of the collection
         display_name (string, Optional, Default=None):
             display name for collection
         description (string, Optional, Default=None):

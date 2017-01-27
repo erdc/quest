@@ -27,7 +27,7 @@ class UserService(WebServiceBase):
     def _register(self, uri):
         """Register user service."""
 
-        config_file = self._get_path('dsl.yml')
+        config_file = self._get_path('quest.yml')
         c = yaml.load(self.uri_open(config_file))
         self.metadata = c['metadata']
         self.metadata['service_uri'] = uri
@@ -65,7 +65,7 @@ class UserService(WebServiceBase):
                 if fmt.lower() == 'mbr-csv':
                     # TODO merge this with the above,
                     # mbr format from datalibrary not exactly the same as
-                    # mbr fromat in dsl-demo-data
+                    # mbr fromat in quest-demo-data
                     polys = []
                     for line in f:
                         feature_id, y1, x1, y2, x2 = line.split(',')

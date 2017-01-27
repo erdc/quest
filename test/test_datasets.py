@@ -3,7 +3,7 @@ import json
 import pytest
 
 from pandas import DataFrame
-import dsl
+import quest
 
 
 ACTIVE_PROJECT = 'test_data'
@@ -18,7 +18,7 @@ pytestmark = pytest.mark.usefixtures('reset_projects_dir', 'set_active_project')
 @pytest.fixture
 def dataset_save_path(reset_projects_dir):
     save_path = os.path.join(reset_projects_dir['BASE_DIR'], 'projects/test_data/test_data/usgs-nwis/iv/df5c3df3229441fa9c779443f03635e7')
-    dsl.api.update_metadata(uris=DATASET, dsl_metadata={'file_path': save_path})
+    quest.api.update_metadata(uris=DATASET, quest_metadata={'file_path': save_path})
 
     return save_path
 
@@ -247,31 +247,31 @@ def test_download_options():
     ------
         download_options: dict
             download options that can be specified when calling
-            dsl.api.stage_for_download or dsl.api.download
+            quest.api.stage_for_download or quest.api.download
 
     Examples:
         TODO add examples
     """
     # test get download options from list of service uris
-    services = dsl.api.get_services()
-    result = dsl.api.download_options(services)
+    services = quest.api.get_services()
+    result = quest.api.download_options(services)
     for service in services:
         actual = result[service]
         expected = DOWNLOAD_OPTIONS_FROM_ALL_SERVICES[service]
         assert actual == expected
 
     # test get download options from single service as string
-    actual = dsl.api.download_options(SERVICE)
+    actual = quest.api.download_options(SERVICE)
     expected = {SERVICE: DOWNLOAD_OPTIONS_FROM_ALL_SERVICES[SERVICE]}
     assert actual == expected
 
     # test get download options from feature
-    actual = dsl.api.download_options(FEATURE)
+    actual = quest.api.download_options(FEATURE)
     expected = {FEATURE: DOWNLOAD_OPTIONS_FROM_ALL_SERVICES[SERVICE]}
     assert actual == expected
 
     # test get download options from dataset
-    actual = dsl.api.download_options(DATASET)
+    actual = quest.api.download_options(DATASET)
     expected = {DATASET: DOWNLOAD_OPTIONS_FROM_ALL_SERVICES[SERVICE]}
     assert actual == expected
 
@@ -282,11 +282,11 @@ def test_get_datasets(dataset_save_path):
     """
     # test generic get datasets
 
-    actual = dsl.api.get_datasets()
+    actual = quest.api.get_datasets()
     expected = [DATASET]
     assert actual == expected
 
-    actual = dsl.api.get_datasets(expand=True)
+    actual = quest.api.get_datasets(expand=True)
     expected = {DATASET: {'download_status': 'downloaded',
                                              'download_message': 'success',
                                              'name': 'df5c3df3229441fa9c779443f03635e7',
@@ -307,14 +307,14 @@ def test_get_datasets(dataset_save_path):
     assert expected[DATASET]['feature'] == actual[DATASET]['feature']
     assert expected[DATASET]['name'] == actual[DATASET]['name']
     # assert actual == expected
-    actual = dsl.api.get_datasets(as_dataframe=True)
+    actual = quest.api.get_datasets(as_dataframe=True)
     assert isinstance(actual, DataFrame)
 
-    actual = dsl.api.get_datasets(filters={'name': DATASET})
+    actual = quest.api.get_datasets(filters={'name': DATASET})
     expected = [DATASET]
     assert actual == expected
 
-    actual = dsl.api.get_datasets(filters={'name': 'not_found'})
+    actual = quest.api.get_datasets(filters={'name': 'not_found'})
     assert actual == []
 
 
@@ -327,8 +327,8 @@ def test_new_dataset():
     Returns:
         uid of dataset
     """
-    new_dataset = dsl.api.new_dataset(FEATURE)
-    datasets = dsl.api.get_datasets()
+    new_dataset = quest.api.new_dataset(FEATURE)
+    datasets = quest.api.get_datasets()
     try:
         # test number of datasets
         actual = len(datasets)
@@ -337,7 +337,7 @@ def test_new_dataset():
 
         assert new_dataset in datasets
     finally:
-        dsl.api.delete(new_dataset)
+        quest.api.delete(new_dataset)
 
 
 def test_stage_for_download():
@@ -355,54 +355,54 @@ def test_stage_for_download():
     """
 
     # test stage new dataset
-    new_dataset = dsl.api.new_dataset(FEATURE)
+    new_dataset = quest.api.new_dataset(FEATURE)
     try:
-        dsl.api.stage_for_download(new_dataset)
-        metadata = dsl.api.get_metadata(uris=new_dataset)
+        quest.api.stage_for_download(new_dataset)
+        metadata = quest.api.get_metadata(uris=new_dataset)
         assert metadata[new_dataset]['status'] == 'staged for download'
 
         # test set download_options
         download_options = {'parameter': 'streamflow'}
-        dsl.api.stage_for_download(new_dataset, download_options=download_options)
-        metadata = dsl.api.get_metadata(uris=new_dataset)
+        quest.api.stage_for_download(new_dataset, download_options=download_options)
+        metadata = quest.api.get_metadata(uris=new_dataset)
         assert json.loads(metadata[new_dataset]['options']) == download_options
         assert metadata[new_dataset]['status'] == 'staged for download'
     finally:
-        dsl.api.delete(new_dataset)
+        quest.api.delete(new_dataset)
 
     # test stage new dataset from feature
-    new_dataset = dsl.api.stage_for_download(FEATURE)[0]
+    new_dataset = quest.api.stage_for_download(FEATURE)[0]
     try:
-        metadata = dsl.api.get_metadata(uris=new_dataset)
+        metadata = quest.api.get_metadata(uris=new_dataset)
         assert metadata[new_dataset]['status'] == 'staged for download'
     finally:
-        dsl.api.delete(new_dataset)
+        quest.api.delete(new_dataset)
 
     # test stage list of datasets/features
     download_options = {'parameter': 'streamflow'}
-    new_dataset = dsl.api.new_dataset(FEATURE)
-    new_datasets = dsl.api.stage_for_download([FEATURE, new_dataset], download_options=download_options)
+    new_dataset = quest.api.new_dataset(FEATURE)
+    new_datasets = quest.api.stage_for_download([FEATURE, new_dataset], download_options=download_options)
     try:
-        metadata = dsl.api.get_metadata(uris=new_datasets)
+        metadata = quest.api.get_metadata(uris=new_datasets)
         for dataset, metadata in metadata.items():
             assert json.loads(metadata['options']) == download_options
             assert metadata['status'] == 'staged for download'
 
         # test different download options
         download_options = [{'parameter': 'streamflow'}, {'parameter': 'water_temperature:daily:mean'}]
-        dsl.api.stage_for_download(new_datasets, download_options=download_options)
-        metadata = dsl.api.get_metadata(uris=new_datasets)
+        quest.api.stage_for_download(new_datasets, download_options=download_options)
+        metadata = quest.api.get_metadata(uris=new_datasets)
         for i, dataset in enumerate(new_datasets):
             assert json.loads(metadata[dataset]['options']) == download_options[i]
             assert metadata[dataset]['status'] == 'staged for download'
     finally:
-        dsl.api.delete(new_datasets)
+        quest.api.delete(new_datasets)
 
 
 def test_describe_dataset():
     """Show metadata associated with downloaded dataset.
 
-    This metadata includes as well as the dsl function and kwargs used to
+    This metadata includes as well as the quest function and kwargs used to
     generate the dataset.
 
     NOTIMPLEMENTED
@@ -442,5 +442,5 @@ def test_visualize_dataset_options(dataset_save_path):
                                },
                 'title': 'Timeseries Vizualization Options'
                 }
-    actual = dsl.api.visualize_dataset_options(DATASET)
+    actual = quest.api.visualize_dataset_options(DATASET)
     assert actual == expected

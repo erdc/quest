@@ -68,8 +68,8 @@ def get_services(expand=None, parameter=None, service_type='geo-discrete'):
 def add_provider(uri):
     """Add a custom web service created from a file or http folder.
 
-    Converts a local/network or http folder that contains a dsl.yml
-    and associated data into a service that can be accessed through dsl
+    Converts a local/network or http folder that contains a quest.yml
+    and associated data into a service that can be accessed through quest
 
 
     Args:
@@ -81,12 +81,12 @@ def add_provider(uri):
     """
     valid = False
     if uri.startswith('http'):
-        url = uri.rstrip('/') + '/dsl.yml'
+        url = uri.rstrip('/') + '/quest.yml'
         r = requests.head(url, verify=False)
         if (r.status_code == requests.codes.ok):
             valid = True
     else:
-        path = os.path.join(uri, 'dsl.yml')
+        path = os.path.join(uri, 'quest.yml')
         valid = os.path.isfile(path)
 
     if valid:
@@ -99,7 +99,7 @@ def add_provider(uri):
         else:
             msg = 'service already present'
     else:
-        msg = 'service does not have a dsl config file (dsl.yml)'
+        msg = 'service does not have a quest config file (quest.yml)'
 
     return msg
 
