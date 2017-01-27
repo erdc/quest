@@ -1,12 +1,12 @@
-"""run dsl rpc server.
+"""run quest rpc server.
 
-This script wraps dsl.api functions and exposes them through RPC
+This script wraps quest.api functions and exposes them through RPC
 """
 
 import click
 import copy
-from dsl import api
-from dsl.util.log import logger
+from quest import api
+from quest.util.log import logger
 import json
 from jsonrpc import JSONRPCResponseManager, dispatcher
 
@@ -25,21 +25,21 @@ jobid = 0
 
 @click.group()
 def cli():
-    """Run DSL RPC Server
+    """Run QUEST RPC Server
 
-    This script wraps dsl.api functions and exposes them through JSON RPC over HTTP.
+    This script wraps quest.api functions and exposes them through JSON RPC over HTTP.
     """
     pass
 
 
-@cli.command('start', help='Start DSL RPC server')
+@cli.command('start', help='Start QUEST RPC server')
 @click.option('--port', default=4000, help='Port number to run rpc server. Default(4000)')
 @click.option('--threaded', is_flag=True, help='Run each request in a new thread')
 @click.option('--processes', default=1, type=int, help='Number of Processes to use')
 def start_server(port, threaded, processes):
-    """Start DSL RPC Server\b
+    """Start QUEST RPC Server\b
 
-    This script wraps dsl.api functions and exposes them through JSON RPC over HTTP.
+    This script wraps quest.api functions and exposes them through JSON RPC over HTTP.
 
     example of using rpc with curl:
 
@@ -55,12 +55,12 @@ def start_server(port, threaded, processes):
     run_simple('localhost', port, wsgi_app, threaded=threaded, processes=processes)
 
 
-@cli.command('stop', help='Stop DSL RPC server')
+@cli.command('stop', help='Stop QUEST RPC server')
 @click.option('--port', default=4000, help='Port number rpc server is running on. Default(4000)')
 def stop_server(port):
-    """Stop DSL RPC Server\b
+    """Stop QUEST RPC Server\b
 
-    DSL RPC server can also be stopped using RPC
+    QUEST RPC server can also be stopped using RPC
 
     example using curl:
 
@@ -77,7 +77,7 @@ def stop_server(port):
         "id": 0,
     }
     response = requests.post(url, data=json.dumps(payload), headers=headers)
-    logger.info('DSL RPC Server shutting down...')
+    logger.info('QUEST RPC Server shutting down...')
 
 
 @dispatcher.add_method
@@ -100,7 +100,7 @@ def shutdown_server(environ):
 
     def fn():
         environ['werkzeug.server.shutdown']()
-        return 'DSL RPC Server shutting down...'
+        return 'QUEST RPC Server shutting down...'
 
     return fn
 

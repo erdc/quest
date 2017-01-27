@@ -119,7 +119,7 @@ def apply_filter_options(name, fmt='json-schema'):
             format in which to return options
     Returns:
         filter options (json-schema or smtk scheme):
-            filter options that can be applied when calling dsl.api.apply_filter
+            filter options that can be applied when calling quest.api.apply_filter
     """
     driver = util.load_drivers('filters', name)[name].driver
     return driver.apply_filter_options(fmt)

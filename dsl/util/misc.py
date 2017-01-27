@@ -121,7 +121,7 @@ def get_cache_dir(service=None):
     return path
 
 
-def get_dsl_dir():
+def get_quest_dir():
     settings = get_settings()
     return settings['BASE_DIR']
 
@@ -212,17 +212,17 @@ def parse_service_uri(uri):
 
 
 def rpc2py(jsonrpc_str):
-    """Convert jsonrpc dict or string to a python dsl function call
+    """Convert jsonrpc dict or string to a python quest function call
 
     args:
         jsonrpc_str (string): json rpc request
 
     returns:
-        converts to python and calls dsl function
+        converts to python and calls quest function
     """
-    import dsl
+    import quest
     r = JSONRPCRequest.from_json(jsonrpc_str).data
-    fn = getattr(dsl.api, r.get('method'))
+    fn = getattr(quest.api, r.get('method'))
     kwargs = r.get('params')
     return fn(**kwargs)
 
@@ -240,7 +240,7 @@ def listify(liststr, delimiter=','):
 
 
 def list_drivers(namespace):
-    namespace = 'dsl.' + namespace
+    namespace = 'quest.' + namespace
     mgr = extension.ExtensionManager(
             namespace=namespace,
             invoke_on_load=False,
@@ -250,7 +250,7 @@ def list_drivers(namespace):
 
 def load_drivers(namespace, names=None):
     names = listify(names)
-    namespace = 'dsl.' + namespace
+    namespace = 'quest.' + namespace
 
     if names is None:
         mgr = extension.ExtensionManager(
@@ -275,12 +275,12 @@ def load_services():
     web_services = list_drivers('services')
     web_services.remove('user')
 
-    services = {name: driver.DriverManager('dsl.services', name, invoke_on_load='True').driver for name in web_services}
+    services = {name: driver.DriverManager('quest.services', name, invoke_on_load='True').driver for name in web_services}
 
     if len(settings.get('USER_SERVICES', [])) > 0:
         for uri in settings.get('USER_SERVICES', []):
             try:
-                drv = driver.DriverManager('dsl.services', 'user', invoke_on_load='True', invoke_kwds={'uri': uri}).driver
+                drv = driver.DriverManager('quest.services', 'user', invoke_on_load='True', invoke_kwds={'uri': uri}).driver
                 services['user-' + drv.name] = drv
             except Exception as e:
                 logger.error('Failed to load local service from %s, with exception: %s' % (uri, str(e)))
@@ -426,7 +426,7 @@ def is_uuid(uuid):
 
 def _abs_path(path, mkdir=True):
     if not os.path.isabs(path):
-        path = os.path.join(get_dsl_dir(), path)
+        path = os.path.join(get_quest_dir(), path)
 
     if mkdir:
         mkdir_if_doesnt_exist(path)

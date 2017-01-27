@@ -106,7 +106,7 @@ def get_metadata(uris, as_dataframe=False):
 
 @dispatcher.add_method
 def update_metadata(uris, display_name=None, description=None,
-                    metadata=None, dsl_metadata=None):
+                    metadata=None, quest_metadata=None):
     """Update metadata for resource(s)
 
     Args:
@@ -118,8 +118,8 @@ def update_metadata(uris, display_name=None, description=None,
             description for each uri
         metadata (dict or list of dicts, Optional, Default=None):
             user defiend metadata
-        dsl_metadata (dict or list of dicts, Optional, Default=None):
-            metadata used by DSL
+        quest_metadata (dict or list of dicts, Optional, Default=None):
+            metadata used by QUEST
     Returns:
         metadata (dict):
             metadata at each uri keyed on uris
@@ -151,26 +151,26 @@ def update_metadata(uris, display_name=None, description=None,
         if not isinstance(metadata, list):
             metadata = [metadata] * n
 
-        if not isinstance(dsl_metadata, list):
-                    dsl_metadata = [dsl_metadata] * n
+        if not isinstance(quest_metadata, list):
+                    quest_metadata = [quest_metadata] * n
     else:
         display_name = [display_name]
         description = [description]
         metadata = [metadata]
-        dsl_metadata = [dsl_metadata]
+        quest_metadata = [quest_metadata]
 
-    for uri, name, desc, meta, dsl_meta in zip(uris, display_name,
+    for uri, name, desc, meta, quest_meta in zip(uris, display_name,
                                                description, metadata,
-                                               dsl_metadata):
-        if dsl_meta is None:
-            dsl_meta = {}
+                                               quest_metadata):
+        if quest_meta is None:
+            quest_meta = {}
 
         if name:
-            dsl_meta.update({'display_name': name})
+            quest_meta.update({'display_name': name})
         if desc:
-            dsl_meta.update({'description': desc})
+            quest_meta.update({'description': desc})
         if meta:
-            dsl_meta.update({'metadata': meta})
+            quest_meta.update({'metadata': meta})
 
         db = get_db()
         with db_session:
@@ -181,6 +181,6 @@ def update_metadata(uris, display_name=None, description=None,
             elif resource == 'datasets':
                 entity = db.Dataset[uri]
 
-            entity.set(**dsl_meta)
+            entity.set(**quest_meta)
 
     return get_metadata(uris)

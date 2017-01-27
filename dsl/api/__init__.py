@@ -1,4 +1,4 @@
-"""Python API for Environmental Simulator Data Services Library (DSL).
+"""Python API for Environmental Simulator Data Services Library (QUEST).
 
 This module defines the Python API for the Environmental Simulator Data
 Services Library.
@@ -13,7 +13,7 @@ __all__ = (
     'save_settings',
     'update_settings',
     'update_settings_from_file',
-    'get_dsl_version',
+    'get_quest_version',
     'get_api_version',
     'get_metadata',
     'update_metadata', # replaces update_collection, update_feature, update_dataset
@@ -68,7 +68,7 @@ from ..util import (
 )
 
 from .version import (
-    get_dsl_version,
+    get_quest_version,
     get_api_version,
 )
 

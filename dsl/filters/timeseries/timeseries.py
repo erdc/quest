@@ -4,7 +4,7 @@
 from __future__ import print_function
 
 from .ts_base import TsBase
-from dsl import util
+from quest import util
 from ...api.metadata import get_metadata
 import pandas as pd
 import numpy as np
@@ -115,7 +115,7 @@ class TsUnitConversion(TsBase):
         if 'file_path' in metadata:
             del metadata['file_path']
 
-        path = "/Users/rditllkw/DSL/data-services-library/dsl/filters/timeseries/default_units.txt"
+        path = "/Users/rditllkw/QUEST/data-services-library/quest/filters/timeseries/default_units.txt"
         reg = UnitRegistry(path)
         from_units = metadata['unit']
         if '/' in from_units and '/' not in options.get('to_units'):
