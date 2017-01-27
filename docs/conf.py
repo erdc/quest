@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Data Services Library documentation build configuration file, created by
+# Quest documentation build configuration file, created by
 # sphinx-quickstart on Thu Nov  5 19:57:53 2015.
 #
 # This file is execfile()d with the current directory set to its
@@ -52,7 +52,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Data Services Library'
+project = u'Quest'
 copyright = u'2015, Environmental Simulator Team'
 author = u'Environmental Simulator Team'
 
@@ -228,7 +228,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  (master_doc, 'DataServicesLibrary.tex', u'Data Services Library Documentation',
+  (master_doc, 'DataServicesLibrary.tex', u'Quest Documentation',
    u'Environmental Simulator Team', 'manual'),
 ]
 
@@ -258,7 +258,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'dataserviceslibrary', u'Data Services Library Documentation',
+    (master_doc, 'dataserviceslibrary', u'Quest Documentation',
      [author], 1)
 ]
 
@@ -272,7 +272,7 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  (master_doc, 'DataServicesLibrary', u'Data Services Library Documentation',
+  (master_doc, 'DataServicesLibrary', u'Quest Documentation',
    author, 'DataServicesLibrary', 'One line description of project.',
    'Miscellaneous'),
 ]
