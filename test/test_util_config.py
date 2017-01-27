@@ -26,10 +26,10 @@ class TempCWD():
 
 @pytest.fixture
 def set_environ(request):
-    os.environ['ENVSIM_QUEST_DIR'] = tempfile.mkdtemp()
+    os.environ['QUEST_DIR'] = tempfile.mkdtemp()
 
     def clear_environ():
-        del os.environ['ENVSIM_QUEST_DIR']
+        del os.environ['QUEST_DIR']
 
     request.addfinalizer(clear_environ)
 
@@ -47,7 +47,7 @@ def test_set_base_path_with_env_var(set_environ):
     quest.api.update_settings()
 
     assert quest.api.get_settings() == {
-                'BASE_DIR': os.environ['ENVSIM_QUEST_DIR'],
+                'BASE_DIR': os.environ['QUEST_DIR'],
                 'CACHE_DIR': 'cache',
                 'PROJECTS_DIR': 'projects',
                 'USER_SERVICES': [],
