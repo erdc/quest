@@ -3,6 +3,7 @@
 Features are unique identifiers with a web service or collection.
 """
 import json
+import itertools
 from jsonrpc import dispatcher
 import pandas as pd
 import geopandas as gpd
@@ -76,10 +77,10 @@ def add_features(collection, features):
 
 
 @dispatcher.add_method
-def get_features(services=None, collections=None, features=None,
-                 expand=False, as_dataframe=False, as_geojson=False,
-                 update_cache=False, filters=None):
-    """Retrieve list of features from resources
+def get_features(uris=None, expand=False, as_dataframe=False, as_geojson=False,
+                 update_cache=False, filters=None,
+                 services=None, collections=None, features=None):
+    """Retrieve list of features from resources.
 
     Args:
         services (comma separated strings, or list of strings, Required):
@@ -109,12 +110,20 @@ def get_features(services=None, collections=None, features=None,
              features of specified service(s), collection(s) or feature(s)
 
     """
-    if services is None and collections is None and features is None:
-        raise ValueError('Specify at least one service, collection or feature')
+    uris = list(itertools.chain(util.listify(uris) or [],
+                                util.listify(services) or [],
+                                util.listify(collections) or [],
+                                util.listify(features) or []))
 
-    services = util.listify(services)
-    collections = util.listify(collections)
-    features = util.listify(features)
+    # group uris by type
+    grouped_uris = util.classify_uris(uris, as_dataframe=False, exclude=['datasets'])
+
+    if not any(grouped_uris):
+        raise ValueError('At least one service, collection, or feature uri must be specified.')
+
+    services = grouped_uris.get('services') or []
+    collections = grouped_uris.get('collections') or []
+    features = grouped_uris.get('features') or []
 
     all_features = []
 
@@ -123,7 +132,7 @@ def get_features(services=None, collections=None, features=None,
         all_features.append(get_metadata(features, as_dataframe=True))
 
     # get metadata for features in services
-    for name in services or []:
+    for name in services:
         provider, service, feature = util.parse_service_uri(name)
         tmp_feats = _get_features(provider, service, update_cache=update_cache)
         all_features.append(tmp_feats)
@@ -131,7 +140,7 @@ def get_features(services=None, collections=None, features=None,
     # get metadata for features in collections
     db = get_db()
     with db_session:
-        for name in collections or []:
+        for name in collections:
             tmp_feats = [f.to_dict() for f in db.Feature.select(
                             lambda c: c.collection.name == name
                         )]
