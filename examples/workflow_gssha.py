@@ -13,43 +13,43 @@
 9. User specifies parameters such as grid-cell size and precipitation in popup panel (standard filter arguments).
 """
 from __future__ import print_function
-import dsl
+import quest
 
 # bounding box for Camp Lejeune
 bbox = '-77.976387, 33.477428, -76.126134, 35.081018'
 
 cname = 'gssha-test'
-if cname not in dsl.api.get_collections():
-    dsl.api.new_collection(cname)
+if cname not in quest.api.get_collections():
+    quest.api.new_collection(cname)
 
 # we do not need to specify parameter or download options for elevation
 # or landcover data since the services are single parameter,
 # single file downloads
 services = ['svc://usgs-ned:1-arc-second']
 filters = {'bbox': bbox}
-features = dsl.api.get_features(services, filters=filters)
-features = dsl.api.add_features(cname, features)
-elevation_rasters = dsl.api.stage_for_download(features)
+features = quest.api.get_features(services, filters=filters)
+features = quest.api.add_features(cname, features)
+elevation_rasters = quest.api.stage_for_download(features)
 
 
 services = ['svc://usgs-nlcd:2006']
-features = dsl.api.get_features(services, filters=filters)
-features = dsl.api.add_features(cname, features)
-landcover_rasters = dsl.api.stage_for_download(features)
+features = quest.api.get_features(services, filters=filters)
+features = quest.api.add_features(cname, features)
+landcover_rasters = quest.api.stage_for_download(features)
 
-status = dsl.api.download_datasets(elevation_rasters+landcover_rasters)
+status = quest.api.download_datasets(elevation_rasters+landcover_rasters)
 
 ####################################
 # NOT WORKING YET BELOW THIS COMMENT
 #
-# reprojected_rasters = dsl.api.apply_filter('raster-reproject', elevation_rasters, options={'target_projection': 'UTM15'})
-# merged_raster = dsl.api.apply_filter('raster-merge-clip', reprojected_rasters, options={})
-# pit_removed = dsl.api.apply_filter('pit-remove', merged_raster)
-# flow_dir_grid = dsl.api.apply_filter('dinf-flow-dir', pit_removed)
-# flow_accumulation = dsl.api.apply_filter('flow-accum', flow_grid=flow_dir_grid, elevation_raster=pit_removed)
-# approx_outlet = dsl.api.new_feature(cid, geom_type='Point', geom_coord=[-94.3, 34.5], display_name='Approx Outlet Position')
-# outlet, watershed_boundary, stream_network = dsl.apply_filter('watershed-delineation', outlet=approx_outlet, elevation_raster=pit_removed, threshold=3)
+# reprojected_rasters = quest.api.apply_filter('raster-reproject', elevation_rasters, options={'target_projection': 'UTM15'})
+# merged_raster = quest.api.apply_filter('raster-merge-clip', reprojected_rasters, options={})
+# pit_removed = quest.api.apply_filter('pit-remove', merged_raster)
+# flow_dir_grid = quest.api.apply_filter('dinf-flow-dir', pit_removed)
+# flow_accumulation = quest.api.apply_filter('flow-accum', flow_grid=flow_dir_grid, elevation_raster=pit_removed)
+# approx_outlet = quest.api.new_feature(cid, geom_type='Point', geom_coord=[-94.3, 34.5], display_name='Approx Outlet Position')
+# outlet, watershed_boundary, stream_network = quest.apply_filter('watershed-delineation', outlet=approx_outlet, elevation_raster=pit_removed, threshold=3)
 #
-# dsl.api.download(landcover_rasters)
-# reprojected_rasters = dsl.api.apply_filter('raster-reproject', landcover_rasters, options={'target_projection': 'UTM15'})
-# input_grids = dsl.api.apply_filter('gssha-landcover-inputgrid', reprojected_rasters, grid_cell_size=25)
+# quest.api.download(landcover_rasters)
+# reprojected_rasters = quest.api.apply_filter('raster-reproject', landcover_rasters, options={'target_projection': 'UTM15'})
+# input_grids = quest.api.apply_filter('gssha-landcover-inputgrid', reprojected_rasters, grid_cell_size=25)

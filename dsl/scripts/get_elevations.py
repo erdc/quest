@@ -1,5 +1,5 @@
 import click
-import dsl
+import quest
 
 @click.group()
 def cli():
@@ -12,7 +12,7 @@ def cli():
 def list_elevation_services():
     """Lists available elevation services
     """
-    services = dsl.api.get_services(parameter='elevation', datatype='raster')
+    services = quest.api.get_services(parameter='elevation', datatype='raster')
     click.echo('\n                             Available Elevation Datasets:')
     click.echo('-----------------------------------------------------------------------------------------')
     click.echo('service code\t\t|\tdescription')
@@ -42,8 +42,8 @@ def extract(service, input_file, output_file, collection, method):
     <output>    : path to output vector file (same type as input)
     """
     #create a temporary collection
-    col = dsl.api.new_collection(collection)
-    col = dsl.api.apply_filter('get-elevations-along-path', collection_name=collection, method=method, service=service, input_file=input_file, output_file=output_file)
+    col = quest.api.new_collection(collection)
+    col = quest.api.apply_filter('get-elevations-along-path', collection_name=collection, method=method, service=service, input_file=input_file, output_file=output_file)
     click.echo('\n Extracted elevations saved in %s \n' % output_file)
 
 

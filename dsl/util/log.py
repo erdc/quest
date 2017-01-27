@@ -3,7 +3,7 @@ import appdirs
 import os
 
 
-logger = logging.getLogger('dsl')
+logger = logging.getLogger('quest')
 null_handler = logging.NullHandler()
 logger.setLevel(logging.DEBUG)
 formatter = logging.Formatter('%(asctime)s - %(levelname)s : %(message)s')
@@ -11,8 +11,8 @@ null_handler.setFormatter(formatter)
 logger.addHandler(null_handler)
 logger.propagate = False
 
-default_log_dir = appdirs.user_log_dir('dsl', 'envsim')
-default_log_file = os.path.join(default_log_dir, 'dsl.log')
+default_log_dir = appdirs.user_log_dir('quest', 'envsim')
+default_log_file = os.path.join(default_log_dir, 'quest.log')
 
 
 def log_to_file(status=True, filename=default_log_file, log_level=None):

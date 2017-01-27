@@ -1,8 +1,8 @@
 """Functions required to assemble and run plugins from the C++ DataLibrary."""
 from ..base import FilterBase
-from dsl import get_pkg_data_path, util
-from dsl.api import get_metadata, get_datasets, new_dataset, update_metadata, new_feature
-from dsl.api.projects import active_db
+from quest import get_pkg_data_path, util
+from quest.api import get_metadata, get_datasets, new_dataset, update_metadata, new_feature
+from quest.api.projects import active_db
 
 from geojson import Polygon
 from jinja2 import Environment, FileSystemLoader
@@ -11,7 +11,7 @@ import numpy as np
 import os
 from subprocess import check_output
 import tempfile
-from dsl.util.log import logger
+from quest.util.log import logger
 
 env = Environment(loader=FileSystemLoader(get_pkg_data_path('datalibrary')))
 
@@ -94,7 +94,7 @@ class DatalibraryBase(FilterBase):
             'parent_datasets': ','.join(datasets),
             'save_path': self.save_path,
         })
-        update_metadata(new_dset, dsl_metadata=new_metadata, metadata=metadata)
+        update_metadata(new_dset, quest_metadata=new_metadata, metadata=metadata)
 
         return {'datasets': new_dset, 'features': feature}
 
@@ -123,9 +123,9 @@ def _run_filter(name, **kwargs):
         t.write(_render_template(name, **kwargs))
         fname = t.name
 
-    runplugin = os.environ.get('DSL_RUNPLUGIN')
+    runplugin = os.environ.get('QUEST_RUNPLUGIN')
     if runplugin is None:
-        raise ValueError('Environment Variable DSL_RUNPLUGIN not set')
+        raise ValueError('Environment Variable QUEST_RUNPLUGIN not set')
     output = check_output([runplugin, fname])
     logger.info(output)
     return output

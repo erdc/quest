@@ -2,5 +2,5 @@ include *.rst
 include *.txt
 include *.yml
 
-recursive-include dsl/data *
-recursive-include dsl *.py
+recursive-include quest/data *
+recursive-include quest *.py

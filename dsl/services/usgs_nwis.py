@@ -1,4 +1,4 @@
-"""DSL wrapper for USGS NWIS Services."""
+"""QUEST wrapper for USGS NWIS Services."""
 
 from .base import WebServiceBase
 import concurrent.futures
@@ -124,7 +124,7 @@ class NwisService(WebServiceBase):
                 ]
         data = data[cols]
 
-        # datasets need to have required dsl metadata and external metadata
+        # datasets need to have required quest metadata and external metadata
         # need to keep track of units/data classification/restrictions
         return data
 

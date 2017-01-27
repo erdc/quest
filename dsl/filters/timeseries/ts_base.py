@@ -1,6 +1,6 @@
 from ..base import FilterBase
-from dsl.api import get_metadata, new_dataset, update_metadata
-from dsl import util
+from quest.api import get_metadata, new_dataset, update_metadata
+from quest import util
 import os
 
 class TsBase(FilterBase):
@@ -70,7 +70,7 @@ class TsBase(FilterBase):
         io.write(save_path, new_df, new_metadata)
 
         new_metadata.update({'file_path': save_path})
-        update_metadata(new_dset, dsl_metadata=new_metadata, metadata=metadata)
+        update_metadata(new_dset, quest_metadata=new_metadata, metadata=metadata)
 
         return {'datasets': new_dset}
 

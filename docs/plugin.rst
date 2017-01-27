@@ -1,4 +1,4 @@
-Writing DSL Service Plugin
+Writing QUEST Service Plugin
 ==========================
 
-Details on how to write a DSL plugin 
+Details on how to write a QUEST plugin 

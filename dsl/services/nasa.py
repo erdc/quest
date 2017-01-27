@@ -1,4 +1,4 @@
-"""DSL wrapper for USGS NWIS Services
+"""QUEST wrapper for USGS NWIS Services
 
 """
 from .base import SingleFileBase

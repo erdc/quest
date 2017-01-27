@@ -1,9 +1,9 @@
 """Functions required run raster filters"""
 from ..base import FilterBase
-from dsl import util
+from quest import util
 
-from dsl.api import get_metadata, new_dataset, update_metadata, new_feature
-from dsl.api.projects import active_db
+from quest.api import get_metadata, new_dataset, update_metadata, new_feature
+from quest.api.projects import active_db
 
 import os
 import rasterio
@@ -99,7 +99,7 @@ class RstBase(FilterBase):
             'parent_datasets': ','.join(datasets),
             'save_path': self.save_path,
         })
-        update_metadata(new_dset, dsl_metadata=new_metadata, metadata=metadata)
+        update_metadata(new_dset, quest_metadata=new_metadata, metadata=metadata)
 
         return {'datasets': new_dset, 'features': feature}
 

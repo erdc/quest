@@ -6,7 +6,7 @@ NEW VERSION INSIDE DATALIBRARY
 
 """
 
-from dsl.filters import base
+from quest.filters import base
 from geojson import Feature, FeatureCollection, Point, Polygon
 from random import random
 
@@ -46,7 +46,7 @@ class Basic(base.DataFilterBase):
                             "name": "Output Name",
                             "value": {
                                 "type": "string",
-                                "default": "DSL Output"
+                                "default": "QUEST Output"
                             }
                         },
                         {
