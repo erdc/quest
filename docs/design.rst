@@ -45,13 +45,24 @@ Features are a unique identifiers that indicate a group of datasets. Typically,
 these are geospatial locations, i.e., monitoring stations, counties, lakes,
 roads at which data exists. Features can also just be a tag or name to group data
 that does not have a geospatial component (i.e. geotypical datasets). Features
-are
+are always either part of a collection or part of a web service.
 
 Datasets
 ^^^^^^^^
 
 These are the actual individual data files or in some cases a folder of data.
-Datasets are a
+Datasets are always located at a feature. Currently a dataset can only be
+attached to a single feature by design.
+
+Web Services
+^^^^^^^^^^^^
+
+Web services are the primary means of ingesting data into Quest.
+todo: add info about providers and services and user services
+
+
+Settings
+--------
 
 DSL can be configured in three ways:
 
