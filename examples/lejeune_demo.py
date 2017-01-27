@@ -20,7 +20,7 @@ import os
 # create a lejeune demo collection:
 
 collection_name = input('Enter Collection Name (default: camp_lejeune):')
-save_path = input('Enter output path to save plots and adh exported data (default is $ENVSIM_QUEST_DIR/adh):')
+save_path = input('Enter output path to save plots and adh exported data (default is $QUEST_DIR/adh):')
 if save_path=='':
     save_path = os.path.join(quest.util.get_quest_dir(), 'adh')
 
