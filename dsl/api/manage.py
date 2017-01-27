@@ -136,7 +136,7 @@ def move(uris, destination_collection):
             for dataset_name, dataset_metadata in datasets.items():
                 _move_dataset(dataset_metadata, collection_path, destination_collection_path, uri)
 
-            update_metadata(uri, dsl_metadata={'collection': destination_collection})
+            update_metadata(uri, quest_metadata={'collection': destination_collection})
 
         if resource == 'datasets':
             dataset_metadata = get_metadata(uri)[uri]
@@ -224,14 +224,14 @@ def _move_dataset(dataset_metadata, collection_path, destination_collection_path
 
 
 def _update_dataset_file_location(func, dataset_metadata, collection_path, destination_collection_path, feature):
-    dsl_metadata = {'feature': feature}
+    quest_metadata = {'feature': feature}
     save_path = dataset_metadata['file_path']
     if save_path is not None:
         rel_path = os.path.relpath(save_path, collection_path)
         new_save_path = os.path.normpath(os.path.join(destination_collection_path, rel_path))
-        dsl_metadata['file_path'] = new_save_path
+        quest_metadata['file_path'] = new_save_path
 
         util.mkdir_if_doesnt_exist(os.path.split(new_save_path)[0])
         func(save_path, new_save_path)
 
-    update_metadata(dataset_metadata['name'], dsl_metadata=dsl_metadata)
+    update_metadata(dataset_metadata['name'], quest_metadata=quest_metadata)

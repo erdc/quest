@@ -1,25 +1,25 @@
 """API functions related to versions."""
-import dsl
+import quest
 from jsonrpc import dispatcher
 
 
 @dispatcher.add_method
-def get_dsl_version():
-    """Get DSL version.
+def get_quest_version():
+    """Get QUEST version.
 
    Returns:
-        DSL version (string):
-            version of DSL being used
+        QUEST version (string):
+            version of QUEST being used
     """
-    return dsl.__version__
+    return quest.__version__
 
 
 @dispatcher.add_method
 def get_api_version():
-    """Get DSL API version.
+    """Get QUEST API version.
 
     Returns:
-        DSL version (string):
-            version of DSL API being used
+        QUEST version (string):
+            version of QUEST API being used
     """
-    return dsl.api.__version__
+    return quest.api.__version__

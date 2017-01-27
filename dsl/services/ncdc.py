@@ -1,4 +1,4 @@
-"""DSL wrapper for NCDC GHCN and GSOD Services."""
+"""QUEST wrapper for NCDC GHCN and GSOD Services."""
 from .base import WebServiceBase
 from .. import util
 import pandas as pd

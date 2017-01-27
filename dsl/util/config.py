@@ -15,7 +15,7 @@ settings = {}
 
 @dispatcher.add_method
 def get_settings():
-    """Get the settings currently being used by DSL.
+    """Get the settings currently being used by QUEST.
 
     Returns
     -------
@@ -24,8 +24,8 @@ def get_settings():
 
     Example
     -------
-    >>> dsl.api.get_settings()
-    {'BASE_DIR': '/Users/dharhas/Library/Application Support/dsl',
+    >>> quest.api.get_settings()
+    {'BASE_DIR': '/Users/dharhas/Library/Application Support/quest',
     'CACHE_DIR': 'cache',
     'PROJECTS_DIR': 'projects',
     'USER_SERVICES': [],
@@ -43,7 +43,7 @@ def get_settings():
 
 @dispatcher.add_method
 def update_settings(config={}):
-    """Update settings currently being used by DSL
+    """Update settings currently being used by QUEST
 
     Only key/value pairs that are provided are updated,
     any other existing pairs are left unchanged or defaults
@@ -61,8 +61,8 @@ def update_settings(config={}):
 
     Example
     -------
-    >>> dsl.api.update_settings({'BASE_DIR':'/Users/dharhas/mydsldir'})
-    {'BASE_DIR': '/Users/dharhas/mydsldir',
+    >>> quest.api.update_settings({'BASE_DIR':'/Users/dharhas/myquestdir'})
+    {'BASE_DIR': '/Users/dharhas/myquestdir',
      'CACHE_DIR': 'cache',
      'PROJECTS_DIR': 'projects',
      'USER_SERVICES': [],
@@ -73,7 +73,7 @@ def update_settings(config={}):
     if 'BASE_DIR' in config.keys() and not os.path.isabs(config['BASE_DIR']):
         config['BASE_DIR'] = os.path.join(os.getcwd(), config['BASE_DIR'])
     settings.update(config)
-    settings.setdefault('BASE_DIR', _default_dsl_dir())
+    settings.setdefault('BASE_DIR', _default_quest_dir())
     settings.setdefault('CACHE_DIR', 'cache')
     settings.setdefault('PROJECTS_DIR', 'projects')
     settings.setdefault('USER_SERVICES', [])
@@ -88,7 +88,7 @@ def update_settings(config={}):
 
 @dispatcher.add_method
 def update_settings_from_file(filename):
-    """Update settings currently being used by DSL from a yaml file
+    """Update settings currently being used by QUEST from a yaml file
 
     Only key/value pairs that are provided are updated,
     any other existing pairs are left unchanged or defaults
@@ -106,8 +106,8 @@ def update_settings_from_file(filename):
 
     Example
     -------
-    >>> dsl.api.update_settings_from_file('/Users/dharhas/mydslsettings.yml')
-    {'BASE_DIR': '/Users/dharhas/mydsl2dir',
+    >>> quest.api.update_settings_from_file('/Users/dharhas/myquestsettings.yml')
+    {'BASE_DIR': '/Users/dharhas/myquest2dir',
      'CACHE_DIR': 'cache',
      'PROJECTS_DIR': 'data',
      'USER_SERVICES': [],
@@ -129,7 +129,7 @@ def update_settings_from_file(filename):
 
 @dispatcher.add_method
 def save_settings(filename=None):
-    """Save settings currently being used by DSL to a yaml file
+    """Save settings currently being used by QUEST to a yaml file
 
     Parameters
     ----------
@@ -145,7 +145,7 @@ def save_settings(filename=None):
 
     Example
     -------
-    >>> dsl.api.save_settings('/Users/dharhas/mydslsettings.yml')
+    >>> quest.api.save_settings('/Users/dharhas/myquestsettings.yml')
     """
     if filename is None:
         filename = _default_config_file()
@@ -161,19 +161,19 @@ def save_settings(filename=None):
 
 def _default_config_file():
     base = get_settings()['BASE_DIR']
-    return os.path.join(base, 'dsl_config.yml')
+    return os.path.join(base, 'quest_config.yml')
 
 
-def _default_dsl_dir():
-    dsl_dir = os.environ.get('ENVSIM_DSL_DIR')
-    if dsl_dir is None:
-        dsl_dir = appdirs.user_data_dir('dsl', 'envsim')
+def _default_quest_dir():
+    quest_dir = os.environ.get('ENVSIM_QUEST_DIR')
+    if quest_dir is None:
+        quest_dir = appdirs.user_data_dir('quest', 'envsim')
 
-    return dsl_dir
+    return quest_dir
 
 
 def _expand_dirs(local_services):
-    "if any dir ends in * then walk the subdirectories looking for dsl.yml"
+    "if any dir ends in * then walk the subdirectories looking for quest.yml"
     if local_services == []:
         return []
 
@@ -182,7 +182,7 @@ def _expand_dirs(local_services):
         head, tail = os.path.split(path)
         if tail == '*':
             for root, dirs, files in os.walk(head):
-                if os.path.exists(os.path.join(root, 'dsl.yml')):
+                if os.path.exists(os.path.join(root, 'quest.yml')):
                     expanded.append(root)
         else:
             expanded.append(path)

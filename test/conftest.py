@@ -4,7 +4,7 @@ import shutil
 import sys
 import tempfile
 
-import dsl
+import quest
 
 base_path = os.path.dirname(os.path.abspath(__file__))
 FILES_DIR = os.path.join(base_path, 'files')
@@ -34,7 +34,7 @@ def reset_settings(get_base_dir):
                      'USER_SERVICES': []
                      }
 
-    dsl.api.update_settings(test_settings)
+    quest.api.update_settings(test_settings)
     return test_settings
 
 
@@ -64,11 +64,11 @@ def reset_projects_dir(reset_settings, request):
 
 @pytest.fixture
 def set_active_project(reset_settings, request):
-    previous_active_project = dsl.api.get_active_project()
+    previous_active_project = quest.api.get_active_project()
     tests_active_project = getattr(request.module, 'ACTIVE_PROJECT', 'default')
-    dsl.api.set_active_project(tests_active_project)
+    quest.api.set_active_project(tests_active_project)
 
     def teardown():
-        dsl.api.set_active_project(previous_active_project)
+        quest.api.set_active_project(previous_active_project)
 
     request.addfinalizer(teardown)

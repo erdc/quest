@@ -1,7 +1,7 @@
 # example of a 'user' vitd service
 # treats each VITD theme as a separate service layer
 # obs, sdr etc theme files can bedownloaded individually
-# this file needs to be renamed dsl.yml and placed in the
+# this file needs to be renamed quest.yml and placed in the
 # folder containing the VITD folder of the iraq data
 
 name: korea-vitd

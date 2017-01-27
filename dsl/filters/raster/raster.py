@@ -1,8 +1,8 @@
 
-from dsl import util
+from quest import util
 
-from dsl.api import get_metadata, new_dataset, update_metadata, new_feature
-from dsl.api.projects import active_db
+from quest.api import get_metadata, new_dataset, update_metadata, new_feature
+from quest.api.projects import active_db
 
 from .rst_base import RstBase
 from pint import UnitRegistry

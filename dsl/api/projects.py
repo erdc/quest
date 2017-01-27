@@ -25,7 +25,7 @@ def active_db():
 
 @dispatcher.add_method
 def add_project(name, path, activate=True):
-    """Add a existing DSL project to the list of available projects
+    """Add a existing QUEST project to the list of available projects
 
     Args:
         name (string, Required):
@@ -61,7 +61,7 @@ def add_project(name, path, activate=True):
 @dispatcher.add_method
 def new_project(name, display_name=None, description=None, metadata=None,
                 folder=None, activate=True):
-    """Create a new DSL project and add it to list of available projects.
+    """Create a new QUEST project and add it to list of available projects.
 
     Args:
         name (string, Required):
@@ -240,7 +240,7 @@ def remove_project(name):
 
 @dispatcher.add_method
 def set_active_project(name):
-    """Set active DSL project.
+    """Set active QUEST project.
 
     Args:
         name (string, Required):

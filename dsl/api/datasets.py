@@ -97,8 +97,8 @@ def download_datasets(datasets, raise_on_error=False):
                                     dataset=idx)
 
             metadata = all_metadata.pop('metadata', None)
-            dsl_metadata = all_metadata
-            dsl_metadata.update({
+            quest_metadata = all_metadata
+            quest_metadata.update({
                 'status': 'downloaded',
                 'message': 'success',
                 })
@@ -106,20 +106,20 @@ def download_datasets(datasets, raise_on_error=False):
             if raise_on_error:
                 raise
 
-            dsl_metadata = {
+            quest_metadata = {
                 'status': 'failed download',
                 'message': str(e),
                 }
 
             metadata = None
 
-        status[idx] = dsl_metadata['status']
+        status[idx] = quest_metadata['status']
 
-        dsl_metadata.update({'metadata': metadata})
+        quest_metadata.update({'metadata': metadata})
 
         with db_session:
             dataset = db.Dataset[idx]
-            dataset.set(**dsl_metadata)
+            dataset.set(**quest_metadata)
 
     return status
 
@@ -138,7 +138,7 @@ def download_options(uris, fmt='json-schema'):
     Returns:
         download_options (dict):
             download options that can be specified when calling
-            dsl.api.stage_for_download or dsl.api.download
+            quest.api.stage_for_download or quest.api.download
     """
     uris = util.listify(uris)
     download_options = {}
@@ -246,7 +246,7 @@ def new_dataset(feature, dataset_type=None, display_name=None,
     if metadata is None:
         metadata = {}
 
-    dsl_metadata = {
+    quest_metadata = {
         'name': name,
         'feature': feature,
         'source': dataset_type,
@@ -256,10 +256,10 @@ def new_dataset(feature, dataset_type=None, display_name=None,
         'metadata': metadata,
     }
     if dataset_type == 'download':
-        dsl_metadata.update({'status': 'not staged'})
+        quest_metadata.update({'status': 'not staged'})
 
     with db_session:
-        db.Dataset(**dsl_metadata)
+        db.Dataset(**quest_metadata)
 
     return name
 
@@ -274,7 +274,7 @@ def stage_for_download(uris, download_options=None):
             If uri is a feature, a new dataset will be created
 
         download_options (dict or list of dicts, Optional, Default=None):
-            options to be passed to dsl.api.download function specified for each dataset
+            options to be passed to quest.api.download function specified for each dataset
 
             If download_options is a dict, then apply same options to all datasets,
             else each dict in list is used for each respective dataset
@@ -297,7 +297,7 @@ def stage_for_download(uris, download_options=None):
         if uri.startswith('f'):
             dataset_uri = new_dataset(uri, dataset_type='download')
 
-        dsl_metadata = {
+        quest_metadata = {
             'options': json.dumps(kwargs),
             'status': 'staged for download',
             'parameter': kwargs.get('parameter') if kwargs else None
@@ -305,7 +305,7 @@ def stage_for_download(uris, download_options=None):
 
         with db_session:
             dataset = db.Dataset[dataset_uri]
-            dataset.set(**dsl_metadata)
+            dataset.set(**quest_metadata)
 
         datasets.append(dataset_uri)
 
@@ -316,7 +316,7 @@ def stage_for_download(uris, download_options=None):
 def describe_dataset():
     """Show metadata associated with downloaded dataset.
 
-    This metadata includes as well as the dsl function and kwargs used to
+    This metadata includes as well as the quest function and kwargs used to
     generate the dataset.
 
     NOTIMPLEMENTED
@@ -399,8 +399,8 @@ def visualize_dataset(dataset, update_cache=False, **kwargs):
         title = dataset
 
     visualization_path = io.visualize(path, title=title, **kwargs)
-    dsl_metadata = {'visualization_path': visualization_path}
-    update_metadata(dataset, dsl_metadata=dsl_metadata)
+    quest_metadata = {'visualization_path': visualization_path}
+    update_metadata(dataset, quest_metadata=quest_metadata)
 
     return visualization_path
 
@@ -418,7 +418,7 @@ def visualize_dataset_options(dataset, fmt='json-schema'):
     Returns:
         visualize_dataset_options  (dict):
             options that can be specified when calling
-            dsl.api.visualize_dataset
+            quest.api.visualize_dataset
     """
     m = get_metadata(dataset).get(dataset)
     file_format = m.get('file_format')

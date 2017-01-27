@@ -1,7 +1,7 @@
 # example of a 'user' vitd service
 # treats each all VITD themes as a single service layer
 # downloading data downloads all layers
-# this file needs to be renamed dsl.yml and placed in the 
+# this file needs to be renamed quest.yml and placed in the 
 # folder containing the VITD folder of the iraq data
 
 name: iraq-vitd
