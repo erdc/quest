@@ -63,8 +63,8 @@ def add_features(collection, features):
 
             uri = util.uuid('feature')
             geometry = data['geometry']
-            if hasattr(geometry, 'to_wkt'):
-                geometry = geometry.to_wkt()
+            if hasattr(geometry, 'wkt'):
+                geometry = geometry.wkt
             data.update({
                     'name': uri,
                     'collection': collection,
@@ -231,7 +231,7 @@ def get_tags(service):
 
 
 @dispatcher.add_method
-def new_feature(collection, display_name=None, geom_type=None, geom_coords=None,
+def new_feature(collection, display_name=None, geometry=None, geom_type=None, geom_coords=None,
                 description=None, metadata=None):
     """Add a new feature to a collection.
 
@@ -240,6 +240,8 @@ def new_feature(collection, display_name=None, geom_type=None, geom_coords=None,
             name of collection
         display_name (string, Optional, Default=None):
             display name of feature
+        geometry (string or Shapely.geometry.shape, optional, Default=None):
+            well-known-text or Shapely shape representing the geometry of the feature. Alternatively `geom_type` and `geom_coords` can be passed.
         geom_type (string, Optional, Default=None):
              geometry type of feature (i.e. point/line/polygon)
         geom_coords (string or list, Optional, Default=None):
@@ -261,23 +263,14 @@ def new_feature(collection, display_name=None, geom_type=None, geom_coords=None,
     if collection not in get_collections():
         raise ValueError('Collection {} not found'.format(collection))
 
-    geometry = None
-    if geom_type is not None:
-        if geom_type not in ['LineString', 'Point', 'Polygon']:
-            raise ValueError(
-                    'geom_type must be one of LineString, Point or Polygon'
-                )
-
+    if geometry is None and geom_coords is not None and geom_type is not None:
         if isinstance(geom_coords, str):
             geom_coords = json.loads(geom_coords)
 
-        # convert to wkt using gist
-        # https://gist.github.com/drmalex07/5a54fc4f1db06a66679e
-        o = {"coordinates": geom_coords, "type": geom_type}
-        s = json.dumps(o)
-        g1 = geojson.loads(s)
-        g2 = shape(g1)
-        geometry = g2.wkt
+        geometry = shape({"coordinates": geom_coords, "type": geom_type})
+
+    if hasattr(geometry, 'wkt'):
+        geometry = geometry.wkt
 
     uri = util.uuid('feature')
     if display_name is None:

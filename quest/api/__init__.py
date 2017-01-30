@@ -18,6 +18,8 @@ __all__ = (
     'get_metadata',
     'update_metadata', # replaces update_collection, update_feature, update_dataset
     'delete', # replaces delete_dataset, delete_collection, delete_feature
+    'move',
+    'copy',
     'get_collections',
     'new_collection',
     'stage_for_download',
@@ -53,7 +55,6 @@ __all__ = (
     'get_services',
     'add_provider',  # add custom url or local folder as a service
     'delete_provider',
-    'move_feature',
     'get_task',
     'get_tasks',
     'cancel_tasks',
