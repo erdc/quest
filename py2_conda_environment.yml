@@ -7,7 +7,7 @@
 # optionally run tests:
 #   python setup.py test
 
-name: dsl
+name: quest
 
 channels:
     - conda-forge

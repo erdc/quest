@@ -1,4 +1,4 @@
-Welcome to Data Services Library's documentation!
+Welcome to Quest's documentation!
 =================================================
 
 Contents:

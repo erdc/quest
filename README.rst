@@ -1,7 +1,7 @@
-Environmental Simulator Data Services Library
+Environmental Simulator Quest
 ---------------------------------------------
 
-Python API for Data Services Library
+Python API for Quest
 
 See *.rst files in the docs folder for documentation
 
@@ -19,11 +19,11 @@ setup dev environment
 - Clone master branch
 - Create a new conda environment for development
     
-    conda env create -n dsl -f py3-conda-requirements.yml
+    conda env create -n quest -f py3-conda-requirements.yml
     
     (you can also create a python 2 env but 3 is preferred)
 
-- Install dsl in develop mode
+- Install quest in develop mode
     
     python setup.py develop
 
