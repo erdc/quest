@@ -27,21 +27,20 @@ def get_metadata(uris, as_dataframe=False):
             metadata at each uri keyed on uris
     """
     # group uris by type
-    df = util.classify_uris(uris)
+    grouped_uris = util.classify_uris(uris)
 
     # handle case when no uris are passed in
-    if df.empty:
+    if not any(grouped_uris):
         metadata = pd.DataFrame()
         if not as_dataframe:
             metadata = metadata.to_dict(orient='index')
         return metadata
 
-    grouped = df.groupby('type')
-
     metadata = []
+
     # get metadata for service type uris
-    if 'services' in grouped.groups.keys():
-        svc_df = grouped.get_group('services')
+    if 'services' in grouped_uris.groups.keys():
+        svc_df = grouped_uris.get_group('services')
         svc_df = pd.DataFrame(svc_df['uri'].apply(util.parse_service_uri).tolist(),
                               columns=['provider', 'service', 'feature'])
 
@@ -59,9 +58,9 @@ def get_metadata(uris, as_dataframe=False):
             features['name'] = features.index
             metadata.append(features)
 
-    if 'collections' in grouped.groups.keys():
+    if 'collections' in grouped_uris.groups.keys():
         # get metadata for collections
-        tmp_df = grouped.get_group('collections')
+        tmp_df = grouped_uris.get_group('collections')
         db = get_db()
         with db_session:
             collections = [c.to_dict() for c in db.Collection.select(lambda c: c.name in tmp_df['uri'].tolist())]
@@ -70,9 +69,9 @@ def get_metadata(uris, as_dataframe=False):
 
         metadata.append(collections)
 
-    if 'features' in grouped.groups.keys():
+    if 'features' in grouped_uris.groups.keys():
         # get metadata for features
-        tmp_df = grouped.get_group('features')
+        tmp_df = grouped_uris.get_group('features')
         db = get_db()
         with db_session:
             features = [f.to_dict() for f in db.Feature.select(lambda c: c.name in tmp_df['uri'].tolist())]
@@ -84,9 +83,9 @@ def get_metadata(uris, as_dataframe=False):
                 features.index = features['name']
         metadata.append(features)
 
-    if 'datasets' in grouped.groups.keys():
+    if 'datasets' in grouped_uris.groups.keys():
         # get metadata for datasets
-        tmp_df = grouped.get_group('datasets')
+        tmp_df = grouped_uris.get_group('datasets')
         db = get_db()
         with db_session:
             datasets = [dict(d.to_dict(), **{'collection': d.feature.collection.name})
@@ -125,18 +124,11 @@ def update_metadata(uris, display_name=None, description=None,
             metadata at each uri keyed on uris
     """
     # group uris by type
-    df = util.classify_uris(uris)
-    uris = util.listify(uris)
-    resource = pd.unique(df['type']).tolist()
+    grouped_uris = util.classify_uris(uris, as_dataframe=False, exclude=['services'], require_same_type=True)
+    resource = list(grouped_uris)[0]
+    uris = grouped_uris[resource]
 
-    if len(resource) > 1:
-        raise ValueError('All uris must be of the same type')
-
-    resource = resource[0]
-    if resource == 'service':
-        raise ValueError('Metadata for service uris cannot be updated')
-
-    n = len(df)
+    n = len(uris)
     if n > 1:
         if display_name is None:
             display_name = [None] * n

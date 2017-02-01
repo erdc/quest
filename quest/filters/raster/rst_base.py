@@ -46,7 +46,7 @@ class RstBase(FilterBase):
         # from different services
 
         orig_metadata = get_metadata(dataset)[dataset]
-        src_path = orig_metadata['_save_path']
+        src_path = orig_metadata['file_path']
         if display_name is None:
             display_name = 'Created by filter {}'.format(self.name)
         if options is None:
@@ -69,7 +69,7 @@ class RstBase(FilterBase):
                               geom_coords=None)
 
         new_dset = new_dataset(feature,
-                               dataset_type='derived',
+                               source='derived',
                                display_name=display_name,
                                description=description)
 
@@ -81,12 +81,12 @@ class RstBase(FilterBase):
         with rasterio.open(dst, "w", **out_meta) as dest:
             dest.write(out_image)
 
-        self.save_path = dst
+        self.file_path = dst
 
         new_metadata = {
-            'parameter': orig_metadata['_parameter'],
-            'datatype': orig_metadata['_datatype'],
-            'file_format': orig_metadata['_file_format'],
+            'parameter': orig_metadata['parameter'],
+            'datatype': orig_metadata['datatype'],
+            'file_format': orig_metadata['file_format'],
         }
 
         if description is None:
@@ -97,7 +97,7 @@ class RstBase(FilterBase):
             'filter_applied': self.name,
             'filter_options': options,
             'parent_datasets': ','.join(datasets),
-            'save_path': self.save_path,
+            'file_path': self.file_path,
         })
         update_metadata(new_dset, quest_metadata=new_metadata, metadata=metadata)
 

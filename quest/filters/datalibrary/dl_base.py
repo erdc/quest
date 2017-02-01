@@ -64,7 +64,7 @@ class DatalibraryBase(FilterBase):
                               geom_coords=geom_coords)
 
         new_dset = new_dataset(feature,
-                               dataset_type='derived',
+                               source='derived',
                                display_name=display_name,
                                description=description)
 
@@ -81,7 +81,7 @@ class DatalibraryBase(FilterBase):
         options = self._extra_options(options)
         _run_filter(self.template, **options)
 
-        self.save_path = dst
+        self.file_path = dst
         new_metadata = self._new_dataset_metadata()
 
         if description is None:
@@ -92,7 +92,7 @@ class DatalibraryBase(FilterBase):
             'filter_applied': self.name,
             'filter_options': options,
             'parent_datasets': ','.join(datasets),
-            'save_path': self.save_path,
+            'file_path': self.file_path,
         })
         update_metadata(new_dset, quest_metadata=new_metadata, metadata=metadata)
 
@@ -146,7 +146,7 @@ def _get_bbox(datasets):
 
 
 def _get_src(dataset):
-    save_path = get_metadata(dataset)[dataset].get('_save_path')
-    save_path = util.listify(save_path)[0]
+    file_path = get_metadata(dataset)[dataset].get('file_path')
+    file_path = util.listify(file_path)[0]
     # the root vitd directory is three levels above file name
-    return os.path.split(os.path.split(os.path.split(save_path)[0])[0])[0]
+    return os.path.split(os.path.split(os.path.split(file_path)[0])[0])[0]

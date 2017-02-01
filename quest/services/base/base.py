@@ -118,8 +118,8 @@ class WebServiceBase(with_metaclass(abc.ABCMeta, object)):
     def get_parameters(self, service):
         return self._get_parameters(service)
 
-    def download(self, service, feature, save_path, **kwargs):
-        return self._download(service, feature, save_path, **kwargs)
+    def download(self, service, feature, file_path, **kwargs):
+        return self._download(service, feature, file_path, **kwargs)
 
     def download_options(self, service, fmt):
         return self._download_options(service, fmt)
@@ -179,16 +179,16 @@ class SingleFileBase(WebServiceBase):
     """Base file for datasets that are a single file download
     eg elevation raster etc
     """
-    def _download(self, service, feature, save_path, **kwargs):
+    def _download(self, service, feature, file_path, **kwargs):
         feature = self.get_features(service).ix[feature]
         reserved = feature.get('reserved')
         download_url = reserved['download_url']
         fmt = reserved.get('extract_from_zip', '')
         filename = reserved.get('filename', util.uuid('dataset'))
         datatype = self._get_services()[service].get('datatype')
-        save_path = self._download_file(save_path, download_url, fmt, filename)
+        file_path = self._download_file(file_path, download_url, fmt, filename)
         return {
-            'file_path': save_path,
+            'file_path': file_path,
             'file_format': reserved.get('file_format'),
             'parameter': feature.get('parameters'),
             'datatype': datatype,

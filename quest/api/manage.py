@@ -42,16 +42,9 @@ def delete(uris):
         return True
 
     # group uris by type
-    df = util.classify_uris(uris)
-    uris = util.listify(uris)
-    resource = pd.unique(df['type']).tolist()
-
-    if len(resource) > 1:
-        raise ValueError('All uris must be of the same type')
-
-    resource = resource[0]
-    if resource == 'service':
-        raise ValueError('Service uris cannot be deleted')
+    grouped_uris = util.classify_uris(uris, as_dataframe=False, exclude=['services'], require_same_type=True)
+    resource = list(grouped_uris)[0]
+    uris = grouped_uris[resource]
 
     db = get_db()
     for uri in uris:
@@ -110,18 +103,10 @@ def move(uris, destination_collection):
         return True
 
     # group uris by type
-    df = util.classify_uris(uris)
-    uris = util.listify(uris)
-    resource = pd.unique(df['type']).tolist()
-
-    if len(resource) > 1:
-        raise ValueError('All uris must be of the same type')
-
-    resource = resource[0]
-    if resource == 'service':
-        raise ValueError('Service uris cannot be moved')
-    elif resource == 'collections':
-        raise ValueError('Collections cannot be moved')
+    grouped_uris = util.classify_uris(uris, as_dataframe=False,
+                                      exclude=['services', 'collections'], require_same_type=True)
+    resource = list(grouped_uris)[0]
+    uris = grouped_uris[resource]
 
     project_path = _get_project_dir()
     destination_collection_path = os.path.join(project_path, destination_collection)
@@ -170,16 +155,10 @@ def copy(uris, destination_collection):
         return True
 
     # group uris by type
-    df = util.classify_uris(uris)
-    uris = util.listify(uris)
-    resource = pd.unique(df['type']).tolist()
-
-    if len(resource) > 1:
-        raise ValueError('All uris must be of the same type')
-
-    resource = resource[0]
-    if resource == 'service':
-        raise ValueError('Service uris cannot be copied')
+    grouped_uris = util.classify_uris(uris, as_dataframe=False,
+                                      exclude=['services', 'collections'], require_same_type=True)
+    resource = list(grouped_uris)[0]
+    uris = grouped_uris[resource]
 
     project_path = _get_project_dir()
     destination_collection_path = os.path.join(project_path, destination_collection)
@@ -225,13 +204,13 @@ def _move_dataset(dataset_metadata, collection_path, destination_collection_path
 
 def _update_dataset_file_location(func, dataset_metadata, collection_path, destination_collection_path, feature):
     quest_metadata = {'feature': feature}
-    save_path = dataset_metadata['file_path']
-    if save_path is not None:
-        rel_path = os.path.relpath(save_path, collection_path)
-        new_save_path = os.path.normpath(os.path.join(destination_collection_path, rel_path))
-        quest_metadata['file_path'] = new_save_path
+    file_path = dataset_metadata['file_path']
+    if file_path is not None:
+        rel_path = os.path.relpath(file_path, collection_path)
+        new_file_path = os.path.normpath(os.path.join(destination_collection_path, rel_path))
+        quest_metadata['file_path'] = new_file_path
 
-        util.mkdir_if_doesnt_exist(os.path.split(new_save_path)[0])
-        func(save_path, new_save_path)
+        util.mkdir_if_doesnt_exist(os.path.split(new_file_path)[0])
+        func(file_path, new_file_path)
 
     update_metadata(dataset_metadata['name'], quest_metadata=quest_metadata)

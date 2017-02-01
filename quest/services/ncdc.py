@@ -123,7 +123,7 @@ class NcdcService(WebServiceBase):
 
         return pmap
 
-    def _download(self, service, feature, save_path, dataset,
+    def _download(self, service, feature, file_path, dataset,
                   parameter, start=None, end=None):
 
         if dataset is None:
@@ -163,10 +163,10 @@ class NcdcService(WebServiceBase):
             data.index = pd.PeriodIndex(data.index, freq='D')
             data.rename(columns={parameter_code: parameter}, inplace=True)
 
-        save_path = os.path.join(save_path, BASE_PATH, service)
-        save_path = os.path.join(save_path, dataset)
+        file_path = os.path.join(file_path, BASE_PATH, service)
+        file_path = os.path.join(file_path, dataset)
         metadata = {
-            'file_path': save_path,
+            'file_path': file_path,
             'file_format': 'timeseries-hdf5',
             'datatype': 'timeseries',
             'parameter': parameter,
@@ -177,7 +177,7 @@ class NcdcService(WebServiceBase):
         # save data to disk
         io = util.load_drivers('io', 'timeseries-hdf5')
         io = io['timeseries-hdf5'].driver
-        io.write(save_path, data, metadata)
+        io.write(file_path, data, metadata)
         del metadata['service_id']
 
         return metadata

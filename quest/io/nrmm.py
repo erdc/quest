@@ -36,7 +36,7 @@ class Nrmm(IoBase):
 
         return grid, attrs, profile.copy()
 
-    def write(self, save_path, dataframe, metadata):
+    def write(self, file_path, dataframe, metadata):
         "Write nrmm file"
         raise NotImplementedError('NRMM write not available')
 

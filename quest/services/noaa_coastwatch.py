@@ -9,6 +9,7 @@ BASE_URL = 'http://coastwatch.pfeg.noaa.gov/erddap/tabledap/'
 
 # noaa_url = 'http://coastwatch.pfeg.noaa.gov/erddap/tabledap/nosCoopsCA.csvp?stationID%2CstationName%2CdateEstablished%2Clongitude%2Clatitude'
 
+
 class NoaaService(WebServiceBase):
     def _register(self):
         self.metadata = {
@@ -80,9 +81,9 @@ class NoaaService(WebServiceBase):
             df['display_name'] = df['service_id']
 
         if service == 'coops-meteorological':
-            #hard coding for now
-            dataset_Ids = ['nosCoopsCA','nosCoopsMW','nosCoopsMRF', 'nosCoopsMV', 'nosCoopsMC',
-                        'nosCoopsMAT', 'nosCoopsMRH','nosCoopsMWT', 'nosCoopsMBP']
+            # hard coding for now
+            dataset_Ids = ['nosCoopsCA', 'nosCoopsMW', 'nosCoopsMRF', 'nosCoopsMV', 'nosCoopsMC',
+                           'nosCoopsMAT', 'nosCoopsMRH', 'nosCoopsMWT', 'nosCoopsMBP']
 
             coops_url = [BASE_URL + '{}.csvp?stationID%2Clongitude%2Clatitude'.format(id) for id in dataset_Ids]
             df = pd.concat([pd.read_csv(f) for f in coops_url])
@@ -90,7 +91,7 @@ class NoaaService(WebServiceBase):
             df.rename(columns={
                 'stationID': 'service_id',
                 'longitude (degrees_east)': 'longitude',
-                'parameter' : 'parameters',
+                'parameter': 'parameters',
                 'latitude (degrees_north)': 'latitude'
             }, inplace=True)
 
@@ -100,8 +101,8 @@ class NoaaService(WebServiceBase):
 
         if service == 'coops-water':
             # hard coding for now
-            dataset_Ids = ['nosCoopsWLV6','nosCoopsWLR6' , 'nosCoopsWLTP6','nosCoopsWLV60',
-                           'nosCoopsWLVHL','nosCoopsWLTP60','nosCoopsWLTPHL']
+            dataset_Ids = ['nosCoopsWLV6', 'nosCoopsWLR6', 'nosCoopsWLTP6', 'nosCoopsWLV60',
+                           'nosCoopsWLVHL', 'nosCoopsWLTP60', 'nosCoopsWLTPHL']
 
             coops_url = [BASE_URL + '{}.csvp?stationID%2Clongitude%2Clatitude'.format(id) for id in dataset_Ids]
             df = pd.concat([pd.read_csv(f) for f in coops_url])
@@ -143,28 +144,27 @@ class NoaaService(WebServiceBase):
 
     def _datasetId_map(self,service,parameter, invert=False):
 
-        if service=='coops-meteorological':
-             dmap={
-                'CS':'CA',
-                'CD':'CA',
-                'WS':'MW',
-                'WD':'MW',
-                'WG':'MW',
-                'RF':'MRF',
-                'Vis':'MV',
-                'CN':'MC',
-                'AT':'MAT',
-                'RH':'MRH',
-                'WT':'MWT',
-                'BP':'MBP'
+        if service == 'coops-meteorological':
+            dmap = {
+                'CS': 'CA',
+                'CD': 'CA',
+                'WS': 'MW',
+                'WD': 'MW',
+                'WG': 'MW',
+                'RF': 'MRF',
+                'Vis': 'MV',
+                'CN': 'MC',
+                'AT': 'MAT',
+                'RH': 'MRH',
+                'WT': 'MWT',
+                'BP': 'MBP'
                  }
 
-        if service=='coops-water':
+        if service == 'coops-water':
             dmap = {
-                'waterLevel':'WL',
-                'predictedWL':'WLTP',
+                'waterLevel': 'WL',
+                'predictedWL': 'WLTP',
             }
-
 
         return dmap[parameter]
 
@@ -190,21 +190,21 @@ class NoaaService(WebServiceBase):
             pmap = {
                 'CS': 'sea_water_speed',
                 'CD': 'direction_of_sea_water_velocity',
-                'WS':'wind_speed',
-                'WD':'wind_from_direction',
-                'WG':'wind_speed_from_gust',
-                'RF':'collective_rainfall',
-                'Vis':'visibility_in_air',
-                'CN':'sea_water_electric_conductivity',
-                'AT':'air_temperature',
-                'RH':'relative_humidity',
-                'WT':'sea_water_temperature',
-                'BP':'barometric_pressure',
+                'WS': 'wind_speed',
+                'WD': 'wind_from_direction',
+                'WG': 'wind_speed_from_gust',
+                'RF': 'collective_rainfall',
+                'Vis': 'visibility_in_air',
+                'CN': 'sea_water_electric_conductivity',
+                'AT': 'air_temperature',
+                'RH': 'relative_humidity',
+                'WT': 'sea_water_temperature',
+                'BP': 'barometric_pressure',
             }
         if service == 'coops-water':
             pmap = {
-                'waterLevel':'sea_surface_height_amplitude',
-                'predictedWL':'predicted_waterLevel',
+                'waterLevel': 'sea_surface_height_amplitude',
+                'predictedWL': 'predicted_waterLevel',
             }
 
         if invert:
@@ -212,9 +212,8 @@ class NoaaService(WebServiceBase):
 
         return pmap
 
-
-    def _download(self, service, feature, save_path, dataset,
-                  parameter,start=None,end=None,quality='R',interval='6',datum='MLLW'):
+    def _download(self, service, feature, file_path, dataset,
+                  parameter, start=None, end=None, quality='R', interval='6', datum='MLLW'):
 
         if dataset is None:
             dataset = 'station-' + feature
@@ -287,13 +286,13 @@ class NoaaService(WebServiceBase):
                 data.index = pd.to_datetime(data.index)
                 data.rename(columns={parameter_code: parameter})
 
-            save_path = os.path.join(save_path, BASE_PATH, service)
-            save_path = os.path.join(save_path, dataset)
+            file_path = os.path.join(file_path, BASE_PATH, service)
+            file_path = os.path.join(file_path, dataset)
             metadata = {
-                'file_path': save_path,
+                'file_path': file_path,
                 'file_format': 'timeseries-hdf5',
                 'datatype': 'timeseries',
-                'parameters': parameter,
+                'parameter': parameter,
                 'unit': units[parameter_code],
                 'service_id': 'svc://noaa:{}/{}'.format(service, feature)
             }
@@ -301,17 +300,14 @@ class NoaaService(WebServiceBase):
             # save data to disk
             io = util.load_drivers('io', 'timeseries-hdf5')
             io = io['timeseries-hdf5'].driver
-            io.write(save_path, data, metadata)
+            io.write(file_path, data, metadata)
             del metadata['service_id']
-
-
 
             return metadata
 
         except Exception as error:
             if str(error) == "HTTP Error 500: Internal Server Error":
-                return pd.DataFrame()
-
+                raise ValueError('No Data Available')
 
     def _download_options(self, service, fmt):
         if service == 'ndbc' or service == 'coops-meteorological':
@@ -379,11 +375,10 @@ class NoaaService(WebServiceBase):
                         },
                         "interval": {
                             "type": "string",
-                            "type": "string",
                             "description": "time interval",
                             "options": ['6', '60'],
                         },
-                        "datum": { #temporary hard coding
+                        "datum": {  # temporary hard coding
                             "type": "string",
                             "description": "time interval",
                             "options": [
@@ -406,6 +401,5 @@ class NoaaService(WebServiceBase):
                         },
                     },
                 }
-
 
         return schema
