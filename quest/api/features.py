@@ -83,12 +83,8 @@ def get_features(uris=None, expand=False, as_dataframe=False, as_geojson=False,
     """Retrieve list of features from resources.
 
     Args:
-        services (comma separated strings, or list of strings, Required):
-            list of services to search in for features
-        collections (comma separated strings or list of strings):
-            list of collections to search in for features
-        features (comma separated strings or list of strings, Optional, Default=None):
-            list of features to include in search
+        uris (string or list, Required):
+            uris of services, collections, or features
         as_dataframe (bool, Optional, Default=False):
            include feature details and format as a pandas DataFrame indexed by feature uris
         as_geojson (bool, Optional, Default=False):
@@ -104,6 +100,12 @@ def get_features(uris=None, expand=False, as_dataframe=False, as_geojson=False,
                     bbox (string, optional): filter features by bounding box
 
             Features can also be filtered by any other metadata fields
+        services (comma separated strings, or list of strings, Deprecated):
+            list of services to search in for features
+        collections (comma separated strings or list of strings, Deprecated):
+            list of collections to search in for features
+        features (comma separated strings or list of strings, Deprecated):
+            list of features to include in search
 
     Returns:
         features (list, geo-json dict or pandas.DataFrame, Default=list):
