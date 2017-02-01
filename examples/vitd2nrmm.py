@@ -1,15 +1,15 @@
 """basic example of vitd 2 nrmm conversion
 
-Note: some things are hardwired and no actual call to the C++ code is made. DSL just sleeps for 10 seconds
+Note: some things are hardwired and no actual call to the C++ code is made. QUEST just sleeps for 10 seconds
 """
 from __future__ import print_function
 from builtins import input
 
-import dsl
+import quest
 
 
 print('~~~ Downloading Iraq VITD locations ~~~')
-locs = dsl.api.services.get_locations('iraq-vitd')
+locs = quest.api.services.get_locations('iraq-vitd')
 print('~~~ %s locations found' % len(locs['features']))
 
 print('Choose start location index and number of locations to add to collection')
@@ -23,35 +23,35 @@ else:
 locations = [f['id'] for f in locs['features'][start:start+nlocs]]
 print('Locations chosen: %s' % (', '.join(locations)))
 
-print('Available collections:\n%s' % ('\n'.join(list(dsl.api.list_collections().keys()))))
+print('Available collections:\n%s' % ('\n'.join(list(quest.api.list_collections().keys()))))
 
 collection = input('Enter collection name to add vitd chosen location (will be created if not above):')
 
-if collection not in list(dsl.api.list_collections().keys()):
-    dsl.api.new_collection(collection)
+if collection not in list(quest.api.list_collections().keys()):
+    quest.api.new_collection(collection)
     print('~~~ created collection: %s ~~~' % collection)
 
 print('~~~ adding locations to collection ~~~')
-dsl.api.add_to_collection(collection, 'iraq-vitd', locations)
+quest.api.add_to_collection(collection, 'iraq-vitd', locations)
 
 print('~~~ downloading data to collection ~~~')
-dsl.api.download_in_collection(collection)
+quest.api.download_in_collection(collection)
 
 print('~~~ getting available filters ~~~')
-print(dsl.api.get_filters())
+print(quest.api.get_filters())
 
 print('~~~ getting filter options ~~~')
-for k,v in sorted(dsl.api.apply_filter_options('vitd2nrmm')['properties'].items()):
+for k,v in sorted(quest.api.apply_filter_options('vitd2nrmm')['properties'].items()):
     if k!='collection_name':
         print('%s: %s (type:%s)' % (k, v['description'], v['type']))
 
 choices = input('Enter comma separated list of themes i.e. obs,sdr (if left blank all will be used)')
 
 if choices=='':
-    dsl.api.apply_filter('vitd2nrmm', collection_name=collection)
+    quest.api.apply_filter('vitd2nrmm', collection_name=collection)
 else:
     kwargs = dict.fromkeys(choices.lower().split(','), True)
-    dsl.api.apply_filter('vitd2nrmm', collection_name=collection, **kwargs)
+    quest.api.apply_filter('vitd2nrmm', collection_name=collection, **kwargs)
 
 print('~~~ processing complete ~~~')
 print('~~~ see "local" dataset inside collection: %s ~~~' % collection)

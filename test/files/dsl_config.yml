@@ -1,6 +1,0 @@
-BASE_DIR: dsl
-CACHE_DIR: cache
-PROJECTS_DIR: projects
-USER_SERVICES:
-    usgs-ned1: http://localhost/data
-    iraq-vitd: file:///tmp/data

@@ -1,7 +1,7 @@
-dsl.egg-info/
+quest.egg-info/
 *.pyc
-dsl/.DS_Store
-.DS_Store
+quest/.QUEST_Store
+.QUEST_Store
 docs/_build/
 __pycache__
 .cache/

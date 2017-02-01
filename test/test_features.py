@@ -1,4 +1,4 @@
-import dsl
+import quest
 import os
 import pytest
 
@@ -21,14 +21,14 @@ def feature(request):
 
 
 def test_add_features(feature):
-    b = dsl.api.add_features('col1', feature)
-    c = dsl.api.get_features(collections='col1')
+    b = quest.api.add_features('col1', feature)
+    c = quest.api.get_features(collections='col1')
     assert len(list(c)) == 1
     assert b == c
 
 
 def test_get_features():
-    c = dsl.api.get_features(collections='col2')
+    c = quest.api.get_features(collections='col2')
     assert len(list(c)) == 2
     for feature in COL2_FEATURES:
         assert feature in c
@@ -36,24 +36,24 @@ def test_get_features():
 
 def test_new_feature():
 
-    c = dsl.api.new_feature(collection='col3', display_name='NewFeat', geom_type='Point', geom_coords=[-94.2, 23.4])
-    assert dsl.api.get_metadata(c)[c]['display_name'] == 'NewFeat'
-    d = dsl.api.get_features(collections='col3')
+    c = quest.api.new_feature(collection='col3', display_name='NewFeat', geom_type='Point', geom_coords=[-94.2, 23.4])
+    assert quest.api.get_metadata(c)[c]['display_name'] == 'NewFeat'
+    d = quest.api.get_features(collections='col3')
     assert c in d
 
 
 def test_update_feature():
     metadata = {'new_field': 'test'}
 
-    c = dsl.api.update_metadata(COL2_FEATURES, display_name=['New Name', 'New Name'], metadata=metadata)
+    c = quest.api.update_metadata(COL2_FEATURES, display_name=['New Name', 'New Name'], metadata=metadata)
     for feature in COL2_FEATURES:
         assert c[feature]['display_name'] == 'New Name'
         assert c[feature]['metadata']['new_field'] == 'test'
 
 
 def test_delete_features():
-    c = dsl.api.new_feature(collection='col1', display_name='New', geom_type='Point', geom_coords=[-93.2, 21.4])
-    d = dsl.api.new_feature(collection='col1', display_name='AnotherFeat', geom_type='Point',geom_coords=[-84.2, 22.4])
-    dsl.api.delete(c)
-    assert len(dsl.api.get_features(collections='col1')) == 1
-    assert d in dsl.api.get_features(collections='col1')
+    c = quest.api.new_feature(collection='col1', display_name='New', geom_type='Point', geom_coords=[-93.2, 21.4])
+    d = quest.api.new_feature(collection='col1', display_name='AnotherFeat', geom_type='Point',geom_coords=[-84.2, 22.4])
+    quest.api.delete(c)
+    assert len(quest.api.get_features(collections='col1')) == 1
+    assert d in quest.api.get_features(collections='col1')

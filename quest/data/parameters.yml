@@ -1,0 +1,19 @@
+quest:
+    file_type: parameters
+    file_version: 1.0
+
+parameters:
+    water_temperature:
+        display_name: Water Temperature
+    air_temperature:
+        display_name: Air Temperature
+    elevation:
+        display_name: Land Surface Elevation
+    bathymetry:
+        display_name: Bathymetry
+    precipitation:
+        display_name: Precipitation
+    vitd:
+        display_name: VITD Dataset
+    adh:
+        display_name: AdH Model Dataset

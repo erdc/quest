@@ -1,15 +1,15 @@
-"""basic example of dsl api functionality
+"""basic example of quest api functionality
 """
 
 from __future__ import print_function
 from builtins import input
 import os
 
-import dsl
+import quest
 
 
 def _get_available_parameters(parameters):
-    """helper function to extract a parameter list from the result of dsl.api.get_parameters
+    """helper function to extract a parameter list from the result of quest.api.get_parameters
     """
     if isinstance(parameters, dict):
         available_parameters = parameters['parameters']
@@ -21,14 +21,14 @@ def _get_available_parameters(parameters):
     return available_parameters
 
 # get list of available services
-services = dsl.api.get_services()
+services = quest.api.get_services()
 
 # make a dict so we can refer to each service by a number rather than service code
 svc_dict = {k: v for k, v in enumerate(services)}
 
-print('%s DSL services are available:' % len(services))
+print('%s QUEST services are available:' % len(services))
 for n, service in enumerate(services):
-    parameters = dsl.api.get_parameters(svc_dict[n])
+    parameters = quest.api.get_parameters(svc_dict[n])
     available_parameters = _get_available_parameters(parameters)
     print("\t%s - %s, (provides %s)" % (n, service, available_parameters))
 
@@ -52,7 +52,7 @@ bounding_box = [float(p) for p in bounding_box.split(',')]
 features = {}
 for svc in chosen_services:
     print('Getting feature data for service: ', svc_dict[svc])
-    features[svc] = dsl.api.get_features(svc_dict[svc], filters={'bbox': bounding_box})
+    features[svc] = quest.api.get_features(svc_dict[svc], filters={'bbox': bounding_box})
     print('\n~~~~~~~ %s features retrieved for%s ~~~~~~~~\n' % (len(features[svc]), svc_dict[svc]))
 
 print('Features Retrieved:')
@@ -60,10 +60,10 @@ for svc in chosen_services:
     print('\t%s - %s  -> %s features retrieved' % (svc, svc_dict[svc], len(features[svc])))
 
 # get the project path
-project_path = dsl.api.get_projects(as_dataframe=True)['folder'][dsl.api.get_active_project()]
+project_path = quest.api.get_projects(as_dataframe=True)['folder'][quest.api.get_active_project()]
 
 
-collections = dsl.api.get_collections()
+collections = quest.api.get_collections()
 print('Available Collections:')
 print('~~~~~~~~~~~~~~~~~~~~~~')
 for name in collections:
@@ -72,10 +72,10 @@ print('~~~~~~~~~~~~~~~~~~~~~~')
 collection_name = input('Type collection name to use (will be created if it is not in list above, '
                         'default is no collection):')
 if collection_name and collection_name not in collections:
-    dsl.api.new_collection(collection_name)
-    col = dsl.api.get_collections(collection_name)
+    quest.api.new_collection(collection_name)
+    col = quest.api.get_collections(collection_name)
     print('collection created at %s' % os.path.join(project_path, collection_name))
-# collections = dsl.api.get_collections(metadata=True)
+# collections = quest.api.get_collections(metadata=True)
 
 print('~~~adding first 2 features from each chosen service to collection~~~\n')
 
@@ -86,10 +86,10 @@ for svc in chosen_services:
         continue
     feats = ','.join(feats)  # convert from list to csv
     print('~~~Adding features [%s] from %s~~~\n' % (feats, svc_dict[svc]))
-    feats = dsl.api.add_features(collection_name, feats)
+    feats = quest.api.add_features(collection_name, feats)
 
     print('Available parameter(s) for %s\n' % (svc_dict[svc]))
-    parameters = dsl.api.get_parameters(svc_dict[svc])
+    parameters = quest.api.get_parameters(svc_dict[svc])
     available_parameters = _get_available_parameters(parameters)
     if available_parameters:
         for number, param in enumerate(available_parameters):
@@ -107,10 +107,10 @@ for svc in chosen_services:
 
         datasets = []
         for parameter in chosen_parameters:
-            datasets.extend(dsl.api.stage_for_download(feats, download_options={'parameter': parameter}))
+            datasets.extend(quest.api.stage_for_download(feats, download_options={'parameter': parameter}))
         print('\n~~~Downloading data for chosen parameters~~~\n')
         try:
-            stat = dsl.api.download_datasets(datasets=datasets, raise_on_error=True)
+            stat = quest.api.download_datasets(datasets=datasets, raise_on_error=True)
         except ValueError as e:
             print(e)
     else:
