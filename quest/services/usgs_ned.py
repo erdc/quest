@@ -57,7 +57,7 @@ class UsgsNedService(SingleFileBase):
             return features
 
         features['parameters'] = 'elevation'
-        #features['file_format'] = 'raster-gdal'
+        features['file_format'] = 'raster-gdal'
         features['filename'] = features['download url'].apply(lambda x: x.split('/')[-1])
         columns = {
             'name': 'display_name',
