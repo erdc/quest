@@ -35,7 +35,7 @@ class RasterGdal(IoBase):
         else:
             visualization_path = base + '.tif'
             import rasterio
-            with rasterio.drivers():
+            with rasterio.Env():
                 rasterio.copy(path, visualization_path, driver='GTIFF')
 
         return visualization_path
