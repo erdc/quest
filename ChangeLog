@@ -1,6 +1,45 @@
 CHANGES
 =======
 
+2.2.0
+-----
+
+* the following api signatures were updated to match database field names
+
+    -def download(feature, save_path, dataset=None, **kwargs):
+    +def download(feature, file_path, dataset=None, **kwargs):
+
+    -def new_dataset(feature, dataset_type=None, display_name=None, description=None, save_path=None, metadata=None):
+    +def new_dataset(feature, source=None, display_name=None, description=None, file_path=None, metadata=None):
+
+    -def stage_for_download(uris, download_options=None):
+    +def stage_for_download(uris, options=None):
+
+    -def get_features(services=None, collections=None, features=None,
+    -                 expand=False, as_dataframe=False, as_geojson=False,
+    -                 update_cache=False, filters=None):
+    +def get_features(uris=None, expand=False, as_dataframe=False, as_geojson=False,
+    +                 update_cache=False, filters=None,
+    +                 services=None, collections=None, features=None):
+
+    -def new_feature(collection, display_name=None, geom_type=None, geom_coords=None, description=None, metadata=None):
+    +def new_feature(collection, display_name=None, geometry=None, geom_type=None, geom_coords=None, description=None, metadata=None):
+
+* bugfixes
+
+
+2.1.0
+-----
+
+* rename to Quest
+
+2.0.1
+-----
+
+* various bugbixes
+* finished porting all print statements to logging
+* updated documentation and doc strings
+
 2.0
 ---
 
