@@ -8,7 +8,7 @@ from quest.api.datasets import DatasetStatus
 
 import os
 import rasterio
-
+from rasterio.tools.mask import mask
 
 class RstBase(FilterBase):
     def register(self, name=None):
@@ -30,16 +30,14 @@ class RstBase(FilterBase):
             },
         }
 
-    def _apply_filter(self, datasets, features=None, options=None,
+
+    def apply_filter(self, datasets, features=None, options=None,
                      display_name=None, description=None, metadata=None):
 
-        if len(datasets > 1):
-            out_image = self._apply(datasets,options)
+        if len(datasets) > 1:
+            raise NotImplementedError('This filter can only be applied to a single dataset')
 
-        else:
-
-            # datasets = util.listify(datasets)
-            dataset = datasets
+        dataset = datasets[0]
 
         # get metadata, path etc from first dataset, i.e. assume all datasets
         # are in same folder. This will break if you try and combine datasets
