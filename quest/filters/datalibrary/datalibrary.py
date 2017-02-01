@@ -122,7 +122,7 @@ class Vitd2Raster(DatalibraryBase):
 
     def _new_dataset_metadata(self):
 
-        self.save_path = os.path.join(self.save_path, '{}.tiff'.format(self.parameter))
+        self.file_path = os.path.join(self.file_path, '{}.tiff'.format(self.parameter))
         return {
             'parameter': self.parameter,
             'datatype': 'raster',

@@ -3,6 +3,7 @@
 Features are unique identifiers with a web service or collection.
 """
 import json
+import itertools
 from jsonrpc import dispatcher
 import pandas as pd
 import geopandas as gpd
@@ -62,8 +63,8 @@ def add_features(collection, features):
 
             uri = util.uuid('feature')
             geometry = data['geometry']
-            if hasattr(geometry, 'to_wkt'):
-                geometry = geometry.to_wkt()
+            if hasattr(geometry, 'wkt'):
+                geometry = geometry.wkt
             data.update({
                     'name': uri,
                     'collection': collection,
@@ -76,18 +77,14 @@ def add_features(collection, features):
 
 
 @dispatcher.add_method
-def get_features(services=None, collections=None, features=None,
-                 expand=False, as_dataframe=False, as_geojson=False,
-                 update_cache=False, filters=None):
-    """Retrieve list of features from resources
+def get_features(uris=None, expand=False, as_dataframe=False, as_geojson=False,
+                 update_cache=False, filters=None,
+                 services=None, collections=None, features=None):
+    """Retrieve list of features from resources.
 
     Args:
-        services (comma separated strings, or list of strings, Required):
-            list of services to search in for features
-        collections (comma separated strings or list of strings):
-            list of collections to search in for features
-        features (comma separated strings or list of strings, Optional, Default=None):
-            list of features to include in search
+        uris (string or list, Required):
+            uris of services, collections, or features
         as_dataframe (bool, Optional, Default=False):
            include feature details and format as a pandas DataFrame indexed by feature uris
         as_geojson (bool, Optional, Default=False):
@@ -103,18 +100,32 @@ def get_features(services=None, collections=None, features=None,
                     bbox (string, optional): filter features by bounding box
 
             Features can also be filtered by any other metadata fields
+        services (comma separated strings, or list of strings, Deprecated):
+            list of services to search in for features
+        collections (comma separated strings or list of strings, Deprecated):
+            list of collections to search in for features
+        features (comma separated strings or list of strings, Deprecated):
+            list of features to include in search
 
     Returns:
         features (list, geo-json dict or pandas.DataFrame, Default=list):
              features of specified service(s), collection(s) or feature(s)
 
     """
-    if services is None and collections is None and features is None:
-        raise ValueError('Specify at least one service, collection or feature')
+    uris = list(itertools.chain(util.listify(uris) or [],
+                                util.listify(services) or [],
+                                util.listify(collections) or [],
+                                util.listify(features) or []))
 
-    services = util.listify(services)
-    collections = util.listify(collections)
-    features = util.listify(features)
+    # group uris by type
+    grouped_uris = util.classify_uris(uris, as_dataframe=False, exclude=['datasets'])
+
+    if not any(grouped_uris):
+        raise ValueError('At least one service, collection, or feature uri must be specified.')
+
+    services = grouped_uris.get('services') or []
+    collections = grouped_uris.get('collections') or []
+    features = grouped_uris.get('features') or []
 
     all_features = []
 
@@ -123,7 +134,7 @@ def get_features(services=None, collections=None, features=None,
         all_features.append(get_metadata(features, as_dataframe=True))
 
     # get metadata for features in services
-    for name in services or []:
+    for name in services:
         provider, service, feature = util.parse_service_uri(name)
         tmp_feats = _get_features(provider, service, update_cache=update_cache)
         all_features.append(tmp_feats)
@@ -131,7 +142,7 @@ def get_features(services=None, collections=None, features=None,
     # get metadata for features in collections
     db = get_db()
     with db_session:
-        for name in collections or []:
+        for name in collections:
             tmp_feats = [f.to_dict() for f in db.Feature.select(
                             lambda c: c.collection.name == name
                         )]
@@ -222,7 +233,7 @@ def get_tags(service):
 
 
 @dispatcher.add_method
-def new_feature(collection, display_name=None, geom_type=None, geom_coords=None,
+def new_feature(collection, display_name=None, geometry=None, geom_type=None, geom_coords=None,
                 description=None, metadata=None):
     """Add a new feature to a collection.
 
@@ -231,6 +242,8 @@ def new_feature(collection, display_name=None, geom_type=None, geom_coords=None,
             name of collection
         display_name (string, Optional, Default=None):
             display name of feature
+        geometry (string or Shapely.geometry.shape, optional, Default=None):
+            well-known-text or Shapely shape representing the geometry of the feature. Alternatively `geom_type` and `geom_coords` can be passed.
         geom_type (string, Optional, Default=None):
              geometry type of feature (i.e. point/line/polygon)
         geom_coords (string or list, Optional, Default=None):
@@ -252,23 +265,14 @@ def new_feature(collection, display_name=None, geom_type=None, geom_coords=None,
     if collection not in get_collections():
         raise ValueError('Collection {} not found'.format(collection))
 
-    geometry = None
-    if geom_type is not None:
-        if geom_type not in ['LineString', 'Point', 'Polygon']:
-            raise ValueError(
-                    'geom_type must be one of LineString, Point or Polygon'
-                )
-
+    if geometry is None and geom_coords is not None and geom_type is not None:
         if isinstance(geom_coords, str):
             geom_coords = json.loads(geom_coords)
 
-        # convert to wkt using gist
-        # https://gist.github.com/drmalex07/5a54fc4f1db06a66679e
-        o = {"coordinates": geom_coords, "type": geom_type}
-        s = json.dumps(o)
-        g1 = geojson.loads(s)
-        g2 = shape(g1)
-        geometry = g2.wkt
+        geometry = shape({"coordinates": geom_coords, "type": geom_type})
+
+    if hasattr(geometry, 'wkt'):
+        geometry = geometry.wkt
 
     uri = util.uuid('feature')
     if display_name is None:

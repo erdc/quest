@@ -61,8 +61,8 @@ class TsRemoveOutliers(TsBase):
 
     def _apply(self, df, options):
         metadata = df.metadata
-        if 'save_path' in metadata:
-            del metadata['save_path']
+        if 'file_path' in metadata:
+            del metadata['file_path']
         param = metadata['parameter']
         sigma = options.get('sigma')
         if sigma is None:
@@ -160,8 +160,8 @@ class TsResample(TsBase):
 
     def _apply(self, df, options):
         metadata = df.metadata
-        if 'save_path' in metadata:
-            del metadata['save_path']
+        if 'file_path' in metadata:
+            del metadata['file_path']
         param = metadata['parameter']
         period = options.get('period')
         method = options.get('method')
