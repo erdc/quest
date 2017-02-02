@@ -1,0 +1,131 @@
+stages:
+  - build
+  - test
+  - deploy
+  - cleanup
+
+# Use Anchors to simplify YAML when GitLab is further upgraded
+
+build_linux_py2:
+  stage: build
+  script:
+    - export PATH=$CONDA_PATH:$PATH
+    - conda env create -q -n dsl-py2-$CI_BUILD_REF -f py2_conda_environment.yml
+    - source activate dsl-py2-$CI_BUILD_REF
+    - python setup.py install
+    - source deactivate dsl-py2-$CI_BUILD_REF
+  tags:
+    - linux
+
+build_linux_py3:
+  stage: build
+  script:
+    - export PATH=$CONDA_PATH:$PATH
+    - echo $PATH
+    - conda env create -q -n dsl-py3-$CI_BUILD_REF -f py3_conda_environment.yml
+    - source activate dsl-py3-$CI_BUILD_REF
+    - python setup.py install
+    - source deactivate dsl-py3-$CI_BUILD_REF
+  tags:
+    - linux
+
+build_win_py2:
+  stage: build
+  script:
+    - echo %CONDA_PATH%
+    - call set PATH=%CONDA_PATH%\..;%CONDA_PATH%;%PATH%
+    - call %CONDA_PATH%\conda env create -q -n dsl-py2-%CI_BUILD_REF% -f py2_conda_environment.yml
+    - call %CONDA_PATH%\activate dsl-py2-%CI_BUILD_REF%
+    - python setup.py install
+    - call %CONDA_PATH%\deactivate dsl-py2-%CI_BUILD_REF%
+  tags:
+    - win
+
+build_win_py3:
+  stage: build
+  script:
+    - echo %CONDA_PATH%
+    - call set PATH=%CONDA_PATH%\..;%CONDA_PATH%;%PATH%
+    - call %CONDA_PATH%\conda env create -q -n dsl-py3-%CI_BUILD_REF% -f py3_conda_environment.yml
+    - call %CONDA_PATH%\activate dsl-py3-%CI_BUILD_REF%
+    - python setup.py install
+    - call %CONDA_PATH%\deactivate dsl-py3-%CI_BUILD_REF%
+  tags:
+    - win
+
+test_linux_py2:
+  stage: test
+  script:
+    - export PATH=$CONDA_PATH:$PATH
+    - source $CONDA_PATH/activate dsl-py2-$CI_BUILD_REF
+    - py.test test
+    - source $CONDA_PATH/deactivate dsl-py2-$CI_BUILD_REF
+  tags:
+    - linux
+
+test_linux_py3:
+  stage: test
+  script:
+    - export PATH=$CONDA_PATH:$PATH
+    - source $CONDA_PATH/activate dsl-py3-$CI_BUILD_REF
+    - py.test test
+    - source $CONDA_PATH/deactivate dsl-py3-$CI_BUILD_REF
+  tags:
+    - linux
+
+test_win_py2:
+  stage: test
+  script:
+    - call set PATH=%CONDA_PATH%\..;%CONDA_PATH%;%PATH%
+    - call %CONDA_PATH%\activate dsl-py2-%CI_BUILD_REF%
+    - call py.test test
+    - call %CONDA_PATH%\deactivate dsl-py2-%CI_BUILD_REF%
+  tags:
+    - win
+
+test_win_py3:
+  stage: test
+  script:
+    - call set PATH=%CONDA_PATH%\..;%CONDA_PATH%;%PATH%
+    - call %CONDA_PATH%\activate dsl-py3-%CI_BUILD_REF%
+    - call py.test test
+    - call %CONDA_PATH%\deactivate dsl-py3-%CI_BUILD_REF%
+  tags:
+    - win
+
+docs:
+  stage: deploy
+  only:
+    - master
+  script:
+    - source $CONDA_PATH/activate dsl-py3-$CI_BUILD_REF
+    - cd ./docs
+    - make -C docs html
+    - tar -czf documentation.tar.gz docs/_build/html
+    - source $CONDA_PATH/deactivate dsl-py3-$CI_BUILD_REF
+# Artifacts will be available yet after further GitLab upgrade
+#  artifacts:
+#    paths:
+#    - documentation.tar.gz
+  tags:
+    - linux
+
+cleanup_linux_job:
+  stage: cleanup
+  script:
+    - $CONDA_PATH/conda env remove -q -y -n dsl-py2-%CI_BUILD_REF%
+    - $CONDA_PATH/conda env remove -q -y -n dsl-py3-%CI_BUILD_REF%
+# 'When' parameter will be available yet after further GitLab upgrade
+#  when: always
+  tags:
+    - linux
+
+cleanup_win_job:
+  stage: cleanup
+  script:
+    - call %CONDA_PATH%\conda env remove -q -y -n dsl-py2-%CI_BUILD_REF%
+    - call %CONDA_PATH%\conda env remove -q -y -n dsl-py3-%CI_BUILD_REF%
+# 'When' parameter will be available yet after further GitLab upgrade
+#  when: always
+  tags:
+    - win
