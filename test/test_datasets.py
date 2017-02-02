@@ -431,14 +431,14 @@ def test_visualize_dataset():
 def test_visualize_dataset_options(dataset_save_path):
     """Return visualization available options for dataset."""
     expected = {'type': 'object',
-                'properties': {'start': {'default': '2016-01-19 17:00:00',
-                                         'type': 'string',
-                                         'description': 'start date'
-                                         },
-                               'end': {'default': '2017-01-18 16:00:00',
+                'properties': {'end': {'default': '2017-01-02 05:00:00',
                                        'type': 'string',
                                        'description': 'end date'
-                                       }
+                                       },
+                               'start': {'default': '2017-01-01 05:00:00',
+                                         'type': 'string',
+                                         'description': 'start date'
+                                         }
                                },
                 'title': 'Timeseries Vizualization Options'
                 }
