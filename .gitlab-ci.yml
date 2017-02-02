@@ -57,10 +57,9 @@ test_linux_py2:
   stage: test
   script:
     - echo $MY_CONDA_PATH
-    - export PATH=$CONDA_PATH:$PATH
+    - export PATH=$MY_CONDA_PATH:$PATH
     - source activate quest-py2-$CI_BUILD_REF
     - py.test test
-    - echo $CONDA_PATH
     - source deactivate
   tags:
     - linux
@@ -68,7 +67,7 @@ test_linux_py2:
 test_linux_py3:
   stage: test
   script:
-    - export PATH=$CONDA_PATH:$PATH
+    - export PATH=$MY_CONDA_PATH:$PATH
     - source activate quest-py3-$CI_BUILD_REF
     - py.test test
     - source deactivate
@@ -78,7 +77,7 @@ test_linux_py3:
 test_win_py2:
   stage: test
   script:
-    - call set PATH=%CONDA_PATH%\..;%CONDA_PATH%;%PATH%
+    - call set PATH=%MY_CONDA_PATH%\..;%MY_CONDA_PATH%;%PATH%
     - call activate quest-py2-%CI_BUILD_REF%
     - call py.test test
     - call deactivate
@@ -88,7 +87,7 @@ test_win_py2:
 test_win_py3:
   stage: test
   script:
-    - call set PATH=%CONDA_PATH%\..;%CONDA_PATH%;%PATH%
+    - call set PATH=%MY_CONDA_PATH%\..;%MY_CONDA_PATH%;%PATH%
     - call activate quest-py3-%CI_BUILD_REF%
     - call py.test test
     - call deactivate
