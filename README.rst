@@ -1,7 +1,9 @@
 Environmental Simulator Quest
 -----------------------------
 
-[![build status](https://public.git.erdc.dren.mil/ci/projects/7/status.png?ref=master)](https://public.git.erdc.dren.mil/ci/projects/7?ref=master)
+.. image:: https://public.git.erdc.dren.mil/ci/projects/7/status.png?ref=master
+   :target: https://public.git.erdc.dren.mil/ci/projects/7?ref=master
+   :alt: Build status of the master branch on gitlab-ci
 
 Python API for Quest
 
@@ -88,3 +90,4 @@ development workflow
 - add-dataset/noaa
 - bugfix/user-services
 - feature/caching-api
+
