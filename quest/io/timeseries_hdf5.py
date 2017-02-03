@@ -18,17 +18,16 @@ class TsHdf5(XYHdf5):
         self.description = 'HDF5 IO for Timeseries datasets'
         self.iotype = 'timeseries'
 
-
     def open(self, path, fmt=None):
         dataframe = self.read(path)
 
-        if fmt == None or fmt.lower() == 'dataframe':
+        if fmt is None or fmt.lower() == 'dataframe':
             return dataframe
 
         # convert index to datetime in case it is a PeriodIndex
         dataframe.index = dataframe.index.to_datetime()
         jstr = json.loads(dataframe.to_json(date_format='iso'))
-        d = {}
+        d = dict()
         d['data'] = {k: sorted(v.items()) for k, v in jstr.items()}
         d['metadata'] = dataframe.metadata
 
@@ -39,7 +38,6 @@ class TsHdf5(XYHdf5):
             return json.dumps(d)
 
         raise NotImplementedError('format %s not recognized' % fmt)
-
 
     def visualize_options(self, path, fmt='json-schema'):
         """visualation options for timeseries datasets"""

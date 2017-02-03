@@ -7,15 +7,16 @@ from .base import IoBase
 from .. import util
 from ..util.log import logger
 
+
 class XYHdf5(IoBase):
     """"""
     def register(self):
-        "Register plugin by setting description and io type."
+        """Register plugin by setting description and io type."""
         self.description = 'Hdf5 for XY datasets '
         self.iotype = 'XYdata'
 
     def read(self, path):
-        "Read metadata and dataframe from HDF5 store."
+        """Read metadata and dataframe from HDF5 store."""
         if not path.endswith('h5'):
             path += '.h5'
 
@@ -26,7 +27,7 @@ class XYHdf5(IoBase):
         return dataframe
 
     def write(self, file_path, dataframe, metadata):
-        "Write dataframe and metadata to HDF5 store."
+        """"Write dataframe and metadata to HDF5 store."""
         base, fname = os.path.split(file_path)
         if not file_path.endswith('h5'):
             file_path += '.h5'
@@ -38,7 +39,6 @@ class XYHdf5(IoBase):
 
         logger.info('file written to: %s' % file_path)
 
-
     def open(self, path, fmt=None):
         dataframe = self.read(path)
 
@@ -48,7 +48,7 @@ class XYHdf5(IoBase):
         # # convert index to datetime in case it is a PeriodIndex
         # dataframe.index = dataframe.index.to_datetime()
         jstr = json.loads(dataframe.to_json())
-        d = {}
+        d = dict()
         d['data'] = {k: sorted(v.items()) for k, v in jstr.items()}
         d['metadata'] = dataframe.metadata
 
