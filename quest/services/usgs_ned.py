@@ -53,6 +53,9 @@ class UsgsNedService(SingleFileBase):
         features = util.to_geodataframe(
             ned.get_raster_availability(service, (-180, -90, 180, 90))
         )
+        if features.empty:
+            return features
+
         features['parameters'] = 'elevation'
         features['file_format'] = 'raster-gdal'
         features['filename'] = features['download url'].apply(lambda x: x.split('/')[-1])
