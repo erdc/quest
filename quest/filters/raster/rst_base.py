@@ -2,13 +2,12 @@
 from ..base import FilterBase
 from quest import util
 
-from quest.api import get_metadata, new_dataset, update_metadata, new_feature, datasets
+from quest.api import get_metadata, new_dataset, update_metadata, new_feature
 from quest.api.projects import active_db
-from quest.api.datasets import DatasetStatus
 
 import os
 import rasterio
-from rasterio.tools.mask import mask
+# from rasterio.tools.mask import mask
 
 class RstBase(FilterBase):
     def register(self, name=None):
@@ -30,7 +29,6 @@ class RstBase(FilterBase):
             },
         }
 
-
     def apply_filter(self, datasets, features=None, options=None,
                      display_name=None, description=None, metadata=None):
 
@@ -44,24 +42,25 @@ class RstBase(FilterBase):
         # from different services
 
         orig_metadata = get_metadata(dataset)[dataset]
-        src_path = orig_metadata['file_path']
+        # src_path = orig_metadata['file_path']
         if display_name is None:
             display_name = 'Created by filter {}'.format(self.name)
         if options is None:
             options ={}
-        options['orig_meta'] = orig_metadata
-        #run filter
-        with rasterio.open(src_path) as src:
-            out_image = self._apply(src,options)
+        else:
+            options['orig_metadata']=orig_metadata
+        # run filter
+        # with rasterio.open(src_path) as src:
+        out_image = self._apply(dataset, options)
 
-        out_meta = src.meta.copy()
+        out_meta = dataset.meta.copy()
         # save the resulting raster
         out_meta.update({"driver": "GTiff",
                          "height": out_image.shape[1],
                          "width": out_image.shape[2],
                          "transform": None})
 
-        cname = orig_metadata['_collection']
+        cname = orig_metadata['collection']
         feature = new_feature(cname,
                               display_name=display_name, geom_type='Polygon',
                               geom_coords=None)
@@ -85,16 +84,21 @@ class RstBase(FilterBase):
             'parameter': orig_metadata['parameter'],
             'datatype': orig_metadata['datatype'],
             'file_format': orig_metadata['file_format'],
-            'options': self.options,
-            'file_path': self.file_path,
-            'status': datasets.DatasetStatus.FILTERED,
-            'message': 'raster filter applied'
         }
+
+        if description is None:
+            description = 'Raster Filter Applied'
+
+        # update metadata
+        new_metadata.update({
+            'parent_datasets': {'dataset':dataset, 'filter_applied': self.name, 'filter_options': options},
+            'file_path': self.file_path,
+        })
         update_metadata(new_dset, quest_metadata=new_metadata, metadata=metadata)
 
         return {'datasets': new_dset, 'features': feature}
 
-    def apply_filter_options(self, fmt='json-schema'):
+    def apply_filter_options(self, fmt, **kwargs):
         schema = {}
 
         return schema
@@ -121,6 +125,6 @@ class RstBase(FilterBase):
         # if fmt == 'smtk':
         #     schema = ''
 
-    def _apply(self, df, metadata, options):
+    def _apply(df, metadata, options):
         raise NotImplementedError
 
