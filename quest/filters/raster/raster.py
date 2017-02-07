@@ -58,6 +58,10 @@ class RstUnitConversion(RstBase):
 
 
 
+    def apply_filter_options(self, fmt, **kwargs):
+        schema = {}
+
+        return schema
 
 #     class RstMerge(RstBase):
 #         def register(self, name='raster-merge-datasets'):
