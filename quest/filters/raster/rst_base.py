@@ -47,12 +47,10 @@ class RstBase(FilterBase):
             display_name = 'Created by filter {}'.format(self.name)
         if options is None:
             options ={}
-        else:
-            options['orig_metadata']=orig_metadata
-        # run filter
+        options['orig_metadata'] = orig_metadata
+        #run filter
         with rasterio.open(src_path) as src:
-            out_image = self._apply(src, options)
-            out_meta = src.profile
+            out_image = self._apply(src,options)
 
         # save the resulting raster
         out_meta.update({"dtype": out_image.dtype,
