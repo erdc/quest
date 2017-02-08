@@ -100,7 +100,6 @@ docs:
     - master
   script:
     - source $MY_CONDA_PATH/activate quest-py3-$CI_BUILD_REF
-    - cd ./docs
     - make -C docs html
     - tar -czf documentation.tar.gz docs/_build/html
     - source deactivate
