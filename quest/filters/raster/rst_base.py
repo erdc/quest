@@ -2,13 +2,12 @@
 from ..base import FilterBase
 from quest import util
 
-from quest.api import get_metadata, new_dataset, update_metadata, new_feature, datasets
+from quest.api import get_metadata, new_dataset, update_metadata, new_feature
 from quest.api.projects import active_db
-from quest.api.datasets import DatasetStatus
 
 import os
 import rasterio
-
+# from rasterio.tools.mask import mask
 
 class RstBase(FilterBase):
     def register(self, name=None):
@@ -33,13 +32,10 @@ class RstBase(FilterBase):
     def _apply_filter(self, datasets, features=None, options=None,
                      display_name=None, description=None, metadata=None):
 
-        if len(datasets > 1):
-            out_image = self._apply(datasets,options)
+        if len(datasets) > 1:
+            raise NotImplementedError('This filter can only be applied to a single dataset')
 
-        else:
-
-            # datasets = util.listify(datasets)
-            dataset = datasets
+        dataset = datasets[0]
 
         # get metadata, path etc from first dataset, i.e. assume all datasets
         # are in same folder. This will break if you try and combine datasets
@@ -56,14 +52,14 @@ class RstBase(FilterBase):
         with rasterio.open(src_path) as src:
             out_image = self._apply(src,options)
 
-        out_meta = src.meta.copy()
+        out_meta = dataset.meta.copy()
         # save the resulting raster
         out_meta.update({"driver": "GTiff",
                          "height": out_image.shape[1],
                          "width": out_image.shape[2],
                          "transform": None})
 
-        cname = orig_metadata['_collection']
+        cname = orig_metadata['collection']
         feature = new_feature(cname,
                               display_name=display_name, geom_type='Polygon',
                               geom_coords=None)
@@ -96,7 +92,7 @@ class RstBase(FilterBase):
 
         return {'datasets': new_dset, 'features': feature}
 
-    def apply_filter_options(self, fmt='json-schema'):
+    def apply_filter_options(self, fmt, **kwargs):
         schema = {}
 
         return schema
