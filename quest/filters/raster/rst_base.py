@@ -42,7 +42,7 @@ class RstBase(FilterBase):
         # from different services
 
         orig_metadata = get_metadata(dataset)[dataset]
-        # src_path = orig_metadata['file_path']
+        src_path = orig_metadata['file_path']
         if display_name is None:
             display_name = 'Created by filter {}'.format(self.name)
         if options is None:
@@ -50,10 +50,10 @@ class RstBase(FilterBase):
         else:
             options['orig_metadata']=orig_metadata
         # run filter
-        # with rasterio.open(src_path) as src:
-        out_image = self._apply(dataset, options)
+        with rasterio.open(src_path) as src:
+            out_image = self._apply(src, options)
 
-        out_meta = dataset.meta.copy()
+        out_meta = src.meta.copy()
         # save the resulting raster
         out_meta.update({"driver": "GTiff",
                          "height": out_image.shape[1],
