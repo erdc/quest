@@ -28,6 +28,7 @@ reserved_geometry_fields = [
 
 reserved_feature_fields.extend(reserved_geometry_fields)
 
+
 class WebServiceBase(with_metaclass(abc.ABCMeta, object)):
     """Base class for data services plugins
     """
@@ -63,12 +64,12 @@ class WebServiceBase(with_metaclass(abc.ABCMeta, object)):
             del features['bbox']
 
         if all(x in features.columns for x in ['latitude', 'longitude']):
-            fn = lambda row:Point((
-                                float(row['longitude']),
-                                float(row['latitude'])
-                                ))
-            features['geometry'] = features.apply(fn,axis=1)
-            features['geometry'] = features.apply(fn,axis=1)
+            fn = lambda row: Point((
+                                    float(row['longitude']),
+                                    float(row['latitude'])
+                                    ))
+            features['geometry'] = features.apply(fn, axis=1)
+            features['geometry'] = features.apply(fn, axis=1)
 
         if 'geometry' in features.columns:
             # TODO
@@ -88,7 +89,9 @@ class WebServiceBase(with_metaclass(abc.ABCMeta, object)):
 
         # merge extra data columns/fields into metadata as a dictionary
         extra_fields = list(set(features.columns.tolist()) - set(reserved_feature_fields))
-        features['metadata'] = features[extra_fields].to_dict(orient='records')
+        # change NaN to None so it can be JSON serialized properly
+        features['metadata'] = [{k: None if v != v else v for k, v in record.items()}
+                                for record in features[extra_fields].to_dict(orient='records')]
         features.drop(extra_fields, axis=1, inplace=True)
         columns = list(set(features.columns.tolist()).intersection(reserved_geometry_fields))
         features.drop(columns, axis=1, inplace=True)
@@ -108,7 +111,7 @@ class WebServiceBase(with_metaclass(abc.ABCMeta, object)):
         # write to cache_file
         util.mkdir_if_doesnt_exist(os.path.split(cache_file)[0])
         with open(cache_file, 'w') as f:
-            f.write(features.to_json())
+            f.write(features.to_json(default=util.to_json_default_handler))
 
         return features
 
@@ -174,6 +177,7 @@ class WebServiceBase(with_metaclass(abc.ABCMeta, object)):
         needs to return dictionary
         eg. {'path': /path/to/dir/or/file, 'format': 'raster'}
         """
+
 
 class SingleFileBase(WebServiceBase):
     """Base file for datasets that are a single file download
