@@ -58,11 +58,11 @@ class NcdcService(WebServiceBase):
         if service == 'gsod':
             features = gsod.get_stations()
             features = pd.DataFrame.from_dict(features, orient='index')
-            # currently to_geojson can't handle datetime objects so deleting these for now.
-            del features['begin']
-            del features['end']
-            # these fields are causing problems when saving to database
-            features = features.drop(['USAF', 'WBAN'], axis=1)
+            # # currently to_geojson can't handle datetime objects so deleting these for now.
+            # del features['begin']
+            # del features['end']
+            # # these fields are causing problems when saving to database
+            # features = features.drop(['USAF', 'WBAN'], axis=1)
 
         # remove locations with invalid coordinates
         valid = pd.notnull(features.latitude) & pd.notnull(features.longitude)
@@ -72,7 +72,6 @@ class NcdcService(WebServiceBase):
                             'longitude': 'longitude',
                             'latitude': 'latitude'
                         }, inplace=True)
-        features['_service_id'] = features.index
 
         return features
 
