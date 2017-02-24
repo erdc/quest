@@ -44,7 +44,7 @@ def get_filters(filters=None, expand=False, **kwargs):
                 kwargs['datatype'] = m.get('datatype')
                 kwargs['parameters'] = m.get('parameter')
                 feature = m.get('feature')
-                kwargs['geometry'] = get_metadata(feature).get(feature).get('geometry')
+                kwargs['geotype'] = get_metadata(feature).get(feature).get('geometry').geom_type
                 return get_filters(filters=kwargs, expand=expand)
             elif k == 'group':
                 avail = [f for f in avail if v == f['group']]
