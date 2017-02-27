@@ -55,6 +55,7 @@ class RstBase(FilterBase):
         out_meta = dataset.meta.copy()
         # save the resulting raster
         out_meta.update({"driver": "GTiff",
+                         "dtype": out_image.dtype,
                          "height": out_image.shape[1],
                          "width": out_image.shape[2],
                          "transform": None})

@@ -1,7 +1,7 @@
 from .rst_base import RstBase
 from pint import UnitRegistry
 import os
-
+import terrapin
 
 class RstUnitConversion(RstBase):
     def register(self, name='rst-unit-conversion'):
