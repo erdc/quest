@@ -59,11 +59,16 @@ class RstUnitConversion(RstBase):
 
 
 
-class RstD8(RstBase):
-    def register(self, name='rst-d8'):
+class RstWaterShed(RstBase):
+    def register(self, name='rst-watershed-delineation'):
                 RstBase.register(self, name=name)
 
     def _apply(self, df, options):
+
+                dem = df.read().squeeze()
+                filterResult = terrapin.d8(dem)
+                filterResult.shape = (1,) + filterResult.shape
+                df = filterResult
 
                 return df
 
