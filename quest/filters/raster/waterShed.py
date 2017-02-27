@@ -1,16 +1,16 @@
-"""Functions required run raster filters"""
 from ..base import FilterBase
 from quest import util
-
 from quest.api import get_metadata, new_dataset, update_metadata, new_feature
 from quest.api.projects import active_db
-
+import terrapin
 import os
 import rasterio
-# from rasterio.tools.mask import mask
+import fiona
+import numpy as np
+from shapely.geometry import mapping
 
-class RstBase(FilterBase):
-    def register(self, name=None):
+class RstWaterShed(FilterBase):
+    def register(self, name='watershed-delineation'):
         """Register Timeseries
 
         """
@@ -47,21 +47,27 @@ class RstBase(FilterBase):
             display_name = 'Created by filter {}'.format(self.name)
         if options is None:
             options ={}
-        else:
-            options['orig_metadata']=orig_metadata
+
+        if not options:
+            raise ValueError('Outlet points are required')
+
+        x,y = options.get('outlet_points')
+        outlet_points = list(zip(x,y))
         # run filter
         with rasterio.open(src_path) as src:
-            out_image = self._apply(src, options)
+            watershed, boundary = terrapin.d8_watershed_delineation(src.read().squeeze(), outlet_points)
+            out_meta = src.profile
 
-        out_meta = src.meta.copy()
-        # save the resulting raster
-        out_meta.update({"driver": "GTiff",
-                         "dtype": out_image.dtype,
-                         "height": out_image.shape[1],
-                         "width": out_image.shape[2],
-                         "transform": None})
+        # Define a polygon feature geometry with one attribute
+        schema = {
+            'geometry': 'Polygon',
+            'properties': {'id': 'int'},
+        }
 
-        cname = orig_metadata['collection']
+
+        # # save the resulting raster
+        out_meta.update(height=watershed.shape[0], width=watershed.shape[1])
+        cname = orig_metadata['collection']#lakenya replaced
         feature = new_feature(cname,
                               display_name=display_name, geom_type='Polygon',
                               geom_coords=None)
@@ -72,14 +78,31 @@ class RstBase(FilterBase):
                                description=description)
 
         prj = os.path.dirname(active_db())
-        dst = os.path.join(prj, cname, new_dset)
+        dst = os.path.join(prj,  cname, new_dset)
         util.mkdir_if_doesnt_exist(dst)
-        dst = os.path.join(dst, new_dset+'.tif')
+        watershed_tif = os.path.join(dst, new_dset+'.tif')
+        boundary_polygon = os.path.join(dst,new_dset+'.shp')
 
-        with rasterio.open(dst, "w", **out_meta) as dest:
-            dest.write(out_image)
+        # Write a new Shapefile
+        with fiona.open(boundary_polygon, 'w', 'ESRI Shapefile', schema) as c:
+            ## If there are multiple geometries, put the "for" loop here
+            c.write({
+                'geometry': mapping(boundary[1]),
+                'properties': {'id': 123},
+            })
 
-        self.file_path = dst
+        data = watershed.data.astype(out_meta['dtype'])
+        data = np.transpose(data)
+
+        # rotate image 90 degrees
+        data = np.rot90(data)
+
+
+        #write out tif file
+        with rasterio.open(watershed_tif, 'w', **out_meta) as src:
+                src.write(data, 1)
+
+        self.file_path = watershed_tif
 
         new_metadata = {
             'parameter': orig_metadata['parameter'],
@@ -101,31 +124,31 @@ class RstBase(FilterBase):
 
     def apply_filter_options(self, fmt, **kwargs):
         schema = {}
+        # # if fmt == 'json-schema':
+        properties = {
+                "bbox": {
+                    "type": "string",
+                    "description": "bounding box 'xmin, ymin, xmax, ymax'",
+                },
+                "nodata": {
+                    "type": "number",
+                    "description": "no data value for raster.",
+                    "default": 0,
+                },
+            }
 
-        return schema
-        # if fmt == 'json-schema':
-        #     properties = {
-        #         "bbox": {
-        #             "type": "string",
-        #             "description": "bounding box 'xmin, ymin, xmax, ymax'",
-        #         },
-        #         "nodata": {
-        #             "type": "number",
-        #             "description": "no data value for raster.",
-        #             "default": 0,
-        #         },
-        #     }
-        #
-        #     schema = {
-        #         "title": "Raster Clip",
-        #         "type": "object",
-        #         "properties": properties,
-        #         "required": ['bbox'],
-        #     }
+        schema = {
+                "title": "Raster Watershed Delineation",
+                "type": "object",
+                "properties": properties,
+                "required": ['outlet_points'],
+            }
         #
         # if fmt == 'smtk':
         #     schema = ''
+        #
+        return schema
 
-    def _apply(df, metadata, options):
-        raise NotImplementedError
+    # def _apply(df, metadata, options):
+    #     raise NotImplementedError
 
