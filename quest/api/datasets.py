@@ -2,14 +2,26 @@
 import json
 from jsonrpc import dispatcher
 import os
-from ..util.log import logger
 
+from ..util.log import logger
 from .. import util
 from .database import get_db, db_session
 import pandas as pd
 from .metadata import get_metadata, update_metadata
 from .projects import _get_project_dir
 from .tasks import add_async
+
+
+class DatasetStatus:
+    """
+    Enum of string constants representing dataset statuses.
+    """
+    NOT_STAGED = 'not staged'
+    STAGED = 'staged for download'
+    FAILED_DOWNLOAD = 'failed download'
+    DOWNLOADED = 'downloaded'
+    PENDING = 'pending'
+    FILTERED = 'filter applied'
 
 
 @dispatcher.add_method
@@ -86,6 +98,7 @@ def download_datasets(datasets, raise_on_error=False):
         collection_path = os.path.join(project_path, dataset['collection'])
         feature_uri = dataset['service'] + '/' + dataset['service_id']
         try:
+            update_metadata(idx, quest_metadata={'status': DatasetStatus.PENDING})
             kwargs = json.loads(dataset['options'])
             if kwargs is not None:
                 all_metadata = download(feature_uri,
@@ -99,7 +112,7 @@ def download_datasets(datasets, raise_on_error=False):
             metadata = all_metadata.pop('metadata', None)
             quest_metadata = all_metadata
             quest_metadata.update({
-                'status': 'downloaded',
+                'status': DatasetStatus.DOWNLOADED,
                 'message': 'success',
                 })
         except Exception as e:
@@ -107,7 +120,7 @@ def download_datasets(datasets, raise_on_error=False):
                 raise
 
             quest_metadata = {
-                'status': 'failed download',
+                'status': DatasetStatus.FAILED_DOWNLOAD,
                 'message': str(e),
                 }
 
@@ -256,7 +269,7 @@ def new_dataset(feature, source=None, display_name=None,
         'metadata': metadata,
     }
     if source == 'download':
-        quest_metadata.update({'status': 'not staged'})
+        quest_metadata.update({'status': DatasetStatus.NOT_STAGED})
 
     with db_session:
         db.Dataset(**quest_metadata)
@@ -299,7 +312,7 @@ def stage_for_download(uris, options=None):
 
         quest_metadata = {
             'options': json.dumps(kwargs),
-            'status': 'staged for download',
+            'status': DatasetStatus.STAGED,
             'parameter': kwargs.get('parameter') if kwargs else None
         }
 
@@ -381,7 +394,7 @@ def visualize_dataset(dataset, update_cache=False, **kwargs):
 
     # TODO if vizualize_dataset is called with different options for a given
     # dataset the update cache.
-    #if update_cache or visualization_path is None:
+    # if update_cache or visualization_path is None:
     file_format = m.get('file_format')
     path = m.get('file_path')
 

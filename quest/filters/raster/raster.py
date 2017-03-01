@@ -10,12 +10,9 @@ import rasterio
 from rasterio.mask import mask
 
 
-
-
 class RstUnitConversion(RstBase):
     def register(self, name='raster-unit-conversion'):
         RstBase.register(self, name=name)
-
 
     def _apply(self, df, options):
         df = df.read()
@@ -43,12 +40,11 @@ class RstUnitConversion(RstBase):
         metadata.update({'units': options.get('to_units')})
         df.metadata = metadata
 
-
-
         return from_units
 
     def apply_filter_options(self, fmt, **kwargs):
-       raise NotImplementedError
+        raise NotImplementedError
+
 
 class RstMerge(RstBase):
         def register(self, name='raster-merge-datasets'):
@@ -84,6 +80,7 @@ class RstMerge(RstBase):
 
         def apply_filter_options(self, fmt, **kwargs):
             raise NotImplementedError
+
 
 class RstClipPolygon(RstBase):
     def register(self, name='raster-clip-polygon'):

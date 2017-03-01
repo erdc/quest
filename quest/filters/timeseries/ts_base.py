@@ -1,7 +1,9 @@
 from ..base import FilterBase
 from quest.api import get_metadata, new_dataset, update_metadata
+from quest.api.datasets import DatasetStatus
 from quest import util
 import os
+
 
 class TsBase(FilterBase):
     def register(self, name=None):
@@ -23,8 +25,7 @@ class TsBase(FilterBase):
             },
         }
 
-
-    def apply_filter(self, datasets, features=None, options=None,
+    def _apply_filter(self, datasets, features=None, options=None,
                      display_name=None, description=None, metadata=None):
 
         if len(datasets) > 1:
@@ -40,7 +41,7 @@ class TsBase(FilterBase):
 
         df = io.read(orig_metadata['file_path'])
 
-        #apply transformation
+        # apply transformation
         if options is None:
             options = {}
 
@@ -50,19 +51,20 @@ class TsBase(FilterBase):
         # setup new dataset
         new_metadata = {
             'parameter': new_df.metadata.get('parameter'),
-            'datatype': orig_metadata['datatype'],
-            'parent_datasets': {'dataset':dataset, 'filter_applied': self.name, 'filter_options': options},
-            'file_format': orig_metadata['file_format'],
             'unit': new_df.metadata.get('unit'),
+            'datatype': orig_metadata['datatype'],
+            'file_format': orig_metadata['file_format'],
+            'parent_datasets': self.options,
+            'options': self.options,
+            'status': DatasetStatus.FILTERED,
+            'message': 'TS Filter Applied'
         }
-
-        if description is None:
-            description = 'TS Filter Applied'
 
         new_dset = new_dataset(orig_metadata['feature'],
                                source='derived',
                                display_name=display_name,
-                               description=description)
+                               description=description,
+                               )
 
         # save dataframe
         file_path = os.path.split(orig_metadata['file_path'])[0]
@@ -79,5 +81,5 @@ class TsBase(FilterBase):
 
         return schema
 
-    def _apply(df, metadata, options):
+    def _apply(self, df, metadata, options):
         raise NotImplementedError

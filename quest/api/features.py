@@ -69,6 +69,7 @@ def add_features(collection, features):
                     'name': uri,
                     'collection': collection,
                     'geometry': geometry,
+                    'metadata': json.dumps(data['metadata'], default=util.to_json_default_handler),
                     })
             db.Feature(**data)
             uris.append(uri)
