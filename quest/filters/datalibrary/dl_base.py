@@ -85,7 +85,6 @@ class DatalibraryBase(FilterBase):
         new_metadata = self._new_dataset_metadata()
 
         new_metadata.update({
-            'parent_datasets': self.options,
             'options': self.options,
             'status': DatasetStatus.FILTERED,
             'message': 'VITD Filter Applied',
