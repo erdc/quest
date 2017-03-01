@@ -54,7 +54,6 @@ class TsBase(FilterBase):
             'unit': new_df.metadata.get('unit'),
             'datatype': orig_metadata['datatype'],
             'file_format': orig_metadata['file_format'],
-            'parent_datasets': self.options,
             'options': self.options,
             'status': DatasetStatus.FILTERED,
             'message': 'TS Filter Applied'
