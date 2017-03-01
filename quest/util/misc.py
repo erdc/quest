@@ -41,8 +41,7 @@ def bbox2poly(x1, y1, x2, y2, reverse_order=False, as_geojson=False, as_shapely=
     xmin, xmax = [float(x1), float(x2)]
     ymin, ymax = [float(y1), float(y2)]
 
-
-    poly = [[xmin, ymin], [xmin, ymax], [xmax, ymax], [xmax, ymin]]
+    poly = list([[xmin, ymin], [xmin, ymax], [xmax, ymax], [xmax, ymin]])
     poly.append(poly[0])
 
     if not (as_geojson or as_shapely):
@@ -68,14 +67,13 @@ def bbox2poly(x1, y1, x2, y2, reverse_order=False, as_geojson=False, as_shapely=
         return polygon(poly)
     # else bbox spans 180 longitude so create multipolygon
 
-
-    poly1 = [[xmin, ymin], [xmin, ymax], [xmax, ymax], [xmax, ymin]]
+    poly1 = list([[xmin, ymin], [xmin, ymax], [xmax, ymax], [xmax, ymin]])
     poly1.append(poly1[0])
 
     xmin = xmin2 or -180
     xmax = xmax2 or 180
 
-    poly2 = [[xmin, ymin], [xmin, ymax], [xmax, ymax], [xmax, ymin]]
+    poly2 = list([xmin, ymin], [xmin, ymax], [xmax, ymax], [xmax, ymin])
     poly2.append(poly2[0])
 
     return multi_polygon(polygons=[polygon(poly1), polygon(poly2)])
@@ -85,7 +83,7 @@ def build_smtk(smtk_subdir, smtk_filename, **kwargs):
     """build smtk file from template and kwargs and stream as string.
 
     """
-    env = Environment(loader=FileSystemLoader(os.path.join(get_pkg_data_path('smtk'),smtk_subdir)))
+    env = Environment(loader=FileSystemLoader(os.path.join(get_pkg_data_path('smtk'), smtk_subdir)))
     return env.get_template(smtk_filename).render(**kwargs)
 
 
@@ -360,6 +358,7 @@ def to_geodataframe(feature_collection):
         features[feature['id']] = data
     return gpd.GeoDataFrame.from_dict(features, orient='index')
 
+
 def to_json_default_handler(obj):
     if hasattr(obj, 'isoformat'):
         return obj.isoformat()
@@ -413,10 +412,10 @@ def uuid(resource_type):
     """
     uuid = uuid4().hex
 
-    if resource_type=='feature':
+    if resource_type == 'feature':
         uuid = 'f' + uuid[1:]
 
-    if resource_type=='dataset':
+    if resource_type == 'dataset':
         uuid = 'd' + uuid[1:]
 
     return uuid
