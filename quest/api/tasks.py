@@ -1,8 +1,11 @@
+from concurrent.futures import CancelledError
 from functools import wraps
 from distributed import Client, LocalCluster
 import psutil
 from jsonrpc import dispatcher
 import pandas as pd
+from tornado import gen
+import sys
 from ..util import listify
 from ..util.log import logger
 
@@ -36,18 +39,30 @@ def add_async(f):
         if async:
             client = _get_client()
             future = client.submit(f, *args, **kwargs)
+            client.loop.add_callback(add_result_when_done, future)
             futures[future.key] = future
             tasks[future.key] = {
                 'fn': f.__name__,
                 'args': args,
                 'kwargs': kwargs,
-                'status': None,
+                'status': 'pending',
                 'result': None,
             }
             return future.key
         else:
             return f(*args, **kwargs)
     return wrapper
+
+
+@dispatcher.add_method
+def get_pending_tasks(**kwargs):
+    """Return list of pending tasks
+
+    calls get_tasks with filter -> status=pending, passes through other kwargs
+    (filters={}, expand=None, as_dataframe=None, with_future=None)
+
+    """
+    return get_tasks(filters={'status': 'pending'}, **kwargs)
 
 
 @dispatcher.add_method
@@ -85,9 +100,6 @@ def get_tasks(filters=None, expand=None, as_dataframe=None, with_future=None):
         tasks (list, dict, or pandas dataframe, Default=list):
             all available tasks
     """
-    # update status
-    _update_status()
-
     task_list = tasks
     if filters:
         for fk, fv in filters.items():
@@ -134,7 +146,6 @@ def remove_tasks(status=None):
         status = ['cancelled', 'finished', 'lost', 'error'] from task list
     """
     global tasks
-    _update_status()
     if status:
         status = listify(status)
     else:
@@ -150,9 +161,13 @@ def remove_tasks(status=None):
     return
 
 
-def _update_status():
-    for k in tasks.keys():
-        future = futures[k]
-        tasks[k]['status'] = future.status
-        if future.status == 'finished':
-            tasks[k]['result'] = future.result()
+@gen.coroutine
+def add_result_when_done(future):
+    try:
+        result = yield future._result()
+        tasks[future.key]['result'] = result
+    except CancelledError as e:
+        tasks[future.key]['result'] = {'error_message': 'task cancelled'}
+    except:
+        tasks[future.key]['result'] = {'error_message': str(sys.exc_info()[0])}
+    tasks[future.key]['status'] = future.status
