@@ -6,7 +6,7 @@ stages:
 
 # Use Anchors to simplify YAML when GitLab is further upgraded
 
-build_nix_py2:
+build_linux_py2:
   stage: build
   script:
     - export PATH=$MY_CONDA_PATH:$PATH
@@ -15,9 +15,9 @@ build_nix_py2:
     - python setup.py install
     - source deactivate
   tags:
-    - unix-like
+    - linux
 
-build_nix_py3:
+build_linux_py3:
   stage: build
   script:
     - export PATH=$MY_CONDA_PATH:$PATH
@@ -27,8 +27,31 @@ build_nix_py3:
     - python setup.py install
     - source deactivate
   tags:
-    - unix-like
+    - linux
+    
+build_mac_py2:
+  stage: build
+  script:
+    - export PATH=$MY_CONDA_PATH:$PATH
+    - conda env create -q -n quest-py2-$CI_BUILD_REF -f py2_conda_environment.yml
+    - source activate quest-py2-$CI_BUILD_REF
+    - python setup.py install
+    - source deactivate
+  tags:
+    - mac
 
+build_mac_py3:
+  stage: build
+  script:
+    - export PATH=$MY_CONDA_PATH:$PATH
+    - echo $PATH
+    - conda env create -q -n quest-py3-$CI_BUILD_REF -f py3_conda_environment.yml
+    - source activate quest-py3-$CI_BUILD_REF
+    - python setup.py install
+    - source deactivate
+  tags:
+    - mac
+    
 build_win_py2:
   stage: build
   script:
@@ -53,7 +76,7 @@ build_win_py3:
   tags:
     - win
 
-test_nix_py2:
+test_linux_py2:
   stage: test
   script:
     - echo $MY_CONDA_PATH
@@ -62,9 +85,9 @@ test_nix_py2:
     - py.test test
     - source deactivate
   tags:
-    - unix-like
+    - linux
 
-test_nix_py3:
+test_linux_py3:
   stage: test
   script:
     - export PATH=$MY_CONDA_PATH:$PATH
@@ -72,7 +95,28 @@ test_nix_py3:
     - py.test test
     - source deactivate
   tags:
-    - unix-like
+    - linux
+
+test_mac_py2:
+  stage: test
+  script:
+    - echo $MY_CONDA_PATH
+    - export PATH=$MY_CONDA_PATH:$PATH
+    - source activate quest-py2-$CI_BUILD_REF
+    - py.test test
+    - source deactivate
+  tags:
+    - mac
+
+test_mac_py3:
+  stage: test
+  script:
+    - export PATH=$MY_CONDA_PATH:$PATH
+    - source activate quest-py3-$CI_BUILD_REF
+    - py.test test
+    - source deactivate
+  tags:
+    - mac
 
 test_win_py2:
   stage: test
@@ -111,7 +155,7 @@ docs:
   tags:
     - docs
 
-cleanup_nix_job:
+cleanup_linux_job:
   stage: cleanup
   script:
     - $MY_CONDA_PATH/conda env remove -q -y -n quest-py2-$CI_BUILD_REF
@@ -119,7 +163,17 @@ cleanup_nix_job:
 # 'When' parameter will be available yet after further GitLab upgrade
 #  when: always
   tags:
-    - unix-like
+    - linux
+
+cleanup_mac_job:
+  stage: cleanup
+  script:
+    - $MY_CONDA_PATH/conda env remove -q -y -n quest-py2-$CI_BUILD_REF
+    - $MY_CONDA_PATH/conda env remove -q -y -n quest-py3-$CI_BUILD_REF
+# 'When' parameter will be available yet after further GitLab upgrade
+#  when: always
+  tags:
+    - mac
 
 cleanup_win_job:
   stage: cleanup
