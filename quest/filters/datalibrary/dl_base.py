@@ -3,6 +3,7 @@ from ..base import FilterBase
 from quest import get_pkg_data_path, util
 from quest.api import get_metadata, get_datasets, new_dataset, update_metadata, new_feature
 from quest.api.projects import active_db
+from quest.api.datasets import DatasetStatus
 
 from geojson import Polygon
 from jinja2 import Environment, FileSystemLoader
@@ -36,8 +37,7 @@ class DatalibraryBase(FilterBase):
             },
         }
 
-
-    def apply_filter(self, datasets, features=None, options=None,
+    def _apply_filter(self, datasets, features=None, options=None,
                      display_name=None, description=None, metadata=None):
 
         datasets = util.listify(datasets)
@@ -84,14 +84,10 @@ class DatalibraryBase(FilterBase):
         self.file_path = dst
         new_metadata = self._new_dataset_metadata()
 
-        if description is None:
-            description = 'VITD Filter Applied'
-
-        # update metadata
         new_metadata.update({
-            'filter_applied': self.name,
-            'filter_options': options,
-            'parent_datasets': ','.join(datasets),
+            'options': self.options,
+            'status': DatasetStatus.FILTERED,
+            'message': 'VITD Filter Applied',
             'file_path': self.file_path,
         })
         update_metadata(new_dset, quest_metadata=new_metadata, metadata=metadata)
