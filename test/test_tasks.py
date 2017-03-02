@@ -36,6 +36,9 @@ def test_launch_tasks():
     for task, msg in zip(test_tasks, ['first', 'second', 'third']):
         assert {'delay': 1, 'msg': msg} == quest.api.get_task(task)['result']
 
+    # cleanup
+    quest.api.remove_tasks()
+
 
 def test_add_remove_tasks():
     test_tasks = [
