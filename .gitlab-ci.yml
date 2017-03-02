@@ -114,8 +114,8 @@ docs:
 cleanup_linux_job:
   stage: cleanup
   script:
-    - $MY_CONDA_PATH/conda env remove -q -y -n quest-py2-%CI_BUILD_REF%
-    - $MY_CONDA_PATH/conda env remove -q -y -n quest-py3-%CI_BUILD_REF%
+    - $MY_CONDA_PATH/conda env remove -q -y -n quest-py2-$CI_BUILD_REF
+    - $MY_CONDA_PATH/conda env remove -q -y -n quest-py3-$CI_BUILD_REF
 # 'When' parameter will be available yet after further GitLab upgrade
 #  when: always
   tags:
