@@ -61,7 +61,6 @@ def define_models(db):
         message = orm.Optional(str)
         file_path = orm.Optional(str, nullable=True)
         visualization_path = orm.Optional(str)
-        parent_datasets = orm.Optional(orm.Json)
 
         # setup relationships
         feature = orm.Required(Feature)

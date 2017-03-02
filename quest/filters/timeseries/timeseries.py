@@ -103,6 +103,7 @@ class TsRemoveOutliers(TsBase):
 
         return schema
 
+
 class TsUnitConversion(TsBase):
     def register(self, name='ts-unit-conversion'):
         TsBase.register(self, name=name)
@@ -176,7 +177,6 @@ class TsResample(TsBase):
         new_df.metadata = metadata
         return new_df
 
-
     def apply_filter_options(self, fmt, **kwargs):
         if fmt == 'smtk':
             schema = util.build_smtk('filter_options','filter_timeseries_resample.sbt')
@@ -224,7 +224,7 @@ class TsResample(TsBase):
 #
 #         TsBase.register(self, name=name)
 #
-#     def apply_filter(self, collection_name, service, location, parameter, export_path, filename, start_time=None):
+#     def _apply_filter(self, collection_name, service, location, parameter, export_path, filename, start_time=None):
 #
 #         collection = get_collection(collection_name)
 #         path = collection['path']

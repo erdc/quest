@@ -2,12 +2,13 @@
 from ..base import FilterBase
 from quest import util
 
-from quest.api import get_metadata, new_dataset, update_metadata, new_feature
+from quest.api import get_metadata, new_dataset, update_metadata, new_feature, datasets
 from quest.api.projects import active_db
+from quest.api.datasets import DatasetStatus
 
 import os
 import rasterio
-from rasterio.tools.mask import mask
+
 
 class RstBase(FilterBase):
     def register(self, name=None):
@@ -29,8 +30,7 @@ class RstBase(FilterBase):
             },
         }
 
-
-    def apply_filter(self, datasets, features=None, options=None,
+    def _apply_filter(self, datasets, features=None, options=None,
                      display_name=None, description=None, metadata=None):
 
         if len(datasets > 1):
@@ -38,7 +38,7 @@ class RstBase(FilterBase):
 
         else:
 
-        # datasets = util.listify(datasets)
+            # datasets = util.listify(datasets)
             dataset = datasets
 
         # get metadata, path etc from first dataset, i.e. assume all datasets
@@ -87,18 +87,11 @@ class RstBase(FilterBase):
             'parameter': orig_metadata['parameter'],
             'datatype': orig_metadata['datatype'],
             'file_format': orig_metadata['file_format'],
-        }
-
-        if description is None:
-            description = 'raster filter applied'
-
-        # update metadata
-        new_metadata.update({
-            'filter_applied': self.name,
-            'filter_options': options,
-            'parent_datasets': ','.join(datasets),
+            'options': self.options,
             'file_path': self.file_path,
-        })
+            'status': datasets.DatasetStatus.FILTERED,
+            'message': 'raster filter applied'
+        }
         update_metadata(new_dset, quest_metadata=new_metadata, metadata=metadata)
 
         return {'datasets': new_dset, 'features': feature}
@@ -130,6 +123,6 @@ class RstBase(FilterBase):
         # if fmt == 'smtk':
         #     schema = ''
 
-    def _apply(df, metadata, options):
+    def _apply(self, df, metadata, options):
         raise NotImplementedError
 
