@@ -18,3 +18,4 @@ pony
 distributed
 psutil
 pint
+tornado

@@ -34,3 +34,4 @@ dependencies:
     - psutil
     - pint
     - pony
+    - tornado
