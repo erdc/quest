@@ -220,7 +220,7 @@ def parse_service_uri(uri):
         returns:
             parsed_uri (tuple): tuple containing provider, service, feature
     """
-    svc, feature = (uri.split('://')[-1].split('/') + [None])[:2]
+    svc, feature = (uri.split('://')[-1].split('/', 1) + [None])[:2]
     provider, service = (svc.split(':') + [None])[:2]
 
     return provider, service, feature
