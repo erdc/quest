@@ -52,14 +52,13 @@ class RstBase(FilterBase):
         # run filter
         with rasterio.open(src_path) as src:
             out_image = self._apply(src, options)
+            out_meta = src.profile
 
-        out_meta = src.meta.copy()
         # save the resulting raster
-        out_meta.update({"driver": "GTiff",
-                         "dtype": out_image.dtype,
-                         "height": out_image.shape[1],
-                         "width": out_image.shape[2],
+        out_meta.update({"height": out_image.shape[0],
+                         "width": out_image.shape[1],
                          "transform": None})
+
 
         cname = orig_metadata['collection']
         feature = new_feature(cname,
@@ -77,7 +76,7 @@ class RstBase(FilterBase):
         dst = os.path.join(dst, new_dset+'.tif')
 
         with rasterio.open(dst, "w", **out_meta) as dest:
-            dest.write(out_image)
+            dest.write(out_image.astype(out_meta['dtype']),1)
 
         self.file_path = dst
 
