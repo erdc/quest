@@ -38,10 +38,76 @@ def test_parse_service_uri():
 
 
 def test_bbox2poly():
-    bbox = quest.util.bbox2poly(-244.34479950938268, 6.5895717344199625, -224.63313773902783, 20.882714122571414)
 
-    assert bbox == [[-244.34479950938268, 6.5895717344199625],
+    bbox = -244.34479950938268, 6.5895717344199625, -224.63313773902783, 20.882714122571414
+
+    poly = quest.util.bbox2poly(*bbox)
+
+    assert poly == [[-244.34479950938268, 6.5895717344199625],
                     [-244.34479950938268, 20.882714122571414],
                     [-224.63313773902783, 20.882714122571414],
                     [-224.63313773902783, 6.5895717344199625],
                     [-244.34479950938268, 6.5895717344199625]]
+
+    bbox = -200, -20, -160, 20
+
+    poly = quest.util.bbox2poly(*bbox, as_geojson=True)
+
+    assert poly == {"coordinates": [],
+                    "polygons": [{"coordinates": [[-180, -20.0],
+                                                  [-180, 20.0],
+                                                  [-160.0, 20.0],
+                                                  [-160.0, -20.0],
+                                                  [-180, -20.0]],
+                                  "type": "Polygon"},
+                                 {"coordinates": [[160.0, -20.0],
+                                                  [160.0, 20.0],
+                                                  [180, 20.0],
+                                                  [180, -20.0],
+                                                  [160.0, -20.0]],
+                                  "type": "Polygon"}],
+                    "type": "MultiPolygon"}
+
+    poly = quest.util.bbox2poly(*bbox, as_shapely=True)
+    poly = str(poly)
+
+    assert poly == 'MULTIPOLYGON (((-180 -20, -180 20, -160 20, -160 -20, -180 -20)), ' \
+                                 '((160 -20, 160 20, 180 20, 180 -20, 160 -20)))'
+
+    bbox = -10, -10, 10, 10
+
+    poly = quest.util.bbox2poly(*bbox, as_geojson=True)
+
+    assert poly == {'coordinates': [[-10.0, -10.0],
+                                    [-10.0, 10.0],
+                                    [10.0, 10.0],
+                                    [10.0, -10.0],
+                                    [-10.0, -10.0]],
+                    'type': 'Polygon'}
+
+    bbox = 160, -20, 200, 20
+
+    poly = quest.util.bbox2poly(*bbox, as_geojson=True)
+
+    assert poly == {'coordinates': [],
+                    'polygons': [{'coordinates': [[160.0, -20.0],
+                                                  [160.0, 20.0],
+                                                  [180, 20.0],
+                                                  [180, -20.0],
+                                                  [160.0, -20.0]],
+                                  'type': 'Polygon'},
+                                 {'coordinates': [[-180, -20.0],
+                                                  [-180, 20.0],
+                                                  [-160.0, 20.0],
+                                                  [-160.0, -20.0],
+                                                  [-180, -20.0]],
+                                  'type': 'Polygon'}],
+                    'type': 'MultiPolygon'}
+
+    poly = quest.util.bbox2poly(*bbox)
+
+    assert poly == [[160.0, -20.0],
+                    [160.0, 20.0],
+                    [200.0, 20.0],
+                    [200.0, -20.0],
+                    [160.0, -20.0]]
