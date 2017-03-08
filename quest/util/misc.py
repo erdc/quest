@@ -73,7 +73,7 @@ def bbox2poly(x1, y1, x2, y2, reverse_order=False, as_geojson=False, as_shapely=
     xmin = xmin2 or -180
     xmax = xmax2 or 180
 
-    poly2 = list([xmin, ymin], [xmin, ymax], [xmax, ymax], [xmax, ymin])
+    poly2 = list([[xmin, ymin], [xmin, ymax], [xmax, ymax], [xmax, ymin]])
     poly2.append(poly2[0])
 
     return multi_polygon(polygons=[polygon(poly1), polygon(poly2)])
