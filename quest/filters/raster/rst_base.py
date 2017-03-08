@@ -82,6 +82,13 @@ class RstBase(FilterBase):
             'parameter': orig_metadata['parameter'],
             'datatype': orig_metadata['datatype'],
             'file_format': orig_metadata['file_format'],
+        }
+
+        if description is None:
+            description = 'Raster Filter Applied'
+
+        # update metadata
+        new_metadata.update({
             'options': self.options,
             'file_path': self.file_path,
             'status': datasets.DatasetStatus.FILTERED,
