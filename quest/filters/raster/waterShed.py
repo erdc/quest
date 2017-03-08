@@ -29,7 +29,7 @@ class RstWaterShed(FilterBase):
             },
         }
 
-    def apply_filter(self, datasets, features=None, options=None,
+    def _apply_filter(self, datasets, features=None, options=None,
                      display_name=None, description=None, metadata=None):
 
         if len(datasets) > 1:
@@ -115,7 +115,7 @@ class RstWaterShed(FilterBase):
 
         # update metadata
         new_metadata.update({
-            'parent_datasets': {'dataset':dataset, 'filter_applied': self.name, 'filter_options': options},
+            'options': self.options,
             'file_path': self.file_path,
         })
         update_metadata(new_dset, quest_metadata=new_metadata, metadata=metadata)
