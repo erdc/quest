@@ -1,6 +1,12 @@
 from time import sleep
+from quest.api.tasks import add_async, get_pending_tasks
+import pytest
 import quest
-from quest.api.tasks import add_async
+
+
+@pytest.fixture
+def task_cleanup(api, request):
+    request.addfinalizer(api.remove_tasks)
 
 @add_async
 def long_process(delay, msg):
@@ -16,58 +22,58 @@ def long_process_with_exception(delay, msg):
 
 
 def wait_until_done():
-    while len(quest.api.get_pending_tasks()) > 0:
+    while len(get_pending_tasks()) > 0:
         sleep(0.2)
     return
 
 
-def test_launch_tasks():
+@pytest.mark.parametrize('api', [quest.api])
+def test_launch_tasks(api, task_cleanup):
     test_tasks = [
         long_process(1, 'first', async=True),
         long_process(1, 'second', async=True),
         long_process(1, 'third', async=True),
         ]
 
-    tasks = quest.api.get_tasks(as_dataframe=True)
+    tasks = api.get_tasks(as_dataframe=True)
     assert len(tasks) == 3
     assert sorted(test_tasks) == sorted(tasks.index.values)
 
     wait_until_done()
     for task, msg in zip(test_tasks, ['first', 'second', 'third']):
-        assert {'delay': 1, 'msg': msg} == quest.api.get_task(task)['result']
-
-    # cleanup
-    quest.api.remove_tasks()
+        assert {'delay': 1, 'msg': msg} == api.get_task(task)['result']
 
 
-def test_add_remove_tasks():
+@pytest.mark.parametrize('api', [quest.api])
+def test_add_remove_tasks(api):
     test_tasks = [
         long_process(1, 'first', async=True),
         long_process(1, 'second', async=True),
         long_process(1, 'third', async=True),
         ]
 
-    assert len(quest.api.get_tasks()) == 3
+    assert len(api.get_tasks()) == 3
     test_tasks.append(long_process(5, 'fourth', async=True))
-    assert len(quest.api.get_tasks()) == 4
-    quest.api.cancel_tasks(test_tasks[3])
-    assert len(quest.api.get_tasks(filters={'status': 'cancelled'})) == 1
-    quest.api.remove_tasks(status='cancelled')
-    assert len(quest.api.get_tasks(filters={'status': 'cancelled'})) == 0
-    assert len(quest.api.get_tasks()) == 3
+    assert len(api.get_tasks()) == 4
+    api.cancel_tasks(test_tasks[3])
+    assert len(api.get_tasks(filters={'status': 'cancelled'})) == 1
+    api.remove_tasks(status='cancelled')
+    assert len(api.get_tasks(filters={'status': 'cancelled'})) == 0
+    assert len(api.get_tasks()) == 3
     wait_until_done()
-    quest.api.remove_tasks()
-    assert len(quest.api.get_tasks()) == 0
+    api.remove_tasks()
+    assert len(api.get_tasks()) == 0
 
 
-def test_task_with_exception():
+@pytest.mark.parametrize('api', [quest.api])
+def test_task_with_exception(api, task_cleanup):
     test_tasks = [
         long_process(1, 'first', async=True),
         long_process_with_exception(1, 'second', async=True),
         long_process(1, 'third', async=True),
         ]
 
-    tasks = quest.api.get_tasks(as_dataframe=True)
+    tasks = api.get_tasks(as_dataframe=False)
     assert len(tasks) == 3
     wait_until_done()
-    assert len(quest.api.get_tasks(filters={'status': 'error'})) == 1
+    assert len(api.get_tasks(filters={'status': 'error'})) == 1

@@ -1,7 +1,6 @@
 """Tests for functions in projects.py"""
 
 
-import quest
 import tempfile
 import os
 import pytest
@@ -34,38 +33,38 @@ def test_project(request):
     return request.param
 
 
-def test_get_projects(reset_projects_dir):
-    c = quest.api.get_projects()
+def test_get_projects(api, reset_projects_dir):
+    c = api.get_projects()
     assert len(c) == reset_projects_dir['NUMBER_OF_PROJECTS']
 
 
-def test_default_project():
-    c = quest.api.get_projects()
+def test_default_project(api, ):
+    c = api.get_projects()
     assert 'default' in c
 
 
-def test_new_project(reset_projects_dir):
-    quest.api.new_project('test')
-    c = quest.api.get_projects()
+def test_new_project(api, reset_projects_dir):
+    api.new_project('test')
+    c = api.get_projects()
     assert len(c) == reset_projects_dir['NUMBER_OF_PROJECTS'] + 1
     assert 'test' in c
 
 
-def test_add_project(reset_projects_dir, init_project_to_add):
+def test_add_project(api, reset_projects_dir, init_project_to_add):
     added_project_name = 'added_test_project'
-    quest.api.add_project(added_project_name, init_project_to_add)
-    c = quest.api.get_projects()
+    api.add_project(added_project_name, init_project_to_add)
+    c = api.get_projects()
     assert len(list(c)) == reset_projects_dir['NUMBER_OF_PROJECTS'] + 1
     assert added_project_name in c
 
 
-def test_delete_project(reset_projects_dir, test_project):
-    c = quest.api.delete_project(test_project)
+def test_delete_project(api, reset_projects_dir, test_project):
+    c = api.delete_project(test_project)
     assert len(c) == reset_projects_dir['NUMBER_OF_PROJECTS'] - 1
     assert test_project not in c
 
     # test that 'default' gets restored after delete on get_projects
-    c = quest.api.get_projects()
+    c = api.get_projects()
     if test_project == 'default':
         assert len(c) == reset_projects_dir['NUMBER_OF_PROJECTS']
         assert test_project in c
@@ -74,7 +73,7 @@ def test_delete_project(reset_projects_dir, test_project):
         assert test_project not in c
 
 
-def test_set_active_project(set_active_project):
-    assert quest.api.get_active_project() == 'project1'
-    quest.api.set_active_project('default')
-    assert quest.api.get_active_project() == 'default'
+def test_set_active_project(api, set_active_project):
+    assert api.get_active_project() == 'project1'
+    api.set_active_project('default')
+    assert api.get_active_project() == 'default'

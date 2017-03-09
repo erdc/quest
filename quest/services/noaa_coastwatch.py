@@ -117,8 +117,6 @@ class NoaaService(WebServiceBase):
             df.index = df['service_id']
             df['display_name'] = df['service_id']
 
-
-
         return df.drop_duplicates()
 
     def _get_parameters(self, service, features=None):
@@ -142,7 +140,7 @@ class NoaaService(WebServiceBase):
 
         return parameters
 
-    def _datasetId_map(self,service,parameter, invert=False):
+    def _datasetId_map(self, service, parameter, invert=False):
 
         if service == 'coops-meteorological':
             dmap = {
@@ -166,10 +164,10 @@ class NoaaService(WebServiceBase):
                 'predictedWL': 'WLTP',
             }
 
-        return dmap[parameter]
+            return dmap[parameter]
 
         if invert:
-            pmap = {v: k for k, v in pmap.items()}
+            return {v: k for k, v in dmap.items()}
 
     def _parameter_map(self, service, invert=False):
         if service == 'ndbc':
@@ -229,7 +227,8 @@ class NoaaService(WebServiceBase):
         parameter_code = pmap[parameter]
         try:
             if service == 'ndbc':
-                url = 'cwwcNDBCMet.csvp?time,{}&station="{}"&time>={}&time<={}'.format(parameter_code, feature, start, end)
+                url = 'cwwcNDBCMet.csvp?time,{}&station="{}"&time>={}&time<={}'\
+                    .format(parameter_code, feature, start, end)
                 url = BASE_URL + url
                 logger.info('downloading data from %s' % url)
                 data = pd.read_csv(url)
@@ -249,7 +248,8 @@ class NoaaService(WebServiceBase):
                 start = start.strftime('%Y-%m-%d')
 
                 location = self._datasetId_map(service, parameter_code)
-                url = 'nosCoops{}.csvp?time,{}&stationID="{}"&time>={}&time<={}'.format(location,parameter_code,feature, start, end)
+                url = 'nosCoops{}.csvp?time,{}&stationID="{}"&time>={}&time<={}'\
+                    .format(location, parameter_code, feature, start, end)
                 url = BASE_URL + url
                 logger.info('downloading data from %s' % url)
                 data = pd.read_csv(url)
@@ -272,7 +272,8 @@ class NoaaService(WebServiceBase):
                 start = pd.to_datetime(end) - pd.datetools.timedelta(days=28)
                 start = start.strftime('%Y-%m-%d')
 
-                url = 'nosCoops{}.csvp?time,{}&stationID="{}"&time>={}&time<={}&datum="{}"'.format(location,parameter_code,feature, start,end, datum)
+                url = 'nosCoops{}.csvp?time,{}&stationID="{}"&time>={}&time<={}&datum="{}"'\
+                    .format(location, parameter_code, feature, start, end, datum)
                 url = BASE_URL + url
                 logger.info('downloading data from %s' % url)
                 data = pd.read_csv(url)
@@ -371,7 +372,7 @@ class NoaaService(WebServiceBase):
                         "quality": {
                             "type": "string",
                             "description": "quality",
-                            "options": ['Preliminary','Verified'],
+                            "options": ['Preliminary', 'Verified'],
                         },
                         "interval": {
                             "type": "string",
@@ -382,21 +383,21 @@ class NoaaService(WebServiceBase):
                             "type": "string",
                             "description": "time interval",
                             "options": [
-                                        {'DHQ':'Mean Diurnal High Water Inequality'},
-                                        {'DLQ':'Mean Diurnal Low Water Inequality'},
-                                        {'DTL':'Mean Diurnal Tide L0evel'},
-                                        {'GT':'Great Diurnal Range'},
-                                        {'HWI':'Greenwich High Water Interval( in Hours)'},
-                                        {'LWI':'Greenwich Low Water Interval( in Hours)'},
-                                        {'MHHW':'Mean Higher - High Water'},
-                                        {'MHW':'Mean High Water'},
-                                        {'MLLW':'Mean Lower_Low Water'},
-                                        {'MLW':'Mean Low Water'},
-                                        {'MN':'Mean Range of Tide'},
-                                        {'MSL':'Mean Sea Level'},
-                                        {'MTL':'Mean Tide Level'},
-                                        {'NAVD''North American Vertical Datum'},
-                                        {'STND':'Station Datum'},
+                                        {'DHQ': 'Mean Diurnal High Water Inequality'},
+                                        {'DLQ': 'Mean Diurnal Low Water Inequality'},
+                                        {'DTL': 'Mean Diurnal Tide L0evel'},
+                                        {'GT': 'Great Diurnal Range'},
+                                        {'HWI': 'Greenwich High Water Interval( in Hours)'},
+                                        {'LWI': 'Greenwich Low Water Interval( in Hours)'},
+                                        {'MHHW': 'Mean Higher - High Water'},
+                                        {'MHW': 'Mean High Water'},
+                                        {'MLLW': 'Mean Lower_Low Water'},
+                                        {'MLW': 'Mean Low Water'},
+                                        {'MN': 'Mean Range of Tide'},
+                                        {'MSL': 'Mean Sea Level'},
+                                        {'MTL': 'Mean Tide Level'},
+                                        {'NAVD': 'North American Vertical Datum'},
+                                        {'STND': 'Station Datum'},
                                         ]
                         },
                     },
