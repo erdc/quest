@@ -73,7 +73,7 @@ def bbox2poly(x1, y1, x2, y2, reverse_order=False, as_geojson=False, as_shapely=
     xmin = xmin2 or -180
     xmax = xmax2 or 180
 
-    poly2 = list([xmin, ymin], [xmin, ymax], [xmax, ymax], [xmax, ymin])
+    poly2 = list([[xmin, ymin], [xmin, ymax], [xmax, ymax], [xmax, ymin]])
     poly2.append(poly2[0])
 
     return multi_polygon(polygons=[polygon(poly1), polygon(poly2)])
@@ -220,7 +220,7 @@ def parse_service_uri(uri):
         returns:
             parsed_uri (tuple): tuple containing provider, service, feature
     """
-    svc, feature = (uri.split('://')[-1].split('/') + [None])[:2]
+    svc, feature = (uri.split('://')[-1].split('/', 1) + [None])[:2]
     provider, service = (svc.split(':') + [None])[:2]
 
     return provider, service, feature
