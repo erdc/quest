@@ -170,7 +170,11 @@ class RPCClient(object):
 
             quest_method = getattr(api, method)
             # convert positional arguments into kwargs
-            method_params = inspect.signature(quest_method).parameters.keys()
+            if hasattr(inspect, 'signature'):  # Python 3
+                method_params = inspect.signature(quest_method).parameters.keys()
+            else:  # Python 2
+                method_params = inspect.getargspec(quest_method)[0]
+
             for arg, method_param in zip(args, method_params):
                 params[method_param] = arg
 
