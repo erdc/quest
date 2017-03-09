@@ -58,6 +58,9 @@ def get_or_generate_test_cache(update=False, skip=False):
 
     return test_cache_dir
 
+RPC_PORT = 4443
+RPC_CLIENT = rpc_server.RPCClient(port=RPC_PORT)
+
 
 @pytest.fixture(scope='session')
 def get_base_dir(request):
