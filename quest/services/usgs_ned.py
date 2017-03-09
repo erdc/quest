@@ -64,8 +64,7 @@ class UsgsNedService(SingleFileBase):
             'download url': 'download_url',
             'format': 'extract_from_zip',
             }
-        features['reserved'] = features['download url'].apply(
-            lambda x: {'download_url': x, 'file_format': 'raster-gdal'})
+        features['reserved'] = features['download_url'].apply(lambda x: {'download_url': x, 'file_format': 'raster-gdal','extract_from_zip': '.DEM'})
         return features.rename(columns=columns)
 
     def _get_parameters(self, service, features=None):
