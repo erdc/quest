@@ -19,6 +19,9 @@ from werkzeug.serving import run_simple
 
 from threading import Thread
 import time
+import builtins
+import inspect
+from functools import partial
 
 jobid = 0
 
@@ -36,7 +39,14 @@ def cli():
 @click.option('--port', default=4000, help='Port number to run rpc server. Default(4000)')
 @click.option('--threaded', is_flag=True, help='Run each request in a new thread')
 @click.option('--processes', default=1, type=int, help='Number of Processes to use')
-def start_server(port, threaded, processes):
+def click_start_server(port, threaded, processes):
+    """
+    click command line wrapper for start_server. Separated so start_server can be called directly from Python.
+    """
+    start_server(port, threaded, processes)
+
+
+def start_server(port=4000, threaded=False, processes=1):
     """Start QUEST RPC Server\b
 
     This script wraps quest.api functions and exposes them through JSON RPC over HTTP.
@@ -57,7 +67,14 @@ def start_server(port, threaded, processes):
 
 @cli.command('stop', help='Stop QUEST RPC server')
 @click.option('--port', default=4000, help='Port number rpc server is running on. Default(4000)')
-def stop_server(port):
+def click_stop_server(port):
+    """
+    click command line wrapper for stop_server. Separated so stop_server can be called directly from Python.
+    """
+    stop_server(port)
+
+
+def stop_server(port=4000):
     """Stop QUEST RPC Server\b
 
     QUEST RPC server can also be stopped using RPC
@@ -88,6 +105,7 @@ def long_download(delay=1):
     thr = Thread(target=run_download, args=[jobid-1, delay])
     thr.start()
     return jobid
+
 
 def run_download(jobid, delay):
     time.sleep(delay)
@@ -140,6 +158,52 @@ def wsgi_app(request):
 
     return Response(response.json, mimetype='application/json')
 
+
+class RPCClient(object):
+    def __init__(self, host='http://localhost', port=4000):
+        self.url = '{0}:{1}'.format(host, port)
+        self.headers = {'content-type': 'application/json'}
+
+    def __getattr__(self, method):
+        def pre_call(method, *args, **kwargs):
+            params = kwargs
+
+            quest_method = getattr(api, method)
+            # convert positional arguments into kwargs
+            if hasattr(inspect, 'signature'):  # Python 3
+                method_params = inspect.signature(quest_method).parameters.keys()
+            else:  # Python 2
+                method_params = inspect.getargspec(quest_method)[0]
+
+            for arg, method_param in zip(args, method_params):
+                params[method_param] = arg
+
+            return self.call(method, params)
+
+        return partial(pre_call, method)
+
+    def call(self, method, params=[], jsonrpc="2.0", id="0"):
+        payload = {
+            "method": method,
+            "params": params,
+            "jsonrpc": jsonrpc,
+            "id": id,
+        }
+
+        response = requests.post(self.url, data=json.dumps(payload), headers=self.headers).json()
+
+        if 'result' in response:
+            return response['result']
+        else:
+            error_type = response['error']['data']['type']
+            error_msg = response['error']['data']['message']
+            if hasattr(builtins, error_type):
+                e = getattr(builtins, error_type)
+            else:
+                print(response)
+                e = Exception
+                error_msg = 'Type: {0}, Message: {1}'.format(error_type, error_msg)
+            raise e(error_msg)
 
 if __name__ == '__main__':
     cli()
