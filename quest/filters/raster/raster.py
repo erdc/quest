@@ -58,39 +58,6 @@ class RstUnitConversion(RstBase):
 
 
 
-class RstFlowAccum(RstBase):
-    def register(self, name='rst-flow-accumulation'):
-                RstBase.register(self, name=name)
-
-    def _apply(self, df, options):
-
-                dem = df.read().squeeze()
-                filterResult = terrapin.d8_flow_accumulation(dem)
-                df = filterResult
-
-                return df
-
-    def apply_filter_options(self, fmt, **kwargs):
-                # if fmt == 'smtk':
-                #     schema = util.build_smtk('filter_options','filter_timeseries_remove_outliers.sbt')
-
-                if fmt == 'json-schema':
-                    properties = {
-                        "to_units": {
-                            "type": "string",
-                            "description": "the unit to convert to ",
-                        },
-                    }
-
-                    schema = {
-                        "title": "Raster Timeseries Filter",
-                        "type": "object",
-                        "properties": properties,
-                        "required": ["to_units"],
-                    }
-
-                return schema
-
 #     class RstMerge(RstBase):
 #         def register(self, name='raster-merge-datasets'):
 #             RstBase.register(self, name=name)
