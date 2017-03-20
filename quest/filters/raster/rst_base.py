@@ -54,7 +54,8 @@ class RstBase(FilterBase):
             out_meta = src.profile
 
         # save the resulting raster
-        out_meta.update({"height": out_image.shape[0],
+        out_meta.update({"dtype": out_image.dtype,
+                        "height": out_image.shape[0],
                          "width": out_image.shape[1],
                          "transform": None})
 
@@ -73,6 +74,7 @@ class RstBase(FilterBase):
         util.mkdir_if_doesnt_exist(dst)
         dst = os.path.join(dst, new_dset+'.tif')
 
+
         with rasterio.open(dst, "w", **out_meta) as dest:
             dest.write(out_image)
 
@@ -82,6 +84,7 @@ class RstBase(FilterBase):
             'parameter': orig_metadata['parameter'],
             'datatype': orig_metadata['datatype'],
             'file_format': orig_metadata['file_format'],
+            'unit': orig_metadata['unit']
         }
 
         if description is None:
@@ -127,4 +130,3 @@ class RstBase(FilterBase):
 
     def _apply(df, metadata, options):
         raise NotImplementedError
-
