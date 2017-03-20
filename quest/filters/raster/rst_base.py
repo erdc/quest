@@ -74,6 +74,7 @@ class RstBase(FilterBase):
         util.mkdir_if_doesnt_exist(dst)
         dst = os.path.join(dst, new_dset+'.tif')
 
+
         with rasterio.open(dst, "w", **out_meta) as dest:
             dest.write(out_image)
 
@@ -127,4 +128,3 @@ class RstBase(FilterBase):
 
     def _apply(self, df, metadata, options):
         raise NotImplementedError
-
