@@ -114,7 +114,7 @@ docs:
 .cleanup_windows_template: &cleanup_windows
   stage: cleanup
   script:
-    - call %MY_CONDA_PATH%\conda env | findstr /R quest-%MY_PY_VER%-%CI_BUILD_REF% >nul 2>&1 && %MY_CONDA_PATH%\conda env remove -q -y -n quest-%MY_PY_VER%-%CI_BUILD_REF%
+    - call %MY_CONDA_PATH%\conda env list | findstr /R quest-%MY_PY_VER%-%CI_BUILD_REF% >nul 2>&1 && %MY_CONDA_PATH%\conda env remove -q -y -n quest-%MY_PY_VER%-%CI_BUILD_REF%
   when: always
   tags: [win]
 
