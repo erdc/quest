@@ -4,139 +4,90 @@ stages:
   - deploy
   - cleanup
 
-# Use Anchors to simplify YAML when GitLab is further upgraded
+# Using YAML anchors to simplify configuration (reuse definitions)
+.py2_template: &py2_job
+  variables: {MY_PY_VER: py2}
+
+.py3_template: &py3_job
+  variables: {MY_PY_VER: py3}
+
+.linux_template: &linux_job
+  tags: [linux]
+
+.mac_template: &mac_job
+  tags: [mac]
+
+.build_unix-like_template: &build_unix-like
+  stage: build
+  script:
+    - export PATH=$MY_CONDA_PATH:$PATH
+    - conda env create -q -n quest-$MY_PY_VER-$CI_BUILD_REF -f ${MY_PY_VER}_conda_environment.yml
+    - source activate quest-$MY_PY_VER-$CI_BUILD_REF
+    - python setup.py install
+    - source deactivate
+
+.build_windows_template: &build_windows
+  stage: build
+  script:
+    - call set PATH=%MY_CONDA_PATH%\..;%MY_CONDA_PATH%;%PATH%
+    - call conda env create -q -n quest-%MY_PY_VER%-%CI_BUILD_REF% -f %MY_PY_VER%_conda_environment.yml
+    - call activate quest-%MY_PY_VER%-%CI_BUILD_REF%
+    - python setup.py install
+    - call deactivate
+  tags: [win]
 
 build_linux_py2:
-  stage: build
-  script:
-    - export PATH=$MY_CONDA_PATH:$PATH
-    - conda env create -q -n quest-py2-$CI_BUILD_REF -f py2_conda_environment.yml
-    - source activate quest-py2-$CI_BUILD_REF
-    - python setup.py install
-    - source deactivate
-  tags:
-    - linux
+  <<: [*build_unix-like, *linux_job, *py2_job]
 
 build_linux_py3:
-  stage: build
-  script:
-    - export PATH=$MY_CONDA_PATH:$PATH
-    - echo $PATH
-    - conda env create -q -n quest-py3-$CI_BUILD_REF -f py3_conda_environment.yml
-    - source activate quest-py3-$CI_BUILD_REF
-    - python setup.py install
-    - source deactivate
-  tags:
-    - linux
+  <<: [*build_unix-like, *linux_job, *py3_job]
     
 build_mac_py2:
-  stage: build
-  script:
-    - export PATH=$MY_CONDA_PATH:$PATH
-    - conda env create -q -n quest-py2-$CI_BUILD_REF -f py2_conda_environment.yml
-    - source activate quest-py2-$CI_BUILD_REF
-    - python setup.py install
-    - source deactivate
-  tags:
-    - mac
+  <<: [*build_unix-like, *mac_job, *py2_job]
 
 build_mac_py3:
-  stage: build
-  script:
-    - export PATH=$MY_CONDA_PATH:$PATH
-    - echo $PATH
-    - conda env create -q -n quest-py3-$CI_BUILD_REF -f py3_conda_environment.yml
-    - source activate quest-py3-$CI_BUILD_REF
-    - python setup.py install
-    - source deactivate
-  tags:
-    - mac
+  <<: [*build_unix-like, *mac_job, *py3_job]
     
 build_win_py2:
-  stage: build
-  script:
-    - echo %MY_CONDA_PATH%
-    - call set PATH=%MY_CONDA_PATH%\..;%MY_CONDA_PATH%;%PATH%
-    - call conda env create -q -n quest-py2-%CI_BUILD_REF% -f py2_conda_environment.yml
-    - call activate quest-py2-%CI_BUILD_REF%
-    - python setup.py install
-    - call deactivate
-  tags:
-    - win
+  <<: [*build_windows, *py2_job]
 
 build_win_py3:
-  stage: build
+  <<: [*build_windows, *py3_job]
+
+.test_unix-like_template: &test_unix-like
+  stage: test
   script:
-    - echo %MY_CONDA_PATH%
+    - export PATH=$MY_CONDA_PATH:$PATH
+    - source activate quest-$MY_PY_VER-$CI_BUILD_REF
+    - py.test test
+    - source deactivate
+
+.test_windows_template: &test_windows
+  stage: test
+  script:
     - call set PATH=%MY_CONDA_PATH%\..;%MY_CONDA_PATH%;%PATH%
-    - call conda env create -q -n quest-py3-%CI_BUILD_REF% -f py3_conda_environment.yml
-    - call activate quest-py3-%CI_BUILD_REF%
-    - python setup.py install
+    - call activate quest-%MY_PY_VER%-%CI_BUILD_REF%
+    - call py.test test
     - call deactivate
-  tags:
-    - win
+  tags: [win]
 
 test_linux_py2:
-  stage: test
-  script:
-    - echo $MY_CONDA_PATH
-    - export PATH=$MY_CONDA_PATH:$PATH
-    - source activate quest-py2-$CI_BUILD_REF
-    - py.test test
-    - source deactivate
-  tags:
-    - linux
+  <<: [*test_unix-like, *linux_job, *py2_job]
 
 test_linux_py3:
-  stage: test
-  script:
-    - export PATH=$MY_CONDA_PATH:$PATH
-    - source activate quest-py3-$CI_BUILD_REF
-    - py.test test
-    - source deactivate
-  tags:
-    - linux
+  <<: [*test_unix-like, *linux_job, *py3_job]
 
 test_mac_py2:
-  stage: test
-  script:
-    - echo $MY_CONDA_PATH
-    - export PATH=$MY_CONDA_PATH:$PATH
-    - source activate quest-py2-$CI_BUILD_REF
-    - py.test test
-    - source deactivate
-  tags:
-    - mac
+  <<: [*test_unix-like, *mac_job, *py2_job]
 
 test_mac_py3:
-  stage: test
-  script:
-    - export PATH=$MY_CONDA_PATH:$PATH
-    - source activate quest-py3-$CI_BUILD_REF
-    - py.test test
-    - source deactivate
-  tags:
-    - mac
+  <<: [*test_unix-like, *mac_job, *py3_job]
 
 test_win_py2:
-  stage: test
-  script:
-    - call set PATH=%MY_CONDA_PATH%\..;%MY_CONDA_PATH%;%PATH%
-    - call activate quest-py2-%CI_BUILD_REF%
-    - call py.test test
-    - call deactivate
-  tags:
-    - win
+  <<: [*test_windows, *py2_job]
 
 test_win_py3:
-  stage: test
-  script:
-    - call set PATH=%MY_CONDA_PATH%\..;%MY_CONDA_PATH%;%PATH%
-    - call activate quest-py3-%CI_BUILD_REF%
-    - call py.test test
-    - call deactivate
-  tags:
-    - win
+  <<: [*test_windows, *py3_job]
 
 docs:
   stage: deploy
@@ -148,39 +99,39 @@ docs:
     - make -C docs html
     - tar -czf documentation.tar.gz docs/_build/html
     - source deactivate
-# Artifacts will be available yet after further GitLab upgrade
-#  artifacts:
-#    paths:
-#    - documentation.tar.gz
+  artifacts:
+    paths:
+    - documentation.tar.gz
   tags:
     - docs
 
-cleanup_linux_job:
+.cleanup_unix-like_template: &cleanup_unix-like
   stage: cleanup
   script:
-    - $MY_CONDA_PATH/conda env remove -q -y -n quest-py2-$CI_BUILD_REF
-    - $MY_CONDA_PATH/conda env remove -q -y -n quest-py3-$CI_BUILD_REF
-# 'When' parameter will be available yet after further GitLab upgrade
-#  when: always
-  tags:
-    - linux
+    - if $MY_CONDA_PATH/conda env list | grep -q quest-$MY_PY_VER-$CI_BUILD_REF; then $MY_CONDA_PATH/conda env remove -q -y -n quest-$MY_PY_VER-$CI_BUILD_REF; fi
+  when: always
 
-cleanup_mac_job:
+.cleanup_windows_template: &cleanup_windows
   stage: cleanup
   script:
-    - $MY_CONDA_PATH/conda env remove -q -y -n quest-py2-$CI_BUILD_REF
-    - $MY_CONDA_PATH/conda env remove -q -y -n quest-py3-$CI_BUILD_REF
-# 'When' parameter will be available yet after further GitLab upgrade
-#  when: always
-  tags:
-    - mac
+    - call %MY_CONDA_PATH%\conda env | findstr /R quest-%MY_PY_VER%-%CI_BUILD_REF% >nul 2>&1 && %MY_CONDA_PATH%\conda env remove -q -y -n quest-%MY_PY_VER%-%CI_BUILD_REF%
+  when: always
+  tags: [win]
 
-cleanup_win_job:
-  stage: cleanup
-  script:
-    - call %MY_CONDA_PATH%\conda env remove -q -y -n quest-py2-%CI_BUILD_REF%
-    - call %MY_CONDA_PATH%\conda env remove -q -y -n quest-py3-%CI_BUILD_REF%
-# 'When' parameter will be available yet after further GitLab upgrade
-#  when: always
-  tags:
-    - win
+cleanup_linux_py2:
+  <<: [*cleanup_unix-like, *linux_job, *py2_job]
+
+cleanup_linux_py3:
+  <<: [*cleanup_unix-like, *linux_job, *py3_job]
+
+cleanup_mac_py2:
+  <<: [*cleanup_unix-like, *mac_job, *py2_job]
+
+cleanup_mac_py3:
+  <<: [*cleanup_unix-like, *mac_job, *py3_job]
+
+cleanup_win_py2:
+  <<: [*cleanup_windows, *py2_job]
+
+cleanup_win_py3:
+  <<: [*cleanup_windows, *py3_job]
