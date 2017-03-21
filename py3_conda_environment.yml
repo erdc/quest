@@ -14,7 +14,7 @@ channels:
     - defaults
 
 dependencies:
-    - python=3
+    - python=3.5
     - fiona
     - rasterio
     - gdal
@@ -35,3 +35,4 @@ dependencies:
     - pint
     - pony
     - tornado
+    - sortedcollections
