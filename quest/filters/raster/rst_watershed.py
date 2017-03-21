@@ -131,30 +131,25 @@ class RstDelineation(FilterBase):
         return {'datasets': new_dset, 'features': feature}
 
     def apply_filter_options(self, fmt, **kwargs):
-        schema = {}
-        # # if fmt == 'json-schema':
-        properties = {
-                "bbox": {
-                    "type": "string",
-                    "description": "bounding box 'xmin, ymin, xmax, ymax'",
-                },
-                "nodata": {
-                    "type": "number",
-                    "description": "no data value for raster.",
-                    "default": 0,
-                },
-            }
+        if fmt == 'json-schema':
+            properties = {
+                    "outlet_points": {
+                        "type": "string",
+                        "description": "Watershed outlet points",
+                    },
 
-        schema = {
-                "title": "Raster Watershed Delineation",
-                "type": "object",
-                "properties": properties,
-                "required": ['outlet_points'],
-            }
-        #
-        # if fmt == 'smtk':
-        #     schema = ''
-        #
+                }
+
+            schema = {
+                    "title": "Raster Watershed Delineation",
+                    "type": "object",
+                    "properties": properties,
+                    "required": ['outlet_points'],
+                }
+
+        if fmt == 'smtk':
+            schema = ''
+
         return schema
 
     # def _apply(df, metadata, options):
@@ -250,53 +245,19 @@ class RstFlowAccum(FilterBase):
         return {'datasets': new_dset, 'features': feature}
 
     def apply_filter_options(self, fmt, **kwargs):
-        schema = {}
+        if fmt == 'json-schema':
+            properties = {}
+            schema = {
+                "title": "Raster Clip",
+                "type": "object",
+                "properties": properties,
+                "required": [],
+            }
+
+        if fmt == 'smtk':
+            schema = ''
 
         return schema
-        # if fmt == 'json-schema':
-        #     properties = {
-        #         "bbox": {
-        #             "type": "string",
-        #             "description": "bounding box 'xmin, ymin, xmax, ymax'",
-        #         },
-        #         "nodata": {
-        #             "type": "number",
-        #             "description": "no data value for raster.",
-        #             "default": 0,
-        #         },
-        #     }
-        #
-        #     schema = {
-        #         "title": "Raster Clip",
-        #         "type": "object",
-        #         "properties": properties,
-        #         "required": ['bbox'],
-        #     }
-        #
-        # if fmt == 'smtk':
-        #     schema = ''
 
     def _apply(df, metadata, options):
         raise NotImplementedError
-
-
-def apply_filter_options(self, fmt, **kwargs):
-                # if fmt == 'smtk':
-                #     schema = util.build_smtk('filter_options','filter_timeseries_remove_outliers.sbt')
-
-                if fmt == 'json-schema':
-                    properties = {
-                        "to_units": {
-                            "type": "string",
-                            "description": "the unit to convert to ",
-                        },
-                    }
-
-                    schema = {
-                        "title": "Raster Timeseries Filter",
-                        "type": "object",
-                        "properties": properties,
-                        "required": ["to_units"],
-                    }
-
-                return schema
