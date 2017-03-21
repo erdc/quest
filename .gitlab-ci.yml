@@ -41,13 +41,13 @@ build_linux_py2:
 
 build_linux_py3:
   <<: [*build_unix-like, *linux_job, *py3_job]
-    
+
 build_mac_py2:
   <<: [*build_unix-like, *mac_job, *py2_job]
 
 build_mac_py3:
   <<: [*build_unix-like, *mac_job, *py3_job]
-    
+
 build_win_py2:
   <<: [*build_windows, *py2_job]
 
