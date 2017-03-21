@@ -116,7 +116,7 @@ class TsUnitConversion(TsBase):
         if 'file_path' in metadata:
             del metadata['file_path']
 
-        path = "/Users/rditllkw/QUEST/data-services-library/quest/filters/timeseries/default_units.txt"
+        path = os.path.join(os.path.dirname(__file__), '..', 'default_units.txt')
         reg = UnitRegistry(path)
         from_units = metadata['unit']
         if '/' in from_units and '/' not in options.get('to_units'):
