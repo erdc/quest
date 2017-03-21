@@ -7,7 +7,7 @@ from quest.api.projects import active_db
 
 import os
 import rasterio
-# from rasterio.tools.mask import mask
+
 
 class RstBase(FilterBase):
     def register(self, name=None):
@@ -47,10 +47,11 @@ class RstBase(FilterBase):
             display_name = 'Created by filter {}'.format(self.name)
         if options is None:
             options ={}
-        options['orig_meta'] = orig_metadata
-        #run filter
+        else:
+            options['orig_metadata']=orig_metadata
+        # run filter
         with rasterio.open(src_path) as src:
-            out_image = self._apply(src,options)
+            out_image = self._apply(src, options)
             out_meta = src.profile
 
         # save the resulting raster
@@ -58,6 +59,7 @@ class RstBase(FilterBase):
                         "height": out_image.shape[0],
                          "width": out_image.shape[1],
                          "transform": None})
+
 
         cname = orig_metadata['collection']
         feature = new_feature(cname,
@@ -73,7 +75,6 @@ class RstBase(FilterBase):
         dst = os.path.join(prj, cname, new_dset)
         util.mkdir_if_doesnt_exist(dst)
         dst = os.path.join(dst, new_dset+'.tif')
-
 
         with rasterio.open(dst, "w", **out_meta) as dest:
             dest.write(out_image)
@@ -94,9 +95,7 @@ class RstBase(FilterBase):
         new_metadata.update({
             'options': self.options,
             'file_path': self.file_path,
-            'status': datasets.DatasetStatus.FILTERED,
-            'message': 'raster filter applied'
-        }
+        })
         update_metadata(new_dset, quest_metadata=new_metadata, metadata=metadata)
 
         return {'datasets': new_dset, 'features': feature}
@@ -128,5 +127,6 @@ class RstBase(FilterBase):
         # if fmt == 'smtk':
         #     schema = ''
 
-    def _apply(df, metadata, options):
+    def _apply(self, df, metadata, options):
         raise NotImplementedError
+
