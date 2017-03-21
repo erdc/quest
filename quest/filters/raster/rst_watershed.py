@@ -8,6 +8,7 @@ import rasterio
 import fiona
 import numpy as np
 from shapely.geometry import mapping
+from shapely.affinity import affine_transform
 
 class RstDelineation(FilterBase):
     def register(self, name='watershed-delineation'):
@@ -48,15 +49,19 @@ class RstDelineation(FilterBase):
         if options is None:
             options ={}
 
-        if not options:
+        if not options.get('outlet_points'):
             raise ValueError('Outlet points are required')
 
-        x,y = options.get('outlet_points')
-        outlet_points = list(zip(x,y))
+        outlet_points = options.get('outlet_points')
+
         # run filter
         with rasterio.open(src_path) as src:
-            watershed, boundary = terrapin.d8_watershed_delineation(src.read().squeeze(), outlet_points)
+            crs = src.crs
+            t = src.transform
+            transform = [t.a, t.b, t.d, t.e, t.xoff, t.yoff]
+            watershed, boundaries = terrapin.d8_watershed_delineation(src.read().squeeze(), outlet_points)
             out_meta = src.profile
+            boundary_list = [mapping(affine_transform(boundary, transform)) for boundary in boundaries.values()]
 
         # Define a polygon feature geometry with one attribute
         schema = {
@@ -84,12 +89,12 @@ class RstDelineation(FilterBase):
         boundary_polygon = os.path.join(dst,new_dset+'.shp')
 
         # Write a new Shapefile
-        with fiona.open(boundary_polygon, 'w', 'ESRI Shapefile', schema) as c:
-            ## If there are multiple geometries, put the "for" loop here
-            c.write({
-                'geometry': mapping(boundary[1]),
-                'properties': {'id': 123},
-            })
+        with fiona.open(boundary_polygon, 'w', 'ESRI Shapefile', schema, crs=crs) as c:
+            for index, boundary in enumerate(boundary_list):
+                c.write({
+                    'geometry': boundary,
+                    'properties': {'id': index + 1},
+                })
 
         data = watershed.data.astype(out_meta['dtype'])
         data = np.transpose(data)
