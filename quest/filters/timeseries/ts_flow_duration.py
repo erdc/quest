@@ -3,7 +3,7 @@ from quest.api import get_metadata, new_dataset, update_metadata
 from quest import util
 import os
 
-class flowDuration(FilterBase):
+class TsFlowDuration(FilterBase):
     def register(self, name='flowDuration'):
         """Register Timeseries
 
