@@ -2,13 +2,12 @@
 from ..base import FilterBase
 from quest import util
 
-from quest.api import get_metadata, new_dataset, update_metadata, new_feature, datasets
+from quest.api import get_metadata, new_dataset, update_metadata, new_feature
 from quest.api.projects import active_db
-from quest.api.datasets import DatasetStatus
 
 import os
 import rasterio
-
+# from rasterio.tools.mask import mask
 
 class RstBase(FilterBase):
     def register(self, name=None):
@@ -33,13 +32,10 @@ class RstBase(FilterBase):
     def _apply_filter(self, datasets, features=None, options=None,
                      display_name=None, description=None, metadata=None):
 
-        if len(datasets > 1):
-            out_image = self._apply(datasets,options)
+        if len(datasets) > 1:
+            raise NotImplementedError('This filter can only be applied to a single dataset')
 
-        else:
-
-            # datasets = util.listify(datasets)
-            dataset = datasets
+        dataset = datasets[0]
 
         # get metadata, path etc from first dataset, i.e. assume all datasets
         # are in same folder. This will break if you try and combine datasets
@@ -51,19 +47,21 @@ class RstBase(FilterBase):
             display_name = 'Created by filter {}'.format(self.name)
         if options is None:
             options ={}
-        options['orig_meta'] = orig_metadata
-        #run filter
+        else:
+            options['orig_metadata']=orig_metadata
+        # run filter
         with rasterio.open(src_path) as src:
-            out_image = self._apply(src,options)
+            out_image = self._apply(src, options)
+            out_meta = src.profile
 
-        out_meta = src.meta.copy()
         # save the resulting raster
-        out_meta.update({"driver": "GTiff",
-                         "height": out_image.shape[1],
-                         "width": out_image.shape[2],
+        out_meta.update({"dtype": out_image.dtype,
+                        "height": out_image.shape[0],
+                         "width": out_image.shape[1],
                          "transform": None})
 
-        cname = orig_metadata['_collection']
+
+        cname = orig_metadata['collection']
         feature = new_feature(cname,
                               display_name=display_name, geom_type='Polygon',
                               geom_coords=None)
@@ -78,6 +76,7 @@ class RstBase(FilterBase):
         util.mkdir_if_doesnt_exist(dst)
         dst = os.path.join(dst, new_dset+'.tif')
 
+
         with rasterio.open(dst, "w", **out_meta) as dest:
             dest.write(out_image)
 
@@ -87,16 +86,22 @@ class RstBase(FilterBase):
             'parameter': orig_metadata['parameter'],
             'datatype': orig_metadata['datatype'],
             'file_format': orig_metadata['file_format'],
+            'unit': orig_metadata['unit']
+        }
+
+        if description is None:
+            description = 'Raster Filter Applied'
+
+        # update metadata
+        new_metadata.update({
             'options': self.options,
             'file_path': self.file_path,
-            'status': datasets.DatasetStatus.FILTERED,
-            'message': 'raster filter applied'
-        }
+        })
         update_metadata(new_dset, quest_metadata=new_metadata, metadata=metadata)
 
         return {'datasets': new_dset, 'features': feature}
 
-    def apply_filter_options(self, fmt='json-schema'):
+    def apply_filter_options(self, fmt, **kwargs):
         schema = {}
 
         return schema
@@ -123,6 +128,13 @@ class RstBase(FilterBase):
         # if fmt == 'smtk':
         #     schema = ''
 
-    def _apply(self, df, metadata, options):
+    def _apply(df, metadata, options):
         raise NotImplementedError
+
+
+
+
+
+
+
 
