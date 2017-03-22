@@ -68,10 +68,11 @@ class UsgsNlcdService(SingleFileBase):
         features = features.ix[~features.title.str.contains('Tree Canopy')]
         features['geometry'] = features['spatial'].apply(_bbox2poly)
         features['download_url'] = features.webLinks.apply(_parse_links)
-        features['extract_from_zip'] = '.tif'
+        #features['extract_from_zip'] = '.tif'
         features['filename'] = features['download_url'].str.split('FNAME=', expand=True)[1]
         features['reserved'] = features['download_url'].apply(
-            lambda x: {'download_url': x, 'file_format': 'raster-gdal'})
+            lambda x: {'download_url': x, 'file_format': 'raster-gdal', 'extract_from_zip':'.tif'})
+
 
         features['parameters'] = 'landcover'
         features['file_format'] = 'raster-gdal'

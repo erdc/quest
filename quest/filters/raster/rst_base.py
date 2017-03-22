@@ -7,7 +7,7 @@ from quest.api.projects import active_db
 
 import os
 import rasterio
-# from rasterio.tools.mask import mask
+
 
 class RstBase(FilterBase):
     def register(self, name=None):
@@ -47,13 +47,11 @@ class RstBase(FilterBase):
             display_name = 'Created by filter {}'.format(self.name)
         if options is None:
             options ={}
-        else:
-            options['orig_metadata']=orig_metadata
-        # run filter
+        options['orig_metadata'] = orig_metadata
+        #run filter
         with rasterio.open(src_path) as src:
-            out_image = self._apply(src, options)
+            out_image = self._apply(src,options)
             out_meta = src.profile
-
         # save the resulting raster
         out_meta.update({"dtype": out_image.dtype,
                         "height": out_image.shape[0],
@@ -128,13 +126,5 @@ class RstBase(FilterBase):
         # if fmt == 'smtk':
         #     schema = ''
 
-    def _apply(df, metadata, options):
+    def _apply(self, df, metadata, options):
         raise NotImplementedError
-
-
-
-
-
-
-
-
