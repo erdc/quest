@@ -3,6 +3,7 @@ import os
 import shutil
 import tempfile
 from multiprocessing import Process
+from time import sleep
 
 import quest
 from quest.scripts import rpc_server
@@ -48,6 +49,7 @@ def api(request, get_base_dir):
         if not server_running:
             server_process = Process(target=start_rpc_server, args=[get_base_dir])
             server_process.start()
+            sleep(1)
 
         request.addfinalizer(lambda: rpc_server.stop_server(port=RPC_PORT))
     return request.param
