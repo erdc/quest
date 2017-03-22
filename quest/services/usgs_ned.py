@@ -57,15 +57,14 @@ class UsgsNedService(SingleFileBase):
             return features
 
         features['parameters'] = 'elevation'
-        features['file_format'] = 'raster-gdal'
+        #features['file_format'] = 'raster-gdal'
         features['filename'] = features['download url'].apply(lambda x: x.split('/')[-1])
         columns = {
             'name': 'display_name',
             'download url': 'download_url',
             'format': 'extract_from_zip',
             }
-        features['reserved'] = features['download url'].apply(
-            lambda x: {'download_url': x, 'file_format': 'raster-gdal'})
+        features['reserved'] = features['download url'].apply(lambda x: {'download_url': x, 'file_format': 'raster-gdal','extract_from_zip': '.DEM'})
         return features.rename(columns=columns)
 
     def _get_parameters(self, service, features=None):
