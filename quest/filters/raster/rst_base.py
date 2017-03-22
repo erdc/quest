@@ -51,7 +51,7 @@ class RstBase(FilterBase):
         #run filter
         with rasterio.open(src_path) as src:
             out_image = self._apply(src,options)
-
+            out_meta = src.profile
         # save the resulting raster
         out_meta.update({"dtype": out_image.dtype,
                         "height": out_image.shape[0],
