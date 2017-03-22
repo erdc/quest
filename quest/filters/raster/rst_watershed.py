@@ -141,7 +141,7 @@ class RstDelineation(FilterBase):
                 }
 
             schema = {
-                    "title": "Raster Watershed Delineation",
+                    "title": "Watershed Delineation Raster Filter",
                     "type": "object",
                     "properties": properties,
                     "required": ['outlet_points'],
@@ -248,7 +248,7 @@ class RstFlowAccum(FilterBase):
         if fmt == 'json-schema':
             properties = {}
             schema = {
-                "title": "Raster Clip",
+                "title": "Flow Accumulation Raster Filter",
                 "type": "object",
                 "properties": properties,
                 "required": [],
