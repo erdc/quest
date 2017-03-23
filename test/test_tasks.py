@@ -25,13 +25,11 @@ def long_process_with_exception(delay, msg):
     1/0
     return {'delay': delay, 'msg': msg}
 
-
 setattr(quest.api, 'long_process', long_process)
 setattr(quest.api, 'long_process_with_exception', long_process_with_exception)
 
-
-def wait_until_done(api):
-    while len(api.get_pending_tasks()) > 0:
+def wait_until_done():
+    while len(get_pending_tasks()) > 0:
         sleep(0.2)
     return
 
