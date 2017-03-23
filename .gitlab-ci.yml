@@ -1,8 +1,7 @@
 stages:
-  - build
-  - test
+  - run & test
   - deploy
-  - cleanup
+  - toolbox # helpful scripts
 
 # Using YAML anchors to simplify configuration (reuse definitions)
 .py2_template: &py2_job
@@ -17,121 +16,138 @@ stages:
 .mac_template: &mac_job
   tags: [mac]
 
-.build_unix-like_template: &build_unix-like
-  stage: build
+### Run & Test stage jobs
+
+.unix-like_template: &unix-like_job
+  stage: run & test
   script:
     - export PATH=$MY_CONDA_PATH:$PATH
+    - conda info -a
+    - if conda env list | grep -q quest-$MY_PY_VER-$CI_BUILD_REF; then conda env remove -q -y -n quest-$MY_PY_VER-$CI_BUILD_REF; fi
     - conda env create -q -n quest-$MY_PY_VER-$CI_BUILD_REF -f ${MY_PY_VER}_conda_environment.yml
     - source activate quest-$MY_PY_VER-$CI_BUILD_REF
     - python setup.py install
+    - py.test test
     - source deactivate
+    - conda env remove -q -y -n quest-$MY_PY_VER-$CI_BUILD_REF
 
-.build_windows_template: &build_windows
-  stage: build
+.windows_template: &windows_job
+  stage: run & test
   script:
+    # GitLab Runner places the following calls in a batch file to run, which can cause change behavior. 
+    # Take care in escaping special characters (see http://www.robvanderwoude.com/escapechars.php)
+    #   For example a unquoted pipe needs double escaping to pass through 2 layers (interpration
+    #   and delayed expansion): ^^^|
+    #   Was not able to determine proper escaping for logical && and ||
     - call set PATH=%MY_CONDA_PATH%\..;%MY_CONDA_PATH%;%PATH%
+    - call conda info -a
+    - if exist %MY_CONDA_PATH%\..\envs\quest-%MY_PY_VER%-%CI_BUILD_REF% rd /s /q %MY_CONDA_PATH%\..\envs\quest-%MY_PY_VER%-%CI_BUILD_REF%
     - call conda env create -q -n quest-%MY_PY_VER%-%CI_BUILD_REF% -f %MY_PY_VER%_conda_environment.yml
     - call activate quest-%MY_PY_VER%-%CI_BUILD_REF%
     - python setup.py install
-    - call deactivate
-  tags: [win]
-
-build_linux_py2:
-  <<: [*build_unix-like, *linux_job, *py2_job]
-
-build_linux_py3:
-  <<: [*build_unix-like, *linux_job, *py3_job]
-
-build_mac_py2:
-  <<: [*build_unix-like, *mac_job, *py2_job]
-
-build_mac_py3:
-  <<: [*build_unix-like, *mac_job, *py3_job]
-
-build_win_py2:
-  <<: [*build_windows, *py2_job]
-
-build_win_py3:
-  <<: [*build_windows, *py3_job]
-
-.test_unix-like_template: &test_unix-like
-  stage: test
-  script:
-    - export PATH=$MY_CONDA_PATH:$PATH
-    - source activate quest-$MY_PY_VER-$CI_BUILD_REF
-    - py.test test
-    - source deactivate
-
-.test_windows_template: &test_windows
-  stage: test
-  script:
-    - call set PATH=%MY_CONDA_PATH%\..;%MY_CONDA_PATH%;%PATH%
-    - call activate quest-%MY_PY_VER%-%CI_BUILD_REF%
     - call py.test test
     - call deactivate
+    - call conda env remove -q -y -n quest-%MY_PY_VER%-%CI_BUILD_REF%
   tags: [win]
 
-test_linux_py2:
-  <<: [*test_unix-like, *linux_job, *py2_job]
+run_and_test_linux_py2:
+  <<: [*unix-like_job, *linux_job, *py2_job]
 
-test_linux_py3:
-  <<: [*test_unix-like, *linux_job, *py3_job]
+run_and_test_linux_py3:
+  <<: [*unix-like_job, *linux_job, *py3_job]
+    
+run_and_test_mac_py2:
+  <<: [*unix-like_job, *mac_job, *py2_job]
 
-test_mac_py2:
-  <<: [*test_unix-like, *mac_job, *py2_job]
+run_and_test_mac_py3:
+  <<: [*unix-like_job, *mac_job, *py3_job]
+    
+run_and_test_win_py2:
+  <<: [*windows_job, *py2_job]
 
-test_mac_py3:
-  <<: [*test_unix-like, *mac_job, *py3_job]
+run_and_test_win_py3:
+  <<: [*windows_job, *py3_job]
 
-test_win_py2:
-  <<: [*test_windows, *py2_job]
-
-test_win_py3:
-  <<: [*test_windows, *py3_job]
+### Deploy stage jobs
 
 docs:
   stage: deploy
   only:
-    - master
+    - master@computational-analysis-and-mechanics/quest
   script:
-    - source $MY_CONDA_PATH/activate quest-py3-$CI_BUILD_REF
+    - export PATH=$MY_CONDA_PATH:$PATH
+    - conda info -a
+    - if conda env list | grep -q quest-$MY_PY_VER-$CI_BUILD_REF; then conda env remove -q -y -n quest-$MY_PY_VER-$CI_BUILD_REF; fi
+    - conda env create -q -n quest-$MY_PY_VER-$CI_BUILD_REF -f ${MY_PY_VER}_conda_environment.yml
+    - source activate quest-$MY_PY_VER-$CI_BUILD_REF
+    - python setup.py install
     - conda install sphinx
     - make -C docs html
     - tar -czf documentation.tar.gz docs/_build/html
     - source deactivate
+    - conda env remove -q -y -n quest-$MY_PY_VER-$CI_BUILD_REF
   artifacts:
     paths:
-    - documentation.tar.gz
+      - documentation.tar.gz
+    expire_in: 1 week
   tags:
     - docs
 
-.cleanup_unix-like_template: &cleanup_unix-like
-  stage: cleanup
+### Toolbox stage jobs
+
+# These are manual jobs to help administer a runner in case triage is necessary and the runner's
+# machine admin is unavailable.
+#
+# From the project's GitLab Runner interface, edit the sick runner's tags list to include the tag
+# of the desired toolbox job. Then manually start the desired toolbox job from the project's
+# GitLab Pipeline interface. The CI system will assign the job to runner based on the special tag.
+# When the job is completed, remove the toolbox job tag from the runner. Only one runner should
+# have the toolbox job tag to ensure apropriate assignment.
+#
+# These jobs may interfere with other currently running jobs from the main project and forks.
+
+# Nuke all existing quest environments (can kill active envs from other running jobs!)
+# Toolbox job tag: clean_conda_envs
+.cleanup_conda_envs_unix-like_template: &cleanup_conda_envs_unix-like
+  stage: toolbox
   script:
-    - if $MY_CONDA_PATH/conda env list | grep -q quest-$MY_PY_VER-$CI_BUILD_REF; then $MY_CONDA_PATH/conda env remove -q -y -n quest-$MY_PY_VER-$CI_BUILD_REF; fi
-  when: always
+    - if $MY_CONDA_PATH/conda env list | grep -q quest-py; then rm -rdf $MY_CONDA_PATH/../envs/quest-py*; fi
+  when: manual
 
-.cleanup_windows_template: &cleanup_windows
-  stage: cleanup
+cleanup_conda_envs_windows:
+  stage: toolbox
   script:
-    - call %MY_CONDA_PATH%\conda env list | findstr /R quest-%MY_PY_VER%-%CI_BUILD_REF% >nul 2>&1 && %MY_CONDA_PATH%\conda env remove -q -y -n quest-%MY_PY_VER%-%CI_BUILD_REF%
-  when: always
-  tags: [win]
+    - for /d %%G in ("%MY_CONDA_PATH%\..\envs\quest-py*") do rd /s /q "%%~G"
+  when: manual
+  tags: [win, clean_conda_envs]
 
-cleanup_linux_py2:
-  <<: [*cleanup_unix-like, *linux_job, *py2_job]
+cleanup_conda_envs_linux:
+  <<: *cleanup_conda_envs_unix-like
+  tags: [linux, clean_conda_envs]
 
-cleanup_linux_py3:
-  <<: [*cleanup_unix-like, *linux_job, *py3_job]
+cleanup_conda_envs_mac:
+  <<: *cleanup_conda_envs_unix-like
+  tags: [mac, clean_conda_envs]
 
-cleanup_mac_py2:
-  <<: [*cleanup_unix-like, *mac_job, *py2_job]
+# Update the conda package manager (can interrupt other running jobs since conda is momentarily unavailable!)
+# Toolbox job tag: update_conda_manager
+.update_conda_manager_unix-like_template: &update_conda_manager_unix-like
+  stage: toolbox
+  script:
+    - $MY_CONDA_PATH/conda update -q conda
+  when: manual
 
-cleanup_mac_py3:
-  <<: [*cleanup_unix-like, *mac_job, *py3_job]
+update_conda_manager_windows:
+  stage: toolbox
+  script:
+    - call %MY_CONDA_PATH%\conda update -q conda
+  when: manual
+  tags: [win, update_conda_manager]
 
-cleanup_win_py2:
-  <<: [*cleanup_windows, *py2_job]
+update_conda_manager_linux:
+  <<: *update_conda_manager_unix-like
+  tags: [linux, update_conda_manager]
 
-cleanup_win_py3:
-  <<: [*cleanup_windows, *py3_job]
+update_conda_manager_mac:
+  <<: *update_conda_manager_unix-like
+  tags: [mac, update_conda_manager]
