@@ -2,7 +2,7 @@ import pytest
 import os
 import shutil
 import tempfile
-from multiprocessing import Process
+from threading import Thread
 from time import sleep
 
 import quest
@@ -47,7 +47,7 @@ def api(request, get_base_dir):
         global server_process
         server_running = server_process.is_alive() if hasattr(server_process, 'is_alive') else False
         if not server_running:
-            server_process = Process(target=start_rpc_server, args=[get_base_dir])
+            server_process = Thread(target=start_rpc_server, args=[get_base_dir])
             server_process.start()
             sleep(1)
 
