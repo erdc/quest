@@ -25,11 +25,13 @@ def long_process_with_exception(delay, msg):
     1/0
     return {'delay': delay, 'msg': msg}
 
+
 setattr(quest.api, 'long_process', long_process)
 setattr(quest.api, 'long_process_with_exception', long_process_with_exception)
 
-def wait_until_done():
-    while len(get_pending_tasks()) > 0:
+
+def wait_until_done(api):
+    while len(api.get_pending_tasks()) > 0:
         sleep(0.2)
     return
 
@@ -55,6 +57,7 @@ def test_launch_tasks(api, task_cleanup):
 
 
 def test_add_remove_tasks(api):
+    api.remove_tasks()
     test_tasks = [
         api.long_process(1, 'first', async=True),
         api.long_process(1, 'second', async=True),
