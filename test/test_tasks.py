@@ -1,5 +1,5 @@
 from time import sleep
-from quest.api.tasks import add_async, get_pending_tasks
+from quest.api.tasks import add_async
 import pytest
 import quest
 from jsonrpc import dispatcher
@@ -9,6 +9,7 @@ from types import ModuleType
 @pytest.fixture
 def task_cleanup(api, request):
     request.addfinalizer(api.remove_tasks)
+
 
 @dispatcher.add_method
 @add_async
@@ -24,13 +25,13 @@ def long_process_with_exception(delay, msg):
     1/0
     return {'delay': delay, 'msg': msg}
 
+
 setattr(quest.api, 'long_process', long_process)
 setattr(quest.api, 'long_process_with_exception', long_process_with_exception)
 
 
 def wait_until_done(api):
     while len(api.get_pending_tasks()) > 0:
-        print(api.get_pending_tasks())
         sleep(0.2)
     return
 
@@ -58,6 +59,7 @@ def test_launch_tasks(api, task_cleanup):
 
 # @pytest.mark.parametrize('api', [quest.api])
 def test_add_remove_tasks(api):
+    api.remove_tasks()
     test_tasks = [
         api.long_process(1, 'first', async=True),
         api.long_process(1, 'second', async=True),
@@ -65,7 +67,7 @@ def test_add_remove_tasks(api):
         ]
 
     assert len(api.get_tasks()) == 3
-    test_tasks.append(long_process(5, 'fourth', async=True))
+    test_tasks.append(long_process(10, 'fourth', async=True))
     assert len(api.get_tasks()) == 4
     api.cancel_tasks(test_tasks[3])
     assert len(api.get_tasks(filters={'status': 'cancelled'})) == 1
