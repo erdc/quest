@@ -36,7 +36,6 @@ def wait_until_done(api):
     return
 
 
-# @pytest.mark.parametrize('api', [quest.api])
 def test_launch_tasks(api, task_cleanup):
     test_tasks = [
         api.long_process(1, 'first', async=True),
@@ -57,9 +56,7 @@ def test_launch_tasks(api, task_cleanup):
         assert {'delay': 1, 'msg': msg} == api.get_task(task)['result']
 
 
-# @pytest.mark.parametrize('api', [quest.api])
 def test_add_remove_tasks(api):
-    api.remove_tasks()
     test_tasks = [
         api.long_process(1, 'first', async=True),
         api.long_process(1, 'second', async=True),
@@ -79,7 +76,6 @@ def test_add_remove_tasks(api):
     assert len(api.get_tasks()) == 0
 
 
-# @pytest.mark.parametrize('api', [quest.api])
 def test_task_with_exception(api, task_cleanup):
     test_tasks = [
         api.long_process(1, 'first', async=True),
