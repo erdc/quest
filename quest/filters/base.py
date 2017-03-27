@@ -1,6 +1,9 @@
 from builtins import object
 import abc
 from future.utils import with_metaclass
+from ..util import listify
+from ..api.metadata import update_metadata
+from ..api.datasets import DatasetStatus
 
 
 class FilterBase(with_metaclass(abc.ABCMeta, object)):
@@ -23,7 +26,15 @@ class FilterBase(with_metaclass(abc.ABCMeta, object)):
         self._datasets = datasets
         self._features = features
         self._filter_options = options
-        return self._apply_filter(datasets, features, options, *args, **kwargs)
+        result = self._apply_filter(datasets, features, options, *args, **kwargs)
+        datasets = listify(result.get('datasets', []))
+        for dataset in datasets:
+            update_metadata(dataset, quest_metadata={
+                'options': self.options,
+                'status': DatasetStatus.FILTERED
+            })
+
+        return result
 
     @abc.abstractmethod
     def _apply_filter(self, datasets, features, options):
