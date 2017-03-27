@@ -35,8 +35,8 @@ class RstUnitConversion(RstBase):
         return df
 
     def apply_filter_options(self, fmt, **kwargs):
-        # if fmt == 'smtk':
-        #     schema = util.build_smtk('filter_options','filter_timeseries_remove_outliers.sbt')
+        if fmt == 'smtk':
+             schema = ''
 
         if fmt == 'json-schema':
             properties = {
@@ -47,22 +47,13 @@ class RstUnitConversion(RstBase):
             }
 
             schema = {
-                "title": "Raster Timeseries Filter",
+                "title": " Unit Conversion Raster Filter",
                 "type": "object",
                 "properties": properties,
                 "required": ["to_units"],
             }
 
         return schema
-
-
-
-
-    def apply_filter_options(self, fmt, **kwargs):
-        schema = {}
-
-        return schema
-
 
 #     class RstMerge(RstBase):
 #         def register(self, name='raster-merge-datasets'):

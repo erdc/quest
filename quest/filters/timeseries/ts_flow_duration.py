@@ -87,11 +87,19 @@ class TsFlowDuration(FilterBase):
         return {'datasets': new_dset}
 
     def apply_filter_options(self, fmt, **kwargs):
-        schema = {
-            "title": "Flow Duration",
-            "type": "object",
-            "properties": {}
-        }
+        if fmt == 'smtk':
+            schema = ''
+
+        if fmt == 'json-schema':
+            properties = {}
+
+            schema = {
+                "title": "Flow Duration Timeseries Filter",
+                "type": "object",
+                "properties": properties,
+                "required": [],
+            }
+
 
         return schema
 

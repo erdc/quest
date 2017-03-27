@@ -103,28 +103,7 @@ class RstBase(FilterBase):
         schema = {}
 
         return schema
-        # if fmt == 'json-schema':
-        #     properties = {
-        #         "bbox": {
-        #             "type": "string",
-        #             "description": "bounding box 'xmin, ymin, xmax, ymax'",
-        #         },
-        #         "nodata": {
-        #             "type": "number",
-        #             "description": "no data value for raster.",
-        #             "default": 0,
-        #         },
-        #     }
-        #
-        #     schema = {
-        #         "title": "Raster Clip",
-        #         "type": "object",
-        #         "properties": properties,
-        #         "required": ['bbox'],
-        #     }
-        #
-        # if fmt == 'smtk':
-        #     schema = ''
+
 
     def _apply(self, df, metadata, options):
         raise NotImplementedError
