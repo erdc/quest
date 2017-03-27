@@ -3,6 +3,7 @@ from quest.api import get_metadata, new_dataset, update_metadata
 from quest import util
 import os
 
+
 class TsFlowDuration(FilterBase):
     def register(self, name='flowDuration'):
         """Register Timeseries
@@ -24,7 +25,7 @@ class TsFlowDuration(FilterBase):
         }
 
     def _apply_filter(self, datasets, features=None, options=None,
-                     display_name=None, description=None, metadata=None):
+                      display_name=None, description=None, metadata=None):
 
         if len(datasets) > 1:
             raise NotImplementedError('This filter can only be applied to a single dataset')
@@ -86,7 +87,11 @@ class TsFlowDuration(FilterBase):
         return {'datasets': new_dset}
 
     def apply_filter_options(self, fmt, **kwargs):
-        schema = {}
+        schema = {
+            "title": "Flow Duration",
+            "type": "object",
+            "properties": {}
+        }
 
         return schema
 
