@@ -1,15 +1,19 @@
-import os
 import pytest
+
+slow = pytest.mark.skipif(
+    pytest.config.getoption("--skip-slow"),
+    reason="--skip-slow option was set"
+)
 
 ACTIVE_PROJECT = 'project1'
 
 pytestmark = pytest.mark.usefixtures('reset_projects_dir', 'set_active_project')
 
-FEATURE_URIS = []
-                # 'svc://usgs-ned:19-arc-second/581d2561e4b08da350d5a3b2',
-                # 'svc://ncdc:gsod/028140-99999',
-                # 'svc://usgs-nwis:iv/01529950',
-                # ]
+FEATURE_URIS = [
+                'svc://usgs-ned:19-arc-second/581d2561e4b08da350d5a3b2',
+                'svc://ncdc:gsod/028140-99999',
+                'svc://usgs-nwis:iv/01529950',
+                ]
 
 COL2_FEATURES = ['f0cedc0e2652404cb40d03109252961c', 'f623d290dcf54d858905e15a098bf300']
 
@@ -26,11 +30,38 @@ def test_add_features(api, feature):
     assert b == c
 
 
-def test_get_features(api):
+@slow
+def test_get_features_from_collection(api):
     c = api.get_features(collections='col2')
     assert len(list(c)) == 2
     for feature in COL2_FEATURES:
         assert feature in c
+
+
+@slow
+@pytest.mark.parametrize("service, expected, tolerance", [
+    ('svc://nasa:srtm-3-arc-second', 14297, 1000),
+    ('svc://nasa:srtm-30-arc-second', 27, 10),
+    ('svc://ncdc:ghcn-daily', 100821, 1000),
+    ('svc://ncdc:gsod', 28621, 1000),
+    ('svc://noaa:coops-meteorological', 371, 50),
+    ('svc://noaa:coops-water', 243, 50),
+    ('svc://noaa:ndbc', 1117, 100),
+    ('svc://usgs-ned:1-arc-second', 3619, 100),
+    ('svc://usgs-ned:13-arc-second', 1240, 100),
+    ('svc://usgs-ned:19-arc-second', 8358, 100),
+    ('svc://usgs-ned:alaska-2-arc-second', 515, 50),
+    ('svc://usgs-nlcd:2001', 203, 50),
+    ('svc://usgs-nlcd:2006', 131, 50),
+    ('svc://usgs-nlcd:2011', 203, 50),
+    ('svc://usgs-nwis:dv', 35919, 1000),
+    ('svc://usgs-nwis:iv', 15483, 1000),
+
+])
+def test_get_features_from_service(api, service, expected, tolerance):
+    features = api.get_features(service)
+    # assert number of features is within tolerance of expected
+    assert abs(len(features) - expected) < tolerance
 
 
 def test_new_feature(api):
