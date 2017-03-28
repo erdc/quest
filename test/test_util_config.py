@@ -42,14 +42,13 @@ def base_dir(request):
     return request.param
 
 
-@pytest.mark.parametrize('api', [quest.api])
-def test_set_base_path_with_env_var(api, set_environ):
+def test_set_base_path_with_env_var(set_environ):
     # Can't be tested with the RPC because environmental variable can't be set.
     settings = quest.api.get_settings()
     del settings['BASE_DIR']
-    api.update_settings()
+    quest.api.update_settings()
 
-    assert api.get_settings() == {
+    assert quest.api.get_settings() == {
                 'BASE_DIR': os.environ['QUEST_DIR'],
                 'CACHE_DIR': 'cache',
                 'PROJECTS_DIR': 'projects',
@@ -57,8 +56,7 @@ def test_set_base_path_with_env_var(api, set_environ):
                 }
 
 
-@pytest.mark.parametrize('api', [quest.api])
-def test_update_settings(api, base_dir):
+def test_update_settings(base_dir):
     """Basic test that paths are set correctly and defaults are used
 
         Can't be tested with RPC because CWD is not the same.
@@ -66,13 +64,13 @@ def test_update_settings(api, base_dir):
 
     with TempCWD():
 
-        api.update_settings(config={'BASE_DIR': base_dir})
+        quest.api.update_settings(config={'BASE_DIR': base_dir})
 
         base_dir = base_dir if os.path.isabs(base_dir) else os.path.join(os.getcwd(), base_dir)
 
         test_settings.update({'BASE_DIR': base_dir})
 
-    assert api.get_settings() == test_settings
+    assert quest.api.get_settings() == test_settings
 
 
 def test_update_settings_from_file(api):
