@@ -86,7 +86,7 @@ def start_rpc_server(base_dir):
     rpc_server.start_server(port=RPC_PORT, threaded=True)
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture
 def api(request, get_base_dir):
     if request.param == 'python':
         return quest.api
