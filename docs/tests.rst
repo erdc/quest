@@ -40,10 +40,6 @@ To get the most coverage you should run::
 
 This will test all of the services by regenerating the cache and will run the complete set of tests. This process can take around 10 minutes.
 
-.. note::
-
-    The `async` tests seem to be somewhat unreliable. There are two tests that seem to periodically fail for no apparent reason. If these tests continue to fail after running the tests several times please submit an issue.
-
 
 Adding Tests
 ------------

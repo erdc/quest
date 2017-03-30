@@ -23,6 +23,7 @@ def feature(request):
     return request.param
 
 
+@slow
 def test_add_features(api, feature):
     b = api.add_features('col1', feature)
     c = api.get_features(collections='col1')
@@ -30,7 +31,6 @@ def test_add_features(api, feature):
     assert b == c
 
 
-@slow
 def test_get_features_from_collection(api):
     c = api.get_features(collections='col2')
     assert len(list(c)) == 2

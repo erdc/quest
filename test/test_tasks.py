@@ -8,7 +8,12 @@ from types import ModuleType
 
 @pytest.fixture
 def task_cleanup(api, request):
-    request.addfinalizer(api.remove_tasks)
+    def remove_tasks():
+        pending_tasks = api.get_pending_tasks()
+        api.cancel_tasks(pending_tasks)
+        api.remove_tasks()
+
+    request.addfinalizer(remove_tasks)
 
 
 @dispatcher.add_method
@@ -62,7 +67,7 @@ def test_launch_tasks(api, task_cleanup):
         assert {'delay': 1, 'msg': msg} == api.get_task(task)['result']
 
 
-def test_add_remove_tasks(api):
+def test_add_remove_tasks(api, task_cleanup):
     test_tasks = [
         api.long_process(1, 'first', async=True),
         api.long_process(1, 'second', async=True),
@@ -70,7 +75,7 @@ def test_add_remove_tasks(api):
         ]
 
     assert len(api.get_tasks()) == 3
-    test_tasks.append(long_process(10, 'fourth', async=True))
+    test_tasks.append(api.long_process(10, 'fourth', async=True))
     assert len(api.get_tasks()) == 4
     api.cancel_tasks(test_tasks[3])
     assert len(api.get_tasks(filters={'status': 'cancelled'})) == 1
