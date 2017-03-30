@@ -58,9 +58,6 @@ def get_or_generate_test_cache(update=False, skip=False):
 
     return test_cache_dir
 
-RPC_PORT = 4443
-RPC_CLIENT = rpc_server.RPCClient(port=RPC_PORT)
-
 
 @pytest.fixture(scope='session')
 def get_base_dir(request):
@@ -86,7 +83,7 @@ def start_rpc_server(base_dir):
     rpc_server.start_server(port=RPC_PORT, threaded=True)
 
 
-@pytest.fixture
+@pytest.fixture(scope='session')
 def api(request, get_base_dir):
     if request.param == 'python':
         return quest.api
