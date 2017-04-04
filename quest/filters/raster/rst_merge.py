@@ -8,6 +8,7 @@ import rasterio
 from pyproj import Proj
 import subprocess
 # from ....util import logger
+import warnings
 
 class RstMerge(FilterBase):
     def register(self, name='raster-merge'):
@@ -51,6 +52,9 @@ class RstMerge(FilterBase):
         if options is None:
             options = {}
 
+        if description is None:
+            description = 'Raster Filter Applied'
+
         cname = orig_metadata['collection']
         feature = new_feature(cname,
                               display_name=display_name, geom_type='Polygon',
@@ -68,9 +72,18 @@ class RstMerge(FilterBase):
 
         self.file_path = dst
 
+        with rasterio.open(orig_metadata['file_path']) as first_dataset:
+            projection = first_dataset.crs
+            bands = first_dataset.count
+
+        for file in raster_files:
+            if rasterio.open(file).crs != projection:
+                raise ValueError('Projections for all datasets must be the same')
+            if rasterio.open(file).count != bands:
+                raise ValueError('Band count for all datasets must be the same')
+
         base_path = os.environ["PYTHONPATH"].split(os.pathsep)
         base_path = base_path[0]
-        # logger.info('Mosaic and clip to bounding box extents')
         output_vrt = os.path.splitext(dst)[0] + '.vrt'
         gdal_build_vrt = os.path.join(base_path, 'gdalbuildvrt')
         gdal_warp = os.path.join(base_path, 'gdalwarp')
@@ -79,8 +92,6 @@ class RstMerge(FilterBase):
 
         subprocess.check_output(
             [gdal_warp, '-overwrite', output_vrt, dst])
-        # logger.info('Output raster saved at %s', output_path)
-
 
         new_metadata = {
             'parameter': orig_metadata['parameter'],
@@ -89,8 +100,7 @@ class RstMerge(FilterBase):
             'unit': orig_metadata['unit']
         }
 
-        if description is None:
-            description = 'Raster Filter Applied'
+
 
         # update metadata
         new_metadata.update({
