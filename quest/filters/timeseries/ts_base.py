@@ -59,6 +59,9 @@ class TsBase(FilterBase):
             'message': 'TS Filter Applied'
         }
 
+        if description is None:
+            description = 'TS Filter Applied'
+
         new_dset = new_dataset(orig_metadata['feature'],
                                source='derived',
                                display_name=display_name,
