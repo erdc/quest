@@ -44,10 +44,14 @@ class RstDelineation(FilterBase):
 
         orig_metadata = get_metadata(dataset)[dataset]
         src_path = orig_metadata['file_path']
+
         if display_name is None:
             display_name = 'Created by filter {}'.format(self.name)
         if options is None:
             options ={}
+
+        if description is None:
+            description = 'Raster Filter Applied'
 
         if not options.get('outlet_points'):
             raise ValueError('Outlet points are required')
@@ -118,8 +122,7 @@ class RstDelineation(FilterBase):
             'file_format': orig_metadata['file_format'],
         }
 
-        if description is None:
-            description = 'Raster Filter Applied'
+
 
         # update metadata
         new_metadata.update({
@@ -189,10 +192,15 @@ class RstFlowAccum(FilterBase):
 
         orig_metadata = get_metadata(dataset)[dataset]
         src_path = orig_metadata['file_path']
+
         if display_name is None:
             display_name = 'Created by filter {}'.format(self.name)
+
         if options is None:
             options = {}
+
+        if description is None:
+            description = 'Raster Filter Applied'
 
         # run filter
         with rasterio.open(src_path) as src:
@@ -232,8 +240,6 @@ class RstFlowAccum(FilterBase):
             'file_format': orig_metadata['file_format'],
         }
 
-        if description is None:
-            description = 'Raster Filter Applied'
 
         # update metadata
         new_metadata.update({
