@@ -112,4 +112,16 @@ class RstMerge(FilterBase):
         return {'datasets': new_dset, 'features': feature}
 
     def apply_filter_options(self, fmt, **kwargs):
-        raise NotImplementedError
+        if fmt == 'json-schema':
+            properties = {},
+
+            schema = {
+                    "title": "Merge Raster Filter",
+                    "type": "object",
+                    "properties": properties,
+                }
+
+        if fmt == 'smtk':
+            schema = ''
+
+        return schema
