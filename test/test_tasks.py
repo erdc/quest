@@ -4,7 +4,12 @@ import pytest
 import quest
 from jsonrpc import dispatcher
 from types import ModuleType
+import sys
 
+skip_py2 = pytest.mark.skipif(
+    sys.version_info.major == 2,
+    reason="async functions are not compatible with the RPC server on Python 2"
+)
 
 @pytest.fixture
 def task_cleanup(api, request):
@@ -41,6 +46,7 @@ def wait_until_done(api):
     return
 
 
+@skip_py2
 def test_launch_tasks(api, task_cleanup):
     test_tasks = [
         api.long_process(1, 'first', async=True),
@@ -61,13 +67,16 @@ def test_launch_tasks(api, task_cleanup):
         assert {'delay': 1, 'msg': msg} == api.get_task(task)['result']
 
 
+@skip_py2
 def test_add_remove_tasks(api, task_cleanup):
+    print(api.get_tasks())
     test_tasks = [
         api.long_process(1, 'first', async=True),
         api.long_process(1, 'second', async=True),
         api.long_process(1, 'third', async=True),
         ]
-
+    print(api.get_tasks())
+    print(test_tasks)
     assert len(api.get_tasks()) == 3
     test_tasks.append(api.long_process(10, 'fourth', async=True))
     assert len(api.get_tasks()) == 4
@@ -81,6 +90,7 @@ def test_add_remove_tasks(api, task_cleanup):
     assert len(api.get_tasks()) == 0
 
 
+@skip_py2
 def test_task_with_exception(api, task_cleanup):
     test_tasks = [
         api.long_process(1, 'first', async=True),
