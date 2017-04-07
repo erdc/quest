@@ -1,6 +1,7 @@
-import quest
 import os
 import tempfile
+import quest
+import pytest
 
 
 def test_get_quest_dir(reset_projects_dir):

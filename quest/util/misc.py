@@ -1,8 +1,6 @@
-import appdirs
 from geojson import LineString, Point, Polygon, Feature, FeatureCollection, MultiPolygon
 import shapely.geometry
 from jinja2 import Environment, FileSystemLoader
-import itertools
 from .config import get_settings
 from .. import get_pkg_data_path
 import os
@@ -19,6 +17,18 @@ except ImportError:
     import json
 
 from uuid import uuid4, UUID
+import quest
+
+
+def generate_cache(update=False):
+    """Downloads features for all services and caches results.
+
+    Args:
+        update (bool):
+            whether to update cached files.
+    """
+    for service in quest.api.get_services():
+        quest.api.get_features(service, update_cache=update)
 
 
 def append_features(old, new):
