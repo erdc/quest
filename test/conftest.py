@@ -74,10 +74,8 @@ def get_base_dir(request, pytestconfig):
 
     def cleanup():
         try:
-            if sys.version_info.major == 2:
-                PermissionError = WindowsError
             shutil.rmtree(base_dir)
-        except PermissionError as e:
+        except Exception as e:
             capmanager = pytestconfig.pluginmanager.getplugin('capturemanager')
             capmanager.suspendcapture()
             warnings.warn('\nFailed to remove temporary directory {0} due to the following error:\n{1}'
