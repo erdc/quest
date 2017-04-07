@@ -1,5 +1,6 @@
 import pytest
 import os
+import sys
 import shutil
 import tempfile
 from threading import Thread
@@ -60,7 +61,7 @@ def get_or_generate_test_cache(update=False, skip=False):
 
 
 @pytest.fixture(scope='session')
-def get_base_dir(request):
+def get_base_dir(request, pytestconfig):
     base_dir = tempfile.mkdtemp()
     update_cache = request.config.getoption('--update-cache')
     skip_cache = request.config.getoption('--skip-slow')
@@ -72,7 +73,16 @@ def get_base_dir(request):
         shutil.copytree(test_cache_dir, os.path.join(base_dir, 'cache'))
 
     def cleanup():
-        shutil.rmtree(base_dir)
+        try:
+            if sys.version_info.major == 2:
+                PermissionError = WindowsError
+            shutil.rmtree(base_dir)
+        except PermissionError as e:
+            capmanager = pytestconfig.pluginmanager.getplugin('capturemanager')
+            capmanager.suspendcapture()
+            warnings.warn('\nFailed to remove temporary directory {0} due to the following error:\n{1}'
+                          .format(base_dir, str(e)))
+            capmanager.resumecapture()
 
     request.addfinalizer(cleanup)
 
