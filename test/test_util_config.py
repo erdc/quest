@@ -1,8 +1,9 @@
 "Tests for functions in settings.py"
-import quest
 import os
 import tempfile
 import pytest
+import quest
+import shutil
 
 test_settings = {
     'BASE_DIR': 'quest',
@@ -16,12 +17,14 @@ class TempCWD():
 
     def __init__(self):
         self.cwd = os.getcwd()
+        self.temp_dir = tempfile.mkdtemp()
 
     def __enter__(self):
-        os.chdir(tempfile.mkdtemp())
+        os.chdir(self.temp_dir)
 
     def __exit__(self, *args):
         os.chdir(self.cwd)
+        shutil.rmtree(self.temp_dir)
 
 
 @pytest.fixture
@@ -39,9 +42,8 @@ def base_dir(request):
     return request.param
 
 
-# this test needs to run first because quest is set from environment only
-# when BASE_DIR is unset
 def test_set_base_path_with_env_var(set_environ):
+    # Can't be tested with the RPC because environmental variable can't be set.
     settings = quest.api.get_settings()
     del settings['BASE_DIR']
     quest.api.update_settings()
@@ -57,6 +59,7 @@ def test_set_base_path_with_env_var(set_environ):
 def test_update_settings(base_dir):
     """Basic test that paths are set correctly and defaults are used
 
+        Can't be tested with RPC because CWD is not the same.
     """
 
     with TempCWD():
@@ -70,21 +73,21 @@ def test_update_settings(base_dir):
     assert quest.api.get_settings() == test_settings
 
 
-def test_update_settings_from_file():
+def test_update_settings_from_file(api):
     with TempCWD():
-        quest.api.update_settings_from_file(os.path.dirname(os.path.realpath(__file__)) + '/files/quest_config.yml')
+        api.update_settings_from_file(os.path.dirname(os.path.realpath(__file__)) + '/files/quest_config.yml')
         test = test_settings.copy()
         test.update({'USER_SERVICES': ['iraq-vitd', 'usgs-ned1']})
-    assert sorted(quest.api.get_settings()['USER_SERVICES']) == (test["USER_SERVICES"])
-    assert len(quest.api.get_settings()) == len(test)
+    assert sorted(api.get_settings()['USER_SERVICES']) == (test["USER_SERVICES"])
+    assert len(api.get_settings()) == len(test)
 
 
-def test_save_settings():
+def test_save_settings(api):
     with TempCWD():
-        quest.api.update_settings(config={'BASE_DIR': 'quest', 'USER_SERVICES':[]})
-        settings = quest.api.get_settings()
+        api.update_settings(config={'BASE_DIR': 'quest', 'USER_SERVICES': []})
+        settings = api.get_settings()
         filename = os.path.join(tempfile.gettempdir(), 'quest_config.yml')
-        quest.api.save_settings(filename)
-        quest.api.update_settings_from_file(filename)
+        api.save_settings(filename)
+        api.update_settings_from_file(filename)
 
-    assert settings == quest.api.get_settings()
+    assert settings == api.get_settings()

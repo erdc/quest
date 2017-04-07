@@ -12,6 +12,7 @@ Contents:
    design
    api
    plugin
+   tests
 
 Indices and tables
 ==================
