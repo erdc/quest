@@ -69,14 +69,11 @@ def test_launch_tasks(api, task_cleanup):
 
 @skip_py2
 def test_add_remove_tasks(api, task_cleanup):
-    print(api.get_tasks())
     test_tasks = [
         api.long_process(1, 'first', async=True),
         api.long_process(1, 'second', async=True),
         api.long_process(1, 'third', async=True),
         ]
-    print(api.get_tasks())
-    print(test_tasks)
     assert len(api.get_tasks()) == 3
     test_tasks.append(api.long_process(10, 'fourth', async=True))
     assert len(api.get_tasks()) == 4
