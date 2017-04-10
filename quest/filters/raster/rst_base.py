@@ -39,15 +39,22 @@ class RstBase(FilterBase):
 
         # get metadata, path etc from first dataset, i.e. assume all datasets
         # are in same folder. This will break if you try and combine datasets
-        # from different services
+        # from different service
 
         orig_metadata = get_metadata(dataset)[dataset]
         src_path = orig_metadata['file_path']
+
         if display_name is None:
             display_name = 'Created by filter {}'.format(self.name)
+
         if options is None:
             options ={}
+
+        if description is None:
+            description = 'Raster Filter Applied'
+
         options['orig_metadata'] = orig_metadata
+
         #run filter
         with rasterio.open(src_path) as src:
             out_image = self._apply(src,options)
@@ -86,9 +93,6 @@ class RstBase(FilterBase):
             'file_format': orig_metadata['file_format'],
             'unit': orig_metadata['unit']
         }
-
-        if description is None:
-            description = 'Raster Filter Applied'
 
         # update metadata
         new_metadata.update({
