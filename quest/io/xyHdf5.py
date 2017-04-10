@@ -17,8 +17,6 @@ class XYHdf5(IoBase):
 
     def read(self, path):
         """Read metadata and dataframe from HDF5 store."""
-        if not path.endswith('h5'):
-            path += '.h5'
 
         with pd.get_store(path) as h5store:
             dataframe = h5store.get('dataframe')
@@ -29,8 +27,6 @@ class XYHdf5(IoBase):
     def write(self, file_path, dataframe, metadata):
         """"Write dataframe and metadata to HDF5 store."""
         base, fname = os.path.split(file_path)
-        if not file_path.endswith('h5'):
-            file_path += '.h5'
 
         util.mkdir_if_doesnt_exist(base)
         with pd.get_store(file_path) as h5store:
