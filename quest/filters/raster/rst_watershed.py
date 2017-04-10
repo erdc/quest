@@ -10,7 +10,8 @@ import numpy as np
 from shapely.geometry import mapping
 from shapely.affinity import affine_transform
 
-class RstDelineation(FilterBase):
+
+class RstWatershedDelineation(FilterBase):
     def register(self, name='watershed-delineation'):
         """Register Timeseries
 
