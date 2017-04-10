@@ -3,7 +3,9 @@ from .base import WebServiceBase
 from .. import util
 import pandas as pd
 import os
+import datetime
 from ..util.log import logger
+
 BASE_PATH = 'noaa'
 BASE_URL = 'http://coastwatch.pfeg.noaa.gov/erddap/tabledap/'
 
@@ -220,7 +222,7 @@ class NoaaService(WebServiceBase):
             end = pd.datetime.now().strftime('%Y-%m-%d')
 
         if start is None:
-            start = pd.to_datetime(end) - pd.datetools.timedelta(days=365)
+            start = pd.to_datetime(end) - datetime.timedelta(days=365)
             start = start.strftime('%Y-%m-%d')
 
         pmap = self._parameter_map(service, invert=True)
@@ -244,7 +246,7 @@ class NoaaService(WebServiceBase):
 
             if service == 'coops-meteorological':
 
-                start = pd.to_datetime(end) - pd.datetools.timedelta(days=28)
+                start = pd.to_datetime(end) - datetime.timedelta(days=28)
                 start = start.strftime('%Y-%m-%d')
 
                 location = self._datasetId_map(service, parameter_code)
@@ -269,7 +271,7 @@ class NoaaService(WebServiceBase):
                 else:
                     location=self._datasetId_map(service, parameter_code) + interval
 
-                start = pd.to_datetime(end) - pd.datetools.timedelta(days=28)
+                start = pd.to_datetime(end) - datetime.timedelta(days=28)
                 start = start.strftime('%Y-%m-%d')
 
                 url = 'nosCoops{}.csvp?time,{}&stationID="{}"&time>={}&time<={}&datum="{}"'\
@@ -287,8 +289,8 @@ class NoaaService(WebServiceBase):
                 data.index = pd.to_datetime(data.index)
                 data.rename(columns={parameter_code: parameter})
 
-            file_path = os.path.join(file_path, BASE_PATH, service)
-            file_path = os.path.join(file_path, dataset)
+            file_path = os.path.join(file_path, BASE_PATH, service, dataset, '{0}.h5'.format(dataset))
+
             metadata = {
                 'file_path': file_path,
                 'file_format': 'timeseries-hdf5',

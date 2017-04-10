@@ -188,8 +188,8 @@ class NwisService(WebServiceBase):
         df[df.values == -999999] = pd.np.nan
         df.rename(columns={'value': parameter}, inplace=True)
 
-        file_path = os.path.join(file_path, BASE_PATH, service)
-        file_path = os.path.join(file_path, dataset)
+        file_path = os.path.join(file_path, BASE_PATH, service, dataset, '{0}.h5'.format(dataset))
+
         del data['values']
 
         metadata = {
