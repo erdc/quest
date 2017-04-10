@@ -3,8 +3,9 @@ from pint import UnitRegistry
 import os
 import terrapin
 
+
 class RstUnitConversion(RstBase):
-    def register(self, name='rst-unit-conversion'):
+    def register(self, name='raster-unit-conversion'):
         RstBase.register(self, name=name)
 
     def _apply(self, df, options):
@@ -36,7 +37,7 @@ class RstUnitConversion(RstBase):
 
     def apply_filter_options(self, fmt, **kwargs):
         if fmt == 'smtk':
-             schema = ''
+            schema = ''
 
         if fmt == 'json-schema':
             properties = {
