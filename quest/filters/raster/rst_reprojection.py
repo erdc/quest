@@ -5,7 +5,7 @@ from quest.api.projects import active_db
 import os
 import rasterio
 import numpy as np
-from rasterio.warp import calculate_default_transform, reproject, Resampling
+from rasterio.warp import calculate_default_transform
 
 
 class RstReproj(FilterBase):

@@ -2,13 +2,11 @@ from ..base import FilterBase
 from quest import util
 from quest.api import get_metadata, new_dataset, update_metadata, new_feature
 from quest.api.projects import active_db
-import terrapin
 import os
 import rasterio
-from pyproj import Proj
 import subprocess
 # from ....util import logger
-import warnings
+
 
 class RstMerge(FilterBase):
     def register(self, name='raster-merge'):
