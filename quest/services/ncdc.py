@@ -162,8 +162,8 @@ class NcdcService(WebServiceBase):
             data.index = pd.PeriodIndex(data.index, freq='D')
             data.rename(columns={parameter_code: parameter}, inplace=True)
 
-        file_path = os.path.join(file_path, BASE_PATH, service)
-        file_path = os.path.join(file_path, dataset)
+        file_path = os.path.join(file_path, BASE_PATH, service, dataset, '{0}.h5'.format(dataset))
+
         metadata = {
             'file_path': file_path,
             'file_format': 'timeseries-hdf5',

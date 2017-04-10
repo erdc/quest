@@ -17,7 +17,7 @@ pytestmark = pytest.mark.usefixtures('reset_projects_dir', 'set_active_project')
 
 @pytest.fixture
 def dataset_save_path(api, reset_projects_dir):
-    save_path = os.path.join(reset_projects_dir['BASE_DIR'], 'projects/test_data/test_data/usgs-nwis/iv/df5c3df3229441fa9c779443f03635e7')
+    save_path = os.path.join(reset_projects_dir['BASE_DIR'], 'projects/test_data/test_data/usgs-nwis/iv/df5c3df3229441fa9c779443f03635e7.h5')
     api.update_metadata(uris=DATASET, quest_metadata={'file_path': save_path})
 
     return save_path
