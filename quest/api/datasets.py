@@ -1,5 +1,4 @@
 """Datasets API functions."""
-import json
 from jsonrpc import dispatcher
 import os
 
@@ -99,7 +98,7 @@ def download_datasets(datasets, raise_on_error=False):
         feature_uri = dataset['service'] + '/' + dataset['service_id']
         try:
             update_metadata(idx, quest_metadata={'status': DatasetStatus.PENDING})
-            kwargs = json.loads(dataset['options'])
+            kwargs = dataset['options']
             if kwargs is not None:
                 all_metadata = download(feature_uri,
                                         file_path=collection_path,
@@ -191,7 +190,9 @@ def get_datasets(expand=None, filters=None, as_dataframe=None):
     """
     db = get_db()
     with db_session:
-        datasets = [dict(d.to_dict(), **{'collection': d.feature.collection.name}) for d in db.Dataset.select()]
+        datasets = [dict(d.to_dict(), **{'collection': d.feature.collection.name,
+                                         'options': d.options if d.options is None else dict(d.options)})
+                    for d in db.Dataset.select()]
         datasets = pd.DataFrame(datasets)
         if not datasets.empty:
             datasets.set_index('name', inplace=True, drop=False)
@@ -311,7 +312,7 @@ def stage_for_download(uris, options=None):
             dataset_uri = new_dataset(uri, source='download')
 
         quest_metadata = {
-            'options': json.dumps(kwargs),
+            'options': kwargs,
             'status': DatasetStatus.STAGED,
             'parameter': kwargs.get('parameter') if kwargs else None
         }
