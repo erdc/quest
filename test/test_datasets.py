@@ -1,5 +1,4 @@
 import os
-import json
 import pytest
 from types import ModuleType
 
@@ -366,7 +365,7 @@ def test_stage_for_download(api):
         download_options = {'parameter': 'streamflow'}
         api.stage_for_download(new_dataset, options=download_options)
         metadata = api.get_metadata(uris=new_dataset)
-        assert json.loads(metadata[new_dataset]['options']) == download_options
+        assert metadata[new_dataset]['options'] == download_options
         assert metadata[new_dataset]['status'] == 'staged for download'
     finally:
         api.delete(new_dataset)
@@ -386,7 +385,7 @@ def test_stage_for_download(api):
     try:
         metadata = api.get_metadata(uris=new_datasets)
         for dataset, metadata in metadata.items():
-            assert json.loads(metadata['options']) == download_options
+            assert metadata['options'] == download_options
             assert metadata['status'] == 'staged for download'
 
         # test different download options
@@ -394,7 +393,7 @@ def test_stage_for_download(api):
         api.stage_for_download(new_datasets, options=download_options)
         metadata = api.get_metadata(uris=new_datasets)
         for i, dataset in enumerate(new_datasets):
-            assert json.loads(metadata[dataset]['options']) == download_options[i]
+            assert metadata[dataset]['options'] == download_options[i]
             assert metadata[dataset]['status'] == 'staged for download'
     finally:
         api.delete(new_datasets)
