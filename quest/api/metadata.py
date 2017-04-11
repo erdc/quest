@@ -88,7 +88,8 @@ def get_metadata(uris, as_dataframe=False):
         tmp_df = grouped_uris.get_group('datasets')
         db = get_db()
         with db_session:
-            datasets = [dict(d.to_dict(), **{'collection': d.feature.collection.name})
+            datasets = [dict(d.to_dict(), **{'collection': d.feature.collection.name,
+                                             'options': d.options if d.options is None else dict(d.options)})
                         for d in db.Dataset.select(lambda c: c.name in tmp_df['uri'].tolist())]
             datasets = pd.DataFrame(datasets)
             datasets.set_index('name', inplace=True, drop=False)
