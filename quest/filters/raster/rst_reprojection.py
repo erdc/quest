@@ -8,8 +8,8 @@ import numpy as np
 from rasterio.warp import calculate_default_transform
 
 
-class RstReproj(FilterBase):
-    def register(self, name='reprojection'):
+class RstReprojection(FilterBase):
+    def register(self, name='raster-reprojection'):
         """Register Raster
 
         """
