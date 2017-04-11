@@ -3,9 +3,10 @@ from quest import util
 from quest.api import get_metadata, new_dataset, update_metadata, new_feature
 from quest.api.projects import active_db
 import os
+import sys
+import platform
 import rasterio
 import subprocess
-# from ....util import logger
 
 
 class RstMerge(FilterBase):
@@ -30,7 +31,6 @@ class RstMerge(FilterBase):
 
     def _apply_filter(self, datasets, features=None, options=None,
                       display_name=None, description=None, metadata=None):
-
 
         if len(datasets) < 2:
             raise ValueError('There must be at LEAST two datasets for this filter')
@@ -80,16 +80,12 @@ class RstMerge(FilterBase):
             if rasterio.open(file).count != bands:
                 raise ValueError('Band count for all datasets must be the same')
 
-        base_path = os.environ["PYTHONPATH"].split(os.pathsep)
-        base_path = base_path[0]
         output_vrt = os.path.splitext(dst)[0] + '.vrt'
-        gdal_build_vrt = os.path.join(base_path, 'gdalbuildvrt')
-        gdal_warp = os.path.join(base_path, 'gdalwarp')
 
-        subprocess.check_output([gdal_build_vrt, '-overwrite', output_vrt] + raster_files)
+        subprocess.check_output(['gdalbuildvrt', '-overwrite', output_vrt] + raster_files)
 
         subprocess.check_output(
-            [gdal_warp, '-overwrite', output_vrt, dst])
+            ['gdalwarp', '-overwrite', output_vrt, dst])
 
         new_metadata = {
             'parameter': orig_metadata['parameter'],

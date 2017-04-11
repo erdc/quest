@@ -17,6 +17,7 @@ FILES_DIR = os.path.join(base_path, 'files')
 RPC_PORT = 4443
 RPC_CLIENT = rpc_server.RPCClient(port=RPC_PORT)
 
+print('PATH', os.environ['PATH'])
 
 def pytest_addoption(parser):
     parser.addoption('--update-cache', action='store_true')
