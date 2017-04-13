@@ -2,6 +2,7 @@ import pytest
 import os
 import sys
 import shutil
+import socket
 import tempfile
 from threading import Thread
 from time import sleep, time
@@ -13,17 +14,17 @@ from quest.scripts import rpc_server
 base_path = os.path.dirname(os.path.abspath(__file__))
 FILES_DIR = os.path.join(base_path, 'files')
 
+# use different default ports for Python 2 and Python 3 so they can both be tested simultaneously
+RPC_PORT = 4440 + sys.version_info.major
 
-RPC_PORT = 4443
-RPC_CLIENT = rpc_server.RPCClient(port=RPC_PORT)
-
-print('PATH', os.environ['PATH'])
 
 def pytest_addoption(parser):
     parser.addoption('--update-cache', action='store_true')
     parser.addoption('--rpc-only', action='store_true')
     parser.addoption('--python-only', action='store_true')
     parser.addoption('--skip-slow', action='store_true')
+    parser.addoption('--rpc-port-range', dest='rpc_port_range', nargs=2, default=None,
+                     help="start and end port for range or ports to scan for an available port.")
 
 
 def pytest_generate_tests(metafunc):
@@ -42,6 +43,8 @@ def get_or_generate_test_cache(update=False, skip=False):
         return test_cache_dir
     start = time()
     quest.api.update_settings({'CACHE_DIR': test_cache_dir})
+    if not os.path.exists(test_cache_dir) or update:
+        print('Generating the services metadata cache for tests. This may take several minutes.')
     warnings.simplefilter('ignore')
     for name in quest.api.get_services():
         provider, service, feature = quest.util.parse_service_uri(name)
@@ -56,7 +59,7 @@ def get_or_generate_test_cache(update=False, skip=False):
         if update or not os.path.exists(cache_file):
             quest.api.get_features(name, update_cache=update)
     warnings.simplefilter('default')
-    print('TIME:', time() - start)
+    print('Generated test cash in {0} seconds'.format(time() - start))
 
     return test_cache_dir
 
@@ -88,12 +91,29 @@ def get_base_dir(request, pytestconfig):
     return base_dir
 
 
-server_process = None
+def get_available_port(request):
+    port_range = request.config.getoption('rpc_port_range')
+    if port_range is not None:
+        port_range = range(int(port_range[0]), int(port_range[1]) + 1)
+    else:
+        port_range = range(RPC_PORT, RPC_PORT + 1)
+
+    for port in port_range:
+        try:
+            s = socket.socket()
+            s.connect(('localhost', port))
+            s.close()
+        except socket.error as e:
+            if e.errno == 61:  # Connection refused (i.e. port is not being used)
+                return port
 
 
-def start_rpc_server(base_dir):
+def start_rpc_server(base_dir, port):
     os.chdir(base_dir)
-    rpc_server.start_server(port=RPC_PORT, threaded=True)
+    rpc_server.start_server(port=port, threaded=True)
+
+server_process = None
+port = None
 
 
 @pytest.fixture(scope='session')
@@ -102,14 +122,16 @@ def api(request, get_base_dir):
         return quest.api
     elif request.param == 'rpc':
         global server_process
+        global port
         server_running = server_process.is_alive() if hasattr(server_process, 'is_alive') else False
         if not server_running:
-            server_process = Thread(target=start_rpc_server, args=[get_base_dir])
+            port = get_available_port(request)
+            server_process = Thread(target=start_rpc_server, args=[get_base_dir, port])
             server_process.start()
             sleep(1)
 
-        request.addfinalizer(lambda: rpc_server.stop_server(port=RPC_PORT))
-    return RPC_CLIENT
+        request.addfinalizer(lambda: rpc_server.stop_server(port=port))
+        return rpc_server.RPCClient(port=port)
 
 
 @pytest.fixture
