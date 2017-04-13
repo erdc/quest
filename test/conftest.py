@@ -7,6 +7,7 @@ import tempfile
 from threading import Thread
 from time import sleep, time
 import warnings
+import errno
 
 import quest
 from quest.scripts import rpc_server
@@ -41,10 +42,11 @@ def get_or_generate_test_cache(update=False, skip=False):
     test_cache_dir = os.path.join(quest.util.get_quest_dir(), 'test_cache')
     if skip:
         return test_cache_dir
-    start = time()
     quest.api.update_settings({'CACHE_DIR': test_cache_dir})
+    start = None
     if not os.path.exists(test_cache_dir) or update:
         print('Generating the services metadata cache for tests. This may take several minutes.')
+        start = time()
     warnings.simplefilter('ignore')
     for name in quest.api.get_services():
         provider, service, feature = quest.util.parse_service_uri(name)
@@ -59,7 +61,8 @@ def get_or_generate_test_cache(update=False, skip=False):
         if update or not os.path.exists(cache_file):
             quest.api.get_features(name, update_cache=update)
     warnings.simplefilter('default')
-    print('Generated test cash in {0} seconds'.format(time() - start))
+    if start is not None:
+        print('Generated test cash in {0} seconds'.format(time() - start))
 
     return test_cache_dir
 
@@ -104,7 +107,7 @@ def get_available_port(request):
             s.connect(('localhost', port))
             s.close()
         except socket.error as e:
-            if e.errno == 61:  # Connection refused (i.e. port is not being used)
+            if e.errno == errno.ECONNREFUSED:  # (i.e. port is not being used)
                 return port
 
 
