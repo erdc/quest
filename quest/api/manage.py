@@ -4,7 +4,6 @@ delete, move, and copy fn for collections/features/datasets
 """
 
 from jsonrpc import dispatcher
-import pandas as pd
 import os
 import shutil
 from ..util.log import logger
@@ -50,9 +49,8 @@ def delete(uris):
     for uri in uris:
         if resource == 'collections':
             if uri not in get_collections():
-                logger.error('Collection does not exist: ',uri)
+                logger.error('Collection does not exist: %s', uri)
                 raise ValueError('Collection does not exists')
-
 
             # delete all datasets and all features and folder
             features = get_features(collections=uri)
@@ -65,7 +63,6 @@ def delete(uris):
             if os.path.exists(path):
                 logger.info('deleting all data under path: %s' % path)
                 shutil.rmtree(path)
-
 
         if resource == 'features':
             # delete feature and associated datasets
@@ -167,7 +164,7 @@ def copy(uris, destination_collection):
         if resource == 'collections':
             pass
             # if destination collection exists:
-                # copy all features from collection to destination
+            #   copy all features from collection to destination
 
         if resource == 'features':
             feature_metadata = get_metadata(uri)[uri]
