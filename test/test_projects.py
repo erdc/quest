@@ -59,18 +59,84 @@ def test_add_project(api, reset_projects_dir, init_project_to_add):
 
 
 def test_delete_project(api, reset_projects_dir, test_project):
+    # this test only works if there is more than 1 project
+    assert reset_projects_dir['NUMBER_OF_PROJECTS'] > 1
+
     c = api.delete_project(test_project)
     assert len(c) == reset_projects_dir['NUMBER_OF_PROJECTS'] - 1
     assert test_project not in c
 
-    # test that 'default' gets restored after delete on get_projects
-    c = api.get_projects()
-    if test_project == 'default':
-        assert len(c) == reset_projects_dir['NUMBER_OF_PROJECTS']
-        assert test_project in c
-    else:
-        assert len(c) == reset_projects_dir['NUMBER_OF_PROJECTS'] - 1
-        assert test_project not in c
+
+def test_delete_all_projects_default_last(api, reset_projects_dir):
+    projects = api.get_projects()
+    assert 'default' in projects
+
+    # delete all projects except the default project
+    for project in projects:
+        if project != 'default':
+            api.delete_project(project)
+
+    # ensure that the default project gets re-generated if it is the last project and gets deleted
+    c = api.delete_project('default')
+
+    assert len(c) == 1
+    assert 'default' in c
+
+
+def test_delete_all_projects_default_not_last(api, reset_projects_dir, set_active_project):
+    # delete all projects except the active project
+    for project in api.get_projects():
+        if project != ACTIVE_PROJECT:
+            api.delete_project(project)
+
+    # ensure that the default project gets re-generated if it is the last project and gets deleted
+    c = api.delete_project(ACTIVE_PROJECT)
+
+    assert len(c) == 1
+    assert 'default' in c
+
+
+def test_delete_active_project_with_default(api, reset_projects_dir, set_active_project):
+    # this test only works if there are more than 2 projects
+    assert reset_projects_dir['NUMBER_OF_PROJECTS'] > 2
+
+    projects = api.get_projects()
+
+    # default project must exist for this test
+    assert 'default' in projects
+
+    # active project cannnot be the default project for this test
+    assert ACTIVE_PROJECT != 'default'
+
+    c = api.delete_project(ACTIVE_PROJECT)
+    assert len(c) == reset_projects_dir['NUMBER_OF_PROJECTS'] - 1
+    assert ACTIVE_PROJECT not in c
+    new_active_project = api.get_active_project()
+    assert new_active_project == 'default'
+
+
+def test_delete_active_project_without_default(api, reset_projects_dir, set_active_project):
+    projects = api.get_projects()
+
+    # default project cannot exist for this test
+    if 'default' in projects:
+        projects = api.delete_project('default')
+
+    # this test only works if there are more than 2 non default projects projects
+    assert len(projects) > 2
+
+    c = api.delete_project(ACTIVE_PROJECT)
+    assert len(c) == len(projects) - 1
+    assert ACTIVE_PROJECT not in c
+    new_active_project = api.get_active_project()
+    assert new_active_project != 'default'
+    assert new_active_project in c
+
+
+def test_remove_project():
+    pass
+    # todo test remove project
+    # test case where project is removed and then re-added
 
 
 def test_set_active_project(api, set_active_project):

@@ -168,11 +168,6 @@ def reset_projects_dir(reset_settings, request):
 
 @pytest.fixture
 def set_active_project(api, reset_settings, request):
-    previous_active_project = quest.api.get_active_project()
     tests_active_project = getattr(request.module, 'ACTIVE_PROJECT', 'default')
     api.set_active_project(tests_active_project)
 
-    def teardown():
-        api.set_active_project(previous_active_project)
-
-    request.addfinalizer(teardown)
