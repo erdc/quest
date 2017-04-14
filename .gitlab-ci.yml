@@ -45,7 +45,7 @@ stages:
     - call conda env create -q -n quest-%MY_PY_VER%-%CI_BUILD_REF% -f %MY_PY_VER%_conda_environment.yml
     - call activate quest-%MY_PY_VER%-%CI_BUILD_REF%
     - python setup.py install
-    - call py.test test -l --verbose --cov=quest
+    - call py.test test -l --verbose --cov=quest --rpc-port-range %MY_RPC_START_PORT% %MY_RPC_END_PORT%
     - call deactivate
     - call conda env remove -q -y -n quest-%MY_PY_VER%-%CI_BUILD_REF%
   tags: [win]
