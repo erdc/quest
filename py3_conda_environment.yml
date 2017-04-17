@@ -36,3 +36,4 @@ dependencies:
     - pony
     - tornado
     - sortedcollections
+    - pytest-cov

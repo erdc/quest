@@ -142,7 +142,7 @@ def delete_project(name):
     else:
         path = folder
     if os.path.exists(path):
-        logger.info('deleting all data under path:', path)
+        logger.info('deleting all data under path: %s', path)
         shutil.rmtree(path)
 
     return remove_project(name)
@@ -223,18 +223,25 @@ def remove_project(name):
         logger.error('Project not found')
         return projects
 
+    logger.info('removing %s from projects' % name)
+    del projects[name]
+    _write_projects(projects)
+
+    active = None
     if name == get_active_project():
         if 'default' in projects.keys():
             active = 'default'
+        elif len(projects) > 0:
+            active = list(projects.keys())[0]
+
+        if active is None:
+            logger.info('All projects have been removed. Re-adding "default" project.')
+            new_project('default', activate=True)
+            projects = get_projects()
         else:
-            active = projects.keys()[0]
-        logger.info('changing active project from {} to {}'.format(name, active))
-        set_active_project(active)
+            logger.info('changing active project from {} to {}'.format(name, active))
+            set_active_project(active)
 
-    logger.info('removing %s from projects' % name)
-
-    del projects[name]
-    _write_projects(projects)
     return projects
 
 

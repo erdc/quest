@@ -27,6 +27,7 @@ Several custom options have been configured to allow several subsets of the test
     * `--rpc-only`: Only runs tests through the RPC server. (There are several tests that cannot be run through the RPC server and these tests will still be run through Python).
     * `--skip-slow`: Any tests that have been marked as slow (e.g. the `get_features` tests) will not be run.
     * `--update-cache`: Triggers the feature metadata for each service to be re-downloaded (this process takes 5 or 6 minutes).
+    * `--rpc-port-range <START_PORT> <END_PORT>`: Provides a range of ports to scan through to find an available port to use for the RPC server.
 
 For example, to run most of the tests very quickly you can run::
 
