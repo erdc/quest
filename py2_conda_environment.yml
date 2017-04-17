@@ -36,3 +36,4 @@ dependencies:
     - pint
     - pony
     - tornado
+    - pytest-cov
