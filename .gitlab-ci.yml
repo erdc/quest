@@ -71,6 +71,7 @@ run_and_test_win_py3:
 ### Deploy stage jobs
 
 docs:
+  <<: *py3_job
   stage: deploy
   only:
     - master@computational-analysis-and-mechanics/quest
