@@ -82,6 +82,27 @@ def test_add_remove_tasks(api, task_cleanup):
     api.remove_tasks(status='cancelled')
     assert len(api.get_tasks(filters={'status': 'cancelled'})) == 0
     assert len(api.get_tasks()) == 3
+
+    # test remove tasks by id
+    t = api.long_process_with_exception(.01, 'fifth', async=True)
+    assert len(api.get_tasks()) == 4
+    wait_until_done(api)
+    api.remove_tasks(task_ids=t)
+    tasks = api.get_tasks()
+    assert len(tasks) == 3
+    assert t not in tasks
+
+    # test remove tasks by id and status
+    t1 = api.long_process_with_exception(.01, 'sixth', async=True)
+    t2 = api.long_process(10, 'seventh', async=True)
+    api.cancel_tasks(t2)
+    wait_until_done(api)
+    assert len(api.get_tasks()) == 5
+    api.remove_tasks(task_ids=[t1, t2], status='finished')  # shouldn't remove any tasks
+    assert len(api.get_tasks()) == 5
+    api.remove_tasks(task_ids=[t1, t2], status=['error', 'cancelled'])
+    assert len(api.get_tasks()) == 3
+
     wait_until_done(api)
     api.remove_tasks()
     assert len(api.get_tasks()) == 0
@@ -99,3 +120,28 @@ def test_task_with_exception(api, task_cleanup):
     assert len(tasks) == 3
     wait_until_done(api)
     assert len(api.get_tasks(filters={'status': 'error'})) == 1
+
+
+@skip_py2
+def test_get_tasks(api, task_cleanup):
+    test_tasks = [
+        api.long_process(1, 'first', async=True),
+        long_process_with_exception(1, 'second', async=True),
+        api.long_process(1, 'third', async=True),
+    ]
+
+    tasks = api.get_tasks(filters={'task_ids': test_tasks[:2]})
+    assert len(tasks) == 2
+    assert test_tasks[0] in tasks and test_tasks[1] in tasks
+    wait_until_done(api)
+    tasks = api.get_tasks(filters={'status': 'finished'})
+    assert len(tasks) == 2
+    assert test_tasks[0] in tasks and test_tasks[2] in tasks
+    tasks = api.get_tasks(filters={'status': ['finished', 'error']})
+    assert len(tasks) == 3
+    tasks = api.get_tasks(filters={'fn': long_process.__name__})
+    assert len(tasks) == 2
+    tasks = api.get_tasks(filters={'task_ids': test_tasks, 'status': 'cancelled'})
+    assert len(tasks) == 0
+    tasks = api.get_tasks(filters={'task_ids': test_tasks, 'status': ['finished']})
+    assert len(tasks) == 2
