@@ -5,7 +5,7 @@ from quest.api.projects import active_db
 import os
 import rasterio
 import numpy as np
-from rasterio.warp import calculate_default_transform
+import subprocess
 
 
 class RstReprojection(FilterBase):
@@ -49,26 +49,10 @@ class RstReprojection(FilterBase):
         if options is None:
             options ={}
 
-
         if description is None:
             description = 'Raster Filter Applied'
 
         dst_crs = options.get('new_crs')
-        # run filter
-        with rasterio.open(src_path) as src:
-            profile = src.profile
-
-            dst_transform, dst_width, dst_height = rasterio.warp.calculate_default_transform(src.crs, dst_crs, src.width, src.height, *src.bounds)
-
-            destination = np.empty(src.shape)
-            rasterio.warp.reproject(source=src.read(), destination=destination, src_transform=src.transform, src_crs=src.crs, dst_transform=src.transform, dst_crs=dst_crs, resampling=rasterio.warp.Resampling.nearest)
-
-            # Update destination profile
-            profile.update({
-                "crs": dst_crs,
-                "transform": dst_transform,
-            })
-
 
         # # save the resulting raster
         cname = orig_metadata['collection']
@@ -86,9 +70,10 @@ class RstReprojection(FilterBase):
         util.mkdir_if_doesnt_exist(dst)
         dst = os.path.join(dst, new_dset+'.tif')
 
-        #write out tif file
-        with rasterio.open(dst, 'w', **profile) as dest:
-            dest.write(destination.astype(profile["dtype"]),1)
+        # run filter
+        with rasterio.open(src_path) as src:
+            # write out tif file
+            subprocess.check_output(['gdalwarp', src_path, dst, '-s_srs', src.crs.to_string(), '-t_srs', dst_crs])
 
         self.file_path = dst
 
