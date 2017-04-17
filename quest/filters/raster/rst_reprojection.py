@@ -52,6 +52,9 @@ class RstReprojection(FilterBase):
         if description is None:
             description = 'Raster Filter Applied'
 
+        if not options.get('new_crs'):
+            raise ValueError("A new coordinated reference system MUST be provided")
+
         dst_crs = options.get('new_crs')
 
         # # save the resulting raster
@@ -95,6 +98,12 @@ class RstReprojection(FilterBase):
     def apply_filter_options(self, fmt, **kwargs):
         if fmt == 'json-schema':
             properties = {}
+            properties = {
+                     "new_crs": {
+                         "type": "string",
+                         "description": "New coordinate reference system to project to",
+                     }
+                    },
 
             schema = {
                     "title": "Reprojection Raster Filter",
