@@ -151,7 +151,7 @@ def get_features(uris=None, expand=False, as_dataframe=False, as_geojson=False,
 
             if not tmp_feats.empty:
                 tmp_feats['geometry'] = tmp_feats['geometry'].apply(
-                                            lambda x: shapely.wkt.loads(x))
+                                            lambda x: x if x is None else shapely.wkt.loads(x))
                 tmp_feats.set_geometry('geometry')
 
                 tmp_feats.index = tmp_feats['name']
