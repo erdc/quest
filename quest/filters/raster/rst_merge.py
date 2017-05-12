@@ -94,9 +94,12 @@ class RstMerge(FilterBase):
             'unit': orig_metadata['unit']
         }
 
+        # update feature geometry metadata
+        with rasterio.open(dst) as f:
+            geometry = util.bbox2poly(f.bounds.left, f.bounds.right, f.bounds.bottom, f.bounds.top, as_shapely=True)
+        update_metadata(feature, quest_metadata={'geometry': geometry.to_wkt()})
 
-
-        # update metadata
+        # update dataset metadata
         new_metadata.update({
             'options': self.options,
             'file_path': self.file_path,
