@@ -96,7 +96,7 @@ class RstMerge(FilterBase):
 
         # update feature geometry metadata
         with rasterio.open(dst) as f:
-            geometry = util.bbox2poly(f.bounds.left, f.bounds.right, f.bounds.bottom, f.bounds.top, as_shapely=True)
+            geometry = util.bbox2poly(f.bounds.left, f.bounds.bottom, f.bounds.right, f.bounds.top, as_shapely=True)
         update_metadata(feature, quest_metadata={'geometry': geometry.to_wkt()})
 
         # update dataset metadata
