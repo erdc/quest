@@ -130,7 +130,7 @@ class NasaService(SingleFileBase):
         features['download_url'] = features['links'].apply(
             lambda x: next(iter([link['href'] for link in x if link.get('type') == 'application/zip']), None))
 
-        features = features.ix[~features.download_url.isnull()]
+        features = features.loc[~features.download_url.isnull()]
         features['reserved'] = features['download_url'].apply(lambda x: {'download_url': x, 'file_format': 'raster-gdal','extract_from_zip': '.DEM'})
 
         # features['_filename'] = features._download_url.apply(lambda x: x.split('/')[-1])
