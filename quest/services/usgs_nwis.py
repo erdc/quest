@@ -113,10 +113,10 @@ class NwisService(WebServiceBase):
             )
         pm_codes = _pm_codes()
         data['description'] = data['parm_cd'].apply(
-            lambda x: pm_codes.ix[x]['SRSName'] if x in pm_codes.index else ''
+            lambda x: pm_codes.loc[x]['SRSName'] if x in pm_codes.index else ''
             )
         data['unit'] = data['parm_cd'].apply(
-            lambda x: pm_codes.ix[x]['parm_unit'] if x in pm_codes.index else ''
+            lambda x: pm_codes.loc[x]['parm_unit'] if x in pm_codes.index else ''
             )
         cols = ['parameter', 'parameter_code', 'external_vocabulary',
                 'service_id', 'description', 'begin_date',
@@ -276,7 +276,7 @@ def _parse_rdb(url, index=None):
     if index is not None:
         df.index = df[index]
 
-    df = df.ix[1:] #remove extra header line
+    df = df.iloc[1:] #remove extra header line
     return df
 
 

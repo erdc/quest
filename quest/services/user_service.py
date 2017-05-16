@@ -111,7 +111,7 @@ class UserService(WebServiceBase):
         if mapping is not None:
             fname = mapping.replace('<feature>', feature)
         else:
-            fname = self._get_features(service).ix[feature]['_download_url']
+            fname = self._get_features(service).loc[feature]['_download_url']
 
         final_path = []
         if parameter is not None:

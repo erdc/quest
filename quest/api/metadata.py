@@ -50,7 +50,7 @@ def get_metadata(uris, as_dataframe=False):
             features = driver.get_features(service)
             selected_features = grp['feature'].tolist()
             if None not in selected_features:
-                features = features.ix[selected_features]
+                features = features.loc[selected_features]
 
             features['service'] = svc
             features['service_id'] = features.index

@@ -99,8 +99,8 @@ class WebServiceBase(with_metaclass(abc.ABCMeta, object)):
         params = self._get_parameters(service, features)
         if isinstance(params, pd.DataFrame):
             groups = params.groupby('service_id').groups
-            features['parameters'] = features.index.map(lambda x: ','.join(filter(None, params.ix[groups[x]]['parameter'].tolist())) if x in groups.keys() else '')
-            #features['parameter_codes'] = features.index.map(lambda x: ','.join(filter(None, params.ix[groups[x]]['_parameter_code'].tolist())) if x in groups.keys() else '')
+            features['parameters'] = features.index.map(lambda x: ','.join(filter(None, params.loc[groups[x]]['parameter'].tolist())) if x in groups.keys() else '')
+            #features['parameter_codes'] = features.index.map(lambda x: ','.join(filter(None, params.loc[groups[x]]['_parameter_code'].tolist())) if x in groups.keys() else '')
         else:
             features['parameters'] = ','.join(params['parameters'])
             #features['parameter_codes'] = ','.join(params['parameter_codes'])
@@ -184,7 +184,7 @@ class SingleFileBase(WebServiceBase):
     eg elevation raster etc
     """
     def _download(self, service, feature, file_path, **kwargs):
-        feature = self.get_features(service).ix[feature]
+        feature = self.get_features(service).loc[feature]
         reserved = feature.get('reserved')
         download_url = reserved['download_url']
         fmt = reserved.get('extract_from_zip', '')

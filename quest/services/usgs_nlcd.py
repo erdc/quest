@@ -63,9 +63,9 @@ class UsgsNlcdService(SingleFileBase):
 
         r = requests.get(base_url, params=params)
         features = pd.DataFrame(r.json()['items'])
-        features = features.ix[~features.title.str.contains('Imperv')]
-        features = features.ix[~features.title.str.contains('by State')]
-        features = features.ix[~features.title.str.contains('Tree Canopy')]
+        features = features.loc[~features.title.str.contains('Imperv')]
+        features = features.loc[~features.title.str.contains('by State')]
+        features = features.loc[~features.title.str.contains('Tree Canopy')]
         features['geometry'] = features['spatial'].apply(_bbox2poly)
         features['download_url'] = features.webLinks.apply(_parse_links)
         #features['extract_from_zip'] = '.tif'

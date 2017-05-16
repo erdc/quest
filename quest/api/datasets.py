@@ -161,7 +161,7 @@ def download_options(uris, fmt='json-schema'):
             if feature.startswith('d'):
                 feature = get_metadata(uri)[uri]['feature']
 
-            df = get_metadata(feature, as_dataframe=True).ix[0]
+            df = get_metadata(feature, as_dataframe=True).iloc[0]
             df = df['service'] + '/' + df['service_id']
             service_uri = df
 
@@ -210,7 +210,7 @@ def get_datasets(expand=None, filters=None, as_dataframe=None):
                 logger.warning('filter field {} not found, continuing'.format(k))
                 continue
 
-            datasets = datasets.ix[datasets[k] == v]
+            datasets = datasets.loc[datasets[k] == v]
 
     if not expand and not as_dataframe:
         datasets = datasets['name'].tolist()

@@ -109,8 +109,7 @@ class RstReprojection(FilterBase):
 
     def apply_filter_options(self, fmt, **kwargs):
         if fmt == 'json-schema':
-            properties = {
-                    },
+            properties = {}
 
             schema = {
                     "title": "Reprojection Raster Filter",
