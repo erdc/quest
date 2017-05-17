@@ -100,8 +100,8 @@ def apply_filter(name, datasets=None, features=None, options=None, as_dataframe=
         new_features = get_metadata(new_features, as_dataframe=True)
 
         if expand:
-            new_datasets = list(new_datasets.to_dict(orient='index').values())
-            new_features = util.to_geojson(new_features)['features']
+            new_datasets = new_datasets.to_dict(orient='index')
+            new_features = new_features.to_dict(orient='index')
 
     result.update({'datasets': new_datasets, 'features': new_features})
 
