@@ -64,6 +64,7 @@ class RstWatershedDelineation(FilterBase):
             crs = src.crs
             t = src.transform
             transform = [t.a, t.b, t.d, t.e, t.xoff, t.yoff]
+            # outlet_points = src.index(*outlet_points)
             watershed, boundaries = terrapin.d8_watershed_delineation(src.read().squeeze(), outlet_points)
             out_meta = src.profile
             boundary_list = [mapping(affine_transform(boundary, transform)) for boundary in boundaries.values()]
@@ -74,13 +75,15 @@ class RstWatershedDelineation(FilterBase):
             'properties': {'id': 'int'},
         }
 
-
         # # save the resulting raster
-        out_meta.update(height=watershed.shape[0], width=watershed.shape[1])
-        cname = orig_metadata['collection']#lakenya replaced
-        feature = new_feature(cname,
+        out_meta.update(height=watershed.shape[0],
+                        width=watershed.shape[1],
+                        nodata=-9999)
+
+        collection_name = orig_metadata['collection']
+        feature = new_feature(collection_name,
                               display_name=display_name, geom_type='Polygon',
-                              geom_coords=None)
+                              geom_coords=boundary_list[0]['coordinates'])
 
         new_dset = new_dataset(feature,
                                source='derived',
@@ -88,10 +91,10 @@ class RstWatershedDelineation(FilterBase):
                                description=description)
 
         prj = os.path.dirname(active_db())
-        dst = os.path.join(prj,  cname, new_dset)
+        dst = os.path.join(prj,  collection_name, new_dset)
         util.mkdir_if_doesnt_exist(dst)
         watershed_tif = os.path.join(dst, new_dset+'.tif')
-        boundary_polygon = os.path.join(dst,new_dset+'.shp')
+        boundary_polygon = os.path.join(dst, new_dset+'.shp')
 
         # Write a new Shapefile
         with fiona.open(boundary_polygon, 'w', 'ESRI Shapefile', schema, crs=crs) as c:
@@ -210,7 +213,7 @@ class RstFlowAccum(FilterBase):
 
         out_meta.update({"height": out_image.shape[0],
                          "width": out_image.shape[1],
-                         "transform": None})
+                         "nodata": -9999})
 
         cname = orig_metadata['collection']
         feature = new_feature(cname,
