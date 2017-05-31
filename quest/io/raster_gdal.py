@@ -2,6 +2,7 @@
 
 from .base import IoBase
 import os
+import rasterio
 
 
 class RasterGdal(IoBase):
@@ -14,11 +15,19 @@ class RasterGdal(IoBase):
 
     def open(self, path, fmt):
         "Open raster and return in requested format"
-        raise NotImplementedError
+        raster_data = self.read(path)
+
+        if fmt == None or fmt.lower() == 'rasterio':
+            return raster_data
+
+        if fmt.lower() == 'array':
+            return raster_data.read()
+
+        raise NotImplementedError('format %s not recognized' % fmt)
 
     def read(self, path):
         "Read raster using rasterio"
-        raise NotImplementedError
+        return rasterio.open(path)
 
     def write(self, file_path, raster, metadata):
         "Write raster and metadata"
