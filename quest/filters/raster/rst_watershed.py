@@ -9,6 +9,48 @@ import fiona
 import numpy as np
 from shapely.geometry import mapping
 from shapely.affinity import affine_transform
+from terrapin.go_spatial import breach_depressions, fill_depressions, d8_flow_accumulation, fd8_flow_accumulation
+
+
+def write_output(data, metadata, output_file):
+    with rasterio.open(output_file, "w", **metadata) as out:
+        try:
+            out.write(data.astype(metadata['dtype']))
+        except ValueError:
+            out.write(data.astype(metadata['dtype']), 1)
+    return output_file
+
+
+def read_input(input_file):
+    with rasterio.open(input_file) as src:
+        data = src.read().squeeze()
+        metadata = src.profile
+    return data, metadata
+
+
+# wrapper for terrapin.fill_flats
+def fill_flats(input_file, output_file):
+    dem, metadata = read_input(input_file)
+    d8 = terrapin.d8(dem)
+    out_data = terrapin.fill_flats(d8)
+    return write_output(out_data, metadata, output_file)
+
+
+# wrapper for terrapin.d8_flow_accumulation
+def flow_accumulation(input_file, output_file):
+    dem, metadata = read_input(input_file)
+    out_data = terrapin.d8_flow_accumulation(dem)
+    return write_output(out_data, metadata, output_file)
+
+
+# TODO algorithm names need to be changed to something more understandable
+FILL_ALGORITHMS = {'go-fill': fill_depressions,
+                   # 'go-breach': breach_depressions,  # doesn't work
+                   'flats': fill_flats}
+
+ACCUMULATION_ALGORITHMS = {'go-d8': d8_flow_accumulation,
+                           'go-fd8': fd8_flow_accumulation,
+                           'd8': flow_accumulation}
 
 
 class RstWatershedDelineation(FilterBase):
@@ -120,20 +162,14 @@ class RstWatershedDelineation(FilterBase):
 
         self.file_path = watershed_tif
 
-        new_metadata = {
+        quest_metadata = {
             'parameter': orig_metadata['parameter'],
             'datatype': orig_metadata['datatype'],
             'file_format': orig_metadata['file_format'],
+            'file_path': self.file_path,
         }
 
-
-
-        # update metadata
-        new_metadata.update({
-            'options': self.options,
-            'file_path': self.file_path,
-        })
-        update_metadata(new_dset, quest_metadata=new_metadata, metadata=metadata)
+        update_metadata(new_dset, quest_metadata=quest_metadata, metadata=metadata)
 
         return {'datasets': new_dset, 'features': feature}
 
@@ -159,8 +195,6 @@ class RstWatershedDelineation(FilterBase):
 
         return schema
 
-    # def _apply(df, metadata, options):
-    #     raise NotImplementedError
 
 class RstFlowAccum(FilterBase):
     def register(self, name='flow-accumulation'):
@@ -215,18 +249,15 @@ class RstFlowAccum(FilterBase):
                          "width": out_image.shape[1],
                          "nodata": -9999})
 
-        cname = orig_metadata['collection']
-        feature = new_feature(cname,
-                              display_name=display_name, geom_type='Polygon',
-                              geom_coords=None)
+        collection_name = orig_metadata['collection']
 
-        new_dset = new_dataset(feature,
+        new_dset = new_dataset(orig_metadata['feature'],
                                source='derived',
                                display_name=display_name,
                                description=description)
 
         prj = os.path.dirname(active_db())
-        dst = os.path.join(prj, cname, new_dset)
+        dst = os.path.join(prj, collection_name, new_dset)
         util.mkdir_if_doesnt_exist(dst)
         dst = os.path.join(dst, new_dset + '.tif')
 
@@ -238,21 +269,16 @@ class RstFlowAccum(FilterBase):
 
         self.file_path = dst
 
-        new_metadata = {
+        quest_metadata = {
             'parameter': orig_metadata['parameter'],
             'datatype': orig_metadata['datatype'],
             'file_format': orig_metadata['file_format'],
+            'file_path': self.file_path,
         }
 
+        update_metadata(new_dset, quest_metadata=quest_metadata, metadata=metadata)
 
-        # update metadata
-        new_metadata.update({
-            'options': self.options,
-            'file_path': self.file_path,
-        })
-        update_metadata(new_dset, quest_metadata=new_metadata, metadata=metadata)
-
-        return {'datasets': new_dset, 'features': feature}
+        return {'datasets': new_dset}
 
     def apply_filter_options(self, fmt, **kwargs):
         if fmt == 'json-schema':
@@ -269,5 +295,191 @@ class RstFlowAccum(FilterBase):
 
         return schema
 
-    def _apply(df, metadata, options):
-        raise NotImplementedError
+
+class RstFlowAccumulation(FilterBase):
+    def register(self, name='flow-accumulation'):
+        """Register Timeseries
+
+        """
+        self.name = name
+        self.metadata = {
+            'group': 'raster',
+            'operates_on': {
+                'datatype': ['raster'],
+                'geotype': None,
+                'parameters': None,
+            },
+            'produces': {
+                'datatype': 'raster',
+                'geotype': None,
+                'parameters': None,
+            },
+        }
+
+    def _apply_filter(self, datasets, features=None, options=None,
+                      display_name=None, description=None, metadata=None):
+
+        if len(datasets) > 1:
+            raise NotImplementedError('This filter can only be applied to a single dataset')
+
+        dataset = datasets[0]
+
+        # get metadata, path etc from first dataset, i.e. assume all datasets
+        # are in same folder. This will break if you try and combine datasets
+        # from different services
+
+        if display_name is None:
+            display_name = 'Created by filter {}'.format(self.name)
+
+        if options is None:
+            options = {}
+
+        options.setdefault('algorithm', 'go-d8')
+
+        if description is None:
+            description = 'Raster Filter Applied'
+
+        orig_metadata = get_metadata(dataset)[dataset]
+        src_path = orig_metadata['file_path']
+
+        new_dset = new_dataset(orig_metadata['feature'],
+                               source='derived',
+                               display_name=display_name,
+                               description=description)
+
+        prj = os.path.dirname(active_db())
+        collection_name = orig_metadata['collection']
+        dst = os.path.join(prj, collection_name, new_dset)
+        util.mkdir_if_doesnt_exist(dst)
+        self.file_path = os.path.join(dst, new_dset + '.tif')
+
+        flow_accumulation_algorithm = ACCUMULATION_ALGORITHMS[options['algorithm']]
+
+        # run filter
+        flow_accumulation_algorithm(src_path, self.file_path)
+
+        quest_metadata = {
+            'parameter': orig_metadata['parameter'],
+            'datatype': orig_metadata['datatype'],
+            'file_format': orig_metadata['file_format'],
+            'file_path': self.file_path,
+        }
+
+        update_metadata(new_dset, quest_metadata=quest_metadata, metadata=metadata)
+
+        return {'datasets': new_dset}
+
+    def apply_filter_options(self, fmt, **kwargs):
+        if fmt == 'json-schema':
+            properties = {
+                "algorithm": {
+                    "type": {"enum": list(ACCUMULATION_ALGORITHMS.keys()), "default": "go-d8"},
+                    "description": "algorithm to use for calculating flow accumulation",
+                },
+            }
+            schema = {
+                "title": "Flow Accumulation Raster Filter",
+                "type": "object",
+                "properties": properties,
+                "required": ["algorithm"],
+            }
+
+        if fmt == 'smtk':
+            schema = ''
+
+        return schema
+
+
+class RstFill(FilterBase):
+    def register(self, name='fill'):
+        """Register Timeseries
+
+        """
+        self.name = name
+        self.metadata = {
+            'group': 'raster',
+            'operates_on': {
+                'datatype': ['raster'],
+                'geotype': None,
+                'parameters': None,
+            },
+            'produces': {
+                'datatype': 'raster',
+                'geotype': None,
+                'parameters': None,
+            },
+        }
+
+    def _apply_filter(self, datasets, features=None, options=None,
+                      display_name=None, description=None, metadata=None):
+
+        if len(datasets) > 1:
+            raise NotImplementedError('This filter can only be applied to a single dataset')
+
+        dataset = datasets[0]
+
+        # get metadata, path etc from first dataset, i.e. assume all datasets
+        # are in same folder. This will break if you try and combine datasets
+        # from different services
+
+        if display_name is None:
+            display_name = 'Created by filter {}'.format(self.name)
+
+        if options is None:
+            options = {}
+
+        if description is None:
+            description = 'Raster Filter Applied'
+
+        options.setdefault('algorithm', 'go-breach')
+
+        orig_metadata = get_metadata(dataset)[dataset]
+        src_path = orig_metadata['file_path']
+
+        new_dset = new_dataset(orig_metadata['feature'],
+                               source='derived',
+                               display_name=display_name,
+                               description=description)
+
+        prj = os.path.dirname(active_db())
+        collection_name = orig_metadata['collection']
+        dst = os.path.join(prj, collection_name, new_dset)
+        util.mkdir_if_doesnt_exist(dst)
+        self.file_path = os.path.join(dst, new_dset + '.tif')
+
+        fill_algorithm = FILL_ALGORITHMS[options['algorithm']]
+
+        # run filter
+        fill_algorithm(src_path, self.file_path)
+
+        quest_metadata = {
+            'parameter': orig_metadata['parameter'],
+            'datatype': orig_metadata['datatype'],
+            'file_format': orig_metadata['file_format'],
+            'file_path': self.file_path,
+        }
+
+        update_metadata(new_dset, quest_metadata=quest_metadata, metadata=metadata)
+
+        return {'datasets': new_dset}
+
+    def apply_filter_options(self, fmt, **kwargs):
+        if fmt == 'json-schema':
+            properties = {
+                "algorithm": {
+                    "type": {"enum": list(FILL_ALGORITHMS.keys()), "default": "go-fill"},
+                    "description": "algorithm to use for filling the dem",
+                },
+            }
+            schema = {
+                "title": "Fill Raster Filter",
+                "type": "object",
+                "properties": properties,
+                "required": ["algorithm"],
+            }
+
+        if fmt == 'smtk':
+            schema = ''
+
+        return schema
+
