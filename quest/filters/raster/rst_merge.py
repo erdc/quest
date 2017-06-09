@@ -7,6 +7,7 @@ import sys
 import platform
 import rasterio
 import subprocess
+from pyproj import Proj
 
 
 class RstMerge(FilterBase):
@@ -88,7 +89,10 @@ class RstMerge(FilterBase):
 
         if bbox is not None:
             xmin, ymin, xmax, ymax = bbox
-
+            p = Proj(projection)
+            if not p.is_latlong():
+                xmin, ymin = p(xmin, ymin)
+                xmax, ymax = p(xmax, ymax)
             subprocess.check_output(
                 ['gdalwarp', '-overwrite', '-te', str(xmin), str(ymin), str(xmax), str(ymax), output_vrt, dst])
         else:
