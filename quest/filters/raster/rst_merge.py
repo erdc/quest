@@ -91,6 +91,9 @@ class RstMerge(FilterBase):
 
             subprocess.check_output(
                 ['gdalwarp', '-overwrite', '-te', str(xmin), str(ymin), str(xmax), str(ymax), output_vrt, dst])
+        else:
+            subprocess.check_output(
+                ['gdal_translate', output_vrt, dst])
 
         new_metadata = {
             'parameter': orig_metadata['parameter'],
