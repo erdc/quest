@@ -140,7 +140,7 @@ class RstWatershedDelineation(FilterBase):
                 if snap.lower() == 'jenson':
                     stream_threshold_pct = options.get('stream_threshold_pct')
                     stream_threshold_abs = options.get('stream_threshold_abs')
-                    outlet_points = snap_points_jenson(flow_accumulation, proj_points, 
+                    proj_points = snap_points_jenson(flow_accumulation, proj_points, 
                         stream_threshold_pct=stream_threshold_pct, stream_threshold_abs=stream_threshold_abs)
                 if p.is_latlong():
                     snapped_points = [src.xy(*point) for point in proj_points]

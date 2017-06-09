@@ -87,7 +87,7 @@ class RstMerge(FilterBase):
         bbox = options.get('bbox')
 
         if bbox is not None:
-            xmin, xmax, ymin, ymax = bbox
+            xmin, ymin, xmax, ymax = bbox
 
             subprocess.check_output(
                 ['gdalwarp', '-overwrite', '-te', str(xmin), str(ymin), str(xmax), str(ymax), output_vrt, dst])
