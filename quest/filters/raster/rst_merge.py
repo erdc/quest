@@ -32,8 +32,8 @@ class RstMerge(FilterBase):
     def _apply_filter(self, datasets, features=None, options=None,
                       display_name=None, description=None, metadata=None):
 
-        if len(datasets) < 2:
-            raise ValueError('There must be at LEAST two datasets for this filter')
+        # if len(datasets) < 2:
+        #     raise ValueError('There must be at LEAST two datasets for this filter')
 
         orig_metadata = get_metadata(datasets[0])[datasets[0]]
         raster_files = [get_metadata(dataset)[dataset]['file_path'] for dataset in datasets]
@@ -84,8 +84,16 @@ class RstMerge(FilterBase):
 
         subprocess.check_output(['gdalbuildvrt', '-overwrite', output_vrt] + raster_files)
 
-        subprocess.check_output(
-            ['gdalwarp', '-overwrite', output_vrt, dst])
+        bbox = options.get('bbox')
+
+        if bbox is not None:
+            xmin, xmax, ymin, ymax = bbox
+
+            subprocess.check_output(
+                ['gdalwarp', '-overwrite', '-te', str(xmin), str(ymin), str(xmax), str(ymax), output_vrt, dst])
+        else:
+            subprocess.check_output(
+                ['gdal_translate', output_vrt, dst])
 
         new_metadata = {
             'parameter': orig_metadata['parameter'],
@@ -110,12 +118,18 @@ class RstMerge(FilterBase):
 
     def apply_filter_options(self, fmt, **kwargs):
         if fmt == 'json-schema':
-            properties = {}
+            properties = {
+                "bbox": {
+                        "type": "array",
+                        "description": "bounding box to clip the merged raster to in the form [xmin, ymin, xmax, ymax]",
+                },
+            }
 
             schema = {
                     "title": "Merge Raster Filter",
                     "type": "object",
                     "properties": properties,
+                    "required": [],
                 }
 
         if fmt == 'smtk':

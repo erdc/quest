@@ -183,6 +183,14 @@ def get_features(uris=None, expand=False, as_dataframe=False, as_geojson=False,
                     idx = features.parameters.str.contains(v)
                     features = features[idx]
 
+                elif k == 'display_name':
+                    idx = features.display_name.str.contains(v)
+                    features = features[idx]
+
+                elif k == 'description':
+                    idx = features.display_name.str.contains(v)
+                    features = features[idx]
+
                 else:
                     idx = features.metadata.map(lambda x: x.get(k) == v)
                     features = features[idx]
