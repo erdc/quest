@@ -130,39 +130,9 @@ class RstWatershedDelineation(FilterBase):
             else:
                 proj_points = [src.index(*p(*point)) for point in outlet_points]
 
-            # read flow accumulation
-            flow_accumulation = src.read().squeeze()
-
-            snap = options.get('snap_outlets')
-            if snap is not None:
-                if snap.lower() == 'maximum_flow_accumulation':
-                    proj_points = snap_points_max_flow_acc(flow_accumulation, proj_points, options.get('search_box_pixels'))
-                if snap.lower() == 'jenson':
-                    stream_threshold_pct = options.get('stream_threshold_pct')
-                    stream_threshold_abs = options.get('stream_threshold_abs')
-                    proj_points = snap_points_jenson(flow_accumulation, proj_points, 
-                        stream_threshold_pct=stream_threshold_pct, stream_threshold_abs=stream_threshold_abs)
-                if p.is_latlong():
-                    snapped_points = [src.xy(*point) for point in proj_points]
-                else:
-                    snapped_points = [src.xy(*p(*point, inverse=True)) for point in proj_points]
-
-                # create new snapped outlet point feature 
-                outlet_feature = new_feature(collection_name,
-                              display_name=display_name+'_snapped_outlet', geom_type='Point',
-                              geom_coords=[snapped_points[0]])
-                print('outlet points snapped, new feature created:', snapped_points, outlet_feature)
-            else:
-                # if input was not a feature then create a feature
-                if features is None:
-                    outlet_feature = new_feature(collection_name,
-                              display_name=display_name+'_outlet', geom_type='Point',
-                              geom_coords=[outlet_points[0]])
-                    print('outlet points converted to feature, new feature created:', outlet_feature)
-                else:
-                    outlet_feature = features[0]
-
-            watershed, boundaries = terrapin.d8_watershed_delineation(flow_accumulation, proj_points)
+            # read elevation
+            elevation = src.read().squeeze()
+            watershed, boundaries = terrapin.d8_watershed_delineation(elevation, proj_points)
             out_meta = src.profile
             boundary_list = [mapping(affine_transform(boundary, transform)) for boundary in boundaries.values()]
 
@@ -537,3 +507,135 @@ class RstFill(FilterBase):
 
         return schema
 
+
+class RstSnapOutlet(FilterBase):
+    def register(self, name='watershed-snap-outlet'):
+        """Register Timeseries
+
+        """
+        self.name = name
+        self.metadata = {
+            'group': 'raster',
+            'operates_on': {
+                'datatype': ['raster'],
+                'geotype': None,
+                'parameters': None,
+            },
+            'produces': {
+                'datatype': None,
+                'geotype': None,
+                'parameters': None,
+            },
+        }
+
+    def _apply_filter(self, datasets, features=None, options=None,
+                     display_name=None, description=None, metadata=None):
+
+        if len(datasets) > 1:
+            raise NotImplementedError('This filter can only be applied to a single dataset')
+
+        dataset = datasets[0]
+
+        # get metadata, path etc from first dataset, i.e. assume all datasets
+        # are in same folder. This will break if you try and combine datasets
+        # from different services
+
+        orig_metadata = get_metadata(dataset)[dataset]
+        collection_name = orig_metadata['collection']
+        src_path = orig_metadata['file_path']
+
+        if display_name is None:
+            display_name = 'Created by filter {}'.format(self.name)
+        if options is None:
+            options ={}
+
+        if description is None:
+            description = 'Snap Points Filter Applied'
+
+        # this filter require a list of outlet points 
+        # these can be provided as a list of point features 
+        # or a list of outlet points in the options
+        if features is not None:
+            df = get_metadata(features, as_dataframe=True)
+            if not all(df.geometry.type == 'Point'):
+                raise ValueError('All the provided features must have the geometry type: Point')
+            outlet_points = df.geometry.apply(lambda x: np.array(x.coords).squeeze().tolist()).values.tolist()
+        else:
+            if not options.get('outlet_points'):
+                raise ValueError('Outlet points are required either as input features or in the options')
+            outlet_points = np.array(options.get('outlet_points'))
+        
+        if len(outlet_points) > 1:
+            raise NotImplementedError('Filter can currently only take one outlet point')
+
+
+        # run filter
+        with rasterio.open(src_path) as src:
+            crs = src.crs
+            t = src.transform
+            transform = [t.a, t.b, t.d, t.e, t.xoff, t.yoff]
+
+            # Convert outlet points from lat/lon to raster row/col
+            # this assumes a list of outlet points in easting, northing
+            p = Proj(crs)
+            if p.is_latlong():
+                proj_points = [src.index(*point) for point in outlet_points]
+            else:
+                proj_points = [src.index(*p(*point)) for point in outlet_points]
+
+            # read flow accumulation
+            flow_accumulation = src.read().squeeze()
+
+            snap = options.get('snap_outlets')
+            if snap is not None:
+                if snap.lower() == 'maximum_flow_accumulation':
+                    proj_points = snap_points_max_flow_acc(flow_accumulation, proj_points, options.get('search_box_pixels'))
+                if snap.lower() == 'jenson':
+                    stream_threshold_pct = options.get('stream_threshold_pct')
+                    stream_threshold_abs = options.get('stream_threshold_abs')
+                    proj_points = snap_points_jenson(flow_accumulation, proj_points, 
+                        stream_threshold_pct=stream_threshold_pct, stream_threshold_abs=stream_threshold_abs)
+                if p.is_latlong():
+                    snapped_points = [src.xy(*point) for point in proj_points]
+                else:
+                    snapped_points = [src.xy(*p(*point, inverse=True)) for point in proj_points]
+
+                # create new snapped outlet point feature 
+                outlet_feature = new_feature(collection_name,
+                              display_name=display_name+'_snapped_outlet', geom_type='Point',
+                              geom_coords=[snapped_points[0]])
+                print('outlet points snapped, new feature created:', snapped_points, outlet_feature)
+            else:
+                # if input was not a feature then create a feature
+                if features is None:
+                    outlet_feature = new_feature(collection_name,
+                              display_name=display_name+'_outlet', geom_type='Point',
+                              geom_coords=[outlet_points[0]])
+                    print('outlet points converted to feature, new feature created:', outlet_feature)
+                else:
+                    outlet_feature = features[0]
+
+        return {'datasets': {}, 'features': {'outlet':outlet_feature}}
+
+
+    def apply_filter_options(self, fmt, **kwargs):
+        if fmt == 'json-schema':
+            properties = {
+                    "outlet_points": {
+                        "type": "string",
+                        "description": "Watershed outlet points",
+                    },
+
+                }
+
+            schema = {
+                    "title": "Watershed Delineation Raster Filter",
+                    "type": "object",
+                    "properties": properties,
+                    "required": ['outlet_points'],
+                }
+
+        if fmt == 'smtk':
+            schema = ''
+
+        return schema
