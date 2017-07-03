@@ -102,11 +102,13 @@ class RstWatershedDelineation(FilterBase):
         # this filter require a list of outlet points 
         # these can be provided as a list of point features 
         # or a list of outlet points in the options
+        outlet_feature = None
         if features is not None:
             df = get_metadata(features, as_dataframe=True)
             if not all(df.geometry.type == 'Point'):
                 raise ValueError('All the provided features must have the geometry type: Point')
             outlet_points = df.geometry.apply(lambda x: np.array(x.coords).squeeze().tolist()).values.tolist()
+            outlet_feature = features[0]
         else:
             if not options.get('outlet_points'):
                 raise ValueError('Outlet points are required either as input features or in the options')
@@ -150,6 +152,14 @@ class RstWatershedDelineation(FilterBase):
         feature = new_feature(collection_name,
                               display_name=display_name, geom_type='Polygon',
                               geom_coords=boundary_list[0]['coordinates'])
+
+        if outlet_feature is None:
+            outlet_points = [src.xy(*p(*point, inverse=True)) for point in proj_points]
+            # create new snapped outlet point feature 
+            outlet_feature = new_feature(collection_name,
+                            display_name=display_name+'_outlet', geom_type='Point',
+                            geom_coords=[outlet_points[0]])
+
 
         new_dset = new_dataset(feature,
                                source='derived',
@@ -587,36 +597,27 @@ class RstSnapOutlet(FilterBase):
             flow_accumulation = src.read().squeeze()
 
             snap = options.get('snap_outlets')
-            if snap is not None:
-                if snap.lower() == 'maximum_flow_accumulation':
-                    proj_points = snap_points_max_flow_acc(flow_accumulation, proj_points, options.get('search_box_pixels'))
-                if snap.lower() == 'jenson':
-                    stream_threshold_pct = options.get('stream_threshold_pct')
-                    stream_threshold_abs = options.get('stream_threshold_abs')
-                    proj_points = snap_points_jenson(flow_accumulation, proj_points, 
-                        stream_threshold_pct=stream_threshold_pct, stream_threshold_abs=stream_threshold_abs)
-                if p.is_latlong():
-                    snapped_points = [src.xy(*point) for point in proj_points]
-                else:
-                    snapped_points = [src.xy(*p(*point, inverse=True)) for point in proj_points]
-
-                # create new snapped outlet point feature 
-                outlet_feature = new_feature(collection_name,
-                              display_name=display_name+'_snapped_outlet', geom_type='Point',
-                              geom_coords=[snapped_points[0]])
-                print('outlet points snapped, new feature created:', snapped_points, outlet_feature)
+            if snap is None:
+                raise ValueError('Kwarg snap_outlets is empty')
+            if snap.lower() == 'maximum_flow_accumulation':
+                proj_points = snap_points_max_flow_acc(flow_accumulation, proj_points, options.get('search_box_pixels'))
+            if snap.lower() == 'jenson':
+                stream_threshold_pct = options.get('stream_threshold_pct')
+                stream_threshold_abs = options.get('stream_threshold_abs')
+                proj_points = snap_points_jenson(flow_accumulation, proj_points, 
+                    stream_threshold_pct=stream_threshold_pct, stream_threshold_abs=stream_threshold_abs)
+            if p.is_latlong():
+                snapped_points = [src.xy(*point) for point in proj_points]
             else:
-                # if input was not a feature then create a feature
-                if features is None:
-                    outlet_feature = new_feature(collection_name,
-                              display_name=display_name+'_outlet', geom_type='Point',
-                              geom_coords=[outlet_points[0]])
-                    print('outlet points converted to feature, new feature created:', outlet_feature)
-                else:
-                    outlet_feature = features[0]
+                snapped_points = [src.xy(*p(*point, inverse=True)) for point in proj_points]
+
+            # create new snapped outlet point feature 
+            outlet_feature = new_feature(collection_name,
+                            display_name=display_name+'_snapped_outlet', geom_type='Point',
+                            geom_coords=[snapped_points[0]])
+            print('outlet points snapped, new feature created:', snapped_points, outlet_feature)
 
         return {'datasets': {}, 'features': {'outlet':outlet_feature}}
-
 
     def apply_filter_options(self, fmt, **kwargs):
         if fmt == 'json-schema':
