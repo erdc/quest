@@ -180,7 +180,7 @@ def copy(uris, destination_collection):
         if resource == 'datasets':
             dataset_metadata = get_metadata(uri)[uri]
 
-            collection_path = os.path.join(project_path, feature_metadata['collection'])
+            collection_path = os.path.join(project_path, dataset_metadata['collection'])
 
             feature = dataset_metadata['feature']
 
