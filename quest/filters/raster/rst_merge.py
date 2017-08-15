@@ -19,7 +19,7 @@ class RstMerge(FilterBase):
         self.metadata = {
             'group': 'raster',
             'operates_on': {
-                'datatype': ['raster'],
+                'datatype': ['raster','discrete-raster'],
                 'geotype': None,
                 'parameters': None,
             },
