@@ -17,7 +17,7 @@ class RstReprojection(FilterBase):
         self.metadata = {
             'group': 'raster',
             'operates_on': {
-                'datatype': ['raster'],
+                'datatype': ['raster','discrete-raster'],
                 'geotype': None,
                 'parameters': None,
             },
@@ -63,6 +63,8 @@ class RstReprojection(FilterBase):
                               display_name=display_name, geom_type='Polygon',
                               geom_coords=None)
 
+
+
         new_dset = new_dataset(feature,
                                source='derived',
                                display_name=display_name,
@@ -71,7 +73,8 @@ class RstReprojection(FilterBase):
         prj = os.path.dirname(active_db())
         dst = os.path.join(prj,  cname, new_dset)
         util.mkdir_if_doesnt_exist(dst)
-        dst = os.path.join(dst, new_dset+'.tif')
+        extension = os.path.splitext(src_path)[1]
+        dst = os.path.join(dst, new_dset + extension)
 
         # run filter
         with rasterio.open(src_path) as src:
@@ -79,6 +82,10 @@ class RstReprojection(FilterBase):
             subprocess.check_output(['gdalwarp', src_path, dst, '-s_srs', src.crs.to_string(), '-t_srs', dst_crs])
 
         self.file_path = dst
+
+        with rasterio.open(dst) as f:
+            geometry = util.bbox2poly(f.bounds.left, f.bounds.bottom, f.bounds.right, f.bounds.top, as_shapely=True)
+        update_metadata(feature, quest_metadata={'geometry': geometry.to_wkt()})
 
         new_metadata = {
             'parameter': orig_metadata['parameter'],
@@ -102,8 +109,8 @@ class RstReprojection(FilterBase):
                      "new_crs": {
                          "type": "string",
                          "description": "New coordinate reference system to project to",
-                     }
-                    },
+                     },
+                    }
 
             schema = {
                     "title": "Reprojection Raster Filter",
