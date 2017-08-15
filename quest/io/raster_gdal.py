@@ -2,6 +2,7 @@
 
 from .base import IoBase
 import os
+import subprocess
 import rasterio
 
 
@@ -33,21 +34,35 @@ class RasterGdal(IoBase):
         "Write raster and metadata"
         raise NotImplementedError
 
-    def visualize(self, path, **kwargs):
+    def visualize(self, path, reproject=False, crs=None):
         """Visualize raster dataset."""
+        import rasterio
 
-        # TODO python visualization of raster datasets
-        # For now raster datasets are just converted to geotiff and returned
         base, ext = os.path.splitext(path)
-        if ext.lower() == 'tif' or ext.lower() == 'tiff':
-            visualization_path = path
-        else:
-            visualization_path = base + '.tif'
-            import rasterio
-            with rasterio.Env():
-                rasterio.copy(path, visualization_path, driver='GTIFF')
 
-        return visualization_path
+        if reproject:
+            reproject_dst = base + '-reproject' + ext
+            if not crs:
+                raise ValueError('MUST specify a destination coordinate system')
+            with rasterio.open(path) as src:
+                # write out tif file
+                subprocess.check_output(['gdalwarp', path, reproject_dst, '-s_srs', src.crs.to_string(), '-t_srs', crs])
+            base, ext = os.path.splitext(reproject_dst)
+            path = reproject_dst
+
+        dst = base + '.jpg'
+        try:
+
+            subprocess.check_output(['gdal_translate', '-expand', 'rgb', '-of','JPEG', path, dst])
+        except Exception as e:
+            try:
+                 subprocess.check_output(['gdal_translate', '-of', 'JPEG', path, dst])
+            except Exception as e:
+                raise
+
+        visualization_path = dst
+
+        return  visualization_path
 
     def visualize_options(self, path, fmt='json-schema'):
         """visualation options for raster datasets."""
