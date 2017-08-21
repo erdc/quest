@@ -412,7 +412,10 @@ def visualize_dataset(dataset, update_cache=False, **kwargs):
     if title is None:
         title = dataset
 
-    visualization_path = io.visualize(path, title=title, **kwargs)
+    if 'timeseries' in file_format:
+        visualization_path = io.visualize(path, title=title, **kwargs)
+    else:
+        visualization_path = io.visualize(path, **kwargs)
     quest_metadata = {'visualization_path': visualization_path}
     update_metadata(dataset, quest_metadata=quest_metadata)
 
