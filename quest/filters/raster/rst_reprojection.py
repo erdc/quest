@@ -5,7 +5,7 @@ from quest.api.projects import active_db
 import os
 import rasterio
 import numpy as np
-from rasterio.warp import calculate_default_transform
+import subprocess
 
 
 class RstReprojection(FilterBase):
@@ -17,7 +17,7 @@ class RstReprojection(FilterBase):
         self.metadata = {
             'group': 'raster',
             'operates_on': {
-                'datatype': ['raster'],
+                'datatype': ['raster','discrete-raster'],
                 'geotype': None,
                 'parameters': None,
             },
@@ -49,32 +49,21 @@ class RstReprojection(FilterBase):
         if options is None:
             options ={}
 
-
         if description is None:
             description = 'Raster Filter Applied'
 
+        if not options.get('new_crs'):
+            raise ValueError("A new coordinated reference system MUST be provided")
+
         dst_crs = options.get('new_crs')
-        # run filter
-        with rasterio.open(src_path) as src:
-            profile = src.profile
-
-            dst_transform, dst_width, dst_height = rasterio.warp.calculate_default_transform(src.crs, dst_crs, src.width, src.height, *src.bounds)
-
-            destination = np.empty(src.shape)
-            rasterio.warp.reproject(source=src.read(), destination=destination, src_transform=src.transform, src_crs=src.crs, dst_transform=src.transform, dst_crs=dst_crs, resampling=rasterio.warp.Resampling.nearest)
-
-            # Update destination profile
-            profile.update({
-                "crs": dst_crs,
-                "transform": dst_transform,
-            })
-
 
         # # save the resulting raster
         cname = orig_metadata['collection']
         feature = new_feature(cname,
                               display_name=display_name, geom_type='Polygon',
                               geom_coords=None)
+
+
 
         new_dset = new_dataset(feature,
                                source='derived',
@@ -84,13 +73,19 @@ class RstReprojection(FilterBase):
         prj = os.path.dirname(active_db())
         dst = os.path.join(prj,  cname, new_dset)
         util.mkdir_if_doesnt_exist(dst)
-        dst = os.path.join(dst, new_dset+'.tif')
+        extension = os.path.splitext(src_path)[1]
+        dst = os.path.join(dst, new_dset + extension)
 
-        #write out tif file
-        with rasterio.open(dst, 'w', **profile) as dest:
-            dest.write(destination.astype(profile["dtype"]),1)
+        # run filter
+        with rasterio.open(src_path) as src:
+            # write out tif file
+            subprocess.check_output(['gdalwarp', src_path, dst, '-s_srs', src.crs.to_string(), '-t_srs', dst_crs])
 
         self.file_path = dst
+
+        with rasterio.open(dst) as f:
+            geometry = util.bbox2poly(f.bounds.left, f.bounds.bottom, f.bounds.right, f.bounds.top, as_shapely=True)
+        update_metadata(feature, quest_metadata={'geometry': geometry.to_wkt()})
 
         new_metadata = {
             'parameter': orig_metadata['parameter'],
@@ -110,6 +105,12 @@ class RstReprojection(FilterBase):
     def apply_filter_options(self, fmt, **kwargs):
         if fmt == 'json-schema':
             properties = {}
+            properties = {
+                     "new_crs": {
+                         "type": "string",
+                         "description": "New coordinate reference system to project to",
+                     },
+                    }
 
             schema = {
                     "title": "Reprojection Raster Filter",
