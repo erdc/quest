@@ -42,7 +42,7 @@ def test_get_features_from_collection(api):
 @pytest.mark.parametrize("service, expected, tolerance", [
     ('svc://nasa:srtm-3-arc-second', 14297, 1000),
     ('svc://nasa:srtm-30-arc-second', 27, 10),
-    ('svc://ncdc:ghcn-daily', 103151, 1000),
+    ('svc://ncdc:ghcn-daily', 103151, 5000),
     ('svc://ncdc:gsod', 28621, 1000),
     ('svc://noaa:coops-meteorological', 371, 50),
     ('svc://noaa:coops-water', 243, 50),
