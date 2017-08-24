@@ -18,7 +18,7 @@ class StartCluster():
     def __init__(self, n_cores=None):
         if n_cores is None:
             n_cores = psutil.cpu_count()-2
-        self.cluster = LocalCluster(nanny=True, n_workers=1)
+        self.cluster = LocalCluster(processes=True, n_workers=1)
         self.client = Client(self.cluster)
 
     def __exit__(self, type, value, traceback):
