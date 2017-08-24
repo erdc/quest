@@ -18,7 +18,7 @@ class XYHdf5(IoBase):
     def read(self, path):
         """Read metadata and dataframe from HDF5 store."""
 
-        with pd.get_store(path) as h5store:
+        with pd.HDFStore(path) as h5store:
             dataframe = h5store.get('dataframe')
             dataframe.metadata = h5store.get_storer('dataframe').attrs.metadata
 
@@ -29,7 +29,7 @@ class XYHdf5(IoBase):
         base, fname = os.path.split(file_path)
 
         util.mkdir_if_doesnt_exist(base)
-        with pd.get_store(file_path) as h5store:
+        with pd.HDFStore(file_path) as h5store:
             h5store.put('dataframe', dataframe)
             h5store.get_storer('dataframe').attrs.metadata = metadata
 
