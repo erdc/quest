@@ -30,7 +30,7 @@ dependencies:
     - peewee
     - stevedore
     - geopandas
-    - distributed
+    - distributed>=1.18
     - psutil
     - pint
     - pony
