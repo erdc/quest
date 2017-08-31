@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<SMTK_AttributeSystem Version="2">
+<SMTK_AttributeSystem Version="3">
   <!--**********  Category and Analysis Information ***********-->
   <!--**********  Attribute Definitions ***********-->
   <Definitions>
@@ -14,12 +14,22 @@
         </String>
         <String Name="DateTime" Label="Specify as:" Version="0" NumberOfRequiredValues="1">
           <ChildrenDefinitions>
-            <String Name="start" Label="Start Date" Optional="true" IsEnabledByDefault="true">
-              <BriefDescription>Format yyyy-mm-dd</BriefDescription>
-            </String>
-            <String Name="end" Label="End Date" Optional="true" IsEnabledByDefault="true">
-              <BriefDescription>Format yyyy-mm-dd</BriefDescription>
-            </String>
+            <DateTime
+              Name="start"
+              Label="Start Date"
+              DisplayFormat="yyyy-MM-dd"
+              ShowTimeZone="false"
+              Optional="true"
+              IsEnabledByDefault="true">
+            </DateTime>
+            <DateTime
+              Name="end"
+              Label="End Date"
+              DisplayFormat="yyyy-MM-dd"
+              ShowTimeZone="false"
+              Optional="true"
+              IsEnabledByDefault="true">
+            </DateTime>
             <String Name="period" Label="Period">
             </String>
           </ChildrenDefinitions>
@@ -44,7 +54,12 @@
   </Definitions>
   <!--********** Workflow Views ***********-->
   <Views>
-    <View Type="Instanced" Title="Options">
+    <View
+      TopLevel="true"
+      Type="Instanced"
+      Title="Options"
+      FilterByAdvanceLevel="false"
+      FilterByCategory="false">
       <InstancedAttributes>
         <Att Name="Options" Type="TimeSeriesOptions" />
       </InstancedAttributes>
