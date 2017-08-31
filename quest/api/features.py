@@ -12,7 +12,7 @@ import shapely.wkt
 from shapely.geometry import shape, Polygon
 
 from .. import util
-from .database import get_db, db_session
+from .database import get_db, db_session, select_features
 from .collections import get_collections
 from .metadata import get_metadata
 
@@ -69,7 +69,6 @@ def add_features(collection, features):
                     'name': uri,
                     'collection': collection,
                     'geometry': geometry,
-                    'metadata': json.dumps(data['metadata'], default=util.to_json_default_handler),
                     })
             db.Feature(**data)
             uris.append(uri)
@@ -141,21 +140,16 @@ def get_features(uris=None, expand=False, as_dataframe=False, as_geojson=False,
         all_features.append(tmp_feats)
 
     # get metadata for features in collections
-    db = get_db()
-    with db_session:
-        for name in collections:
-            tmp_feats = [f.to_dict() for f in db.Feature.select(
-                            lambda c: c.collection.name == name
-                        )]
-            tmp_feats = gpd.GeoDataFrame(tmp_feats)
+    tmp_feats = select_features(lambda c: c.collection.name in collections)
+    tmp_feats = gpd.GeoDataFrame(tmp_feats)
 
-            if not tmp_feats.empty:
-                tmp_feats['geometry'] = tmp_feats['geometry'].apply(
-                                            lambda x: x if x is None else shapely.wkt.loads(x))
-                tmp_feats.set_geometry('geometry')
+    if not tmp_feats.empty:
+        tmp_feats['geometry'] = tmp_feats['geometry'].apply(
+                                    lambda x: x if x is None else shapely.wkt.loads(x))
+        tmp_feats.set_geometry('geometry')
 
-                tmp_feats.index = tmp_feats['name']
-            all_features.append(tmp_feats)
+        tmp_feats.index = tmp_feats['name']
+    all_features.append(tmp_feats)
 
     # drop duplicates fails when some columns have nested list/tuples like
     # _geom_coords. so drop based on index

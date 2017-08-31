@@ -9,7 +9,7 @@ import geopandas as gpd
 import shapely.wkt
 
 from .. import util
-from .database import get_db, db_session
+from .database import get_db, db_session, select_collections, select_features, select_datasets
 
 
 @dispatcher.add_method
@@ -61,38 +61,30 @@ def get_metadata(uris, as_dataframe=False):
     if 'collections' in grouped_uris.groups.keys():
         # get metadata for collections
         tmp_df = grouped_uris.get_group('collections')
-        db = get_db()
-        with db_session:
-            collections = [c.to_dict() for c in db.Collection.select(lambda c: c.name in tmp_df['uri'].tolist())]
-            collections = pd.DataFrame(collections)
-            collections.set_index('name', inplace=True, drop=False)
+        collections = select_collections(lambda c: c.name in tmp_df['uri'].tolist())
+        collections = pd.DataFrame(collections)
+        collections.set_index('name', inplace=True, drop=False)
 
         metadata.append(collections)
 
     if 'features' in grouped_uris.groups.keys():
         # get metadata for features
         tmp_df = grouped_uris.get_group('features')
-        db = get_db()
-        with db_session:
-            features = [f.to_dict() for f in db.Feature.select(lambda c: c.name in tmp_df['uri'].tolist())]
-            features = gpd.GeoDataFrame(features)
-            if not features.empty:
-                features['geometry'] = features['geometry'].apply(
-                                            lambda x: shapely.wkt.loads(x))
-                features.set_geometry('geometry')
-                features.index = features['name']
+        features = select_features(lambda c: c.name in tmp_df['uri'].tolist())
+        features = gpd.GeoDataFrame(features)
+        if not features.empty:
+            features['geometry'] = features['geometry'].apply(
+                                        lambda x: shapely.wkt.loads(x))
+            features.set_geometry('geometry')
+            features.index = features['name']
         metadata.append(features)
 
     if 'datasets' in grouped_uris.groups.keys():
         # get metadata for datasets
         tmp_df = grouped_uris.get_group('datasets')
-        db = get_db()
-        with db_session:
-            datasets = [dict(d.to_dict(), **{'collection': d.feature.collection.name,
-                                             'options': d.options if d.options is None else dict(d.options)})
-                        for d in db.Dataset.select(lambda c: c.name in tmp_df['uri'].tolist())]
-            datasets = pd.DataFrame(datasets)
-            datasets.set_index('name', inplace=True, drop=False)
+        datasets = select_datasets(lambda c: c.name in tmp_df['uri'].tolist())
+        datasets = pd.DataFrame(datasets)
+        datasets.set_index('name', inplace=True, drop=False)
 
         metadata.append(datasets)
 
