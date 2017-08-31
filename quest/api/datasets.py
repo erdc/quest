@@ -4,7 +4,7 @@ import os
 
 from ..util.log import logger
 from .. import util
-from .database import get_db, db_session
+from .database import get_db, db_session, select_datasets
 import pandas as pd
 from .metadata import get_metadata, update_metadata
 from .projects import _get_project_dir
@@ -188,14 +188,10 @@ def get_datasets(expand=None, filters=None, as_dataframe=None):
             staged dataset uids
 
     """
-    db = get_db()
-    with db_session:
-        datasets = [dict(d.to_dict(), **{'collection': d.feature.collection.name,
-                                         'options': d.options if d.options is None else dict(d.options)})
-                    for d in db.Dataset.select()]
-        datasets = pd.DataFrame(datasets)
-        if not datasets.empty:
-            datasets.set_index('name', inplace=True, drop=False)
+    datasets = select_datasets()
+    datasets = pd.DataFrame(datasets)
+    if not datasets.empty:
+        datasets.set_index('name', inplace=True, drop=False)
 
     if datasets.empty:
         if not expand and not as_dataframe:

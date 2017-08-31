@@ -101,3 +101,55 @@ def init_db(dbpath):
     db.generate_mapping(create_tables=True)
 
     return db
+
+
+def select_collections(select_func=None):
+    db = get_db()
+    with db_session:
+        if select_func is None:
+            collections = db.Collection.select()
+        else:
+            collections = db.Collection.select(select_func)
+
+        return [dict(c.to_dict(), **{'metadata': _convert_to_dict(c.metadata)
+                                     }
+                     ) for c in collections]
+
+
+def select_features(select_func=None):
+    db = get_db()
+    with db_session:
+        if select_func is None:
+            features = db.Feature.select()
+        else:
+            features = db.Feature.select(select_func)
+
+        return [dict(f.to_dict(), **{'metadata': _convert_to_dict(f.metadata),
+                                     'reserved': _convert_to_dict(f.reserved),
+                                     }
+                     ) for f in features]
+
+
+def select_datasets(select_func=None):
+    db = get_db()
+    with db_session:
+        if select_func is None:
+            datasets = db.Dataset.select()
+        else:
+            datasets = db.Dataset.select(select_func)
+
+        return [dict(d.to_dict(), **{'collection': d.feature.collection.name,
+                                     'options': _convert_to_dict(d.options),
+                                     'metadata': _convert_to_dict(d.metadata),
+                                     }
+                     ) for d in datasets]
+
+
+def _convert_to_dict(tracked_dict):
+    """
+    Recursively convert a Pony ORM TrackedDict to a normal Python dict
+    """
+    if not isinstance(tracked_dict, orm.ormtypes.TrackedDict):
+        return tracked_dict
+
+    return {k: _convert_to_dict(v) for k, v in tracked_dict.items()}
