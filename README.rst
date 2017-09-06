@@ -23,7 +23,7 @@ setup dev environment
 - Clone master branch
 - Create a new conda environment for development
 
-    conda env create -n quest -f py3-conda-requirements.yml
+    conda env create -n quest -f py3_conda_requirements.yml
 
     (you can also create a python 2 env but 3 is preferred)
 
