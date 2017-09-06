@@ -82,117 +82,105 @@ def delete(uris):
 
 
 @dispatcher.add_method
-def move(uris, destination_collection):
-    """Move feature/dataset from one collection to another.
+def move(uris, destination_collection, as_dataframe=True, expand=None):
 
-    Args:
-        uris (string or list of strings, Required):
-            uris of features/datasets to move
-        destination_collection (string):
-            collection name
-    Returns:
-        status (bool):
-            True on success
-    """
+    if not uris:                                                                                                                        
+        return {}                                                                                                                       
 
-    # if uri list is empty do nothing
-    if not uris:
-        return True
+    grouped_uris = util.classify_uris(uris, as_dataframe=False, exclude=['services', 'collections'], require_same_type=True)            
+    resource = list(grouped_uris)[0]                                                                                                    
+    uris = grouped_uris[resource]                                                                                                       
+    project_path = _get_project_dir()                                                                                                   
+    destination_collection_path = os.path.join(project_path, destination_collection)                                                    
 
-    # group uris by type
-    grouped_uris = util.classify_uris(uris, as_dataframe=False,
-                                      exclude=['services', 'collections'], require_same_type=True)
-    resource = list(grouped_uris)[0]
-    uris = grouped_uris[resource]
+    datasets_list = []
+    features_list = []
 
-    project_path = _get_project_dir()
-    destination_collection_path = os.path.join(project_path, destination_collection)
+    for uri in uris:                                                                                                                    
+        if resource == 'features':                                                                                                      
+            feature_metadata = get_metadata(uri)[uri]                                                                                   
+            collection_path = os.path.join(project_path, feature_metadata['collection'])                                                
+            datasets = get_datasets(expand=True, filters={'feature': uri})                                                              
 
-    for uri in uris:
-        if resource == 'features':
-            feature_metadata = get_metadata(uri)[uri]
+            features_list.append(uri)
 
-            collection_path = os.path.join(project_path, feature_metadata['collection'])
+            for dataset_name, dataset_metadata in datasets.items():                                                                     
+                _move_dataset(dataset_metadata, collection_path, destination_collection_path, uri)                        
+                datasets_list.append(dataset_name)
+            update_metadata(uri, quest_metadata={'collection': destination_collection})                                                 
 
-            datasets = get_datasets(expand=True, filters={'feature': uri})
-            for dataset_name, dataset_metadata in datasets.items():
-                _move_dataset(dataset_metadata, collection_path, destination_collection_path, uri)
+        if resource == 'datasets':                                                                                                      
+            dataset_metadata = get_metadata(uri)[uri]                                                                                   
+            collection_path = os.path.join(project_path, dataset_metadata['collection'])                                                
+            feature = dataset_metadata['feature']                                                                                       
+            new_feature = add_features(destination_collection, feature)[0]                                                              
+            features_list.append(new_feature)
+            _move_dataset(dataset_metadata, collection_path, destination_collection_path, new_feature)           
+            datasets_list.append(uri)
 
-            update_metadata(uri, quest_metadata={'collection': destination_collection})
+    if expand or as_dataframe:
+        return {'features': get_metadata(features_list, as_dataframe=as_dataframe),
+                'datasets': get_metadata(datasets_list, as_dataframe=as_dataframe)}
 
-        if resource == 'datasets':
-            dataset_metadata = get_metadata(uri)[uri]
 
-            collection_path = os.path.join(project_path, dataset_metadata['collection'])
-
-            feature = dataset_metadata['feature']
-
-            new_feature = add_features(destination_collection, feature)[0]
-
-            _move_dataset(dataset_metadata, collection_path, destination_collection_path, new_feature)
-
-    return True
+    return {'features': features_list, 'datasets': datasets_list}
 
 
 @dispatcher.add_method
-def copy(uris, destination_collection):
-    """Copy feature/dataset from one collection to another.
+def copy(uris, destination_collection, as_dataframe=False, expand=None):
 
-       Args:
-           uris (string or list of strings, Required):
-               uris of features/datasets to copy
-           destination_collection (string):
-               collection name
-       Returns:
-           status (bool):
-               True on success
-       """
-    # if uri list is empty do nothing
-    if not uris:
-        return True
+    if not uris:                                                                                                                        
+        return {}                                                                                                                       
 
-    # group uris by type
-    grouped_uris = util.classify_uris(uris, as_dataframe=False,
-                                      exclude=['services', 'collections'], require_same_type=True)
-    resource = list(grouped_uris)[0]
-    uris = grouped_uris[resource]
+    grouped_uris = util.classify_uris(uris, as_dataframe=False, exclude=['services', 'collections'], require_same_type=True)            
+    resource = list(grouped_uris)[0]                                                                                                    
+    uris = grouped_uris[resource]                                                                                                       
+    project_path = _get_project_dir()                                                                                                   
+    destination_collection_path = os.path.join(project_path, destination_collection)                                                    
 
-    project_path = _get_project_dir()
-    destination_collection_path = os.path.join(project_path, destination_collection)
+    datasets_list = []
+    features_list = []
 
-    for uri in uris:
-        if resource == 'collections':
-            pass
-            # if destination collection exists:
-            #   copy all features from collection to destination
+    for uri in uris:                                                                                                                    
+        if resource == 'features':                                                                                                      
+            feature_metadata = get_metadata(uri)[uri]                                                                                   
+            collection_path = os.path.join(project_path, feature_metadata['collection'])                                                
+            new_feature = add_features(destination_collection, uri)[0]                                                                  
+            datasets = get_datasets(expand=True, filters={'feature': uri})                                                              
 
-        if resource == 'features':
-            feature_metadata = get_metadata(uri)[uri]
+            features_list.append(new_feature)
 
-            collection_path = os.path.join(project_path, feature_metadata['collection'])
+            for dataset_name, dataset_metadata in datasets.items():                                                                     
+                new_dataset = _copy_dataset(dataset_metadata, collection_path, destination_collection_path, new_feature)                
+                datasets_list.append(new_dataset)
 
-            new_feature = add_features(destination_collection, uri)[0]
+        if resource == 'datasets':                                                                                                      
+            dataset_metadata = get_metadata(uri)[uri]                                                                                   
+            collection_path = os.path.join(project_path, dataset_metadata['collection'])                                                
+            feature = dataset_metadata['feature']                                                                                       
+            new_feature = add_features(destination_collection, feature)[0]                                                              
 
-            datasets = get_datasets(expand=True, filters={'feature': uri})
-            for dataset_name, dataset_metadata in datasets.items():
-                _copy_dataset(dataset_metadata, collection_path, destination_collection_path, new_feature)
+            features_list.append(new_feature)
 
-        if resource == 'datasets':
-            dataset_metadata = get_metadata(uri)[uri]
+            datasets_list.append(_copy_dataset(dataset_metadata, collection_path, destination_collection_path, new_feature))  
 
-            collection_path = os.path.join(project_path, dataset_metadata['collection'])
+    if expand or as_dataframe:
+        return {'features': get_metadata(features_list, as_dataframe=as_dataframe),
+                'datasets': get_metadata(datasets_list, as_dataframe=as_dataframe)}               
 
-            feature = dataset_metadata['feature']
-
-            new_feature = add_features(destination_collection, feature)[0]
-
-            _copy_dataset(dataset_metadata, collection_path, destination_collection_path, new_feature)
-
-    return True
+    return {'features': features_list, 'datasets': datasets_list} 
 
 
 def _copy_dataset(dataset_metadata, collection_path, destination_collection_path, feature):
-    _update_dataset_file_location(shutil.copy2, dataset_metadata, collection_path, destination_collection_path, feature)
+    new_name = util.uuid('dataset')
+    db = get_db()
+    with db_session:
+        db_metadata = db.Dataset[dataset_metadata['name']].to_dict()
+        db_metadata.update(feature=feature, name=new_name)
+        db.Dataset(**db_metadata)
+    
+    _update_dataset_file_location(shutil.copy2, db_metadata, collection_path, destination_collection_path, feature)
+    return new_name
 
 
 def _move_dataset(dataset_metadata, collection_path, destination_collection_path, feature):
