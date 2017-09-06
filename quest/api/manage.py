@@ -82,7 +82,7 @@ def delete(uris):
 
 
 @dispatcher.add_method
-def move(uris, destination_collection, as_dataframe=True, expand=None):
+def move(uris, destination_collection, as_dataframe=None, expand=None):
 
     if not uris:                                                                                                                        
         return {}                                                                                                                       
@@ -127,7 +127,7 @@ def move(uris, destination_collection, as_dataframe=True, expand=None):
 
 
 @dispatcher.add_method
-def copy(uris, destination_collection, as_dataframe=False, expand=None):
+def copy(uris, destination_collection, as_dataframe=None, expand=None):
 
     if not uris:                                                                                                                        
         return {}                                                                                                                       
