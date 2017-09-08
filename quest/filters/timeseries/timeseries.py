@@ -169,10 +169,10 @@ class TsResample(TsBase):
         method = options.get('method')
 
         orig_param, orig_period, orig_method = (param.split(':') + [None, None])[:3]
-        new_df = df.resample(periods[period], how=method, kind='period')
+        new_df = getattr(df.resample(periods[period], kind='period'), method)()
 
         new_param = '%s:%s:%s' % (orig_param, period, method)
-        new_df.rename(columns={param: new_param},inplace=True)  #inplace must be set to True to make changes
+        new_df.rename(columns={param: new_param}, inplace=True)  #inplace must be set to True to make changes
 
         metadata.update({'parameter': new_param})
         new_df.metadata = metadata
