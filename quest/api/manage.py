@@ -16,10 +16,12 @@ from .database import get_db, db_session
 from .projects import _get_project_dir
 from .collections import get_collections
 from .metadata import get_metadata, update_metadata
+from .tasks import add_async
 from .. import util
 
 
 @dispatcher.add_method
+@add_async
 def delete(uris):
     """Delete metadata for resource(s)
 
@@ -83,6 +85,7 @@ def delete(uris):
 
 
 @dispatcher.add_method
+@add_async
 def move(uris, destination_collection, as_dataframe=None, expand=None):
 
     if not uris:                                                                                                                        
@@ -132,6 +135,7 @@ def move(uris, destination_collection, as_dataframe=None, expand=None):
 
 
 @dispatcher.add_method
+@add_async
 def copy(uris, destination_collection, as_dataframe=None, expand=None):
 
     if not uris:                                                                                                                        

@@ -15,9 +15,11 @@ from .. import util
 from .database import get_db, db_session, select_features
 from .collections import get_collections
 from .metadata import get_metadata
+from .tasks import add_async
 
 
 @dispatcher.add_method
+@add_async
 def add_features(collection, features):
     """Add features to a collection based on the passed in feature uris.
 
@@ -77,6 +79,7 @@ def add_features(collection, features):
 
 
 @dispatcher.add_method
+@add_async
 def get_features(uris=None, expand=False, as_dataframe=False, as_geojson=False,
                  update_cache=False, filters=None,
                  services=None, collections=None, features=None):
@@ -236,6 +239,7 @@ def get_tags(service):
 
 
 @dispatcher.add_method
+@add_async
 def new_feature(collection, display_name=None, geometry=None, geom_type=None, geom_coords=None,
                 description=None, metadata=None):
     """Add a new feature to a collection.
