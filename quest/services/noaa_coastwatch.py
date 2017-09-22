@@ -1,293 +1,106 @@
 """QUEST wrapper for NCDC GHCN and GSOD Services."""
-from .base import WebServiceBase
-from .. import util
-import pandas as pd
 import os
 import datetime
+
+import pandas as pd
+import param
+
 from ..util.log import logger
+from .base import WebProviderBase, ServiceBase
+from .. import util
 
 BASE_PATH = 'noaa'
 BASE_URL = 'http://coastwatch.pfeg.noaa.gov/erddap/tabledap/'
 
+
 # noaa_url = 'http://coastwatch.pfeg.noaa.gov/erddap/tabledap/nosCoopsCA.csvp?stationID%2CstationName%2CdateEstablished%2Clongitude%2Clatitude'
 
 
-class NoaaService(WebServiceBase):
-    def _register(self):
-        self.metadata = {
-            'display_name': 'NOAA Coastwatch ERDDAP Web Services',
-            'description': 'Services available from NOAA' ,
-            'organization': {
-                'abbr': 'NOAA',
-                'name': 'National Oceanic and Atmospheric Administration',
-            },
-        }
+class NoaaServiceBase(ServiceBase):
+    BASE_URL = 'http://coastwatch.pfeg.noaa.gov/erddap/tabledap/'
+    start = param.Date(default=lambda: None, doc='start date')
+    end = param.Date(default=lambda: None, doc='end date')
+    smtk_template = 'start_end.sbt'
 
-    def _get_services(self):
+    @property
+    def metadata(self):
         return {
-            'ndbc': {
-                'display_name': 'NOAA National Data Buoy Center',
-                'description': 'NDBC Standard Meteorological Buoy Data',
-                'service_type': 'geo-discrete',
-                'parameters': list(self._parameter_map('ndbc').values()),
-                'unmapped_parameters_available': True,
-                'geom_type': 'Point',
-                'datatype': 'timeseries',
-                'geographical_areas': ['Worldwide'],
-                'bounding_boxes': [
-                    [-177.75, -27.705, 179.001, 71.758],
-                ],
-            },
-            'coops-meteorological': {
-                'display_name': 'NOAA COOPS',
-                'description': 'Center for Operational Oceanographic Products '
-                               'and Services',
-                'service_type': 'geo-discrete',
-                'parameters': list(self._parameter_map('coops-meteorological').values()),
-                'unmapped_parameters_available': True,
-                'geom_type': 'Point',
-                'datatype': 'timeseries',
-                'geographical_areas': ['Worldwide'],
-                'bounding_boxes': [
-                    [-180, -90, 180, 90],
-                ],
-            },
-            'coops-water': {
-                'display_name': 'NOAA COOPS',
-                'description': 'Center for Operational Oceanographic Products '
-                               'and Services',
-                'service_type': 'geo-discrete',
-                'parameters': list(self._parameter_map('coops-water').values()),
-                'unmapped_parameters_available': True,
-                'geom_type': 'Point',
-                'datatype': 'timeseries',
-                'geographical_areas': ['Worldwide'],
-                'bounding_boxes': [
-                    [-180, -90, 180, 90],
-                ],
-            },
+            'display_name': self.display_name,
+            'description': self.description,
+            'service_type': self.service_type,
+            'parameters': list(self._parameter_map.values()),
+            'unmapped_parameters_available': self.unmapped_parameters_available,
+            'geom_type': self.geom_type,
+            'datatype': self.datatype,
+            'geographical_areas': self.geographical_areas,
+            'bounding_boxes': self.bounding_boxes
         }
 
-    def _get_features(self, service):
-        if service == 'ndbc':
-            ndbc_url = BASE_URL + 'cwwcNDBCMet.csvp?station%2Clongitude%2Clatitude'
-            df = pd.read_csv(ndbc_url)
-            df.rename(columns={
-                'station': 'service_id',
-                'longitude (degrees_east)': 'longitude',
-                'latitude (degrees_north)': 'latitude'
-                }, inplace=True)
+    @property
+    def parameters(self):
+        return {
+            'parameters': list(self._parameter_map.values()),
+            'parameter_codes': list(self._parameter_map.keys())
+        }
 
-            df['service_id'] = df['service_id'].apply(str)  # converts ints to strings
-            df.index = df['service_id']
-            df['display_name'] = df['service_id']
+    @property
+    def features(self):
+        features = self._get_features()
+        return features.drop_duplicates()
 
-        if service == 'coops-meteorological':
-            # hard coding for now
-            dataset_Ids = ['nosCoopsCA', 'nosCoopsMW', 'nosCoopsMRF', 'nosCoopsMV', 'nosCoopsMC',
-                           'nosCoopsMAT', 'nosCoopsMRH', 'nosCoopsMWT', 'nosCoopsMBP']
+    def _get_features(self):
+        raise NotImplementedError()
+    
+    @property
+    def feature(self):
+        return self._feature
 
-            coops_url = [BASE_URL + '{}.csvp?stationID%2Clongitude%2Clatitude'.format(id) for id in dataset_Ids]
-            df = pd.concat([pd.read_csv(f) for f in coops_url])
+    @property
+    def parameter_code(self):
+        pmap = self.parameter_map(invert=True)
+        return pmap[self.parameter]
 
-            df.rename(columns={
-                'stationID': 'service_id',
-                'longitude (degrees_east)': 'longitude',
-                'parameter': 'parameters',
-                'latitude (degrees_north)': 'latitude'
-            }, inplace=True)
+    @property
+    def url(self):
+        raise NotImplementedError()
 
-            df['service_id'] = df['service_id'].apply(str)  # converts ints to strings
-            df.index = df['service_id']
-            df['display_name'] = df['service_id']
-
-        if service == 'coops-water':
-            # hard coding for now
-            dataset_Ids = ['nosCoopsWLV6', 'nosCoopsWLR6', 'nosCoopsWLTP6', 'nosCoopsWLV60',
-                           'nosCoopsWLVHL', 'nosCoopsWLTP60', 'nosCoopsWLTPHL']
-
-            coops_url = [BASE_URL + '{}.csvp?stationID%2Clongitude%2Clatitude'.format(id) for id in dataset_Ids]
-            df = pd.concat([pd.read_csv(f) for f in coops_url])
-
-            df.rename(columns={
-                'stationID': 'service_id',
-                'longitude (degrees_east)': 'longitude',
-                'latitude (degrees_north)': 'latitude'
-            }, inplace=True)
-
-            df['service_id'] = df['service_id'].apply(str)  # converts ints to strings
-            df.index = df['service_id']
-            df['display_name'] = df['service_id']
-
-        return df.drop_duplicates()
-
-    def _get_parameters(self, service, features=None):
-        # hardcoding for now
-        if service == 'ndbc':
-            parameters = {
-                'parameters': list(self._parameter_map('ndbc').values()),
-                'parameter_codes': list(self._parameter_map('ndbc').keys())
-            }
-
-        if service == 'coops-meteorological':
-            parameters = {
-                'parameters': list(self._parameter_map('coops-meteorological').values()),
-                'parameter_codes': list(self._parameter_map('coops-meteorological').keys())
-            }
-        if service == 'coops-water':
-            parameters = {
-                'parameters': list(self._parameter_map('coops-water').values()),
-                'parameter_codes': list(self._parameter_map('coops-water').keys())
-            }
-
-        return parameters
-
-    def _datasetId_map(self, service, parameter, invert=False):
-
-        if service == 'coops-meteorological':
-            dmap = {
-                'CS': 'CA',
-                'CD': 'CA',
-                'WS': 'MW',
-                'WD': 'MW',
-                'WG': 'MW',
-                'RF': 'MRF',
-                'Vis': 'MV',
-                'CN': 'MC',
-                'AT': 'MAT',
-                'RH': 'MRH',
-                'WT': 'MWT',
-                'BP': 'MBP'
-                 }
-
-        if service == 'coops-water':
-            dmap = {
-                'waterLevel': 'WL',
-                'predictedWL': 'WLTP',
-            }
-
-            return dmap[parameter]
-
-        if invert:
-            return {v: k for k, v in dmap.items()}
-
-    def _parameter_map(self, service, invert=False):
-        if service == 'ndbc':
-            pmap = {
-                'wd': 'wind_direction',
-                'wspd': 'wind_from_direction',
-                'gst': 'wind_speed_of_gust',
-                'wvht': 'wave_height',
-                'wtmp': 'sea_surface_temperature',
-                'atmp': 'air_temperature',
-                'bar': 'air_pressure',
-                'tide': 'water_level',
-                'wspu': 'eastward_wind',
-                'wspv': 'northward_wind',
-            }
-
-        if service == 'coops-meteorological':
-            pmap = {
-                'CS': 'sea_water_speed',
-                'CD': 'direction_of_sea_water_velocity',
-                'WS': 'wind_speed',
-                'WD': 'wind_from_direction',
-                'WG': 'wind_speed_from_gust',
-                'RF': 'collective_rainfall',
-                'Vis': 'visibility_in_air',
-                'CN': 'sea_water_electric_conductivity',
-                'AT': 'air_temperature',
-                'RH': 'relative_humidity',
-                'WT': 'sea_water_temperature',
-                'BP': 'barometric_pressure',
-            }
-        if service == 'coops-water':
-            pmap = {
-                'waterLevel': 'sea_surface_height_amplitude',
-                'predictedWL': 'predicted_waterLevel',
-            }
+    def parameter_map(self, invert=False):
+        pmap = self._parameter_map
 
         if invert:
             pmap = {v: k for k, v in pmap.items()}
 
         return pmap
 
-    def _download(self, service, feature, file_path, dataset,
-                  parameter, start=None, end=None, quality='R', interval='6', datum='MLLW'):
+    def __call__(self, feature, file_path, dataset, **params):
+        p = param.ParamOverrides(self, params)
+        self._feature = feature
 
         if dataset is None:
             dataset = 'station-' + feature
 
-        if end is None:
-            end = pd.datetime.now().strftime('%Y-%m-%d')
+        # end = p.end or pd.datetime.now().strftime('%Y-%m-%d')
+        #
+        # start = p.start
+        # if p.start is None:
+        #     start = pd.to_datetime(end) - datetime.timedelta(days=365)
+        #     start = start.strftime('%Y-%m-%d')
 
-        if start is None:
-            start = pd.to_datetime(end) - datetime.timedelta(days=365)
-            start = start.strftime('%Y-%m-%d')
 
-        pmap = self._parameter_map(service, invert=True)
-        parameter_code = pmap[parameter]
         try:
-            if service == 'ndbc':
-                url = 'cwwcNDBCMet.csvp?time,{}&station="{}"&time>={}&time<={}'\
-                    .format(parameter_code, feature, start, end)
-                url = BASE_URL + url
-                logger.info('downloading data from %s' % url)
-                data = pd.read_csv(url)
-                if data.empty:
-                    raise ValueError('No Data Available')
+            url = self.url
+            logger.info('downloading data from %s' % url)
+            data = pd.read_csv(url)
 
-                rename = {x: x.split()[0] for x in data.columns.tolist()}
-                units = {x.split()[0]: x.split()[-1].strip('()').lower() for x in data.columns.tolist()}
-                data.rename(columns=rename, inplace=True)
-                data = data.set_index('time')
-                data.index = pd.to_datetime(data.index)
-                data.rename(columns={parameter_code: parameter})
+            if data.empty:
+                raise ValueError('No Data Available')
 
-            if service == 'coops-meteorological':
-
-                start = pd.to_datetime(end) - datetime.timedelta(days=28)
-                start = start.strftime('%Y-%m-%d')
-
-                location = self._datasetId_map(service, parameter_code)
-                url = 'nosCoops{}.csvp?time,{}&stationID="{}"&time>={}&time<={}'\
-                    .format(location, parameter_code, feature, start, end)
-                url = BASE_URL + url
-                logger.info('downloading data from %s' % url)
-                data = pd.read_csv(url)
-                if data.empty:
-                    raise ValueError('No Data Available')
-
-                rename = {x: x.split()[0] for x in data.columns.tolist()}
-                units = {x.split()[0]: x.split()[-1].strip('()').lower() for x in data.columns.tolist()}
-                data.rename(columns=rename, inplace=True)
-                data = data.set_index('time')
-                data.index = pd.to_datetime(data.index)
-                data.rename(columns={parameter_code: parameter})
-
-            if service == 'coops-water':
-                if parameter_code == 'waterLevel':
-                    location = self._datasetId_map(service, parameter_code) + quality[0].capitalize() + interval
-                else:
-                    location=self._datasetId_map(service, parameter_code) + interval
-
-                start = pd.to_datetime(end) - datetime.timedelta(days=28)
-                start = start.strftime('%Y-%m-%d')
-
-                url = 'nosCoops{}.csvp?time,{}&stationID="{}"&time>={}&time<={}&datum="{}"'\
-                    .format(location, parameter_code, feature, start, end, datum)
-                url = BASE_URL + url
-                logger.info('downloading data from %s' % url)
-                data = pd.read_csv(url)
-                if data.empty:
-                    raise ValueError('No Data Available')
-
-                rename = {x: x.split()[0] for x in data.columns.tolist()}
-                units = {x.split()[0]: x.split()[-1].strip('()').lower() for x in data.columns.tolist()}
-                data.rename(columns=rename, inplace=True)
-                data = data.set_index('time')
-                data.index = pd.to_datetime(data.index)
-                data.rename(columns={parameter_code: parameter})
+            rename = {x: x.split()[0] for x in data.columns.tolist()}
+            units = {x.split()[0]: x.split()[-1].strip('()').lower() for x in data.columns.tolist()}
+            data.rename(columns=rename, inplace=True)
+            data = data.set_index('time')
+            data.index = pd.to_datetime(data.index)
+            data.rename(columns={self.parameter_code: self.parameter})
 
             file_path = os.path.join(file_path, BASE_PATH, service, dataset, '{0}.h5'.format(dataset))
 
@@ -295,9 +108,9 @@ class NoaaService(WebServiceBase):
                 'file_path': file_path,
                 'file_format': 'timeseries-hdf5',
                 'datatype': 'timeseries',
-                'parameter': parameter,
-                'unit': units[parameter_code],
-                'service_id': 'svc://noaa:{}/{}'.format(service, feature)
+                'parameter': p.parameter,
+                'unit': units[self.parameter_code],
+                'service_id': 'svc://noaa:{}/{}'.format(self.service_name, feature)
             }
 
             # save data to disk
@@ -312,97 +125,213 @@ class NoaaService(WebServiceBase):
             if str(error) == "HTTP Error 500: Internal Server Error":
                 raise ValueError('No Data Available')
 
-    def _download_options(self, service, fmt):
-        if service == 'ndbc' or service == 'coops-meteorological':
 
-            if fmt == 'smtk':
-                parameters = sorted(self._parameter_map(service).values())
-                parameters = [(p.capitalize(), p) for p in parameters]
-                schema = util.build_smtk('download_options',
-                                         'start_end.sbt',
-                                         title='Noaa Coastwatch Download Options',
-                                         parameters=parameters)
-            if fmt == 'json-schema':
+class NoaaServiceBaseNDBC(NoaaServiceBase):
+    service_name = 'ndbc'
+    display_name = 'NOAA National Data Buoy Center'
+    description = 'NDBC Standard Meteorological Buoy Data'
+    service_type = 'geo-discrete'
+    unmapped_parameters_available = True
+    geom_type = 'Point'
+    datatype = 'timeseries'
+    geographical_areas = ['Worldwide']
+    bounding_boxes = [
+        [-177.75, -27.705, 179.001, 71.758],
+    ]
+    _parameter_map = {
+        'wd': 'wind_direction',
+        'wspd': 'wind_from_direction',
+        'gst': 'wind_speed_of_gust',
+        'wvht': 'wave_height',
+        'wtmp': 'sea_surface_temperature',
+        'atmp': 'air_temperature',
+        'bar': 'air_pressure',
+        'tide': 'water_level',
+        'wspu': 'eastward_wind',
+        'wspv': 'northward_wind',
+        }
+        
+    parameter = param.ObjectSelector(default=None, doc='parameter', objects=sorted(_parameter_map.values()))
 
-                schema = {
-                    "title": "NOAA Download Options",
-                    "type": "object",
-                    "properties": {
-                        "parameter": {
-                            "type": "string",
-                            "enum": sorted(self._parameter_map(service).values()),
-                            "description": "parameter",
-                        },
-                        "start": {
-                            "type": "string",
-                            "description": "start date",
-                        },
-                        "end": {
-                            "type": "string",
-                            "description": "end date",
-                        },
-                    },
-                }
+    @property
+    def url(self):
+        url = 'cwwcNDBCMet.csvp?time,{}&station="{}"&time>={}&time<={}' \
+            .format(self.parameter_code, self.feature, self.start, self.end)
+        return self.BASE_URL + url
 
-        if service == 'coops-water':
-            if fmt == 'smtk':
-                parameters = sorted(self._parameter_map(service).values())
-                parameters = [(p.capitalize(), p) for p in parameters]
-                schema = util.build_smtk('download_options',
-                                         'start_end.sbt',
-                                         title='Noaa Coastwatch Download Options',
-                                         parameters=parameters)
-            if fmt == 'json-schema':
-                schema = {
+    def _get_features(self):
+        ndbc_url = self.BASE_URL + 'cwwcNDBCMet.csvp?station%2Clongitude%2Clatitude'
+        df = pd.read_csv(ndbc_url)
+        df.rename(columns={
+            'station': 'service_id',
+            'longitude (degrees_east)': 'longitude',
+            'latitude (degrees_north)': 'latitude'
+        }, inplace=True)
 
-                    "title": "NOAA Download Options",
-                    "type": "object",
-                    "properties": {
-                        "parameter": {
-                            "type": "string",
-                            "enum": sorted(self._parameter_map(service).values()),
-                            "description": "parameter",
-                        },
-                        "start": {
-                            "type": "string",
-                            "description": "start date",
-                        },
-                        "end": {
-                            "type": "string",
-                            "description": "end date",
-                        },
-                        "quality": {
-                            "type": "string",
-                            "description": "quality",
-                            "options": ['Preliminary', 'Verified'],
-                        },
-                        "interval": {
-                            "type": "string",
-                            "description": "time interval",
-                            "options": ['6', '60'],
-                        },
-                        "datum": {  # temporary hard coding
-                            "type": "string",
-                            "description": "time interval",
-                            "options": [
-                                        {'DHQ': 'Mean Diurnal High Water Inequality'},
-                                        {'DLQ': 'Mean Diurnal Low Water Inequality'},
-                                        {'DTL': 'Mean Diurnal Tide L0evel'},
-                                        {'GT': 'Great Diurnal Range'},
-                                        {'HWI': 'Greenwich High Water Interval( in Hours)'},
-                                        {'LWI': 'Greenwich Low Water Interval( in Hours)'},
-                                        {'MHHW': 'Mean Higher - High Water'},
-                                        {'MHW': 'Mean High Water'},
-                                        {'MLLW': 'Mean Lower_Low Water'},
-                                        {'MLW': 'Mean Low Water'},
-                                        {'MN': 'Mean Range of Tide'},
-                                        {'MSL': 'Mean Sea Level'},
-                                        {'MTL': 'Mean Tide Level'},
-                                        {'NAVD': 'North American Vertical Datum'},
-                                        {'STND': 'Station Datum'},
-                                        ]
-                        },
-                    },
-                }
+        df['service_id'] = df['service_id'].apply(str)  # converts ints to strings
+        df.index = df['service_id']
+        df['display_name'] = df['service_id']
 
-        return schema
+        return df
+
+
+class NoaaServiceBaseCoopsMet(NoaaServiceBase):
+    service_name = 'coops-meteorological'
+    display_name = 'NOAA COOPS'
+    description = 'Center for Operational Oceanographic Products and Services'
+    service_type = 'geo-discrete'
+    unmapped_parameters_available = True
+    geom_type = 'Point'
+    datatype = 'timeseries'
+    geographical_areas = ['Worldwide']
+    bounding_boxes = [
+        [-180, -90, 180, 90],
+    ]
+    _parameter_map = {
+        'CS': 'sea_water_speed',
+        'CD': 'direction_of_sea_water_velocity',
+        'WS': 'wind_speed',
+        'WD': 'wind_from_direction',
+        'WG': 'wind_speed_from_gust',
+        'RF': 'collective_rainfall',
+        'Vis': 'visibility_in_air',
+        'CN': 'sea_water_electric_conductivity',
+        'AT': 'air_temperature',
+        'RH': 'relative_humidity',
+        'WT': 'sea_water_temperature',
+        'BP': 'barometric_pressure',
+        }
+    _location_id_map = {
+        'CS': 'CA',
+        'CD': 'CA',
+        'WS': 'MW',
+        'WD': 'MW',
+        'WG': 'MW',
+        'RF': 'MRF',
+        'Vis': 'MV',
+        'CN': 'MC',
+        'AT': 'MAT',
+        'RH': 'MRH',
+        'WT': 'MWT',
+        'BP': 'MBP'
+         }
+
+    parameter = param.ObjectSelector(default=None, doc='parameter', objects=sorted(_parameter_map.values()))
+
+    @property
+    def url(self):
+        # start = pd.to_datetime(end) - datetime.timedelta(days=28)
+        # start = start.strftime('%Y-%m-%d')
+
+        location = self._location_id_map[self.parameter_code]
+        url = 'nosCoops{}.csvp?time,{}&stationID="{}"&time>={}&time<={}' \
+            .format(location, self.parameter_code, self.feature, self.start, self.end)
+
+        return self.BASE_URL + url
+
+    def _get_features(self):
+        # hard coding for now
+        dataset_Ids = ['nosCoopsCA', 'nosCoopsMW', 'nosCoopsMRF', 'nosCoopsMV', 'nosCoopsMC',
+                       'nosCoopsMAT', 'nosCoopsMRH', 'nosCoopsMWT', 'nosCoopsMBP']
+
+        coops_url = [self.BASE_URL + '{}.csvp?stationID%2Clongitude%2Clatitude'.format(id) for id in dataset_Ids]
+        df = pd.concat([pd.read_csv(f) for f in coops_url])
+
+        df.rename(columns={
+            'stationID': 'service_id',
+            'longitude (degrees_east)': 'longitude',
+            'parameter': 'parameters',
+            'latitude (degrees_north)': 'latitude'
+        }, inplace=True)
+
+        df['service_id'] = df['service_id'].apply(str)  # converts ints to strings
+        df.index = df['service_id']
+        df['display_name'] = df['service_id']
+
+        return df
+
+
+class NoaaServiceBaseCoopsWater(NoaaServiceBase):
+    service_name = 'coops-water'
+    display_name = 'NOAA COOPS'
+    description = 'Center for Operational Oceanographic Products and Services'
+    service_type = 'geo-discrete'
+    unmapped_parameters_available = True
+    geom_type = 'Point'
+    datatype = 'timeseries'
+    geographical_areas = ['Worldwide']
+    bounding_boxes = [
+        [-180, -90, 180, 90],
+    ]
+    _parameter_map = {
+                'waterLevel': 'sea_surface_height_amplitude',
+                'predictedWL': 'predicted_waterLevel',
+            }
+    _location_id_map = {
+                'waterLevel': 'WL',
+                'predictedWL': 'WLTP',
+            }
+    _datum_map = {
+        'DHQ': 'Mean Diurnal High Water Inequality',
+        'DLQ': 'Mean Diurnal Low Water Inequality',
+        'DTL': 'Mean Diurnal Tide L0evel',
+        'GT': 'Great Diurnal Range',
+        'HWI': 'Greenwich High Water Interval( in Hours)',
+        'LWI': 'Greenwich Low Water Interval( in Hours)',
+        'MHHW': 'Mean Higher - High Water',
+        'MHW': 'Mean High Water',
+        'MLLW': 'Mean Lower_Low Water',
+        'MLW': 'Mean Low Water',
+        'MN': 'Mean Range of Tide',
+        'MSL': 'Mean Sea Level',
+        'MTL': 'Mean Tide Level',
+        'NAVD': 'North American Vertical Datum',
+        'STND': 'Station Datum'
+    }
+
+    parameter = param.ObjectSelector(default=None, doc='parameter', objects=sorted(_parameter_map.values()))
+    quality = param.ObjectSelector(default='R', doc='quality', objects=['Preliminary', 'Verified', 'R'])
+    interval = param.ObjectSelector(default='6', doc='time interval', objects=['6', '60'])
+    datum = param.ObjectSelector(default='Mean Lower_Low Water', doc='datum', objects=sorted(_datum_map.values()))
+
+    @property
+    def url(self):
+        location = self._location_id_map[self.parameter_code]
+        quality = self.quality[0].capitalize() if self.parameter_code == 'waterLevel' else ''
+        datum = self._datum_map[self.datum]
+
+        # start = pd.to_datetime(end) - datetime.timedelta(days=28)
+        # start = start.strftime('%Y-%m-%d')
+
+        url = 'nosCoops{}{}{}.csvp?time,{}&stationID="{}"&time>={}&time<={}&datum="{}"' \
+            .format(location, quality, self.interval, self.parameter_code, self.feature, self.start, self.end, datum)
+
+        return self.BASE_URL + url
+
+    def _get_features(self):
+        # hard coding for now
+        dataset_Ids = ['nosCoopsWLV6', 'nosCoopsWLR6', 'nosCoopsWLTP6', 'nosCoopsWLV60',
+                       'nosCoopsWLVHL', 'nosCoopsWLTP60', 'nosCoopsWLTPHL']
+
+        coops_url = [BASE_URL + '{}.csvp?stationID%2Clongitude%2Clatitude'.format(id) for id in dataset_Ids]
+        df = pd.concat([pd.read_csv(f) for f in coops_url])
+
+        df.rename(columns={
+            'stationID': 'service_id',
+            'longitude (degrees_east)': 'longitude',
+            'latitude (degrees_north)': 'latitude'
+        }, inplace=True)
+
+        df['service_id'] = df['service_id'].apply(str)  # converts ints to strings
+        df.index = df['service_id']
+        df['display_name'] = df['service_id']
+
+        return df
+
+
+class NoaaProvider(WebProviderBase):
+    service_base_class = NoaaServiceBase
+    display_name = 'NOAA Coastwatch ERDDAP Web Services'
+    description = 'Services available from NOAA'
+    organization_name = 'National Oceanic and Atmospheric Administration'
+    organization_abbr = 'NOAA'
