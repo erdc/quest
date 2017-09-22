@@ -300,12 +300,12 @@ def load_services():
     web_services = list_drivers('services')
     web_services.remove('user')
 
-    services = {name: driver.DriverManager('quest.services', name, invoke_on_load='True').driver for name in web_services}
+    services = {name: driver.DriverManager('quest.services', name, invoke_on_load=True).driver for name in web_services}
 
     if len(settings.get('USER_SERVICES', [])) > 0:
         for uri in settings.get('USER_SERVICES', []):
             try:
-                drv = driver.DriverManager('quest.services', 'user', invoke_on_load='True', invoke_kwds={'uri': uri}).driver
+                drv = driver.DriverManager('quest.services', 'user', invoke_on_load=True, invoke_kwds={'uri': uri}).driver
                 services['user-' + drv.name] = drv
             except Exception as e:
                 logger.error('Failed to load local service from %s, with exception: %s' % (uri, str(e)))

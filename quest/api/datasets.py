@@ -98,15 +98,10 @@ def download_datasets(datasets, raise_on_error=False):
         feature_uri = dataset['service'] + '/' + dataset['service_id']
         try:
             update_metadata(idx, quest_metadata={'status': DatasetStatus.PENDING})
-            kwargs = dataset['options']
-            if kwargs is not None:
-                all_metadata = download(feature_uri,
-                                        file_path=collection_path,
-                                        dataset=idx, **kwargs)
-            else:
-                all_metadata = download(feature_uri,
-                                        file_path=collection_path,
-                                        dataset=idx)
+            kwargs = dataset['options'] or dict()
+            all_metadata = download(feature_uri,
+                                    file_path=collection_path,
+                                    dataset=idx, **kwargs)
 
             metadata = all_metadata.pop('metadata', None)
             quest_metadata = all_metadata

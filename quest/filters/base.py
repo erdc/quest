@@ -1,32 +1,48 @@
 from builtins import object
 import abc
+
+import param
 from future.utils import with_metaclass
-from ..util import listify
+
+from ..util import listify, format_json_options
 from ..api.metadata import update_metadata
 from ..api.datasets import DatasetStatus
 
 
-class FilterBase(with_metaclass(abc.ABCMeta, object)):
+class FilterBase(param.Parameterized):
     """Base class for data filters."""
+    _name = None
+    name = param.String(default='Filter', precedence=-1)
 
-    def __init__(self):
+    def __init__(self, **params):
+        params.update({'name': self._name})
         self.register()
-        self._options = None
-        self._datasets = None
-        self._features = None
         self._filter_options = None
+        super(FilterBase, self).__init__(**params)
+
+    @property
+    def title(self):
+        return '{} Options'.format(self.name.replace('-', ' ').title())
+
+    @property
+    def display_name(self):
+        return 'Created by filter {}'.format(self.name)
+
+    @property
+    def description(self):
+        return '{} Filter Applied'.format(self.metadata['group'].capitalize)
 
     @abc.abstractmethod
     def register(self):
         """Register plugin by setting filter name, geotype and uid."""
         pass
 
-    def apply_filter(self, datasets, features, options, *args, **kwargs):
+    def apply_filter(self, **options):
         """Function that applies filter"""
-        self._datasets = datasets
-        self._features = features
+        self.set_param(**options)
+
         self._filter_options = options
-        result = self._apply_filter(datasets, features, options, *args, **kwargs)
+        result = self._apply_filter()
         datasets = listify(result.get('datasets', []))
         for dataset in datasets:
             update_metadata(dataset, quest_metadata={
@@ -37,19 +53,20 @@ class FilterBase(with_metaclass(abc.ABCMeta, object)):
         return result
 
     @abc.abstractmethod
-    def _apply_filter(self, datasets, features, options):
+    def _apply_filter(self, **options):
         """Function that applies filter"""
         pass
 
-    @abc.abstractmethod
-    def apply_filter_options(self, fmt):
+    def apply_filter_options(self, fmt=None):
         """Function that applies filter"""
-        pass
+
+        if fmt == 'json-schema':
+            return format_json_options(self)
+
+        return self
 
     @property
     def options(self):
         return {'filter_applied': self.name,
-                'dataset': self._datasets,
-                'features': self._features,
                 'filter_options': self._filter_options
                 }
