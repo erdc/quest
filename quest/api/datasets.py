@@ -173,6 +173,7 @@ def download_options(uris, fmt='json-schema'):
 
 
 @dispatcher.add_method
+@add_async
 def get_datasets(expand=None, filters=None, as_dataframe=None):
     """Return all available datasets in active project.
 
@@ -216,6 +217,7 @@ def get_datasets(expand=None, filters=None, as_dataframe=None):
     return datasets
 
 
+@add_async
 @dispatcher.add_method
 def new_dataset(feature, source=None, display_name=None,
                 description=None, file_path=None, metadata=None):
@@ -367,6 +369,7 @@ def open_dataset(dataset, fmt=None):
 
 
 @dispatcher.add_method
+@add_async
 def visualize_dataset(dataset, update_cache=False, **kwargs):
     """Visualize the dataset as a matplotlib/bokeh plot.
 
