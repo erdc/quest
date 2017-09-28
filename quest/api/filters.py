@@ -2,11 +2,14 @@
 
 This will eventually hold filter related functionality
 """
+import pandas as pd
+
 from .. import util
 from jsonrpc import dispatcher
 from .metadata import get_metadata
-from pint import UnitRegistry
 from .tasks import add_async
+
+
 
 
 @dispatcher.add_method
@@ -103,12 +106,13 @@ def apply_filter(name, datasets=None, features=None, options=None, as_dataframe=
     new_features = util.listify(result.get('features', []))
 
     if expand or as_dataframe:
-        new_datasets = get_metadata(new_datasets, as_dataframe=True)
-        new_features = get_metadata(new_features, as_dataframe=True)
+        new_datasets = get_metadata(new_datasets, as_dataframe=as_dataframe)
+        new_features = get_metadata(new_features, as_dataframe=as_dataframe)
 
-        if expand:
-            new_datasets = new_datasets.to_dict(orient='index')
-            new_features = new_features.to_dict(orient='index')
+        if as_dataframe:
+            new_datasets['quest_type'] = 'dataset'
+            new_features['quest_type'] = 'feature'
+            return pd.concat((new_datasets, new_features))
 
     result.update({'datasets': new_datasets, 'features': new_features})
 
