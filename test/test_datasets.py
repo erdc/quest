@@ -4,12 +4,10 @@ from types import ModuleType
 
 from pandas import DataFrame
 
+from data import DOWNLOAD_OPTIONS_FROM_ALL_SERVICES, SERVICE, FEATURE, DATASET, DATASET_METADATA
+
 
 ACTIVE_PROJECT = 'test_data'
-SERVICE = 'svc://usgs-nwis:iv'
-FEATURE = 'f92ad0e35d04402ab1b1d4621b48a636'
-DATASET = 'df5c3df3229441fa9c779443f03635e7'
-
 
 pytestmark = pytest.mark.usefixtures('reset_projects_dir', 'set_active_project')
 
@@ -38,207 +36,11 @@ def test_download_datasets():
     # TODO
 
 
-DOWNLOAD_OPTIONS_FROM_ALL_SERVICES = \
-{'svc://nasa:srtm-3-arc-second': {},
- 'svc://nasa:srtm-30-arc-second': {},
- 'svc://ncdc:ghcn-daily': {'properties': [{'bounds': None,
-    'default': 'null',
-    'description': 'end date',
-    'name': 'end',
-    'type': 'Date'},
-   {'bounds': None,
-    'default': 'null',
-    'description': 'start date',
-    'name': 'start',
-    'type': 'Date'},
-   {'default': None,
-    'description': 'parameter',
-    'name': 'parameter',
-    'range': [('air_temperature:daily:mean', 'air_temperature:daily:mean'),
-     ('air_temperature:daily:minimum', 'air_temperature:daily:minimum'),
-     ('air_temperature:daily:total', 'air_temperature:daily:total'),
-     ('rainfall:daily:total', 'rainfall:daily:total'),
-     ('snow_depth:daily:total', 'snow_depth:daily:total'),
-     ('snowfall:daily:total', 'snowfall:daily:total')],
-    'type': 'ObjectSelector'}],
-  'title': 'NCDC GHCN Daily Download Options'},
- 'svc://ncdc:gsod': {'properties': [{'bounds': None,
-    'default': 'null',
-    'description': 'end date',
-    'name': 'end',
-    'type': 'Date'},
-   {'bounds': None,
-    'default': 'null',
-    'description': 'start date',
-    'name': 'start',
-    'type': 'Date'},
-   {'default': None,
-    'description': 'parameter',
-    'name': 'parameter',
-    'range': [('air_temperature:daily:max', 'air_temperature:daily:max'),
-     ('air_temperature:daily:min', 'air_temperature:daily:min'),
-     ('rainfall:daily:total', 'rainfall:daily:total'),
-     ('snow_depth:daily:total', 'snow_depth:daily:total')],
-    'type': 'ObjectSelector'}],
-  'title': 'NCDC GSOD Download Options'},
- 'svc://noaa:coops-meteorological': {'properties': [{'bounds': None,
-    'default': 'null',
-    'description': 'end date',
-    'name': 'end',
-    'type': 'Date'},
-   {'bounds': None,
-    'default': 'null',
-    'description': 'start date',
-    'name': 'start',
-    'type': 'Date'},
-   {'default': None,
-    'description': 'parameter',
-    'name': 'parameter',
-    'range': [('air_temperature', 'air_temperature'),
-     ('barometric_pressure', 'barometric_pressure'),
-     ('collective_rainfall', 'collective_rainfall'),
-     ('direction_of_sea_water_velocity', 'direction_of_sea_water_velocity'),
-     ('relative_humidity', 'relative_humidity'),
-     ('sea_water_electric_conductivity', 'sea_water_electric_conductivity'),
-     ('sea_water_speed', 'sea_water_speed'),
-     ('sea_water_temperature', 'sea_water_temperature'),
-     ('visibility_in_air', 'visibility_in_air'),
-     ('wind_from_direction', 'wind_from_direction'),
-     ('wind_speed', 'wind_speed'),
-     ('wind_speed_from_gust', 'wind_speed_from_gust')],
-    'type': 'ObjectSelector'}],
-  'title': 'NOAA COOPS Download Options'},
- 'svc://noaa:coops-water': {'properties': [{'bounds': None,
-    'default': 'null',
-    'description': 'end date',
-    'name': 'end',
-    'type': 'Date'},
-   {'bounds': None,
-    'default': 'null',
-    'description': 'start date',
-    'name': 'start',
-    'type': 'Date'},
-   {'default': None,
-    'description': 'parameter',
-    'name': 'parameter',
-    'range': [('predicted_waterLevel', 'predicted_waterLevel'),
-     ('sea_surface_height_amplitude', 'sea_surface_height_amplitude')],
-    'type': 'ObjectSelector'},
-   {'default': '"6"',
-    'description': 'time interval',
-    'name': 'interval',
-    'range': [('6', '6'), ('60', '60')],
-    'type': 'ObjectSelector'},
-   {'default': '"Mean Lower_Low Water"',
-    'description': 'datum',
-    'name': 'datum',
-    'range': [('Great Diurnal Range', 'Great Diurnal Range'),
-     ('Greenwich High Water Interval( in Hours)',
-      'Greenwich High Water Interval( in Hours)'),
-     ('Greenwich Low Water Interval( in Hours)',
-      'Greenwich Low Water Interval( in Hours)'),
-     ('Mean Diurnal High Water Inequality',
-      'Mean Diurnal High Water Inequality'),
-     ('Mean Diurnal Low Water Inequality',
-      'Mean Diurnal Low Water Inequality'),
-     ('Mean Diurnal Tide L0evel', 'Mean Diurnal Tide L0evel'),
-     ('Mean High Water', 'Mean High Water'),
-     ('Mean Higher - High Water', 'Mean Higher - High Water'),
-     ('Mean Low Water', 'Mean Low Water'),
-     ('Mean Lower_Low Water', 'Mean Lower_Low Water'),
-     ('Mean Range of Tide', 'Mean Range of Tide'),
-     ('Mean Sea Level', 'Mean Sea Level'),
-     ('Mean Tide Level', 'Mean Tide Level'),
-     ('North American Vertical Datum', 'North American Vertical Datum'),
-     ('Station Datum', 'Station Datum')],
-    'type': 'ObjectSelector'},
-   {'default': '"R"',
-    'description': 'quality',
-    'name': 'quality',
-    'range': [('Preliminary', 'Preliminary'),
-     ('Verified', 'Verified'),
-     ('R', 'R')],
-    'type': 'ObjectSelector'}],
-  'title': 'NOAA COOPS Download Options'},
- 'svc://noaa:ndbc': {'properties': [{'bounds': None,
-    'default': 'null',
-    'description': 'end date',
-    'name': 'end',
-    'type': 'Date'},
-   {'bounds': None,
-    'default': 'null',
-    'description': 'start date',
-    'name': 'start',
-    'type': 'Date'},
-   {'default': None,
-    'description': 'parameter',
-    'name': 'parameter',
-    'range': [('air_pressure', 'air_pressure'),
-     ('air_temperature', 'air_temperature'),
-     ('eastward_wind', 'eastward_wind'),
-     ('northward_wind', 'northward_wind'),
-     ('sea_surface_temperature', 'sea_surface_temperature'),
-     ('water_level', 'water_level'),
-     ('wave_height', 'wave_height'),
-     ('wind_direction', 'wind_direction'),
-     ('wind_from_direction', 'wind_from_direction'),
-     ('wind_speed_of_gust', 'wind_speed_of_gust')],
-    'type': 'ObjectSelector'}],
-  'title': 'NOAA National Data Buoy Center Download Options'},
- 'svc://usgs-ned:1-arc-second': {},
- 'svc://usgs-ned:13-arc-second': {},
- 'svc://usgs-ned:19-arc-second': {},
- 'svc://usgs-ned:alaska-2-arc-second': {},
- 'svc://usgs-nlcd:2001': {},
- 'svc://usgs-nlcd:2006': {},
- 'svc://usgs-nlcd:2011': {},
- 'svc://usgs-nwis:dv': {'properties': [{'bounds': None,
-    'default': '30',
-    'description': 'period date',
-    'name': 'period',
-    'type': 'Integer'},
-   {'bounds': None,
-    'default': None,
-    'description': 'end date',
-    'name': 'end',
-    'type': 'Date'},
-   {'bounds': None,
-    'default': None,
-    'description': 'start date',
-    'name': 'start',
-    'type': 'Date'},
-   {'default': None,
-    'description': 'parameter',
-    'name': 'parameter',
-    'range': [('streamflow:mean:daily', 'streamflow:mean:daily'),
-     ('water_temperature:daily:max', 'water_temperature:daily:max'),
-     ('water_temperature:daily:mean', 'water_temperature:daily:mean'),
-     ('water_temperature:daily:min', 'water_temperature:daily:min')],
-    'type': 'ObjectSelector'}],
-  'title': 'NWIS Daily Values Service Download Options'},
- 'svc://usgs-nwis:iv': {'properties': [{'bounds': None,
-    'default': '30',
-    'description': 'period date',
-    'name': 'period',
-    'type': 'Integer'},
-   {'bounds': None,
-    'default': None,
-    'description': 'end date',
-    'name': 'end',
-    'type': 'Date'},
-   {'bounds': None,
-    'default': None,
-    'description': 'start date',
-    'name': 'start',
-    'type': 'Date'},
-   {'default': None,
-    'description': 'parameter',
-    'name': 'parameter',
-    'range': [('gage_height', 'gage_height'),
-     ('streamflow', 'streamflow'),
-     ('water_temperature', 'water_temperature')],
-    'type': 'ObjectSelector'}],
-  'title': 'NWIS Instantaneous Values Service Download Options'}}
+@pytest.mark.parametrize('service, options', [(k, v) for k, v in DOWNLOAD_OPTIONS_FROM_ALL_SERVICES.items()])
+def test_download_options_for_services(api, service, options):
+    actual = api.download_options(service)[service]
+    expected = options
+    assert actual == expected
 
 
 def test_download_options(api):
@@ -261,11 +63,9 @@ def test_download_options(api):
     # test get download options from list of service uris
     services = api.get_services()
     result = api.download_options(services)
-    for service in services:
-        actual = result[service]
-        expected = DOWNLOAD_OPTIONS_FROM_ALL_SERVICES[service]
-        print(service)
-        assert actual == expected
+    actual = result
+    expected = DOWNLOAD_OPTIONS_FROM_ALL_SERVICES
+    assert actual == expected
 
     # test get download options from single service as string
     actual = api.download_options(SERVICE)
@@ -294,22 +94,7 @@ def test_get_datasets(api, dataset_save_path):
     assert actual == expected
 
     actual = api.get_datasets(expand=True)
-    expected = {DATASET: {'download_status': 'downloaded',
-                                             'download_message': 'success',
-                                             'name': 'df5c3df3229441fa9c779443f03635e7',
-                                             'file_format': 'timeseries-hdf5',
-                                             'datatype': 'timeseries',
-                                             'feature': 'f92ad0e35d04402ab1b1d4621b48a636',
-                                             'collection': 'test_data',
-                                             'download_options': '{"parameter": "streamflow"}',
-                                             'dataset_type': 'download',
-                                             'timezone': 'utc',
-                                             'unit': 'ft3/s',
-                                             'display_name': 'df5c3df3229441fa9c779443f03635e7',
-                                             'parameter': 'streamflow',
-                                             'metadata': {}
-                          }
-                }
+    expected = {DATASET: DATASET_METADATA}
     expected[DATASET].update({'file_path': dataset_save_path})
     assert expected[DATASET]['feature'] == actual[DATASET]['feature']
     assert expected[DATASET]['name'] == actual[DATASET]['name']

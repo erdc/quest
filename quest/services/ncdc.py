@@ -6,17 +6,14 @@ import pandas as pd
 import param
 from ulmo.ncdc import ghcn_daily, gsod
 
-from .base import WebProviderBase, ServiceBase
+from .base import WebProviderBase, TimePeriodServiceBase
 from .. import util
 # from ulmo.ncdc.ghcn_daily.core import _get_inventory as _get_ghcn_inventory
 
 BASE_PATH = 'ncdc'
 
 
-class NcdcServiceBase(ServiceBase):
-    start = param.Date(default=lambda: None, doc='start date')
-    end = param.Date(default=lambda: None, doc='end date')
-    smtk_template = 'start_end.sbt'
+class NcdcServiceBase(TimePeriodServiceBase):
 
     @property
     def metadata(self):
@@ -138,7 +135,7 @@ class NcdcServiceGhcnDaily(NcdcServiceBase):
         'air_temperature:daily:mean': '0.1*degC',
     }
 
-    parameter = param.ObjectSelector(default=None, doc='parameter', objects=sorted(_parameter_map.values()))
+    parameter = param.ObjectSelector(default=None, doc='parameter', precedence=1, objects=sorted(_parameter_map.values()))
 
     @property
     def data(self):
@@ -184,7 +181,7 @@ class NcdcServiceGsod(NcdcServiceBase):
         'air_temperature:daily:min': '0.1*degF',
         'air_temperature:daily:min': '0.1*degF',
     }
-    parameter = param.ObjectSelector(default=None, doc='parameter', objects=sorted(_parameter_map.values()))
+    parameter = param.ObjectSelector(default=None, doc='parameter', precedence=1, objects=sorted(_parameter_map.values()))
 
     @property
     def data(self):

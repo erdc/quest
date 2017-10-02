@@ -6,7 +6,7 @@ import pandas as pd
 import param
 
 from ..util.log import logger
-from .base import WebProviderBase, ServiceBase
+from .base import WebProviderBase, TimePeriodServiceBase
 from .. import util
 
 BASE_PATH = 'noaa'
@@ -16,11 +16,8 @@ BASE_URL = 'http://coastwatch.pfeg.noaa.gov/erddap/tabledap/'
 # noaa_url = 'http://coastwatch.pfeg.noaa.gov/erddap/tabledap/nosCoopsCA.csvp?stationID%2CstationName%2CdateEstablished%2Clongitude%2Clatitude'
 
 
-class NoaaServiceBase(ServiceBase):
+class NoaaServiceBase(TimePeriodServiceBase):
     BASE_URL = 'http://coastwatch.pfeg.noaa.gov/erddap/tabledap/'
-    start = param.Date(default=lambda: None, doc='start date')
-    end = param.Date(default=lambda: None, doc='end date')
-    smtk_template = 'start_end.sbt'
 
     @property
     def metadata(self):
@@ -151,7 +148,7 @@ class NoaaServiceBaseNDBC(NoaaServiceBase):
         'wspv': 'northward_wind',
         }
         
-    parameter = param.ObjectSelector(default=None, doc='parameter', objects=sorted(_parameter_map.values()))
+    parameter = param.ObjectSelector(default=None, doc='parameter', precedence=1, objects=sorted(_parameter_map.values()))
 
     @property
     def url(self):
@@ -216,7 +213,7 @@ class NoaaServiceBaseCoopsMet(NoaaServiceBase):
         'BP': 'MBP'
          }
 
-    parameter = param.ObjectSelector(default=None, doc='parameter', objects=sorted(_parameter_map.values()))
+    parameter = param.ObjectSelector(default=None, doc='parameter', precedence=1, objects=sorted(_parameter_map.values()))
 
     @property
     def url(self):
@@ -289,10 +286,10 @@ class NoaaServiceBaseCoopsWater(NoaaServiceBase):
         'STND': 'Station Datum'
     }
 
-    parameter = param.ObjectSelector(default=None, doc='parameter', objects=sorted(_parameter_map.values()))
-    quality = param.ObjectSelector(default='R', doc='quality', objects=['Preliminary', 'Verified', 'R'])
-    interval = param.ObjectSelector(default='6', doc='time interval', objects=['6', '60'])
-    datum = param.ObjectSelector(default='Mean Lower_Low Water', doc='datum', objects=sorted(_datum_map.values()))
+    parameter = param.ObjectSelector(default=None, doc='parameter', precedence=1, objects=sorted(_parameter_map.values()))
+    quality = param.ObjectSelector(default='R', doc='quality', precedence=4, objects=['Preliminary', 'Verified', 'R'])
+    interval = param.ObjectSelector(default='6', doc='time interval', precedence=5, objects=['6', '60'])
+    datum = param.ObjectSelector(default='Mean Lower_Low Water', precedence=6, doc='datum', objects=sorted(_datum_map.values()))
 
     @property
     def url(self):
