@@ -1,6 +1,6 @@
 """QUEST wrapper for USGS NWIS Services."""
 
-from .base import WebProviderBase, ServiceBase
+from .base import WebProviderBase, TimePeriodServiceBase
 import concurrent.futures
 from functools import partial
 from builtins import range
@@ -14,10 +14,8 @@ import param
 BASE_PATH = 'usgs-nwis'
 
 
-class NwisServiceBase(ServiceBase):
-    start = param.Date(default=None, doc='start date')
-    end = param.Date(default=None, doc='end date')
-    period = param.Integer(default=30, doc='period date')
+class NwisServiceBase(TimePeriodServiceBase):
+    period = param.Integer(default=30, precedence=4, doc='period date')
     smtk_template = 'start_end_or_period.sbt'
 
     def __call__(self, feature, file_path, dataset, **params):
@@ -167,7 +165,7 @@ class NwisServiceBaseIV(NwisServiceBase):
                 '00065': 'gage_height',
                 '00010': 'water_temperature',
     }
-    parameter = param.ObjectSelector(default=None, doc='parameter', objects=sorted(_parameter_map.values()))
+    parameter = param.ObjectSelector(default=None, doc='parameter', precedence=1, objects=sorted(_parameter_map.values()))
 
 
 class NwisServiceBaseDV(NwisServiceBase):
@@ -191,7 +189,7 @@ class NwisServiceBaseDV(NwisServiceBase):
             '00010:00002': 'water_temperature:daily:max',
             '00010:00003': 'water_temperature:daily:mean',
     }
-    parameter = param.ObjectSelector(default=None, doc='parameter', objects=sorted(_parameter_map.values()))
+    parameter = param.ObjectSelector(default=None, doc='parameter', precedence=1, objects=sorted(_parameter_map.values()))
 
 
 class NwisProvider(WebProviderBase):

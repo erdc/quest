@@ -3,6 +3,8 @@ import pytest
 
 from conftest import FILES_DIR
 
+from data import SERVICES
+
 pytestmark = pytest.mark.usefixtures('reset_projects_dir')
 
 
@@ -30,23 +32,4 @@ def test_get_providers(api):
 
 
 def test_get_services(api):
-    services = [
-                 'svc://nasa:srtm-3-arc-second',
-                 'svc://nasa:srtm-30-arc-second',
-                 'svc://ncdc:ghcn-daily',
-                 'svc://ncdc:gsod',
-                 'svc://noaa:coops-meteorological',
-                 'svc://noaa:coops-water',
-                 'svc://noaa:ndbc',
-                 'svc://usgs-ned:1-arc-second',
-                 'svc://usgs-ned:13-arc-second',
-                 'svc://usgs-ned:19-arc-second',
-                 'svc://usgs-ned:alaska-2-arc-second',
-                 'svc://usgs-nlcd:2001',
-                 'svc://usgs-nlcd:2006',
-                 'svc://usgs-nlcd:2011',
-                 'svc://usgs-nwis:dv',
-                 'svc://usgs-nwis:iv'
-                ]
-
-    assert api.get_services() == services
+    assert sorted(api.get_services()) == SERVICES

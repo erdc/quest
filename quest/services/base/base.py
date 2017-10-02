@@ -279,6 +279,12 @@ class ServiceBase(param.ParameterizedFunction):
         raise NotImplementedError()
 
 
+class TimePeriodServiceBase(ServiceBase):
+    start = param.Date(default=lambda: None, precedence=2, doc='start date')
+    end = param.Date(default=lambda: None, precedence=3, doc='end date')
+    smtk_template = 'start_end.sbt'
+
+
 # abc
 class SingleFileServiceBase(ServiceBase):
     """Base file for datasets that are a single file download

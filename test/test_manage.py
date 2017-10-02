@@ -1,10 +1,9 @@
 import pytest
 import os
 
+from data import FEATURE, DATASET
+
 ACTIVE_PROJECT = 'test_data'
-SERVICE = 'svc://usgs-nwis:iv'
-FEATURE = 'f92ad0e35d04402ab1b1d4621b48a636'
-DATASET = 'df5c3df3229441fa9c779443f03635e7'
 COLLECTION = 'col2'
 
 pytestmark = pytest.mark.usefixtures('reset_projects_dir', 'set_active_project')

@@ -67,7 +67,7 @@ def _get_pobj_default(pobj):
         else:
             default = pobj.default
 
-        default = json.dumps(default, default=to_json_default_handler)
+        # default = json.dumps(default, default=to_json_default_handler)
 
     return default
 
@@ -81,7 +81,7 @@ def _param_to_json(pobj):
     if hasattr(pobj, 'softbounds'):
         schema['bounds'] = pobj.softbounds
     if hasattr(pobj, 'get_range'):
-        schema['range'] = list(pobj.get_range().items())
+        schema['range'] = sorted(pobj.get_range().items())
 
     return schema
 
