@@ -8,14 +8,25 @@ import platform
 import rasterio
 import subprocess
 from pyproj import Proj
+import param
 
 
 class RstMerge(FilterBase):
+    _name = 'raster-merge'
+    datasets = util.param.DatasetListSelector(default=None,
+                                              doc="""Dataset to apply filter to.""",
+                                              filters={'datatype': 'raster'},
+                                              )
+    bbox = param.List(default=None,
+                      bounds=(4, 4),
+                      class_=float,
+                      doc="""bounding box to clip the merged raster to in the form [xmin, ymin, xmax, ymax]""")
+
     def register(self, name='raster-merge'):
         """Register Timeseries
 
         """
-        self.name = name
+        # self.name = name
         self.metadata = {
             'group': 'raster',
             'operates_on': {
@@ -30,11 +41,12 @@ class RstMerge(FilterBase):
             },
         }
 
-    def _apply_filter(self, datasets, features=None, options=None,
-                      display_name=None, description=None, metadata=None):
+    def _apply_filter(self):
 
         # if len(datasets) < 2:
         #     raise ValueError('There must be at LEAST two datasets for this filter')
+
+        datasets = self.datasets
 
         orig_metadata = get_metadata(datasets[0])[datasets[0]]
         raster_files = [get_metadata(dataset)[dataset]['file_path'] for dataset in datasets]
@@ -45,24 +57,16 @@ class RstMerge(FilterBase):
             if get_metadata(dataset)[dataset]['unit'] != orig_metadata['unit']:
                 raise ValueError('Units must match for all datasets')
 
-        if display_name is None:
-            display_name = 'Created by filter {}'.format(self.name)
-
-        if options is None:
-            options = {}
-
-        if description is None:
-            description = 'Raster Filter Applied'
-
         cname = orig_metadata['collection']
         feature = new_feature(cname,
-                              display_name=display_name, geom_type='Polygon',
+                              display_name=self.display_name,
+                              geom_type='Polygon',
                               geom_coords=None)
 
         new_dset = new_dataset(feature,
                                source='derived',
-                               display_name=display_name,
-                               description=description)
+                               display_name=self.display_name,
+                               description=self.description)
 
         prj = os.path.dirname(active_db())
         dst = os.path.join(prj, cname, new_dset)
@@ -85,7 +89,7 @@ class RstMerge(FilterBase):
 
         subprocess.check_output(['gdalbuildvrt', '-overwrite', output_vrt] + raster_files)
 
-        bbox = options.get('bbox')
+        bbox = self.bbox
 
         if bbox is not None:
             xmin, ymin, xmax, ymax = bbox
@@ -116,27 +120,6 @@ class RstMerge(FilterBase):
             'options': self.options,
             'file_path': self.file_path,
         })
-        update_metadata(new_dset, quest_metadata=new_metadata, metadata=metadata)
+        update_metadata(new_dset, quest_metadata=new_metadata)
 
         return {'datasets': new_dset, 'features': feature}
-
-    def apply_filter_options(self, fmt, **kwargs):
-        if fmt == 'json-schema':
-            properties = {
-                "bbox": {
-                        "type": "array",
-                        "description": "bounding box to clip the merged raster to in the form [xmin, ymin, xmax, ymax]",
-                },
-            }
-
-            schema = {
-                    "title": "Merge Raster Filter",
-                    "type": "object",
-                    "properties": properties,
-                    "required": [],
-                }
-
-        if fmt == 'smtk':
-            schema = ''
-
-        return schema

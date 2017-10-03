@@ -4,12 +4,10 @@ from types import ModuleType
 
 from pandas import DataFrame
 
+from data import DOWNLOAD_OPTIONS_FROM_ALL_SERVICES, SERVICE, FEATURE, DATASET, DATASET_METADATA
+
 
 ACTIVE_PROJECT = 'test_data'
-SERVICE = 'svc://usgs-nwis:iv'
-FEATURE = 'f92ad0e35d04402ab1b1d4621b48a636'
-DATASET = 'df5c3df3229441fa9c779443f03635e7'
-
 
 pytestmark = pytest.mark.usefixtures('reset_projects_dir', 'set_active_project')
 
@@ -38,200 +36,11 @@ def test_download_datasets():
     # TODO
 
 
-DOWNLOAD_OPTIONS_FROM_ALL_SERVICES = {'svc://nasa:srtm-3-arc-second': {},
-                                      'svc://nasa:srtm-30-arc-second': {},
-                                      'svc://ncdc:ghcn-daily': {'properties': {'end': {'description': 'end date',
-                                                                                       'type': 'string'
-                                                                                       },
-                                                                               'parameter': {'description': 'parameter',
-                                                                                             'enum': ['air_temperature:daily:mean',
-                                                                                                      'air_temperature:daily:minimum',
-                                                                                                      'air_temperature:daily:total',
-                                                                                                      'rainfall:daily:total',
-                                                                                                      'snow_depth:daily:total',
-                                                                                                      'snowfall:daily:total',
-                                                                                                      ],
-                                                                                             'type': 'string'
-                                                                                             },
-                                                                               'start': {'description': 'start date',
-                                                                                         'type': 'string'
-                                                                                         }
-                                                                               },
-                                                                'title': 'NCDC Download Options',
-                                                                'type': 'object'
-                                                                },
-                                      'svc://ncdc:gsod': {'properties': {'end': {'description': 'end date',
-                                                                                 'type': 'string'
-                                                                                 },
-                                                                         'parameter': {'description': 'parameter',
-                                                                                       'enum': ['air_temperature:daily:max',
-                                                                                                'air_temperature:daily:min',
-                                                                                                'rainfall:daily:total',
-                                                                                                'snow_depth:daily:total',
-                                                                                                ],
-                                                                                       'type': 'string'
-                                                                                       },
-                                                                         'start': {'description': 'start date',
-                                                                                   'type': 'string'
-                                                                                   }
-                                                                         },
-                                                          'title': 'NCDC Download Options',
-                                                          'type': 'object'
-                                                          },
-                                      'svc://noaa:coops-water':  {
-
-                                                                                    "title": "NOAA Download Options",
-                                                                                    "type": "object",
-                                                                                    "properties": {
-                                                                                        "parameter": {
-                                                                                            "type": "string",
-                                                                                            "enum": [ 'predicted_waterLevel',
-                                                                                                      'sea_surface_height_amplitude'],
-                                                                                            "description": "parameter",
-                                                                                        },
-                                                                                        "start": {
-                                                                                            "type": "string",
-                                                                                            "description": "start date",
-                                                                                        },
-                                                                                        "end": {
-                                                                                            "type": "string",
-                                                                                            "description": "end date",
-                                                                                        },
-                                                                                        "quality": {
-                                                                                            "type": "string",
-                                                                                            "description": "quality",
-                                                                                            "options": ['Preliminary','Verified'],
-                                                                                        },
-                                                                                        "interval": {
-                                                                                            "type": "string",
-                                                                                            "type": "string",
-                                                                                            "description": "time interval",
-                                                                                            "options": ['6', '60'],
-                                                                                        },
-                                                                                        "datum": { #temporary hard coding
-                                                                                            "type": "string",
-                                                                                            "description": "time interval",
-                                                                                            "options": [
-                                                                                                        {'DHQ': 'Mean Diurnal High Water Inequality'},
-                                                                                                        {'DLQ': 'Mean Diurnal Low Water Inequality'},
-                                                                                                        {'DTL': 'Mean Diurnal Tide L0evel'},
-                                                                                                        {'GT': 'Great Diurnal Range'},
-                                                                                                        {'HWI': 'Greenwich High Water Interval( in Hours)'},
-                                                                                                        {'LWI': 'Greenwich Low Water Interval( in Hours)'},
-                                                                                                        {'MHHW': 'Mean Higher - High Water'},
-                                                                                                        {'MHW': 'Mean High Water'},
-                                                                                                        {'MLLW': 'Mean Lower_Low Water'},
-                                                                                                        {'MLW': 'Mean Low Water'},
-                                                                                                        {'MN': 'Mean Range of Tide'},
-                                                                                                        {'MSL': 'Mean Sea Level'},
-                                                                                                        {'MTL': 'Mean Tide Level'},
-                                                                                                        {'NAVD': 'North American Vertical Datum'},
-                                                                                                        {'STND': 'Station Datum'},
-                                                                                                        ]
-                                                                                        },
-                                                                                    },
-                                                                                },
-
-                                      'svc://noaa:coops-meteorological': {'properties': {'end': {'description': 'end date',
-                                                                                 'type': 'string'
-                                                                                 },
-                                                                          'parameter': {'description': 'parameter',
-                                                                                           'enum': ['air_temperature',
-                                                                                                    'barometric_pressure',
-                                                                                                    'collective_rainfall',
-                                                                                                    'direction_of_sea_water_velocity',
-                                                                                                    'relative_humidity',
-                                                                                                    'sea_water_electric_conductivity',
-                                                                                                    'sea_water_speed',
-                                                                                                    'sea_water_temperature',
-                                                                                                    'visibility_in_air',
-                                                                                                    'wind_from_direction',
-                                                                                                    'wind_speed',
-                                                                                                    'wind_speed_from_gust'],
-
-                                                                                           'type': 'string'
-                                                                                       },
-                                                                         'start': {'description': 'start date',
-                                                                                   'type': 'string'
-                                                                                   }
-                                                                         },
-                                                          'title': 'NOAA Download Options',
-                                                          'type': 'object'
-                                                          },
-
-                                      'svc://noaa:ndbc': {'properties': {'end': {'description': 'end date',
-                                                                                 'type': 'string'
-                                                                                 },
-                                                                         'parameter': {'description': 'parameter',
-                                                                                       'enum': ['air_pressure',
-                                                                                                'air_temperature',
-                                                                                                'eastward_wind',
-                                                                                                'northward_wind',
-                                                                                                'sea_surface_temperature',
-                                                                                                'water_level',
-                                                                                                'wave_height',
-                                                                                                'wind_direction',
-                                                                                                'wind_from_direction',
-                                                                                                'wind_speed_of_gust',
-                                                                                                ],
-                                                                                       'type': 'string'
-                                                                                       },
-                                                                         'start': {'description': 'start date',
-                                                                                   'type': 'string'
-                                                                                   }
-                                                                         },
-                                                          'title': 'NOAA Download Options',
-                                                          'type': 'object'
-                                                          },
-                                      'svc://usgs-ned:1-arc-second': {},
-                                      'svc://usgs-ned:13-arc-second': {},
-                                      'svc://usgs-ned:19-arc-second': {},
-                                      'svc://usgs-ned:alaska-2-arc-second': {},
-                                      'svc://usgs-nlcd:2001': {},
-                                      'svc://usgs-nlcd:2006': {},
-                                      'svc://usgs-nlcd:2011': {},
-                                      'svc://usgs-nwis:dv': {'properties': {'end': {'description': 'end date',
-                                                                                    'type': 'string'
-                                                                                    },
-                                                                            'parameter': {'description': 'parameter',
-                                                                                          'enum': ['streamflow:mean:daily',
-                                                                                                   'water_temperature:daily:max',
-                                                                                                   'water_temperature:daily:mean',
-                                                                                                   'water_temperature:daily:min',
-                                                                                                   ],
-                                                                                          'type': 'string'
-                                                                                          },
-                                                                            'period': {'description': 'period date',
-                                                                                       'type': 'string'
-                                                                                       },
-                                                                            'start': {'description': 'start date',
-                                                                                      'type': 'string'
-                                                                                      }
-                                                                            },
-                                                             'title': 'USGS NWIS Download Options',
-                                                             'type': 'object'
-                                                             },
-                                      'svc://usgs-nwis:iv': {'properties': {'end': {'description': 'end date',
-                                                                                    'type': 'string'
-                                                                                    },
-                                                                            'parameter': {'description': 'parameter',
-                                                                                          'enum': ['gage_height',
-                                                                                                   'streamflow',
-                                                                                                   'water_temperature',
-                                                                                                   ],
-                                                                                          'type': 'string'
-                                                                                          },
-                                                                            'period': {'description': 'period date',
-                                                                                       'type': 'string'
-                                                                                       },
-                                                                            'start': {'description': 'start date',
-                                                                                      'type': 'string'
-                                                                                      }
-                                                                            },
-                                                             'title': 'USGS NWIS Download Options',
-                                                             'type': 'object'
-                                                             }
-                                      }
+@pytest.mark.parametrize('service, options', [(k, v) for k, v in DOWNLOAD_OPTIONS_FROM_ALL_SERVICES.items()])
+def test_download_options_for_services(api, service, options):
+    actual = api.download_options(service)[service]
+    expected = options
+    assert actual == expected
 
 
 def test_download_options(api):
@@ -254,10 +63,9 @@ def test_download_options(api):
     # test get download options from list of service uris
     services = api.get_services()
     result = api.download_options(services)
-    for service in services:
-        actual = result[service]
-        expected = DOWNLOAD_OPTIONS_FROM_ALL_SERVICES[service]
-        assert actual == expected
+    actual = result
+    expected = DOWNLOAD_OPTIONS_FROM_ALL_SERVICES
+    assert actual == expected
 
     # test get download options from single service as string
     actual = api.download_options(SERVICE)
@@ -286,22 +94,7 @@ def test_get_datasets(api, dataset_save_path):
     assert actual == expected
 
     actual = api.get_datasets(expand=True)
-    expected = {DATASET: {'download_status': 'downloaded',
-                                             'download_message': 'success',
-                                             'name': 'df5c3df3229441fa9c779443f03635e7',
-                                             'file_format': 'timeseries-hdf5',
-                                             'datatype': 'timeseries',
-                                             'feature': 'f92ad0e35d04402ab1b1d4621b48a636',
-                                             'collection': 'test_data',
-                                             'download_options': '{"parameter": "streamflow"}',
-                                             'dataset_type': 'download',
-                                             'timezone': 'utc',
-                                             'unit': 'ft3/s',
-                                             'display_name': 'df5c3df3229441fa9c779443f03635e7',
-                                             'parameter': 'streamflow',
-                                             'metadata': {}
-                          }
-                }
+    expected = {DATASET: DATASET_METADATA}
     expected[DATASET].update({'file_path': dataset_save_path})
     assert expected[DATASET]['feature'] == actual[DATASET]['feature']
     assert expected[DATASET]['name'] == actual[DATASET]['name']

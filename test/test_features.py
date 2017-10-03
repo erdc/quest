@@ -1,5 +1,7 @@
 import pytest
 
+from data import SERVICES_FEATURE_COUNT
+
 slow = pytest.mark.skipif(
     pytest.config.getoption("--skip-slow"),
     reason="--skip-slow option was set"
@@ -39,25 +41,7 @@ def test_get_features_from_collection(api):
 
 
 @slow
-@pytest.mark.parametrize("service, expected, tolerance", [
-    ('svc://nasa:srtm-3-arc-second', 14297, 1000),
-    ('svc://nasa:srtm-30-arc-second', 27, 10),
-    ('svc://ncdc:ghcn-daily', 103151, 5000),
-    ('svc://ncdc:gsod', 28621, 1000),
-    ('svc://noaa:coops-meteorological', 371, 50),
-    ('svc://noaa:coops-water', 243, 50),
-    ('svc://noaa:ndbc', 1117, 100),
-    ('svc://usgs-ned:1-arc-second', 3619, 100),
-    ('svc://usgs-ned:13-arc-second', 1240, 100),
-    ('svc://usgs-ned:19-arc-second', 8358, 100),
-    ('svc://usgs-ned:alaska-2-arc-second', 515, 50),
-    ('svc://usgs-nlcd:2001', 203, 50),
-    ('svc://usgs-nlcd:2006', 131, 50),
-    ('svc://usgs-nlcd:2011', 203, 50),
-    ('svc://usgs-nwis:dv', 35919, 1000),
-    ('svc://usgs-nwis:iv', 15483, 1000),
-
-])
+@pytest.mark.parametrize("service, expected, tolerance", SERVICES_FEATURE_COUNT)
 def test_get_features_from_service(api, service, expected, tolerance):
     features = api.get_features(service)
     # assert number of features is within tolerance of expected
