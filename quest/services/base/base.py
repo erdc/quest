@@ -8,7 +8,9 @@ import pandas as pd
 import geopandas as gpd
 from shapely.geometry import box, Point, Polygon, LineString, shape
 from quest.util.log import logger
+from quest.util.param_util import format_json_options
 import json
+import param
 
 reserved_feature_fields = [
     'display_name',
@@ -29,15 +31,40 @@ reserved_geometry_fields = [
 reserved_feature_fields.extend(reserved_geometry_fields)
 
 
-class WebServiceBase(with_metaclass(abc.ABCMeta, object)):
-    """Base class for data services plugins
+class WebProviderBase(with_metaclass(abc.ABCMeta, object)):
+    """Base class for data provider plugins
     """
+    service_base_class = None
+    display_name = None
+    description = None
+    organization_name = None
+    organization_abbr = None
+
+    @property
+    def services(self):
+        if self.service_base_class is None:
+            return {}  # TODO or should I raise a NotImplementedError
+        if self._services is None:
+            self._services = {s.service_name: s.instance(name=s.service_name)
+                              for s in self.service_base_class.__subclasses__()}
+        return self._services
+
+    @property
+    def metadata(self):
+        return {
+            'display_name': self.display_name,
+            'description': self.description,
+            'organization': {
+                'abbr': self.organization_abbr,
+                'name': self.organization_name,
+            }
+        }
 
     def __init__(self, name=None, use_cache=True, update_frequency='M'):
         self.name = name
         self.use_cache = use_cache #not implemented
         self.update_frequency = update_frequency #not implemented
-        self._register()
+        self._services = None
 
     def get_features(self, service, update_cache=False):
         """Get Features associated with service.
@@ -116,28 +143,25 @@ class WebServiceBase(with_metaclass(abc.ABCMeta, object)):
         return features
 
     def get_services(self):
-        return self._get_services()
+        return {k: v.metadata for k, v in self.services.items()}
 
     def get_parameters(self, service):
-        return self._get_parameters(service)
+        return self.services[service].parameters
 
-    def download(self, service, feature, file_path, **kwargs):
-        return self._download(service, feature, file_path, **kwargs)
-
-    def download_options(self, service, fmt):
-        return self._download_options(service, fmt)
-
-    @abc.abstractmethod
-    def _register(self):
+    def download(self, service, feature, file_path, dataset, **kwargs):
         """
+        needs to return dictionary
+        eg. {'path': /path/to/dir/or/file, 'format': 'raster'}
         """
+        return self.services[service](feature, file_path, dataset, **kwargs)
 
-    @abc.abstractmethod
-    def _get_services(self):
+    def download_options(self, service, fmt=None):
         """
+        needs to return dictionary
+        eg. {'path': /path/to/dir/or/file, 'format': 'raster'}
         """
+        return self.services[service].download_options(fmt)
 
-    @abc.abstractmethod
     def _get_features(self, service):
         """
         should return a pandas dataframe or a python dictionary with
@@ -158,48 +182,127 @@ class WebServiceBase(with_metaclass(abc.ABCMeta, object)):
         in a metadata field.
 
         """
+        return self.services[service].features
 
-    @abc.abstractmethod
-    def _get_parameters(self, services):
-        """
-        """
 
-    @abc.abstractmethod
-    def _download(self, path, service, feature, parameter, **kwargs):
+# base class for services
+# TODO can I make this an abc and have it be a ParamitarizedFunction?
+class ServiceBase(param.ParameterizedFunction):
+    """Base class for data services
+    """
+    service_name = None
+    display_name = None
+    description = None
+    service_type = None
+    unmapped_parameters_available = None
+    geom_type = None
+    datatype = None
+    geographical_areas = None
+    bounding_boxes = None
+    smtk_template = None
+    _parameter_map = None
+
+    name = param.String(default='Service', precedence=-1)
+
+    @property
+    def title(self):
+        return '{} Download Options'.format(self.display_name)
+
+    @property
+    def metadata(self):
+        return {
+            'display_name': self.display_name,
+            'description': self.description,
+            'service_type': self.service_type,
+            'parameters': list(self._parameter_map.values()),
+            'unmapped_parameters_available': self.unmapped_parameters_available,
+            'geom_type': self.geom_type,
+            'datatype': self.datatype,
+            'geographical_areas': self.geographical_areas,
+            'bounding_boxes': self.bounding_boxes
+        }
+
+    @property
+    def parameters(self):
+        return {
+            'parameters': list(self._parameter_map.values()),
+            'parameter_codes': list(self._parameter_map.keys())
+        }
+
+    @property
+    def features(self):
+        features = self._get_features()
+        return features.drop_duplicates()
+
+    @property
+    def parameter_code(self):
+        pmap = self.parameter_map(invert=True)
+        return pmap[self.parameter]
+
+    def parameter_map(self, invert=False):
+        pmap = self._parameter_map
+
+        if pmap is None:
+            raise NotImplementedError()
+
+        if invert:
+            pmap = {v: k for k, v in pmap.items()}
+
+        return pmap
+
+    def download_options(self, fmt=None):
         """
         needs to return dictionary
         eg. {'path': /path/to/dir/or/file, 'format': 'raster'}
         """
+        schema = self
 
-    @abc.abstractmethod
-    def _download_options(self, service, fmt):
-        """
-        needs to return dictionary
-        eg. {'path': /path/to/dir/or/file, 'format': 'raster'}
-        """
+        if fmt == 'smtk':
+            if self.smtk_template is None:
+                return ''
+            parameters = sorted(self.parameters['parameters'])
+            parameters = [(p.capitalize(), p) for p in parameters]
+            schema = util.build_smtk('download_options',
+                                     self.smtk_template,
+                                     title=self.title,
+                                     parameters=parameters)
+
+        if fmt == 'json-schema':
+            schema = format_json_options(self)
+
+        return schema
+
+    def __call__(self, feature, file_path, dataset, **params):
+        raise NotImplementedError()
+
+    def _get_features(self):
+        raise NotImplementedError()
 
 
-class SingleFileBase(WebServiceBase):
+class TimePeriodServiceBase(ServiceBase):
+    start = param.Date(default=lambda: None, precedence=2, doc='start date')
+    end = param.Date(default=lambda: None, precedence=3, doc='end date')
+    smtk_template = 'start_end.sbt'
+
+
+# abc
+class SingleFileServiceBase(ServiceBase):
     """Base file for datasets that are a single file download
     eg elevation raster etc
     """
-    def _download(self, service, feature, file_path, **kwargs):
-        feature = self.get_features(service).loc[feature]
+    def __call__(self, feature, file_path, dataset, **params):
+        feature = self.features.loc[feature]
         reserved = feature.get('reserved')
         download_url = reserved['download_url']
         fmt = reserved.get('extract_from_zip', '')
         filename = reserved.get('filename', util.uuid('dataset'))
-        datatype = self._get_services()[service].get('datatype')
         file_path = self._download_file(file_path, download_url, fmt, filename)
         return {
             'file_path': file_path,
             'file_format': reserved.get('file_format'),
             'parameter': feature.get('parameters'),
-            'datatype': datatype,
+            'datatype': self.datatype,
         }
-
-    def _download_options(self, service, fmt):
-        return {}
 
     def _download_file(self, path, url, tile_fmt, filename, check_modified=False):
         util.mkdir_if_doesnt_exist(path)

@@ -2,15 +2,12 @@
 
 """
 from __future__ import print_function
+import os
+
+import param
 
 from .ts_base import TsBase
-from quest import util
-from ...api.metadata import get_metadata
-import pandas as pd
-import numpy as np
-import numpy.ma as ma
-import os
-from pint import UnitRegistry
+from ...util import unit_registry, unit_list
 
 periods = {
     'daily': 'D',
@@ -56,23 +53,26 @@ periods = {
 
 
 class TsRemoveOutliers(TsBase):
+    _name = 'ts-remove-outliers'
+    sigma = param.Number(doc="values greater than (sigma * std deviation) from median will be filtered out")
+
     def register(self, name='ts-remove-outliers'):
         TsBase.register(self, name=name)
 
-    def _apply(self, df, options):
+    def _apply(self, df):
         metadata = df.metadata
         if 'file_path' in metadata:
             del metadata['file_path']
-        param = metadata['parameter']
-        sigma = options.get('sigma')
+        parameter = metadata['parameter']
+        sigma = self.sigma
         if sigma is None:
             sigma = 3
 
         # remove anything 'sigma' standard deviations from median
-        vmin = df[param].median() - float(sigma)*df[param].std()
-        vmax = df[param].median() + float(sigma)*df[param].std()
-        df = df[(df[param] > vmin)]
-        df = df[(df[param] < vmax)]
+        vmin = df[parameter].median() - float(sigma)*df[parameter].std()
+        vmax = df[parameter].median() + float(sigma)*df[parameter].std()
+        df = df[(df[parameter] > vmin)]
+        df = df[(df[parameter] < vmax)]
         df.metadata = metadata
 
 
@@ -83,50 +83,34 @@ class TsRemoveOutliers(TsBase):
 
         return df
 
-    def apply_filter_options(self, fmt, **kwargs):
-        if fmt == 'smtk':
-            schema = util.build_smtk('filter_options','filter_timeseries_remove_outliers.sbt')
-
-        if fmt == 'json-schema':
-            properties = {
-                "sigma": {
-                    "type": "number",
-                    "description": "values greater than (sigma * std deviation) from median will be filtered out",
-                },
-            }
-
-            schema = {
-                "title": "Outlier Timeseries Filter",
-                "type": "object",
-                "properties": properties,
-                "required": ['sigma']
-            }
-
-        return schema
-
 
 class TsUnitConversion(TsBase):
+    _name = 'ts-unit-conversion'
+    to_units = param.ObjectSelector(default=None,
+                                    doc="""Units of the resulting dataset.""",
+                                    objects=unit_list()
+                                    )
+
     def register(self, name='ts-unit-conversion'):
         TsBase.register(self, name=name)
 
-    def _apply(self, df, options):
-        if not options.get('to_units'):
+    def _apply(self, df):
+        if self.to_units is None:
             raise ValueError('To_units cannot be None')
 
         metadata = df.metadata
         if 'file_path' in metadata:
             del metadata['file_path']
 
-        path = os.path.join(os.path.dirname(__file__), '..', 'default_units.txt')
-        reg = UnitRegistry(path)
+        reg = unit_registry()
         from_units = metadata['unit']
-        if '/' in from_units and '/' not in options.get('to_units'):
+        if '/' in from_units and '/' not in self.to_units:
             beg = from_units.find('/')
             end = len(from_units)
             default_time = from_units[beg:end]
-            to_units = options.get('to_units') + default_time
+            to_units = self.to_units + default_time
         else:
-            to_units = options.get('to_units')
+            to_units = self.to_units
         conversion = reg.convert(1, src=from_units, dst=to_units)
         df[df.columns[1]] = df[df.columns[1]] * conversion
         metadata.update({'unit': to_units})
@@ -134,39 +118,32 @@ class TsUnitConversion(TsBase):
 
         return df
 
-    def apply_filter_options(self, fmt, **kwargs):
-        if fmt == 'smtk':
-            schema = ''
-
-        if fmt == 'json-schema':
-            properties = {
-                "to_units": {
-                    "type": "string",
-                    "description": "the unit to convert to ",
-                },
-            }
-
-            schema = {
-                "title": "Unit Conversion Timeseries Filter",
-                "type": "object",
-                "properties": properties,
-                "required":["to_units"],
-            }
-
-        return schema
-
 
 class TsResample(TsBase):
+    _name = 'ts-resample'
+    # name = param.String(default='ts-resample')
+    period = param.ObjectSelector(doc="resample frequency",
+                                  objects=['daily', 'weekly', 'monthly', 'annual'],
+                                  default='daily',
+                                  precedence=1,
+                                  )
+    method = param.ObjectSelector(doc="resample method",
+                                  objects=['sum', 'mean', 'std', 'max', 'min', 'median'],
+                                  default='mean',
+                                  precedence=2,
+                                  allow_None=False,
+                                  )
+
     def register(self, name='ts-resample'):
         TsBase.register(self, name=name)
 
-    def _apply(self, df, options):
+    def _apply(self, df):
         metadata = df.metadata
         if 'file_path' in metadata:
             del metadata['file_path']
         param = metadata['parameter']
-        period = options.get('period')
-        method = options.get('method')
+        period = self.period
+        method = self.method
 
         orig_param, orig_period, orig_method = (param.split(':') + [None, None])[:3]
         new_df = getattr(df.resample(periods[period], kind='period'), method)()
@@ -177,32 +154,6 @@ class TsResample(TsBase):
         metadata.update({'parameter': new_param})
         new_df.metadata = metadata
         return new_df
-
-    def apply_filter_options(self, fmt, **kwargs):
-        if fmt == 'smtk':
-            schema = util.build_smtk('filter_options','filter_timeseries_resample.sbt')
-
-        if fmt == 'json-schema':
-            properties = {
-                "period": {
-                    "type": { "enum": [ 'daily', 'weekly', 'monthly', 'annual' ], "default": 'daily' },
-                    "description": "resample frequency",
-                },
-                "method": {
-                    "type": { "enum": [ 'sum', 'mean', 'std', 'max', 'min', 'median'], "default": 'mean' },
-                    "description": "resample method",
-                }
-
-            }
-
-            schema = {
-                "title": "Resample Timeseries Filter",
-                "type": "object",
-                "properties": properties,
-                "required": ['period', 'method'],
-            }
-
-        return schema
 
 
 # class ToAdh(TsBase):

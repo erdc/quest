@@ -163,6 +163,7 @@ def get_features(uris=None, expand=False, as_dataframe=False, as_geojson=False,
 
     # apply any specified filters
     if filters is not None:
+        # features = features.dropna(axis=1)  # can't index if NaN values exist
         for k, v in filters.items():
             if features.empty:
                 break  # if dataframe is empty then doen't try filtering any further
@@ -173,7 +174,7 @@ def get_features(uris=None, expand=False, as_dataframe=False, as_geojson=False,
                     features = features[idx]
 
                 elif k == 'geom_type':
-                    idx = features.geom_type.str.contains(v)  # will not work if features is empty
+                    idx = features.geom_type.str.contains(v).fillna(value=False)  # will not work if features is empty
                     features = features[idx]
 
                 elif k == 'parameter':

@@ -1,12 +1,17 @@
-from .dl_base import DatalibraryBase
 import os
 
+import param
+
+from .dl_base import DatalibraryBase
+
 class Vitd2Nrmm(DatalibraryBase):
+    _name = 'Vitd2Nrmm'
+
     def register(self, name='Vitd2Nrmm'):
         """Register Timeseries
 
         """
-        self.name = name
+        # self.name = name
         self.template = 'vitd2nrmm.txt'
         self.metadata = {
             'group': 'vitd',
@@ -22,27 +27,6 @@ class Vitd2Nrmm(DatalibraryBase):
             },
         }
 
-    def apply_filter_options(self, fmt='json-schema'):
-        if fmt == 'json-schema':
-            properties = {
-                "apply_to_collection": {
-                    "type": 'boolean',
-                    "description": "Apply filter to all tiles in collection",
-                    "default": False,
-                },
-            }
-
-            schema = {
-                "title": "VITD2Raster Filter",
-                "type": "object",
-                "properties": properties,
-            }
-
-        if fmt == 'smtk':
-            schema = ''
-
-        return schema
-
     def _new_dataset_metadata(self):
         return {
             'parameter': 'nrmm',
@@ -52,6 +36,18 @@ class Vitd2Nrmm(DatalibraryBase):
 
 
 class Vitd2Raster(DatalibraryBase):
+    _name = 'Vitd2Raster'
+    theme = param.ObjectSelector(default='vegetation',
+                                 doc="""Theme to Extract from VITD""",
+                                 objects=[
+                                     'slope',
+                                     'vegetation',
+                                     'soil_material_composition',
+                                     'surface_drainage',
+                                     'transportation',
+                                     'obstacles',
+                                 ])
+
     def register(self, name='Vitd2Raster'):
         """Register Vitd2Raster.
 
@@ -62,7 +58,7 @@ class Vitd2Raster(DatalibraryBase):
         TRN == transportation
         OBS == obstacles
         """
-        self.name = name
+        # self.name = name
         self.template = 'vitd2raster.txt'
         self.metadata = {
             'group': 'vitd',
@@ -84,41 +80,6 @@ class Vitd2Raster(DatalibraryBase):
                 ],
             },
         }
-
-    def apply_filter_options(self, fmt='json-schema'):
-        if fmt == 'json-schema':
-            properties = {
-                "theme": {
-                    "type": {
-                        "enum": [
-                            'slope',
-                            'vegetation',
-                            'soil_material_composition',
-                            'surface_drainage',
-                            'transportation',
-                            'obstacles',
-                        ],
-                        "default": 'daily'
-                    },
-                    "description": "Theme to Extract from VITD",
-                },
-                "apply_to_collection": {
-                    "type": 'boolean',
-                    "description": "Apply filter to all tiles in collection",
-                    "default": False,
-                },
-            }
-
-            schema = {
-                "title": "VITD2Raster Filter",
-                "type": "object",
-                "properties": properties,
-            }
-
-        if fmt == 'smtk':
-            schema = ''
-
-        return schema
 
     def _new_dataset_metadata(self):
 
