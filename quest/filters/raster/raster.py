@@ -11,9 +11,6 @@ class RstUnitConversion(RstBase):
                                     objects=unit_list()
                                     )
 
-    def register(self, name='raster-unit-conversion'):
-        RstBase.register(self, name=name)
-
     def _apply(self, df, orig_metadata):
         if self.to_units is None:
             raise ValueError('to_units cannot be None')

@@ -62,6 +62,16 @@ SNAP_ALGORITHMS = {'maximum_flow_accumulation': snap_points_max_flow_acc,
 
 class RstWatershedDelineation(FilterBase):
     _name = 'watershed-delineation'
+
+    # metadata attributes
+    group = 'Multi-dataset'
+    operates_on_datatype = ['raster']
+    operates_on_geotype = 'Point'
+    operates_on_parameters = 'elevation'
+    produces_datatype = ['raster']
+    produces_geotype = 'Polygon'
+    produces_parameters = None
+
     dataset = util.param.DatasetSelector(default=None,
                                          doc="""Dataset to apply filter to.""",
                                          filters={'datatype': 'raster'},
@@ -69,25 +79,6 @@ class RstWatershedDelineation(FilterBase):
     outlet_point = util.param.FeatureSelector(default=None,
                                               filters={'geom_type': 'Point'},
                                               doc="""Watershed outlet points""")
-
-    def register(self, name='watershed-delineation'):
-        """Register Timeseries
-
-        """
-        # self.name = name
-        self.metadata = {
-            'group': 'raster',
-            'operates_on': {
-                'datatype': ['raster'],
-                'geotype': None,
-                'parameters': None,
-            },
-            'produces': {
-                'datatype': 'raster',
-                'geotype': None,
-                'parameters': None,
-            },
-        }
 
     def _apply_filter(self):
 
@@ -218,25 +209,6 @@ class RstFlowAccum(FilterBase):
                                          filters={'datatype': 'raster'},
                                          )
 
-    def register(self, name='flow-accumulation'):
-        """Register Timeseries
-
-        """
-        self.name = name
-        self.metadata = {
-            'group': 'raster',
-            'operates_on': {
-                'datatype': ['raster'],
-                'geotype': None,
-                'parameters': None,
-            },
-            'produces': {
-                'datatype': 'raster',
-                'geotype': None,
-                'parameters': None,
-            },
-        }
-
     def _apply_filter(self):
 
         dataset = self.dataset
@@ -291,6 +263,16 @@ class RstFlowAccum(FilterBase):
 
 class RstFlowAccumulation(FilterBase):
     _name = 'flow-accumulation'
+
+    # metadata attributes
+    group = 'raster'
+    operates_on_datatype = ['raster']
+    operates_on_geotype = None
+    operates_on_parameters = None
+    produces_datatype = ['raster']
+    produces_geotype = None
+    produces_parameters = None
+
     dataset = util.param.DatasetSelector(default=None,
                                          doc="""Dataset to apply filter to.""",
                                          filters={'datatype': 'raster'},
@@ -299,25 +281,6 @@ class RstFlowAccumulation(FilterBase):
                                      doc="""algorithm to use for calculating flow accumulation""",
                                      objects=list(ACCUMULATION_ALGORITHMS.keys()),
                                      )
-
-    def register(self, name='flow-accumulation'):
-        """Register Timeseries
-
-        """
-        # self.name = name
-        self.metadata = {
-            'group': 'raster',
-            'operates_on': {
-                'datatype': ['raster'],
-                'geotype': None,
-                'parameters': None,
-            },
-            'produces': {
-                'datatype': 'raster',
-                'geotype': None,
-                'parameters': None,
-            },
-        }
 
     def _apply_filter(self):
 
@@ -360,6 +323,16 @@ class RstFlowAccumulation(FilterBase):
 
 class RstFill(FilterBase):
     _name = 'fill'
+
+    # metadata attributes
+    group = 'raster'
+    operates_on_datatype = ['raster']
+    operates_on_geotype = None
+    operates_on_parameters = None
+    produces_datatype = ['raster']
+    produces_geotype = None
+    produces_parameters = None
+
     dataset = util.param.DatasetSelector(default=None,
                                          doc="""Dataset to apply filter to.""",
                                          filters={'datatype': 'raster'},
@@ -368,25 +341,6 @@ class RstFill(FilterBase):
                                      doc="""algorithm to use for filling the dem""",
                                      objects=list(FILL_ALGORITHMS.keys()),
                                      )
-
-    def register(self, name='fill'):
-        """Register Timeseries
-
-        """
-        # self.name = name
-        self.metadata = {
-            'group': 'raster',
-            'operates_on': {
-                'datatype': ['raster'],
-                'geotype': None,
-                'parameters': None,
-            },
-            'produces': {
-                'datatype': 'raster',
-                'geotype': None,
-                'parameters': None,
-            },
-        }
 
     def _apply_filter(self):
 
@@ -429,6 +383,16 @@ class RstFill(FilterBase):
 
 class RstSnapOutlet(FilterBase):
     _name = 'watershed-snap-outlet'
+
+    # metadata attributes
+    group = 'Feature'
+    operates_on_datatype = None
+    operates_on_geotype = 'Point'
+    operates_on_parameters = None
+    produces_datatype = None
+    produces_geotype = 'Point'
+    produces_parameters = None
+
     outlet_point = util.param.FeatureSelector(default=None,
                                               filters={'geom_type': 'Point'},
                                               doc="""Watershed outlet points""")
@@ -442,25 +406,6 @@ class RstSnapOutlet(FilterBase):
                                          doc="""stream threshold specified as a fraction (0 to 1) of the max flow accumulation""")
     stream_threshold_abs = param.Number(default=100,
                                          doc="""stream threshold specified as an absolute value""")
-
-    def register(self, name='watershed-snap-outlet'):
-        """Register Timeseries
-
-        """
-        self.name = name
-        self.metadata = {
-            'group': 'raster',
-            'operates_on': {
-                'datatype': ['raster'],
-                'geotype': None,
-                'parameters': None,
-            },
-            'produces': {
-                'datatype': None,
-                'geotype': None,
-                'parameters': None,
-            },
-        }
 
     def _apply_filter(self):
 

@@ -3,7 +3,7 @@
 """
 
 from .. import util
-from .base import WebProviderBase, ServiceBase
+from .base import ProviderBase, ServiceBase
 
 import geojson
 from geojson import Feature, FeatureCollection, Polygon
@@ -30,7 +30,7 @@ def get_user_service_base():
             else:
                 cls.params()['parameter'] = param.String(default=parameters[0], doc="""parameter""", constant=True)
 
-            self = super(UserServiceBase, cls).instance(name=service_name)
+            self = UserServiceBase(name=service_name)
             self.service_name = service_name
             self.uri = uri
             self.is_remote = is_remote
@@ -51,7 +51,7 @@ def get_user_service_base():
 
             return self
 
-        def __call__(self, feature, file_path, dataset, **params):
+        def download(self, feature, file_path, dataset, **params):
             if self.datasets_mapping is not None:
                 fnames = self.datasets_mapping
                 if isinstance(dict, self.datasets_mapping):
@@ -168,7 +168,7 @@ def get_user_service_base():
     return UserServiceBase
 
 
-class UserProvider(WebProviderBase):
+class UserProvider(ProviderBase):
     service_base_class = None
     display_name = None
     description = None

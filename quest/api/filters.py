@@ -108,8 +108,8 @@ def apply_filter(name, options=None, as_dataframe=None, expand=None):
 
 
 @dispatcher.add_method
-def apply_filter_options(name, fmt='json-schema'):
-    """Retreive kwarg options for apply_filter.
+def apply_filter_options(name, fmt='json-schema', **kwargs):
+    """Retrieve kwarg options for apply_filter.
 
     Args:
         name (string, Required):
@@ -121,4 +121,4 @@ def apply_filter_options(name, fmt='json-schema'):
             filter options that can be applied when calling quest.api.apply_filter
     """
     driver = util.load_drivers('filters', name)[name].driver
-    return driver.apply_filter_options(fmt)
+    return driver.apply_filter_options(fmt, **kwargs)
