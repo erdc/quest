@@ -31,7 +31,7 @@ reserved_geometry_fields = [
 reserved_feature_fields.extend(reserved_geometry_fields)
 
 
-class WebProviderBase(with_metaclass(abc.ABCMeta, object)):
+class ProviderBase(with_metaclass(abc.ABCMeta, object)):
     """Base class for data provider plugins
     """
     service_base_class = None
@@ -45,7 +45,7 @@ class WebProviderBase(with_metaclass(abc.ABCMeta, object)):
         if self.service_base_class is None:
             return {}  # TODO or should I raise a NotImplementedError
         if self._services is None:
-            self._services = {s.service_name: s.instance(name=s.service_name)
+            self._services = {s.service_name: s(name=s.service_name)
                               for s in self.service_base_class.__subclasses__()}
         return self._services
 
@@ -153,7 +153,7 @@ class WebProviderBase(with_metaclass(abc.ABCMeta, object)):
         needs to return dictionary
         eg. {'path': /path/to/dir/or/file, 'format': 'raster'}
         """
-        return self.services[service](feature, file_path, dataset, **kwargs)
+        return self.services[service].download(feature, file_path, dataset, **kwargs)
 
     def download_options(self, service, fmt=None):
         """
@@ -186,8 +186,8 @@ class WebProviderBase(with_metaclass(abc.ABCMeta, object)):
 
 
 # base class for services
-# TODO can I make this an abc and have it be a ParamitarizedFunction?
-class ServiceBase(param.ParameterizedFunction):
+# TODO can I make this an abc and have it be a Paramitarized?
+class ServiceBase(param.Parameterized):
     """Base class for data services
     """
     service_name = None
@@ -272,7 +272,7 @@ class ServiceBase(param.ParameterizedFunction):
 
         return schema
 
-    def __call__(self, feature, file_path, dataset, **params):
+    def download(self, feature, file_path, dataset, **params):
         raise NotImplementedError()
 
     def _get_features(self):
@@ -280,8 +280,8 @@ class ServiceBase(param.ParameterizedFunction):
 
 
 class TimePeriodServiceBase(ServiceBase):
-    start = param.Date(default=lambda: None, precedence=2, doc='start date')
-    end = param.Date(default=lambda: None, precedence=3, doc='end date')
+    start = param.Date(default=None, precedence=2, doc='start date')
+    end = param.Date(default=None, precedence=3, doc='end date')
     smtk_template = 'start_end.sbt'
 
 
@@ -290,7 +290,7 @@ class SingleFileServiceBase(ServiceBase):
     """Base file for datasets that are a single file download
     eg elevation raster etc
     """
-    def __call__(self, feature, file_path, dataset, **params):
+    def download(self, feature, file_path, dataset, **params):
         feature = self.features.loc[feature]
         reserved = feature.get('reserved')
         download_url = reserved['download_url']

@@ -56,7 +56,7 @@ def get_or_generate_test_cache(update=False, skip=False):
             cache_file = os.path.join(quest.util.get_cache_dir(), service + '_features.geojson')
             if os.path.exists(cache_file):
                 continue
-            driver = quest.util.load_services()[provider]
+            driver = quest.util.load_providers()[provider]
             cache_file = os.path.join(quest.util.get_cache_dir(driver.name), service + '_features.geojson')
         if update or not os.path.exists(cache_file):
             quest.api.get_features(name, update_cache=update)

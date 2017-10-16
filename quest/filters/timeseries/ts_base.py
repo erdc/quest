@@ -7,6 +7,15 @@ import param
 
 
 class TsBase(FilterBase):
+    # metadata attributes
+    group = 'Timeseries'
+    operates_on_datatype = ['timeseries']
+    operates_on_geotype = None
+    operates_on_parameters = None
+    produces_datatype = ['timeseries']
+    produces_geotype = None
+    produces_parameters = None
+
     dataset = util.param.DatasetSelector(default=None,
                                          doc="""Dataset to apply filter to.""",
                                          filters={'datatype': 'timeseries'},

@@ -20,31 +20,21 @@ env = Environment(loader=FileSystemLoader(get_pkg_data_path('datalibrary')))
 
 
 class DatalibraryBase(FilterBase):
+    # metadata attributes
+    group = 'vitd'
+    operates_on_datatype = ['vitd']
+    operates_on_geotype = None
+    operates_on_parameters = None
+    produces_datatype = None
+    produces_geotype = None
+    produces_parameters = None
+
     dataset = util.param.DatasetSelector(default=None,
                                          doc="""Dataset to apply filter to.""",
                                          filters={'datatype': 'raster', 'parameter': 'vitd'},
                                          )
     apply_to_collection = param.Boolean(default=False,
                                         doc="""Apply filter to all tiles in collection""")
-
-    def register(self, name=None):
-        """Register Timeseries
-
-        """
-        self.name = name
-        self.metadata = {
-            'group': 'vitd',
-            'operates_on': {
-                'datatype': ['vitd'],
-                'geotype': None,
-                'parameters': None,
-            },
-            'produces': {
-                'datatype': None,
-                'geotype': None,
-                'parameters': None,
-            },
-        }
 
     def _apply_filter(self):
 

@@ -55,7 +55,7 @@ def download(feature, file_path, dataset=None, **kwargs):
         pass
 
     provider, service, feature = util.parse_service_uri(service_uri)
-    driver = util.load_services()[provider]
+    driver = util.load_providers()[provider]
     data = driver.download(service=service, feature=feature,
                            file_path=file_path, dataset=dataset, **kwargs)
     return data
@@ -161,7 +161,7 @@ def download_options(uris, fmt='json-schema'):
             service_uri = df
 
         provider, service, feature = util.parse_service_uri(service_uri)
-        driver = util.load_services()[provider]
+        driver = util.load_providers()[provider]
         options[uri] = driver.download_options(service, fmt)
 
     return options

@@ -306,7 +306,7 @@ def new_feature(collection, display_name=None, geometry=None, geom_type=None, ge
 
 
 def _get_features(provider, service, update_cache):
-    driver = util.load_services()[provider]
+    driver = util.load_providers()[provider]
     features = driver.get_features(service, update_cache=update_cache)
     features['service'] = 'svc://{}:{}'.format(provider, service)
     features['service_id'] = features.index
