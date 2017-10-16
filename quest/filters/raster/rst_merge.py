@@ -13,6 +13,9 @@ import param
 
 class RstMerge(FilterBase):
     _name = 'raster-merge'
+    group = 'Multi-dataset'
+    operates_on_datatype = ['raster','discrete-raster']
+
     datasets = util.param.DatasetListSelector(default=None,
                                               doc="""Dataset to apply filter to.""",
                                               filters={'datatype': 'raster'},
@@ -22,24 +25,6 @@ class RstMerge(FilterBase):
                       class_=float,
                       doc="""bounding box to clip the merged raster to in the form [xmin, ymin, xmax, ymax]""")
 
-    def register(self, name='raster-merge'):
-        """Register Timeseries
-
-        """
-        # self.name = name
-        self.metadata = {
-            'group': 'raster',
-            'operates_on': {
-                'datatype': ['raster','discrete-raster'],
-                'geotype': None,
-                'parameters': None,
-            },
-            'produces': {
-                'datatype': 'raster',
-                'geotype': None,
-                'parameters': None,
-            },
-        }
 
     def _apply_filter(self):
 

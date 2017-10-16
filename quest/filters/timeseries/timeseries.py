@@ -56,9 +56,6 @@ class TsRemoveOutliers(TsBase):
     _name = 'ts-remove-outliers'
     sigma = param.Number(doc="values greater than (sigma * std deviation) from median will be filtered out")
 
-    def register(self, name='ts-remove-outliers'):
-        TsBase.register(self, name=name)
-
     def _apply(self, df):
         metadata = df.metadata
         if 'file_path' in metadata:
@@ -90,9 +87,6 @@ class TsUnitConversion(TsBase):
                                     doc="""Units of the resulting dataset.""",
                                     objects=unit_list()
                                     )
-
-    def register(self, name='ts-unit-conversion'):
-        TsBase.register(self, name=name)
 
     def _apply(self, df):
         if self.to_units is None:
@@ -133,9 +127,6 @@ class TsResample(TsBase):
                                   precedence=2,
                                   allow_None=False,
                                   )
-
-    def register(self, name='ts-resample'):
-        TsBase.register(self, name=name)
 
     def _apply(self, df):
         metadata = df.metadata

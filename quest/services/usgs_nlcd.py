@@ -2,7 +2,7 @@
 
 import pandas as pd
 import requests
-from .base import WebProviderBase, SingleFileServiceBase
+from .base import ProviderBase, SingleFileServiceBase
 from .. import util
 
 
@@ -78,7 +78,7 @@ class UsgsNlcdService2011(UsgsNlcdServiceBase):
     _parent_id = '513624bae4b03b8ec4025c4d'
 
 
-class UsgsNlcdProvider(WebProviderBase):
+class UsgsNlcdProvider(ProviderBase):
     service_base_class = UsgsNlcdServiceBase
     display_name = 'National Land Cover Database'
     description = 'The National Land Cover Database products are created through a cooperative project conducted by ' \

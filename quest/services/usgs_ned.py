@@ -2,7 +2,7 @@
 Example Services
 """
 
-from .base import WebProviderBase, SingleFileServiceBase
+from .base import ProviderBase, SingleFileServiceBase
 from .. import util
 from ulmo.usgs import ned
 from geojson import FeatureCollection, dump
@@ -75,7 +75,7 @@ class UsgsNedService19ArcSec(UsgsNedServiceBase):
     description = 'Retrieve USGS NED at {} resolution'.format(_description)
 
 
-class UsgsNedProvider(WebProviderBase):
+class UsgsNedProvider(ProviderBase):
     service_base_class = UsgsNedServiceBase
     display_name = 'USGS National Elevation Dataset'
     description = 'National Elevation Dataset at several resolutions'

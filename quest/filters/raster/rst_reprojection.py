@@ -12,31 +12,14 @@ import param
 
 class RstReprojection(FilterBase):
     _name = 'raster-reprojection'
+    operates_on_datatype = ['raster', 'discrete-raster']
+
     dataset = util.param.DatasetSelector(default=None,
                                          doc="""Dataset to apply filter to.""",
                                          filters={'datatype': 'raster'},
                                          )
     new_crs = param.String(default=None,
                            doc="""New coordinate reference system to project to""")
-
-    def register(self, name='raster-reprojection'):
-        """Register Raster
-
-        """
-        # self.name = name
-        self.metadata = {
-            'group': 'raster',
-            'operates_on': {
-                'datatype': ['raster','discrete-raster'],
-                'geotype': None,
-                'parameters': None,
-            },
-            'produces': {
-                'datatype': 'raster',
-                'geotype': None,
-                'parameters': None,
-            },
-        }
 
     def _apply_filter(self):
 

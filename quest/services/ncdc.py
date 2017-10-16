@@ -6,7 +6,7 @@ import pandas as pd
 import param
 from ulmo.ncdc import ghcn_daily, gsod
 
-from .base import WebProviderBase, TimePeriodServiceBase
+from .base import ProviderBase, TimePeriodServiceBase
 from .. import util
 # from ulmo.ncdc.ghcn_daily.core import _get_inventory as _get_ghcn_inventory
 
@@ -72,7 +72,7 @@ class NcdcServiceBase(TimePeriodServiceBase):
 
         return pmap
 
-    def __call__(self, feature, file_path, dataset, **params):
+    def download(self, feature, file_path, dataset, **params):
         p = param.ParamOverrides(self, params)
         self._feature = feature
 
@@ -207,7 +207,7 @@ class NcdcServiceGsod(NcdcServiceBase):
         return features
 
 
-class NcdcProvider(WebProviderBase):
+class NcdcProvider(ProviderBase):
     service_base_class = NcdcServiceBase
     display_name = 'NCDC Web Services'
     description = 'Services available through the NCDC'
