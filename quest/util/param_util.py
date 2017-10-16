@@ -87,7 +87,8 @@ def _param_to_json(pobj):
 
 
 def format_json_options(pobj):
-    params = list(filter(lambda x: (x.precedence is None or x.precedence >= 0) and not x.constant,
+    params = list(filter(lambda x: (x.precedence is None or x.precedence >= 0) and not x.constant
+                         and getattr(pobj, x._attrib_name) == x.default,  # Filter out parameters that are already set
                          pobj.params().values()))
 
     if not params:

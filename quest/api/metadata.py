@@ -46,7 +46,7 @@ def get_metadata(uris, as_dataframe=False):
 
         for (provider, service), grp in svc_df.groupby(['provider', 'service']):
             svc = 'svc://{}:{}'.format(provider, service)
-            driver = util.load_services()[provider]
+            driver = util.load_providers()[provider]
             features = driver.get_features(service)
             selected_features = grp['feature'].tolist()
             if None not in selected_features:

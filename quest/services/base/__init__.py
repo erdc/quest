@@ -1,1 +1,1 @@
-from .base import WebProviderBase, ServiceBase, TimePeriodServiceBase, SingleFileServiceBase
+from .base import ProviderBase, ServiceBase, TimePeriodServiceBase, SingleFileServiceBase

@@ -10,30 +10,19 @@ import rasterio
 
 
 class RstBase(FilterBase):
-    _name = None
+    # metadata attributes
+    group = 'raster'
+    operates_on_datatype = ['raster']
+    operates_on_geotype = None
+    operates_on_parameters = None
+    produces_datatype = ['raster']
+    produces_geotype = None
+    produces_parameters = None
+
     dataset = util.param.DatasetSelector(default=None,
                                          doc="""Dataset to apply filter to.""",
                                          filters={'datatype': 'raster'},
                                          )
-
-    def register(self, name=None):
-        """Register Timeseries
-
-        """
-        # self.name = name
-        self.metadata = {
-            'group': 'raster',
-            'operates_on': {
-                'datatype': ['raster'],
-                'geotype': None,
-                'parameters': None,
-            },
-            'produces': {
-                'datatype': 'raster',
-                'geotype': None,
-                'parameters': None,
-            },
-        }
 
     def _apply_filter(self):
 

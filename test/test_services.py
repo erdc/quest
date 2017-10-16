@@ -11,7 +11,8 @@ pytestmark = pytest.mark.usefixtures('reset_projects_dir')
 def test_add_and_remove_provider(api):
     user_provider_path = os.path.join(FILES_DIR, 'user_provider')
     api.add_provider(user_provider_path)
-    assert 'user-test-service' in api.get_providers()
+    providers = api.get_providers()
+    assert 'user-test-service' in providers
     assert 'svc://user-test-service:test' in api.get_services()
 
     api.delete_provider(user_provider_path)

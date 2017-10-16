@@ -1,6 +1,6 @@
 """QUEST wrapper for USGS NWIS Services."""
 
-from .base import WebProviderBase, TimePeriodServiceBase
+from .base import ProviderBase, TimePeriodServiceBase
 import concurrent.futures
 from functools import partial
 from builtins import range
@@ -15,10 +15,10 @@ BASE_PATH = 'usgs-nwis'
 
 
 class NwisServiceBase(TimePeriodServiceBase):
-    period = param.Integer(default=30, precedence=4, doc='period date')
+    period = param.String(default='P365D', precedence=4, doc='time period (e.g. P365D = 365 days or P4W = 4 weeks)')
     smtk_template = 'start_end_or_period.sbt'
 
-    def __call__(self, feature, file_path, dataset, **params):
+    def download(self, feature, file_path, dataset, **params):
         p = param.ParamOverrides(self, params)
 
         parameter = p.parameter
@@ -63,7 +63,7 @@ class NwisServiceBase(TimePeriodServiceBase):
         df[df.values == -999999] = pd.np.nan
         df.rename(columns={'value': parameter}, inplace=True)
 
-        file_path = os.path.join(file_path, BASE_PATH, service, dataset, '{0}.h5'.format(dataset))
+        file_path = os.path.join(file_path, BASE_PATH, self.service_name, dataset, '{0}.h5'.format(dataset))
 
         del data['values']
 
@@ -74,7 +74,7 @@ class NwisServiceBase(TimePeriodServiceBase):
             'datatype': 'timeseries',
             'parameter': parameter,
             'unit': data['variable']['units']['code'],
-            'service_id': 'svc://usgs-nwis:{}/{}'.format(service, feature)
+            'service_id': 'svc://usgs-nwis:{}/{}'.format(self.service_name, feature)
         }
 
         # save data to disk
@@ -146,7 +146,7 @@ class NwisServiceBase(TimePeriodServiceBase):
         return data
 
 
-class NwisServiceBaseIV(NwisServiceBase):
+class NwisServiceIV(NwisServiceBase):
     service_name = 'iv'
     display_name = 'NWIS Instantaneous Values Service'
     description = 'Retrieve current streamflow and other real-time data for USGS water sites since October 1, 2007'
@@ -168,7 +168,7 @@ class NwisServiceBaseIV(NwisServiceBase):
     parameter = param.ObjectSelector(default=None, doc='parameter', precedence=1, objects=sorted(_parameter_map.values()))
 
 
-class NwisServiceBaseDV(NwisServiceBase):
+class NwisServiceDV(NwisServiceBase):
     service_name = 'dv'
     display_name = 'NWIS Daily Values Service'
     description = 'Retrieve historical summarized daily data about streams, lakes and wells. Daily data available ' \
@@ -192,7 +192,7 @@ class NwisServiceBaseDV(NwisServiceBase):
     parameter = param.ObjectSelector(default=None, doc='parameter', precedence=1, objects=sorted(_parameter_map.values()))
 
 
-class NwisProvider(WebProviderBase):
+class NwisProvider(ProviderBase):
     service_base_class = NwisServiceBase
     display_name ='USGS NWIS Web Services'
     description = 'Services available through the USGS National Water Information System'

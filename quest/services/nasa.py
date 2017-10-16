@@ -1,7 +1,7 @@
 """QUEST wrapper for USGS NWIS Services
 
 """
-from .base import WebProviderBase, SingleFileServiceBase
+from .base import ProviderBase, SingleFileServiceBase
 import pandas as pd
 import requests
 
@@ -119,7 +119,7 @@ class NasaServiceSrtm30ArcSec(NasaServiceBase):
     bounding_boxes = [[float(x) for x in _metadata['boxes'][0].split()]]
 
 
-class NasaProvider(WebProviderBase):
+class NasaProvider(ProviderBase):
     service_base_class = NasaServiceBase
     display_name = 'NASA Web Services'
     description = 'Services available through the NASA'

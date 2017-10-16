@@ -6,7 +6,7 @@ import pandas as pd
 import param
 
 from ..util.log import logger
-from .base import WebProviderBase, TimePeriodServiceBase
+from .base import ProviderBase, TimePeriodServiceBase
 from .. import util
 
 BASE_PATH = 'noaa'
@@ -69,7 +69,7 @@ class NoaaServiceBase(TimePeriodServiceBase):
 
         return pmap
 
-    def __call__(self, feature, file_path, dataset, **params):
+    def download(self, feature, file_path, dataset, **params):
         p = param.ParamOverrides(self, params)
         self._feature = feature
 
@@ -123,7 +123,7 @@ class NoaaServiceBase(TimePeriodServiceBase):
                 raise ValueError('No Data Available')
 
 
-class NoaaServiceBaseNDBC(NoaaServiceBase):
+class NoaaServiceNDBC(NoaaServiceBase):
     service_name = 'ndbc'
     display_name = 'NOAA National Data Buoy Center'
     description = 'NDBC Standard Meteorological Buoy Data'
@@ -172,7 +172,7 @@ class NoaaServiceBaseNDBC(NoaaServiceBase):
         return df
 
 
-class NoaaServiceBaseCoopsMet(NoaaServiceBase):
+class NoaaServiceCoopsMet(NoaaServiceBase):
     service_name = 'coops-meteorological'
     display_name = 'NOAA COOPS'
     description = 'Center for Operational Oceanographic Products and Services'
@@ -248,7 +248,7 @@ class NoaaServiceBaseCoopsMet(NoaaServiceBase):
         return df
 
 
-class NoaaServiceBaseCoopsWater(NoaaServiceBase):
+class NoaaServiceCoopsWater(NoaaServiceBase):
     service_name = 'coops-water'
     display_name = 'NOAA COOPS'
     description = 'Center for Operational Oceanographic Products and Services'
@@ -326,7 +326,7 @@ class NoaaServiceBaseCoopsWater(NoaaServiceBase):
         return df
 
 
-class NoaaProvider(WebProviderBase):
+class NoaaProvider(ProviderBase):
     service_base_class = NoaaServiceBase
     display_name = 'NOAA Coastwatch ERDDAP Web Services'
     description = 'Services available from NOAA'

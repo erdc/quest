@@ -6,29 +6,11 @@ import os
 
 class TsFlowDuration(FilterBase):
     _name = 'flow-duration'
+
     dataset = util.param.DatasetSelector(default=None,
                                          doc="""Dataset to apply filter to.""",
                                          filters={'datatype': 'timeseries'},
                                          )
-
-    def register(self, name='flow-duration'):
-        """Register Timeseries
-
-        """
-        # self.name = name
-        self.metadata = {
-            'group': 'Timeseries: Flow Duration',
-            'operates_on': {
-                'datatype': ['timeseries'],
-                'geotype': None,
-                'parameters': 'streamflow',
-            },
-            'produces': {
-                'datatype': ['timeseries'],
-                'geotype': None,
-                'parameters': 'streamflow',
-            },
-        }
 
     def _apply_filter(self):
 
