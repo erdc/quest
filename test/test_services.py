@@ -1,9 +1,16 @@
 import os
 import pytest
+from pprint import pprint
+from quest.scripts import rpc_server
 
 from conftest import FILES_DIR
 
-from data import SERVICES
+from data import SERVICES, SERVICE_FEATURE_DOWNLOAD_OPTIONS
+
+test_download = pytest.mark.skipif(
+    not pytest.config.getoption("--test-download"),
+    reason="--test-download option was not set"
+)
 
 pytestmark = pytest.mark.usefixtures('reset_projects_dir')
 
@@ -34,3 +41,17 @@ def test_get_providers(api):
 
 def test_get_services(api):
     assert sorted(api.get_services()) == SERVICES
+
+@test_download
+@pytest.mark.parametrize('feature, options', SERVICE_FEATURE_DOWNLOAD_OPTIONS)
+def test_download(api, feature, options):
+    # hack to override RPC api for this test
+    if isinstance(api, rpc_server.RPCClient):
+        return
+    api.new_collection('test')
+    collection_feature = api.add_features('test', feature)
+    d = api.stage_for_download(collection_feature, options=options)[0]
+    result = api.download_datasets(d)
+    if result[d] != 'downloaded':
+        pprint(api.get_metadata(d))
+    assert result[d] == 'downloaded'

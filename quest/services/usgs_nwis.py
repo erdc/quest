@@ -29,8 +29,8 @@ class NwisServiceBase(TimePeriodServiceBase):
         if dataset is None:
             dataset = 'station-' + feature
 
-        if not any([start, end, period]):
-            period = 'P365D'  # default to past 1yr of data
+        if start and end:
+            period = None
 
         pmap = self.parameter_map(invert=True)
         parameter_code, statistic_code = (pmap[parameter].split(':') + [None])[:2]
@@ -105,11 +105,11 @@ class NwisServiceBase(TimePeriodServiceBase):
         # df['_geom_coords'] = list(zip(df['_longitude'], df['_latitude']))
         return df
 
-    def _get_parameters(self, service, features=None):
+    def get_parameters(self, features=None):
         df = self.features
 
         chunks = list(_chunks(df.index.tolist()))
-        func = partial(_site_info, service=service)
+        func = partial(_site_info, service=self.service_name)
         with concurrent.futures.ProcessPoolExecutor() as executor:
             data = executor.map(func, chunks)
 
@@ -126,7 +126,7 @@ class NwisServiceBase(TimePeriodServiceBase):
                     inplace=True)
         data = data[pd.notnull(data['parameter_code'])]
         data['parameter'] = data['parameter_code'].apply(
-            lambda x: self._parameter_map(service).get(x)
+            lambda x: self._parameter_map.get(x)
             )
         pm_codes = _pm_codes()
         data['description'] = data['parm_cd'].apply(

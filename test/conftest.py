@@ -24,6 +24,7 @@ def pytest_addoption(parser):
     parser.addoption('--rpc-only', action='store_true')
     parser.addoption('--python-only', action='store_true')
     parser.addoption('--skip-slow', action='store_true')
+    parser.addoption('--test-download', action='store_true')
     parser.addoption('--rpc-port-range', dest='rpc_port_range', nargs=2, default=None,
                      help="start and end port for range or ports to scan for an available port.")
 
@@ -173,4 +174,3 @@ def reset_projects_dir(reset_settings, request):
 def set_active_project(api, reset_settings, request):
     tests_active_project = getattr(request.module, 'ACTIVE_PROJECT', 'default')
     api.set_active_project(tests_active_project)
-

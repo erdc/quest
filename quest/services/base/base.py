@@ -123,14 +123,14 @@ class ProviderBase(with_metaclass(abc.ABCMeta, object)):
         columns = list(set(features.columns.tolist()).intersection(reserved_geometry_fields))
         features.drop(columns, axis=1, inplace=True)
 
-        params = self._get_parameters(service, features)
+        params = self.get_parameters(service, features)
         if isinstance(params, pd.DataFrame):
             groups = params.groupby('service_id').groups
             features['parameters'] = features.index.map(lambda x: ','.join(filter(None, params.loc[groups[x]]['parameter'].tolist())) if x in groups.keys() else '')
-            #features['parameter_codes'] = features.index.map(lambda x: ','.join(filter(None, params.loc[groups[x]]['_parameter_code'].tolist())) if x in groups.keys() else '')
+            # features['parameter_codes'] = features.index.map(lambda x: ','.join(filter(None, params.loc[groups[x]]['_parameter_code'].tolist())) if x in groups.keys() else '')
         else:
             features['parameters'] = ','.join(params['parameters'])
-            #features['parameter_codes'] = ','.join(params['parameter_codes'])
+            # features['parameter_codes'] = ','.join(params['parameter_codes'])
 
         # convert to GeoPandas GeoDataFrame
         features = gpd.GeoDataFrame(features, geometry='geometry')
@@ -145,8 +145,8 @@ class ProviderBase(with_metaclass(abc.ABCMeta, object)):
     def get_services(self):
         return {k: v.metadata for k, v in self.services.items()}
 
-    def get_parameters(self, service):
-        return self.services[service].parameters
+    def get_parameters(self, service, features=None):
+        return self.services[service].get_parameters(features=features)
 
     def download(self, service, feature, file_path, dataset, **kwargs):
         """
@@ -232,12 +232,13 @@ class ServiceBase(param.Parameterized):
     @property
     def features(self):
         features = self._get_features()
-        return features.drop_duplicates()
+        return features #.drop_duplicates()
 
     @property
     def parameter_code(self):
-        pmap = self.parameter_map(invert=True)
-        return pmap[self.parameter]
+        if hasattr(self, 'parameter'):
+            pmap = self.parameter_map(invert=True)
+            return pmap[self.parameter]
 
     def parameter_map(self, invert=False):
         pmap = self._parameter_map
@@ -278,11 +279,24 @@ class ServiceBase(param.Parameterized):
     def _get_features(self):
         raise NotImplementedError()
 
+    def get_parameters(self, features=None):
+        """Default function that should be overridden if the features argument needs to be handled."""
+        return self.parameters
+
+
 
 class TimePeriodServiceBase(ServiceBase):
     start = param.Date(default=None, precedence=2, doc='start date')
     end = param.Date(default=None, precedence=3, doc='end date')
     smtk_template = 'start_end.sbt'
+
+    @property
+    def start_string(self):
+        return self.start.strftime('%Y-%m-%d')
+
+    @property
+    def end_string(self):
+        return self.end.strftime('%Y-%m-%d')
 
 
 # abc
