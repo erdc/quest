@@ -74,6 +74,9 @@ class NcdcServiceBase(TimePeriodServiceBase):
 
     def download(self, feature, file_path, dataset, **params):
         p = param.ParamOverrides(self, params)
+        self.parameter = p.parameter
+        self.end = pd.to_datetime(p.end)
+        self.start = pd.to_datetime(p.start)
         self._feature = feature
 
         if dataset is None:
@@ -86,14 +89,14 @@ class NcdcServiceBase(TimePeriodServiceBase):
         #     start = pd.to_datetime(end) - pd.datetools.timedelta(days=30)
         #     start = start.strftime('%Y-%m-%d')
 
-        file_path = os.path.join(file_path, BASE_PATH, service, dataset, '{0}.h5'.format(dataset))
+        file_path = os.path.join(file_path, BASE_PATH, self.service_name, dataset, '{0}.h5'.format(dataset))
 
         metadata = {
             'file_path': file_path,
             'file_format': 'timeseries-hdf5',
             'datatype': 'timeseries',
             'parameter': self.parameter,
-            'unit': self._unit_map(service)[self.parameter],
+            'unit': self._unit_map[self.parameter],
             'service_id': 'svc://ncdc:{}/{}'.format(self.service_name, feature)
         }
 
@@ -142,12 +145,14 @@ class NcdcServiceGhcnDaily(NcdcServiceBase):
         data = ghcn_daily.get_data(self.feature,
                                    elements=self.parameter_code,
                                    as_dataframe=True)  # [parameter_code]
-        if not data or not data[self.feature]:
+        if not data or data[self.parameter_code].empty:
             raise ValueError('No Data Available')
 
         data = data[self.parameter_code]
 
-        data = data[self.start:self.end]
+        data = data[self.start_string:self.end_string]
+        if data.empty:
+            raise ValueError('No Data Available')
         data.rename(columns={'value': self.parameter}, inplace=True)
 
         return data
@@ -191,6 +196,7 @@ class NcdcServiceGsod(NcdcServiceBase):
         if not data or not data[self.feature]:
             raise ValueError('No Data Available')
 
+        data = data[self.feature]
         data = pd.DataFrame(data)
         if data.empty:
             raise ValueError('No Data Available')

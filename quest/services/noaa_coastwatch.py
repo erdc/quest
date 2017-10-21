@@ -4,6 +4,8 @@ import datetime
 
 import pandas as pd
 import param
+from urllib.error import HTTPError
+from urllib.parse import quote, urlencode
 
 from ..util.log import logger
 from .base import ProviderBase, TimePeriodServiceBase
@@ -71,18 +73,13 @@ class NoaaServiceBase(TimePeriodServiceBase):
 
     def download(self, feature, file_path, dataset, **params):
         p = param.ParamOverrides(self, params)
+        self.parameter = p.parameter
+        self.end = pd.to_datetime(p.end)
+        self.start = pd.to_datetime(p.start)
         self._feature = feature
 
         if dataset is None:
             dataset = 'station-' + feature
-
-        # end = p.end or pd.datetime.now().strftime('%Y-%m-%d')
-        #
-        # start = p.start
-        # if p.start is None:
-        #     start = pd.to_datetime(end) - datetime.timedelta(days=365)
-        #     start = start.strftime('%Y-%m-%d')
-
 
         try:
             url = self.url
@@ -99,7 +96,7 @@ class NoaaServiceBase(TimePeriodServiceBase):
             data.index = pd.to_datetime(data.index)
             data.rename(columns={self.parameter_code: self.parameter})
 
-            file_path = os.path.join(file_path, BASE_PATH, service, dataset, '{0}.h5'.format(dataset))
+            file_path = os.path.join(file_path, BASE_PATH, self.service_name, dataset, '{0}.h5'.format(dataset))
 
             metadata = {
                 'file_path': file_path,
@@ -118,9 +115,32 @@ class NoaaServiceBase(TimePeriodServiceBase):
 
             return metadata
 
-        except Exception as error:
-            if str(error) == "HTTP Error 500: Internal Server Error":
+        except HTTPError as error:
+            if error.code == 500:
                 raise ValueError('No Data Available')
+            elif error.code == 400:
+                raise ValueError('Bad Request')
+            else:
+                raise error
+
+    def _format_url(self, dataset_id, file_type='csvp', variables=None, start_time=None, end_time=None, **kwargs):
+        query = {k: '"{}"'.format(v) for k, v in kwargs.items()}
+        if start_time is not None and end_time is not None:
+            query.update({'time>': start_time,
+                          'time<': end_time})
+        query = urlencode(query)
+        if variables is not None:
+            variables = quote(','.join(variables))
+
+        if variables is not None and query:
+            variables += '&'
+
+        url_selector = '{dataset_id}.{file_type}?{variables}{query}'.format(dataset_id=dataset_id,
+                                                                              file_type=file_type,
+                                                                              variables=variables,
+                                                                              query=query)
+
+        return self.BASE_URL + url_selector
 
 
 class NoaaServiceNDBC(NoaaServiceBase):
@@ -147,18 +167,22 @@ class NoaaServiceNDBC(NoaaServiceBase):
         'wspu': 'eastward_wind',
         'wspv': 'northward_wind',
         }
+
+    _dataset_id = 'cwwcNDBCMet'
         
     parameter = param.ObjectSelector(default=None, doc='parameter', precedence=1, objects=sorted(_parameter_map.values()))
 
     @property
     def url(self):
-        url = 'cwwcNDBCMet.csvp?time,{}&station="{}"&time>={}&time<={}' \
-            .format(self.parameter_code, self.feature, self.start, self.end)
-        return self.BASE_URL + url
+
+        variables = 'time', self.parameter_code
+
+        return self._format_url(dataset_id=self._dataset_id, variables=variables,
+                                station=self.feature, start_time=self.start, end_time=self.end)
 
     def _get_features(self):
-        ndbc_url = self.BASE_URL + 'cwwcNDBCMet.csvp?station%2Clongitude%2Clatitude'
-        df = pd.read_csv(ndbc_url)
+        variables = 'station', 'longitude', 'latitude'
+        df = pd.read_csv(self._format_url(dataset_id=self._dataset_id, variables=variables))
         df.rename(columns={
             'station': 'service_id',
             'longitude (degrees_east)': 'longitude',
@@ -217,21 +241,22 @@ class NoaaServiceCoopsMet(NoaaServiceBase):
 
     @property
     def url(self):
-        # start = pd.to_datetime(end) - datetime.timedelta(days=28)
-        # start = start.strftime('%Y-%m-%d')
 
         location = self._location_id_map[self.parameter_code]
-        url = 'nosCoops{}.csvp?time,{}&stationID="{}"&time>={}&time<={}' \
-            .format(location, self.parameter_code, self.feature, self.start, self.end)
+        dataset_id = 'nosCoops{}'.format(location)
+        variables = 'time', self.parameter_code
 
-        return self.BASE_URL + url
+        return self._format_url(dataset_id=dataset_id, variables=variables,
+                                stationID=self.feature, start_time=self.start, end_time=self.end)
 
     def _get_features(self):
         # hard coding for now
-        dataset_Ids = ['nosCoopsCA', 'nosCoopsMW', 'nosCoopsMRF', 'nosCoopsMV', 'nosCoopsMC',
+        dataset_services = ['nosCoopsCA', 'nosCoopsMW', 'nosCoopsMRF', 'nosCoopsMV', 'nosCoopsMC',
                        'nosCoopsMAT', 'nosCoopsMRH', 'nosCoopsMWT', 'nosCoopsMBP']
+        variables = ['stationID', 'longitude', 'latitude']
 
-        coops_url = [self.BASE_URL + '{}.csvp?stationID%2Clongitude%2Clatitude'.format(id) for id in dataset_Ids]
+        # coops_url = [self.BASE_URL + '{}.csvp?stationID%2Clongitude%2Clatitude'.format(id) for id in dataset_Ids]
+        coops_url = [self._format_url(dataset_id=dataset_id, variables=variables) for dataset_id in dataset_services]
         df = pd.concat([pd.read_csv(f) for f in coops_url])
 
         df.rename(columns={
@@ -295,22 +320,24 @@ class NoaaServiceCoopsWater(NoaaServiceBase):
     def url(self):
         location = self._location_id_map[self.parameter_code]
         quality = self.quality[0].capitalize() if self.parameter_code == 'waterLevel' else ''
-        datum = self._datum_map[self.datum]
+        datum = {v: k for k, v in self._datum_map.items()}[self.datum]
+        dataset_id = 'nosCoops{}{}{}'.format(location, quality, self.interval)
 
-        # start = pd.to_datetime(end) - datetime.timedelta(days=28)
-        # start = start.strftime('%Y-%m-%d')
+        variables = 'time', self.parameter_code
 
-        url = 'nosCoops{}{}{}.csvp?time,{}&stationID="{}"&time>={}&time<={}&datum="{}"' \
-            .format(location, quality, self.interval, self.parameter_code, self.feature, self.start, self.end, datum)
-
-        return self.BASE_URL + url
+        return self._format_url(dataset_id=dataset_id, variables=variables,
+                                stationID=self.feature, datum=datum,
+                                start_time=self.start, end_time=self.end)
 
     def _get_features(self):
         # hard coding for now
-        dataset_Ids = ['nosCoopsWLV6', 'nosCoopsWLR6', 'nosCoopsWLTP6', 'nosCoopsWLV60',
+        dataset_services = ['nosCoopsWLV6', 'nosCoopsWLR6', 'nosCoopsWLTP6', 'nosCoopsWLV60',
                        'nosCoopsWLVHL', 'nosCoopsWLTP60', 'nosCoopsWLTPHL']
 
-        coops_url = [BASE_URL + '{}.csvp?stationID%2Clongitude%2Clatitude'.format(id) for id in dataset_Ids]
+        variables = 'stationID', 'longitude', 'latitude'
+
+        coops_url = [self._format_url(dataset_id=dataset_id, variables=variables) for dataset_id in
+                     dataset_services]
         df = pd.concat([pd.read_csv(f) for f in coops_url])
 
         df.rename(columns={
