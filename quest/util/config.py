@@ -113,7 +113,8 @@ def update_settings_from_file(filename):
      'USER_SERVICES': [],
      }
     """
-    config = yaml.safe_load(open(filename, 'r'))
+    with open(filename, 'r') as f:
+        config = yaml.safe_load(f)
 
     # convert keys to uppercase
     config = dict((k.upper(), v) for k, v in config.items())

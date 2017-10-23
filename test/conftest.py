@@ -24,6 +24,7 @@ def pytest_addoption(parser):
     parser.addoption('--rpc-only', action='store_true')
     parser.addoption('--python-only', action='store_true')
     parser.addoption('--skip-slow', action='store_true')
+    parser.addoption('--test-download', action='store_true')
     parser.addoption('--rpc-port-range', dest='rpc_port_range', nargs=2, default=None,
                      help="start and end port for range or ports to scan for an available port.")
 
@@ -31,10 +32,16 @@ def pytest_addoption(parser):
 def pytest_generate_tests(metafunc):
     if 'api' in metafunc.fixturenames:
         api_params = ['python', 'rpc']
-        if metafunc.config.getoption('--python-only'):
-            api_params.remove('rpc')
-        elif metafunc.config.getoption('--rpc-only'):
-            api_params.remove('python')
+
+        if sys.version_info.major == 3:
+            if metafunc.config.getoption('--python-only'):
+                api_params.remove('rpc')
+            elif metafunc.config.getoption('--rpc-only'):
+                api_params.remove('python')
+        else:
+            api_params.remove('rpc')  # RPC server doesn't support Python 2
+            print('The RPC server is not supported in Python 2.')
+
         metafunc.parametrize("api", api_params, indirect=True, scope='session')
 
 
@@ -56,7 +63,7 @@ def get_or_generate_test_cache(update=False, skip=False):
             cache_file = os.path.join(quest.util.get_cache_dir(), service + '_features.geojson')
             if os.path.exists(cache_file):
                 continue
-            driver = quest.util.load_services()[provider]
+            driver = quest.util.load_providers()[provider]
             cache_file = os.path.join(quest.util.get_cache_dir(driver.name), service + '_features.geojson')
         if update or not os.path.exists(cache_file):
             quest.api.get_features(name, update_cache=update)
@@ -173,4 +180,3 @@ def reset_projects_dir(reset_settings, request):
 def set_active_project(api, reset_settings, request):
     tests_active_project = getattr(request.module, 'ACTIVE_PROJECT', 'default')
     api.set_active_project(tests_active_project)
-

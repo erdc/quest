@@ -3,14 +3,29 @@ from quest.api import get_metadata, new_dataset, update_metadata
 from quest.api.datasets import DatasetStatus
 from quest import util
 import os
+import param
 
 
 class TsBase(FilterBase):
+    # metadata attributes
+    group = 'Timeseries'
+    operates_on_datatype = ['timeseries']
+    operates_on_geotype = None
+    operates_on_parameters = None
+    produces_datatype = ['timeseries']
+    produces_geotype = None
+    produces_parameters = None
+
+    dataset = util.param.DatasetSelector(default=None,
+                                         doc="""Dataset to apply filter to.""",
+                                         filters={'datatype': 'timeseries'},
+                                         )
+
     def register(self, name=None):
         """Register Timeseries
 
         """
-        self.name = name
+        # self.name = name
         self.metadata = {
             'group': 'Timeseries',
             'operates_on': {
@@ -25,13 +40,16 @@ class TsBase(FilterBase):
             },
         }
 
-    def _apply_filter(self, datasets, features=None, options=None,
-                     display_name=None, description=None, metadata=None):
+    def _apply_filter(self):
 
-        if len(datasets) > 1:
-            raise NotImplementedError('This filter can only be applied to a single dataset')
 
-        dataset = datasets[0]
+
+        # if len(datasets) > 1:
+        #     raise NotImplementedError('This filter can only be applied to a single dataset')
+
+        # dataset = datasets[0]
+
+        dataset = self.dataset
 
         io = util.load_drivers('io', 'timeseries-hdf5')
         io = io['timeseries-hdf5'].driver
@@ -41,12 +59,8 @@ class TsBase(FilterBase):
 
         df = io.read(orig_metadata['file_path'])
 
-        # apply transformation
-        if options is None:
-            options = {}
-
         # run filter
-        new_df = self._apply(df, options)
+        new_df = self._apply(df)
 
         # setup new dataset
         new_metadata = {
@@ -59,13 +73,10 @@ class TsBase(FilterBase):
             'message': 'TS Filter Applied'
         }
 
-        if description is None:
-            description = 'TS Filter Applied'
-
         new_dset = new_dataset(orig_metadata['feature'],
                                source='derived',
-                               display_name=display_name,
-                               description=description,
+                               display_name=self.display_name,
+                               description=self.description,
                                )
 
         # save dataframe
@@ -74,14 +85,14 @@ class TsBase(FilterBase):
         io.write(file_path, new_df, new_metadata)
 
         new_metadata.update({'file_path': file_path})
-        update_metadata(new_dset, quest_metadata=new_metadata, metadata=metadata)
+        update_metadata(new_dset, quest_metadata=new_metadata)
 
         return {'datasets': new_dset}
 
-    def apply_filter_options(self, fmt, **kwargs):
-        schema = {}
+    # def apply_filter_options(self, fmt, **kwargs):
+    #     schema = {}
+    #
+    #     return schema
 
-        return schema
-
-    def _apply(self, df, metadata, options):
+    def _apply(self, df):
         raise NotImplementedError

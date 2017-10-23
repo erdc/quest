@@ -1,47 +1,20 @@
-from .dl_base import DatalibraryBase
 import os
 
+import param
+
+from .dl_base import DatalibraryBase
+
 class Vitd2Nrmm(DatalibraryBase):
-    def register(self, name='Vitd2Nrmm'):
-        """Register Timeseries
+    _name = 'Vitd2Nrmm'
 
-        """
-        self.name = name
-        self.template = 'vitd2nrmm.txt'
-        self.metadata = {
-            'group': 'vitd',
-            'operates_on': {
-                'datatype': 'vitd',
-                'geotype': 'Polygon',
-                'parameters': 'vitd',
-            },
-            'produces': {
-                'datatype': 'nrmm',
-                'geotype': 'Polygon',
-                'parameters': 'nrmm',
-            },
-        }
-
-    def apply_filter_options(self, fmt='json-schema'):
-        if fmt == 'json-schema':
-            properties = {
-                "apply_to_collection": {
-                    "type": 'boolean',
-                    "description": "Apply filter to all tiles in collection",
-                    "default": False,
-                },
-            }
-
-            schema = {
-                "title": "VITD2Raster Filter",
-                "type": "object",
-                "properties": properties,
-            }
-
-        if fmt == 'smtk':
-            schema = ''
-
-        return schema
+    # metadata attributes
+    group = 'vitd'
+    operates_on_datatype = ['vitd']
+    operates_on_geotype = 'Polygon'
+    operates_on_parameters = 'vitd'
+    produces_datatype = 'nrmm'
+    produces_geotype = 'Polygon'
+    produces_parameters = 'nrmm'
 
     def _new_dataset_metadata(self):
         return {
@@ -52,73 +25,36 @@ class Vitd2Nrmm(DatalibraryBase):
 
 
 class Vitd2Raster(DatalibraryBase):
-    def register(self, name='Vitd2Raster'):
-        """Register Vitd2Raster.
+    _name = 'Vitd2Raster'
 
-        SLP == slope
-        VEG == vegetation
-        SMC == soil material composition
-        SDR == surface drainage
-        TRN == transportation
-        OBS == obstacles
-        """
-        self.name = name
-        self.template = 'vitd2raster.txt'
-        self.metadata = {
-            'group': 'vitd',
-            'operates_on': {
-                'datatype': 'vitd',
-                'geotype': 'Polygon',
-                'parameters': 'vitd',
-            },
-            'produces': {
-                'datatype': 'raster',
-                'geotype': 'Polygon',
-                'parameters': [
-                    'slope',
-                    'vegetation',
-                    'soil_material_composition',
-                    'surface_drainage',
-                    'transportation',
-                    'obstacles',
-                ],
-            },
-        }
+    # metadata attributes
+    group = 'vitd'
+    operates_on_datatype = ['vitd']
+    operates_on_geotype = 'Polygon'
+    operates_on_parameters = 'vitd'
+    produces_datatype = 'raster'
+    produces_geotype = 'Polygon'
+    produces_parameters = [
+        'slope',
+        'vegetation',
+        'soil_material_composition',
+        'surface_drainage',
+        'transportation',
+        'obstacles',
+    ]
 
-    def apply_filter_options(self, fmt='json-schema'):
-        if fmt == 'json-schema':
-            properties = {
-                "theme": {
-                    "type": {
-                        "enum": [
-                            'slope',
-                            'vegetation',
-                            'soil_material_composition',
-                            'surface_drainage',
-                            'transportation',
-                            'obstacles',
-                        ],
-                        "default": 'daily'
-                    },
-                    "description": "Theme to Extract from VITD",
-                },
-                "apply_to_collection": {
-                    "type": 'boolean',
-                    "description": "Apply filter to all tiles in collection",
-                    "default": False,
-                },
-            }
+    theme = param.ObjectSelector(default='vegetation',
+                                 doc="""Theme to Extract from VITD""",
+                                 objects=[
+                                     'slope',
+                                     'vegetation',
+                                     'soil_material_composition',
+                                     'surface_drainage',
+                                     'transportation',
+                                     'obstacles',
+                                 ])
 
-            schema = {
-                "title": "VITD2Raster Filter",
-                "type": "object",
-                "properties": properties,
-            }
-
-        if fmt == 'smtk':
-            schema = ''
-
-        return schema
+    template = 'vitd2raster.txt'
 
     def _new_dataset_metadata(self):
 

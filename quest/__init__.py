@@ -9,6 +9,9 @@ from __future__ import (absolute_import, division,
 from builtins import *
 import pbr.version
 import os
+import logging
+
+logging.getLogger('ulmo').propagate = False
 
 # set version number
 __version__ = pbr.version.VersionInfo('quest').version_string_with_vcs()

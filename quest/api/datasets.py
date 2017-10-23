@@ -55,7 +55,7 @@ def download(feature, file_path, dataset=None, **kwargs):
         pass
 
     provider, service, feature = util.parse_service_uri(service_uri)
-    driver = util.load_services()[provider]
+    driver = util.load_providers()[provider]
     data = driver.download(service=service, feature=feature,
                            file_path=file_path, dataset=dataset, **kwargs)
     return data
@@ -98,15 +98,10 @@ def download_datasets(datasets, raise_on_error=False):
         feature_uri = dataset['service'] + '/' + dataset['service_id']
         try:
             update_metadata(idx, quest_metadata={'status': DatasetStatus.PENDING})
-            kwargs = dataset['options']
-            if kwargs is not None:
-                all_metadata = download(feature_uri,
-                                        file_path=collection_path,
-                                        dataset=idx, **kwargs)
-            else:
-                all_metadata = download(feature_uri,
-                                        file_path=collection_path,
-                                        dataset=idx)
+            kwargs = dataset['options'] or dict()
+            all_metadata = download(feature_uri,
+                                    file_path=collection_path,
+                                    dataset=idx, **kwargs)
 
             metadata = all_metadata.pop('metadata', None)
             quest_metadata = all_metadata
@@ -166,7 +161,7 @@ def download_options(uris, fmt='json-schema'):
             service_uri = df
 
         provider, service, feature = util.parse_service_uri(service_uri)
-        driver = util.load_services()[provider]
+        driver = util.load_providers()[provider]
         options[uri] = driver.download_options(service, fmt)
 
     return options
