@@ -32,10 +32,16 @@ def pytest_addoption(parser):
 def pytest_generate_tests(metafunc):
     if 'api' in metafunc.fixturenames:
         api_params = ['python', 'rpc']
-        if metafunc.config.getoption('--python-only'):
-            api_params.remove('rpc')
-        elif metafunc.config.getoption('--rpc-only'):
-            api_params.remove('python')
+
+        if sys.version_info.major == 3:
+            if metafunc.config.getoption('--python-only'):
+                api_params.remove('rpc')
+            elif metafunc.config.getoption('--rpc-only'):
+                api_params.remove('python')
+        else:
+            api_params.remove('rpc')  # RPC server doesn't support Python 2
+            print('The RPC server is not supported in Python 2.')
+
         metafunc.parametrize("api", api_params, indirect=True, scope='session')
 
 
