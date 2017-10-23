@@ -7,34 +7,23 @@ import rasterio
 import numpy as np
 import subprocess
 
+import param
+
 
 class RstReprojection(FilterBase):
-    def register(self, name='raster-reprojection'):
-        """Register Raster
+    _name = 'raster-reprojection'
+    operates_on_datatype = ['raster', 'discrete-raster']
 
-        """
-        self.name = name
-        self.metadata = {
-            'group': 'raster',
-            'operates_on': {
-                'datatype': ['raster','discrete-raster'],
-                'geotype': None,
-                'parameters': None,
-            },
-            'produces': {
-                'datatype': 'raster',
-                'geotype': None,
-                'parameters': None,
-            },
-        }
+    dataset = util.param.DatasetSelector(default=None,
+                                         doc="""Dataset to apply filter to.""",
+                                         filters={'datatype': 'raster'},
+                                         )
+    new_crs = param.String(default=None,
+                           doc="""New coordinate reference system to project to""")
 
-    def _apply_filter(self, datasets, features=None, options=None,
-                     display_name=None, description=None, metadata=None):
+    def _apply_filter(self):
 
-        if len(datasets) > 1:
-            raise NotImplementedError('This filter can only be applied to a single dataset')
-
-        dataset = datasets[0]
+        dataset = self.dataset
 
         # get metadata, path etc from first dataset, i.e. assume all datasets
         # are in same folder. This will break if you try and combine datasets
@@ -43,32 +32,22 @@ class RstReprojection(FilterBase):
         orig_metadata = get_metadata(dataset)[dataset]
         src_path = orig_metadata['file_path']
 
-        if display_name is None:
-            display_name = 'Created by filter {}'.format(self.name)
 
-        if options is None:
-            options ={}
-
-        if description is None:
-            description = 'Raster Filter Applied'
-
-        if not options.get('new_crs'):
+        if self.new_crs is None:
             raise ValueError("A new coordinated reference system MUST be provided")
 
-        dst_crs = options.get('new_crs')
+        dst_crs = self.new_crs
 
         # # save the resulting raster
         cname = orig_metadata['collection']
         feature = new_feature(cname,
-                              display_name=display_name, geom_type='Polygon',
+                              display_name=self.display_name, geom_type='Polygon',
                               geom_coords=None)
-
-
 
         new_dset = new_dataset(feature,
                                source='derived',
-                               display_name=display_name,
-                               description=description)
+                               display_name=self.display_name,
+                               description=self.description)
 
         prj = os.path.dirname(active_db())
         dst = os.path.join(prj,  cname, new_dset)
@@ -98,28 +77,6 @@ class RstReprojection(FilterBase):
             'options': self.options,
             'file_path': self.file_path,
         })
-        update_metadata(new_dset, quest_metadata=new_metadata, metadata=metadata)
+        update_metadata(new_dset, quest_metadata=new_metadata)
 
         return {'datasets': new_dset, 'features': feature}
-
-    def apply_filter_options(self, fmt, **kwargs):
-        if fmt == 'json-schema':
-            properties = {}
-            properties = {
-                     "new_crs": {
-                         "type": "string",
-                         "description": "New coordinate reference system to project to",
-                     },
-                    }
-
-            schema = {
-                    "title": "Reprojection Raster Filter",
-                    "type": "object",
-                    "properties": properties,
-
-                }
-
-        if fmt == 'smtk':
-            schema = ''
-
-        return schema

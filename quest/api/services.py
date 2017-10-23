@@ -25,7 +25,7 @@ def get_providers(expand=None):
             list of all available providers
 
     """
-    providers = util.load_services() #util.load_drivers('services')
+    providers = util.load_providers() #util.load_drivers('services')
     p = {k: v.metadata for k, v in providers.items()}
     if not expand:
         p = sorted(p.keys())
@@ -48,7 +48,7 @@ def get_services(expand=None, parameter=None, service_type='geo-discrete'):
             all available services
 
     """
-    providers = util.load_services() # util.load_drivers('services')
+    providers = util.load_providers() # util.load_drivers('services')
     services = {}
     for provider, svc in providers.items():
         for service, svc_metadata in svc.get_services().items():

@@ -83,7 +83,7 @@ def _read_cached_parameters(provider, service, update_cache=False):
 
 
 def _get_parameters(provider, service, cache_file):
-    driver = util.load_services()[provider]
+    driver = util.load_providers()[provider]
     parameters = driver.get_parameters(service)
     util.mkdir_if_doesnt_exist(os.path.split(cache_file)[0])
     if isinstance(parameters, pd.DataFrame):

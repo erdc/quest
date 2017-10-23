@@ -1,59 +1,41 @@
+import param
+
 from .rst_base import RstBase
-from pint import UnitRegistry
-import os
+from ...util import unit_list, unit_registry
 
 
 class RstUnitConversion(RstBase):
-    def register(self, name='raster-unit-conversion'):
-        RstBase.register(self, name=name)
+    _name = 'raster-unit-conversion'
+    to_units = param.ObjectSelector(default=None,
+                                    doc="""Units of the resulting dataset.""",
+                                    objects=unit_list()
+                                    )
 
-    def _apply(self, df, options):
-        if not options.get('to_units'):
+    def _apply(self, df, orig_metadata):
+        if self.to_units is None:
             raise ValueError('to_units cannot be None')
 
-        metadata = options['orig_metadata']
+        metadata = orig_metadata
         if 'file_path' in metadata:
             del metadata['file_path']
 
-        file_path = os.path.join(os.path.dirname(__file__), '..', 'default_units.txt')
-        reg = UnitRegistry(file_path)
+        reg = unit_registry()
         from_units = metadata['unit']
-        if '/' in from_units and '/' not in options.get('to_units'):
+        if '/' in from_units and '/' not in self.to_units:
             beg = from_units.find('/')
             end = len(from_units)
             default_time = from_units[beg:end]
-            to_units = options.get('to_units') + default_time
+            to_units = self.to_units + default_time
         else:
-            to_units = options.get('to_units')
+            to_units = self.to_units
         conversion = reg.convert(1, src=from_units, dst=to_units)
         result = df.read()
         result = result * conversion
         metadata.update({'unit': to_units})
         df.metadata = metadata
         df = result
-        del options['orig_metadata']
         return df
 
-    def apply_filter_options(self, fmt, **kwargs):
-        if fmt == 'smtk':
-            schema = ''
-
-        if fmt == 'json-schema':
-            properties = {
-                "to_units": {
-                    "type": "string",
-                    "description": "the unit to convert to ",
-                },
-            }
-
-            schema = {
-                "title": " Unit Conversion Raster Filter",
-                "type": "object",
-                "properties": properties,
-                "required": ["to_units"],
-            }
-
-        return schema
 
 #     class RstMerge(RstBase):
 #         def register(self, name='raster-merge-datasets'):

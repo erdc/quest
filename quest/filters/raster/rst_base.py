@@ -10,32 +10,23 @@ import rasterio
 
 
 class RstBase(FilterBase):
-    def register(self, name=None):
-        """Register Timeseries
+    # metadata attributes
+    group = 'raster'
+    operates_on_datatype = ['raster']
+    operates_on_geotype = None
+    operates_on_parameters = None
+    produces_datatype = ['raster']
+    produces_geotype = None
+    produces_parameters = None
 
-        """
-        self.name = name
-        self.metadata = {
-            'group': 'raster',
-            'operates_on': {
-                'datatype': ['raster'],
-                'geotype': None,
-                'parameters': None,
-            },
-            'produces': {
-                'datatype': 'raster',
-                'geotype': None,
-                'parameters': None,
-            },
-        }
+    dataset = util.param.DatasetSelector(default=None,
+                                         doc="""Dataset to apply filter to.""",
+                                         filters={'datatype': 'raster'},
+                                         )
 
-    def _apply_filter(self, datasets, features=None, options=None,
-                     display_name=None, description=None, metadata=None):
+    def _apply_filter(self):
 
-        if len(datasets) > 1:
-            raise NotImplementedError('This filter can only be applied to a single dataset')
-
-        dataset = datasets[0]
+        dataset = self.dataset
 
         # get metadata, path etc from first dataset, i.e. assume all datasets
         # are in same folder. This will break if you try and combine datasets
@@ -44,20 +35,9 @@ class RstBase(FilterBase):
         orig_metadata = get_metadata(dataset)[dataset]
         src_path = orig_metadata['file_path']
 
-        if display_name is None:
-            display_name = 'Created by filter {}'.format(self.name)
-
-        if options is None:
-            options ={}
-
-        if description is None:
-            description = 'Raster Filter Applied'
-
-        options['orig_metadata'] = orig_metadata
-
         #run filter
         with rasterio.open(src_path) as src:
-            out_image = self._apply(src,options)
+            out_image = self._apply(src, orig_metadata)
             out_meta = src.profile
         # save the resulting raster
         out_meta.update({"dtype": out_image.dtype,
@@ -65,22 +45,20 @@ class RstBase(FilterBase):
                          "width": out_image.shape[1],
                          "transform": None})
 
-
         cname = orig_metadata['collection']
         feature = new_feature(cname,
-                              display_name=display_name, geom_type='Polygon',
+                              display_name=self.display_name, geom_type='Polygon',
                               geom_coords=None)
 
         new_dset = new_dataset(feature,
                                source='derived',
-                               display_name=display_name,
-                               description=description)
+                               display_name=self.display_name,
+                               description=self.description)
 
         prj = os.path.dirname(active_db())
         dst = os.path.join(prj, cname, new_dset)
         util.mkdir_if_doesnt_exist(dst)
         dst = os.path.join(dst, new_dset+'.tif')
-
 
         with rasterio.open(dst, "w", **out_meta) as dest:
             dest.write(out_image)
@@ -99,15 +77,9 @@ class RstBase(FilterBase):
             'options': self.options,
             'file_path': self.file_path,
         })
-        update_metadata(new_dset, quest_metadata=new_metadata, metadata=metadata)
+        update_metadata(new_dset, quest_metadata=new_metadata)
 
         return {'datasets': new_dset, 'features': feature}
 
-    def apply_filter_options(self, fmt, **kwargs):
-        schema = {}
-
-        return schema
-
-
-    def _apply(self, df, metadata, options):
+    def _apply(self, df, orig_metadata):
         raise NotImplementedError
