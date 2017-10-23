@@ -1,7 +1,7 @@
-QUEST Design
+Quest Design
 ============
 
-QUEST has several (sometimes conflicting) design goals. The current design aims
+Quest has several (sometimes conflicting) design goals. The current design aims
 for a practical balance between these goals.
 
 Architectural Goals:
@@ -13,58 +13,20 @@ API Goals:
   - The api should allow for use as a backend library to drive web and gui interfaces
 
 Data Goals:
-  - Downloaded data should be reasonably structured, portable and usable even if you don't use QUEST later
+  - Downloaded data should be reasonably structured, portable and usable even if you don't use Quest later
   - Should allow reasonable tracking of provenance and transformations of data
   - Provide mechanisms to publish/share data that has been downloaded/transformed
   - Easily publish structured data as user defined services
 
+
 Core Concepts
 -------------
-
-Projects
-^^^^^^^^
-
-A QUEST Project is the base organizing factor. The first time QUEST is started a
-default project is created. Only one project can be active at a time and
-currently the api does not allow copying data from one project to another.
-
-Physically, a project maps to a folder on the computer. All data and metadata
-associated with a project is stored under the project folder. The metadata is
-stored in a sqlite database.
-
-Collections
-^^^^^^^^^^^
-
-Collections are a way of organizing data within a project. Collection names are
-unique and the collection name maps directly to a folder name in the project folder.
-
-Features
-^^^^^^^^
-
-Features are a unique identifiers that indicate a group of datasets. Typically,
-these are geospatial locations, i.e., monitoring stations, counties, lakes,
-roads at which data exists. Features can also just be a tag or name to group data
-that does not have a geospatial component (i.e. geotypical datasets). Features
-are always either part of a collection or part of a web service.
-
-Datasets
-^^^^^^^^
-
-These are the actual individual data files or in some cases a folder of data.
-Datasets are always located at a feature. Currently a dataset can only be
-attached to a single feature by design.
-
-Web Services
-^^^^^^^^^^^^
-
-Web services are the primary means of ingesting data into Quest.
-todo: add info about providers and services and user services
-
+Refer to :doc:`../core_concepts`.
 
 Settings
 --------
 
-QUEST can be configured in three ways:
+Quest can be configured in three ways:
 
   1. Setting Environmental Variables
   2. Passing in a python dictionary to quest.api.update_settings()
@@ -82,7 +44,7 @@ QUEST_CACHE_DIR           Location to save cached data/metadata                 
 QUEST_PROJECT_FILE        Name of project metadata file                                           quest_project.yml
 QUEST_PROJECTS_INDEX_FILE Name of projects index file listing available projects and their paths  quest_projects_index.yml
 QUEST_CONFIG_FILE         Name of quest_config file that these settings are saved in                quest_config.yml
-QUEST_USER_SERVICES       list of web/file uris to user defined QUEST services                      None
+QUEST_USER_SERVICES       list of web/file uris to user defined Quest services                      None
 ======================= ======================================================================= ====================================
 
 You can add any extra settings needed by a plugin here as well using the keyword:arg structure.
@@ -96,8 +58,8 @@ Projects and Collections:
   - Only one project can be active at a time, if none is specified a project called 'default' will be created and used
   - Other projects can be opened as 'local' web services and features/data 'downloaded' in to the current project
   - Only one dataset (with linear progression of versions) can exist in a (collection,parameter,feature) tuple. i.e. You cannot have two temperature datasets like 2015 Temperature and 2013 Temperature in the same collection+feature. You will either need to copy the feature with a new feature_id or copy to a new collection.
-  - Any 'project' can be added as a user defined QUEST service (either from a local/network drive or http folder). In that case, the 'project' is equivalent to a 'provider' and each 'collection' is equivalent to a 'service'
-  - There will be a way to convert folders of non QUEST data into a user defined service by adding a quest_project.yml to the folder with appropriate metadata. These will be read-only projects.
+  - Any 'project' can be added as a user defined Quest service (either from a local/network drive or http folder). In that case, the 'project' is equivalent to a 'provider' and each 'collection' is equivalent to a 'service'
+  - There will be a way to convert folders of non Quest data into a user defined service by adding a quest_project.yml to the folder with appropriate metadata. These will be read-only projects.
 
 
 Services:
