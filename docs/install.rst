@@ -1,5 +1,31 @@
 Installation Instructions
--------------------------
+=========================
+
+These instructions will walk you through installing Quest either from the released package or from the source code.
+
+Install Released Conda Package
+------------------------------
+
+1. Install Miniconda (http://conda.io/) [or Anaconda (http://continuum.io/downloads) although Miniconda is preferred] for your OS
+
+2. Create a new environment and install Quest from the ERDC Environmental Simulator conda channel::
+
+    conda config --set ssl_verify false
+    conda create -n quest -c conda-forge -c https://quest.erdc.dren.mil/Software/es-conda-channel/ terrapin quest
+    conda config --set ssl_verify true
+
+.. note::
+
+    Because of the DoD certificates on the es-conda-channel server conda's SSL verification must be turned off to install packages from this channel.
+
+3.  Refer to :doc:`quickstart` for more help getting started with Quest.
+
+Install from Source
+-------------------
+
+1. Clone the repository::
+
+    git clone git@public.git.erdc.dren.mil:computational-analysis-and-mechanics/quest.git
 
 Conda Install
 ~~~~~~~~~~~~~
@@ -17,7 +43,7 @@ Install Anaconda (http://continuum.io/downloads) or Miniconda (http://conda.io/)
 
 Optional
 ........
-Some filters (e.g. watershed delineation) require the package `terrapin` that is available (Python 3 only) through the es-conda-channel. Because of the DOD certificates on the es-conda-channel server conda's SSL verification must be turned off to install this package::
+Some filters (e.g. watershed delineation) require the package `terrapin` that is available (Python 3 only) through the es-conda-channel::
 
     conda config --set ssl_verify false
     conda install -y -c https://quest.erdc.dren.mil/Software/es-conda-channel/ terrapin
@@ -28,8 +54,12 @@ Run tests::
     python setup.py test
 
 
-Regular Installation
+Pip Installation
 ~~~~~~~~~~~~~~~~~~~~
+
+.. warning::
+
+    Some of the Python dependencies (e.g. gdal) have system dependencies that must be installed before they can be installed from pip.
 
 from the base directory type::
 

@@ -1,18 +1,15 @@
 Welcome to Quest's documentation!
-=================================================
-
-Contents:
+=================================
 
 .. toctree::
+   :caption: Table of Contents
    :maxdepth: 2
 
    install
    quickstart
-   examples
-   design
+   core_concepts
    api
-   plugin
-   tests
+   developers/index
 
 Indices and tables
 ==================
