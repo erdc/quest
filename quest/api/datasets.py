@@ -132,13 +132,13 @@ def download_datasets(datasets, raise_on_error=False):
 
 
 @dispatcher.add_method
-def download_options(uris, fmt='json-schema'):
+def download_options(uris, fmt='json'):
     """List optional kwargs that can be specified when downloading a dataset.
 
    Args:
         uris (string or list, Required):
             uris of features or datasets
-        fmt (string, Required, Default='json-schema'):
+        fmt (string, Required, Default='json'):
             format in which to return download_options
 
 
@@ -344,7 +344,7 @@ def open_dataset(dataset, fmt=None):
              will raise NotImplementedError if format requested is not possible
 
     Returns:
-        data (pandas dataframe, json-schema, or dict, Default=dataframe):
+        data (pandas dataframe, json, or dict, Default=dataframe):
             contents of dataset
 
     """
@@ -417,13 +417,13 @@ def visualize_dataset(dataset, update_cache=False, **kwargs):
 
 
 @dispatcher.add_method
-def visualize_dataset_options(dataset, fmt='json-schema'):
+def visualize_dataset_options(dataset, fmt='json'):
     """Return visualization available options for dataset.
 
     Args:
         dataset (string, Required):
             uid of dataset
-        fmt (string, Required, Default='json-schema'):
+        fmt (string, Required, Default='json'):
             format in which to return options
 
     Returns:

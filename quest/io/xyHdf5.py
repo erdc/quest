@@ -82,7 +82,7 @@ class XYHdf5(IoBase):
 
         return visualization_path
 
-    def visualize_options(self, path, fmt='json-schema'):
+    def visualize_options(self, path, fmt='json'):
         """visualation options for timeseries datasets"""
         df = self.read(path)
         start = df.index[0]

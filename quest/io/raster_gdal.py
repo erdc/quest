@@ -64,7 +64,7 @@ class RasterGdal(IoBase):
 
         return  visualization_path
 
-    def visualize_options(self, path, fmt='json-schema'):
+    def visualize_options(self, path, fmt='json'):
         """visualation options for raster datasets."""
         schema = {}
         return schema
