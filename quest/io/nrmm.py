@@ -75,7 +75,7 @@ class Nrmm(IoBase):
 
         return dst
 
-    def visualize_options(self, path, fmt='json-schema'):
+    def visualize_options(self, path, fmt='json'):
         """visualization options for nrmm datasets"""
 
         if fmt=='smtk':

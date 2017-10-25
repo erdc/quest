@@ -4,7 +4,7 @@ import abc
 import param
 from future.utils import with_metaclass
 
-from ..util import listify, format_json_options
+from ..util import listify, format_json_options, build_smtk
 from ..api.metadata import update_metadata
 from ..api.datasets import DatasetStatus
 
@@ -13,6 +13,7 @@ class FilterBase(param.Parameterized):
     """Base class for data filters."""
     _name = None
     name = param.String(default='Filter', precedence=-1)
+    smtk_template = None
 
     # metadata attributes
     group = None
@@ -22,7 +23,6 @@ class FilterBase(param.Parameterized):
     produces_datatype = None
     produces_geotype = None
     produces_parameters = None
-
 
     def __init__(self, **params):
         params.update({'name': self._name})
@@ -87,10 +87,18 @@ class FilterBase(param.Parameterized):
         """Function that applies filter"""
         self.set_param(**kwargs)
 
-        if fmt == 'json-schema':
-            return format_json_options(self)
+        schema = self
 
-        return self
+        if fmt == 'smtk':
+            if self.smtk_template is None:
+                return ''
+            schema = build_smtk('filter_options',
+                                self.smtk_template)
+
+        if fmt == 'json':
+            schema = format_json_options(self)
+
+        return schema
 
     @property
     def options(self):

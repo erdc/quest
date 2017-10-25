@@ -39,7 +39,7 @@ class TsHdf5(XYHdf5):
 
         raise NotImplementedError('format %s not recognized' % fmt)
 
-    def visualize_options(self, path, fmt='json-schema'):
+    def visualize_options(self, path, fmt='json'):
         """visualation options for timeseries datasets"""
         df = self.read(path)
         start = df.index[0].strftime('%Y-%m-%d %H:%M:%S')

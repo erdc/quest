@@ -268,7 +268,7 @@ class ServiceBase(param.Parameterized):
                                      title=self.title,
                                      parameters=parameters)
 
-        if fmt == 'json-schema':
+        if fmt == 'json':
             schema = format_json_options(self)
 
         return schema
@@ -282,7 +282,6 @@ class ServiceBase(param.Parameterized):
     def get_parameters(self, features=None):
         """Default function that should be overridden if the features argument needs to be handled."""
         return self.parameters
-
 
 
 class TimePeriodServiceBase(ServiceBase):
