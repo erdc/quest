@@ -65,9 +65,10 @@ class FilterBase(param.Parameterized):
 
     def apply_filter(self, **options):
         """Function that applies filter"""
+        options.pop('name', None)
         self.set_param(**options)
 
-        self._filter_options = options
+        self._filter_options = options or dict(self.get_param_values())
         result = self._apply_filter()
         datasets = listify(result.get('datasets', []))
         for dataset in datasets:
@@ -83,20 +84,25 @@ class FilterBase(param.Parameterized):
         """Function that applies filter"""
         pass
 
-    def apply_filter_options(self, fmt=None, **kwargs):
+    def apply_filter_options(self, fmt, **kwargs):
         """Function that applies filter"""
+        kwargs.pop('name', None)
         self.set_param(**kwargs)
 
-        schema = self
+        if fmt == 'param':
+            schema = self
 
-        if fmt == 'smtk':
+        elif fmt == 'smtk':
             if self.smtk_template is None:
                 return ''
             schema = build_smtk('filter_options',
                                 self.smtk_template)
 
-        if fmt == 'json':
+        elif fmt == 'json':
             schema = format_json_options(self)
+
+        else:
+            raise ValueError('{} is an unrecognized format.'.format(fmt))
 
         return schema
 

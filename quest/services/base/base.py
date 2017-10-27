@@ -251,14 +251,16 @@ class ServiceBase(param.Parameterized):
 
         return pmap
 
-    def download_options(self, fmt=None):
+    def download_options(self, fmt):
         """
         needs to return dictionary
         eg. {'path': /path/to/dir/or/file, 'format': 'raster'}
         """
-        schema = self
 
-        if fmt == 'smtk':
+        if fmt == 'param':
+            schema = self
+
+        elif fmt == 'smtk':
             if self.smtk_template is None:
                 return ''
             parameters = sorted(self.parameters['parameters'])
@@ -268,8 +270,11 @@ class ServiceBase(param.Parameterized):
                                      title=self.title,
                                      parameters=parameters)
 
-        if fmt == 'json':
+        elif fmt == 'json':
             schema = format_json_options(self)
+
+        else:
+            raise ValueError('{} is an unrecognized format.'.format(fmt))
 
         return schema
 

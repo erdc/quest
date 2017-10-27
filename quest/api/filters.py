@@ -62,22 +62,22 @@ def get_filters(filters=None, expand=False, **kwargs):
 
 @dispatcher.add_method
 @add_async
-def apply_filter(name, options=None, as_dataframe=None, expand=None):
+def apply_filter(name, options=None, as_dataframe=None, expand=None, **kwargs):
     """Apply Filter to dataset.
 
     Args:
         name (string,Required):
             name of filter
-        datasets (string, list of strings, or dict, Required):
-            datasets to which the filter is to be applied
-        features (string, list of strings, or dict, Optional, Default=False)
-            features to which the filter is to be applied
+        options (dict, Required):
+            a dictionary of arguments to pass to the filter formatted as specified by `apply_filter_options`
         expand (bool, Optional, Default=False):
             include details of newly created dataset and format as a dict
         as_dataframe (bool, Optional, Default=False):
             include details of newly created dataset and format as a pandas dataframe
         async (bool,Optional):
             if True, run filter in the background
+        kwargs:
+            keyword arguments that will be added to `options`
 
 
     Returns:
@@ -86,7 +86,8 @@ def apply_filter(name, options=None, as_dataframe=None, expand=None):
 
 
     """
-    options = util.listify(options)
+    options = options or dict()
+    options.update(kwargs)
 
     driver = util.load_drivers('filters', name)[name].driver
     result = driver.apply_filter(**options)
@@ -115,7 +116,9 @@ def apply_filter_options(name, fmt='json', **kwargs):
         name (string, Required):
             name of filter
         fmt (string, Required, Default='json'):
-            format in which to return options
+            format in which to return options. One of ['json', 'smtk', 'param']
+        kwargs:
+            keyword arguments of options to set and exclude from return value.
     Returns:
         filter options (json or smtk scheme):
             filter options that can be applied when calling quest.api.apply_filter

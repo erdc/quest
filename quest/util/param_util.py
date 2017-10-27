@@ -100,4 +100,4 @@ def format_json_options(pobj):
         "title": pobj.title,
         "properties": properties,
     }
-    return schema
+    return schema  # TODO Should this return JSON instead of a dict?
