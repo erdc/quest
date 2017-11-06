@@ -258,10 +258,14 @@ def listify(liststr, delimiter=','):
     if liststr is None:
         return None
 
-    if isinstance(liststr, dict):
+    if isinstance(liststr, dict) or isinstance(liststr, list):
         return liststr
 
-    return liststr if isinstance(liststr, list) else [s.strip() for s in liststr.split(delimiter)]
+    elif isinstance(liststr, str):
+        return [s.strip() for s in liststr.split(delimiter)]
+
+    else:
+        return [liststr]
 
 
 def list_drivers(namespace):
