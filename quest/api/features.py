@@ -194,9 +194,10 @@ def get_features(uris=None, expand=False, as_dataframe=False, as_geojson=False,
                     idx = features.metadata.map(lambda x: _multi_index(x, k) == v)
                     features = features[idx]
 
-    idx = np.column_stack([features[col].str.contains(search_term, na=False)
-                           for col, search_term in itertools.product(features, search_terms)]).any(axis=1)
-    features = features[idx]
+    if search_terms is not None:
+        idx = np.column_stack([features[col].str.contains(search_term, na=False)
+                               for col, search_term in itertools.product(features, search_terms)]).any(axis=1)
+        features = features[idx]
 
     if not (expand or as_dataframe or as_geojson):
         return features.index.astype('unicode').tolist()

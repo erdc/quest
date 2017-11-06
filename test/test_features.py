@@ -1,6 +1,6 @@
 import pytest
 
-from data import SERVICES_FEATURE_COUNT
+from data import SERVICES_FEATURE_COUNT, SERVICES
 
 slow = pytest.mark.skipif(
     pytest.config.getoption("--skip-slow"),
@@ -48,6 +48,22 @@ def test_get_features_from_service(api, service, expected, tolerance):
     assert abs(len(features) - expected) < tolerance
 
 
+@slow
+def test_get_features_with_search_term(api):
+    features = api.get_features('svc://ncdc:ghcn-daily', search_terms=['ZI'])
+    expected = 259
+    tolerance = 10
+    assert abs(len(features) - expected) < tolerance
+
+
+@slow
+def test_get_features_with_tag(api):
+    features = api.get_features('svc://ncdc:ghcn-daily', filters={'country': 'ZI'})
+    expected = 20
+    tolerance = 5
+    assert abs(len(features) - expected) < tolerance
+
+
 def test_new_feature(api):
 
     c = api.new_feature(collection='col3', display_name='NewFeat', geom_type='Point', geom_coords=[-94.2, 23.4])
@@ -71,3 +87,13 @@ def test_delete_features(api):
     api.delete(c)
     assert len(api.get_features(collections='col1')) == 1
     assert d in api.get_features(collections='col1')
+
+
+@slow
+@pytest.mark.parametrize('service', SERVICES)
+def test_get_tags(api, service):
+    tags = api.get_tags(service)
+    assert isinstance(tags, dict)
+    for value in tags.values():
+        assert isinstance(value, list)
+
