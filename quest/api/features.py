@@ -137,9 +137,10 @@ def get_features(uris=None, expand=False, as_dataframe=False, as_geojson=False,
         all_features.append(get_metadata(features, as_dataframe=True))
 
     # get metadata for features in services
+    filters = filters or dict()
     for name in services:
         provider, service, feature = util.parse_service_uri(name)
-        tmp_feats = _get_features(provider, service, update_cache=update_cache)
+        tmp_feats = _get_features(provider, service, update_cache=update_cache, **filters)
         all_features.append(tmp_feats)
 
     # get metadata for features in collections
@@ -162,36 +163,40 @@ def get_features(uris=None, expand=False, as_dataframe=False, as_geojson=False,
     features = features.set_index('index').sort_index()
 
     # apply any specified filters
-    if filters is not None:
-        # features = features.dropna(axis=1)  # can't index if NaN values exist
-        for k, v in filters.items():
-            if features.empty:
-                break  # if dataframe is empty then doen't try filtering any further
+    # features = features.dropna(axis=1)  # can't index if NaN values exist
+    for k, v in filters.items():
+        if features.empty:
+            break  # if dataframe is empty then doen't try filtering any further
+        else:
+            if k == 'bbox':
+                bbox = util.bbox2poly(*[float(x) for x in util.listify(v)], as_shapely=True)
+                idx = features.intersects(bbox)  # http://geopandas.org/reference.html#GeoSeries.intersects
+                features = features[idx]
+
+            elif k == 'geom_type':
+                idx = features.geom_type.str.contains(v).fillna(value=False)  # will not work if features is empty
+                features = features[idx]
+
+            elif k == 'parameter':
+                idx = features.parameters.str.contains(v)
+                features = features[idx]
+
+            elif k == 'display_name':
+                idx = features.display_name.str.contains(v)
+                features = features[idx]
+
+            elif k == 'description':
+                idx = features.display_name.str.contains(v)
+                features = features[idx]
+
             else:
-                if k == 'bbox':
-                    bbox = util.bbox2poly(*[float(x) for x in util.listify(v)], as_shapely=True)
-                    idx = features.intersects(bbox)  # http://geopandas.org/reference.html#GeoSeries.intersects
-                    features = features[idx]
+                idx = features.metadata.map(lambda x: _multi_index(x, k) == v)
+                features = features[idx]
 
-                elif k == 'geom_type':
-                    idx = features.geom_type.str.contains(v).fillna(value=False)  # will not work if features is empty
-                    features = features[idx]
-
-                elif k == 'parameter':
-                    idx = features.parameters.str.contains(v)
-                    features = features[idx]
-
-                elif k == 'display_name':
-                    idx = features.display_name.str.contains(v)
-                    features = features[idx]
-
-                elif k == 'description':
-                    idx = features.display_name.str.contains(v)
-                    features = features[idx]
-
-                else:
-                    idx = features.metadata.map(lambda x: x.get(k) == v)
-                    features = features[idx]
+    if search_terms is not None:
+        idx = np.column_stack([features[col].str.contains(search_term, na=False)
+                               for col, search_term in itertools.product(features, search_terms)]).any(axis=1)
+        features = features[idx]
 
     if not (expand or as_dataframe or as_geojson):
         return features.index.astype('unicode').tolist()
@@ -208,6 +213,19 @@ def get_features(uris=None, expand=False, as_dataframe=False, as_geojson=False,
     return features
 
 
+def _multi_index(d, index):
+    """Helper function for `get_features` filters to index multi-index tags (see `get_tags`)
+    """
+    if not isinstance(index, str):
+        return d[index]
+
+    multi_index = index.split(':')
+    for k in multi_index:
+        d = d[k]
+
+    return d
+
+
 @dispatcher.add_method
 def get_tags(service):
     """Get searchable tags for a given service.
@@ -220,23 +238,58 @@ def get_tags(service):
     --------
         tags (dict):
          dict keyed by tag name and list of possible values
+
+         Note: nested dicts are parsed out as a multi-index tag where keys for nested dicts are joined with ':'.
     """
     f = get_features(services=service, as_dataframe=True)
+    metadata = pd.DataFrame(list(f.metadata))
 
-    # potential tags are non underscored column names
     tags = {}
-    for tag in [x for x in f.columns if not x.startswith('_')]:
+    for tag in metadata.columns:
         try:
-            df = f[tag].dropna()
-            tag_list = df.unique().tolist()
-            if len(tag_list) < len(df):
-                tags[tag] = tag_list
+            tags[tag] = list(metadata[tag].unique())
         except TypeError:
-            # for fields that have unhashable types like list
-            # unique doesn't work
-            continue
+            values = list(metadata[tag])
+            new_tags = dict()
+            new_tags[tag] = list()
+            for v in values:
+                if isinstance(v, dict):
+                    _combine_dicts(new_tags, _get_tags_from_dict(tag, v))
+                else:
+                    new_tags[tag].append(v)
+            if not new_tags[tag]:
+                del new_tags[tag]
+            tags.update({k: list(set(v)) for k, v in new_tags.items()})
 
     return tags
+
+
+def _get_tags_from_dict(tag, d):
+    """Helper fucntion for `get_tags` to recursively parse dicts and add them as multi-indexed tags
+    """
+    tags = dict()
+    for k, v in d.items():
+        new_tag = '{}:{}'.format(tag, k)
+        if isinstance(v, dict):
+            _combine_dicts(tags, _get_tags_from_dict(new_tag, v))
+        else:
+            tags[new_tag] = v
+
+    return tags
+
+
+def _combine_dicts(this, other):
+    """Helper function for `get_tags` to combine dictionaries by aggregating values rather than overwriting them.
+    """
+    for k, other_v in other.items():
+        other_v = util.listify(other_v)
+        if k in this:
+            this_v = this[k]
+            if isinstance(this_v, list):
+                other_v.extend(this_v)
+            else:
+                other_v.append(this_v)
+        this[k] = other_v
 
 
 @dispatcher.add_method
@@ -305,9 +358,9 @@ def new_feature(collection, display_name=None, geometry=None, geom_type=None, ge
     return uri
 
 
-def _get_features(provider, service, update_cache):
+def _get_features(provider, service, update_cache, **kwargs):
     driver = util.load_providers()[provider]
-    features = driver.get_features(service, update_cache=update_cache)
+    features = driver.get_features(service, update_cache=update_cache, **kwargs)
     features['service'] = 'svc://{}:{}'.format(provider, service)
     features['service_id'] = features.index
     features.index = features['service'] + '/' + features['service_id']

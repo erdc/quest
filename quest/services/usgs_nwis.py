@@ -85,7 +85,7 @@ class NwisServiceBase(TimePeriodServiceBase):
 
         return metadata
 
-    def _get_features(self):
+    def get_features(self, **kwargs):
         func = partial(_nwis_features, service=self.service_name)
         with concurrent.futures.ProcessPoolExecutor() as executor:
             sites = executor.map(func, _states())

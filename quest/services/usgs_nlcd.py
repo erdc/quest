@@ -17,7 +17,7 @@ class UsgsNlcdServiceBase(SingleFileServiceBase):
         'landcover': 'landcover'
     }
 
-    def _get_features(self):
+    def get_features(self, **kwargs):
         base_url = 'https://www.sciencebase.gov/catalog/items'
         params = [
             ('filter', 'tags!=tree canopy'),
