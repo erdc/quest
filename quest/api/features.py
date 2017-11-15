@@ -81,7 +81,7 @@ def add_features(collection, features):
 @dispatcher.add_method
 @add_async
 def get_features(uris=None, expand=False, as_dataframe=False, as_geojson=False,
-                 update_cache=False, filters=None,
+                 update_cache=False, filters=None, search_terms=None,
                  services=None, collections=None, features=None):
     """Retrieve list of features from resources.
 
