@@ -44,10 +44,10 @@ class NoaaServiceBase(TimePeriodServiceBase):
 
     @property
     def features(self):
-        features = self._get_features()
+        features = self.get_features()
         return features.drop_duplicates()
 
-    def _get_features(self):
+    def get_features(self, **kwargs):
         raise NotImplementedError()
     
     @property
@@ -180,7 +180,7 @@ class NoaaServiceNDBC(NoaaServiceBase):
         return self._format_url(dataset_id=self._dataset_id, variables=variables,
                                 station=self.feature, start_time=self.start, end_time=self.end)
 
-    def _get_features(self):
+    def get_features(self, **kwargs):
         variables = 'station', 'longitude', 'latitude'
         df = pd.read_csv(self._format_url(dataset_id=self._dataset_id, variables=variables))
         df.rename(columns={
@@ -249,7 +249,7 @@ class NoaaServiceCoopsMet(NoaaServiceBase):
         return self._format_url(dataset_id=dataset_id, variables=variables,
                                 stationID=self.feature, start_time=self.start, end_time=self.end)
 
-    def _get_features(self):
+    def get_features(self, **kwargs):
         # hard coding for now
         dataset_services = ['nosCoopsCA', 'nosCoopsMW', 'nosCoopsMRF', 'nosCoopsMV', 'nosCoopsMC',
                        'nosCoopsMAT', 'nosCoopsMRH', 'nosCoopsMWT', 'nosCoopsMBP']
@@ -329,7 +329,7 @@ class NoaaServiceCoopsWater(NoaaServiceBase):
                                 stationID=self.feature, datum=datum,
                                 start_time=self.start, end_time=self.end)
 
-    def _get_features(self):
+    def get_features(self, **kwargs):
         # hard coding for now
         dataset_services = ['nosCoopsWLV6', 'nosCoopsWLR6', 'nosCoopsWLTP6', 'nosCoopsWLV60',
                        'nosCoopsWLVHL', 'nosCoopsWLTP60', 'nosCoopsWLTPHL']

@@ -66,7 +66,7 @@ class ProviderBase(with_metaclass(abc.ABCMeta, object)):
         self.update_frequency = update_frequency #not implemented
         self._services = None
 
-    def get_features(self, service, update_cache=False):
+    def get_features(self, service, update_cache=False, **kwargs):
         """Get Features associated with service.
 
         Take a series of query parameters and return a list of
@@ -83,7 +83,7 @@ class ProviderBase(with_metaclass(abc.ABCMeta, object)):
                 pass
 
         # get features from service
-        features = self._get_features(service)
+        features = self.services[service].get_features()
 
         # convert geometry into shapely objects
         if 'bbox' in features.columns:
@@ -155,34 +155,12 @@ class ProviderBase(with_metaclass(abc.ABCMeta, object)):
         """
         return self.services[service].download(feature, file_path, dataset, **kwargs)
 
-    def download_options(self, service, fmt=None):
+    def download_options(self, service, fmt):
         """
         needs to return dictionary
         eg. {'path': /path/to/dir/or/file, 'format': 'raster'}
         """
         return self.services[service].download_options(fmt)
-
-    def _get_features(self, service):
-        """
-        should return a pandas dataframe or a python dictionary with
-        indexed by feature uid and containing the following columns
-
-        reserved column/field names
-            display_name -> will be set to uid if not provided
-            description -> will be set to '' if not provided
-            download_url -> optional download url
-
-            defining geometry options:
-                1) geometry -> geojson string or shapely object
-                2) latitude & longitude columns/fields
-                3) geometry_type, latitudes, longitudes columns/fields
-                4) bbox column/field -> tuple with order (lon min, lat min, lon max, lat max)
-
-        all other columns/fields will be accumulated in a dict and placed
-        in a metadata field.
-
-        """
-        return self.services[service].features
 
 
 # base class for services
@@ -230,11 +208,6 @@ class ServiceBase(param.Parameterized):
         }
 
     @property
-    def features(self):
-        features = self._get_features()
-        return features #.drop_duplicates()
-
-    @property
     def parameter_code(self):
         if hasattr(self, 'parameter'):
             pmap = self.parameter_map(invert=True)
@@ -250,6 +223,10 @@ class ServiceBase(param.Parameterized):
             pmap = {v: k for k, v in pmap.items()}
 
         return pmap
+
+    def get_parameters(self, features=None):
+        """Default function that should be overridden if the features argument needs to be handled."""
+        return self.parameters
 
     def download_options(self, fmt):
         """
@@ -281,12 +258,28 @@ class ServiceBase(param.Parameterized):
     def download(self, feature, file_path, dataset, **params):
         raise NotImplementedError()
 
-    def _get_features(self):
-        raise NotImplementedError()
+    def get_features(self, **kwargs):
+        """
+        should return a pandas dataframe or a python dictionary with
+        indexed by feature uid and containing the following columns
 
-    def get_parameters(self, features=None):
-        """Default function that should be overridden if the features argument needs to be handled."""
-        return self.parameters
+        reserved column/field names
+            display_name -> will be set to uid if not provided
+            description -> will be set to '' if not provided
+            download_url -> optional download url
+
+            defining geometry options:
+                1) geometry -> geojson string or shapely object
+                2) latitude & longitude columns/fields
+                3) geometry_type, latitudes, longitudes columns/fields
+                4) bbox column/field -> tuple with order (lon min, lat min, lon max, lat max)
+
+        all other columns/fields will be accumulated in a dict and placed
+        in a metadata field.
+        :param **kwargs:
+
+        """
+        raise NotImplementedError()
 
 
 class TimePeriodServiceBase(ServiceBase):
@@ -309,7 +302,7 @@ class SingleFileServiceBase(ServiceBase):
     eg elevation raster etc
     """
     def download(self, feature, file_path, dataset, **params):
-        feature = self.features.loc[feature]
+        feature = self.get_features().loc[feature]
         reserved = feature.get('reserved')
         download_url = reserved['download_url']
         fmt = reserved.get('extract_from_zip', '')

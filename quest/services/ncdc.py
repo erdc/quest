@@ -43,7 +43,7 @@ class NcdcServiceBase(TimePeriodServiceBase):
 
     @property
     def features(self):
-        features = self._get_features()
+        features = self.get_features()
 
         # remove locations with invalid coordinates
         valid = pd.notnull(features.latitude) & pd.notnull(features.longitude)
@@ -157,7 +157,7 @@ class NcdcServiceGhcnDaily(NcdcServiceBase):
 
         return data
 
-    def _get_features(self):
+    def get_features(self, **kwargs):
         return ghcn_daily.get_stations(as_dataframe=True)
 
 
@@ -207,7 +207,7 @@ class NcdcServiceGsod(NcdcServiceBase):
 
         return data
 
-    def _get_features(sefl):
+    def get_features(self, **kwargs):
         features = gsod.get_stations()
         features = pd.DataFrame.from_dict(features, orient='index')
         return features
