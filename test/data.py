@@ -258,9 +258,9 @@ SERVICE_FEATURE_DOWNLOAD_OPTIONS = [
     ('svc://usgs-ned:13-arc-second/581d2134e4b08da350d52caf', None),
     ('svc://usgs-ned:19-arc-second/581d2561e4b08da350d5a3b2', None),
     ('svc://usgs-ned:alaska-2-arc-second/581d276ee4b08da350d5decb', None),
-    ('svc://usgs-nlcd:2001/589ffa73e4b099f50d3e0248', None),
-    ('svc://usgs-nlcd:2006/581d59c2e4b0dee4cc8e4a47', None),
-    ('svc://usgs-nlcd:2011/581d59e7e4b0dee4cc8e4e33', None),
+    ('svc://usgs-nlcd:2001/5a0c6495e4b09af898cd1c4b', None),
+    ('svc://usgs-nlcd:2006/5a0c66b3e4b09af898cd2384', None),
+    ('svc://usgs-nlcd:2011/5a0c6962e4b09af898cd3aae', None),
     ('svc://usgs-nwis:dv/01010000', {'parameter': 'streamflow:mean:daily', 'start': '2016-01-01', 'end': '2016-01-02'}),
     ('svc://usgs-nwis:iv/01010000', {'parameter': 'gage_height', 'start': '2016-01-01', 'end': '2016-01-02'}),
 ]
