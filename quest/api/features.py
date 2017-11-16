@@ -6,6 +6,7 @@ import json
 import itertools
 from jsonrpc import dispatcher
 import pandas as pd
+import numpy as np
 import geopandas as gpd
 import geojson
 import shapely.wkt
@@ -81,7 +82,7 @@ def add_features(collection, features):
 @dispatcher.add_method
 @add_async
 def get_features(uris=None, expand=False, as_dataframe=False, as_geojson=False,
-                 update_cache=False, filters=None, search_terms=None,
+                 update_cache=False, filters=None,
                  services=None, collections=None, features=None):
     """Retrieve list of features from resources.
 
@@ -188,15 +189,13 @@ def get_features(uris=None, expand=False, as_dataframe=False, as_geojson=False,
             elif k == 'description':
                 idx = features.display_name.str.contains(v)
                 features = features[idx]
-
+            elif k== 'search_terms':
+                idx = np.column_stack([features[col].str.contains(search_term, na=False)
+                                       for col, search_term in itertools.product(features, k)]).any(axis=1)
+                features = features[idx]
             else:
                 idx = features.metadata.map(lambda x: _multi_index(x, k) == v)
                 features = features[idx]
-
-    if search_terms is not None:
-        idx = np.column_stack([features[col].str.contains(search_term, na=False)
-                               for col, search_term in itertools.product(features, search_terms)]).any(axis=1)
-        features = features[idx]
 
     if not (expand or as_dataframe or as_geojson):
         return features.index.astype('unicode').tolist()
