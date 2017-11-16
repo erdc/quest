@@ -167,7 +167,7 @@ def get_features(uris=None, expand=False, as_dataframe=False, as_geojson=False,
     # features = features.dropna(axis=1)  # can't index if NaN values exist
     for k, v in filters.items():
         if features.empty:
-            break  # if dataframe is empty then doen't try filtering any further
+            break  # if dataframe is empty then doesn't try filtering any further
         else:
             if k == 'bbox':
                 bbox = util.bbox2poly(*[float(x) for x in util.listify(v)], as_shapely=True)
@@ -189,10 +189,12 @@ def get_features(uris=None, expand=False, as_dataframe=False, as_geojson=False,
             elif k == 'description':
                 idx = features.display_name.str.contains(v)
                 features = features[idx]
-            elif k== 'search_terms':
-                idx = np.column_stack([features[col].str.contains(search_term, na=False)
-                                       for col, search_term in itertools.product(features, k)]).any(axis=1)
+
+            elif k == 'search_terms':
+                idx = np.column_stack([features[col].apply(str).str.contains(search_term, na=False)
+                                       for col, search_term in itertools.product(features.columns, v)]).any(axis=1)
                 features = features[idx]
+
             else:
                 idx = features.metadata.map(lambda x: _multi_index(x, k) == v)
                 features = features[idx]
