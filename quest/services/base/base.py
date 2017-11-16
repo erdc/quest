@@ -83,7 +83,7 @@ class ProviderBase(with_metaclass(abc.ABCMeta, object)):
                 pass
 
         # get features from service
-        features = self.services[service].get_features()
+        features = self.services[service].get_features(**kwargs)
 
         # convert geometry into shapely objects
         if 'bbox' in features.columns:
