@@ -207,7 +207,7 @@ SERVICES_FEATURE_COUNT = [
     # ('svc://nasa:srtm-3-arc-second', 14297, 1000),
     # ('svc://nasa:srtm-30-arc-second', 27, 10),
     ('svc://ncdc:ghcn-daily', 103151, 5000),
-    ('svc://ncdc:gsod', 28621, 1000),
+    ('svc://ncdc:gsod', 30053, 1000),
     ('svc://noaa:coops-meteorological', 371, 50),
     ('svc://noaa:coops-water', 243, 50),
     ('svc://noaa:ndbc', 1117, 100),
@@ -219,7 +219,7 @@ SERVICES_FEATURE_COUNT = [
     ('svc://usgs-nlcd:2006', 131, 50),
     ('svc://usgs-nlcd:2011', 203, 50),
     ('svc://usgs-nwis:dv', 35919, 1000),
-    ('svc://usgs-nwis:iv', 15483, 1000),
+    ('svc://usgs-nwis:iv', 16493, 1000),
 
 ]
 
