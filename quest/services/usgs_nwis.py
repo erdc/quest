@@ -106,7 +106,7 @@ class NwisServiceBase(TimePeriodServiceBase):
         return df
 
     def get_parameters(self, features=None):
-        df = self.features
+        df = self.get_features()
 
         chunks = list(_chunks(df.index.tolist()))
         func = partial(_site_info, service=self.service_name)
