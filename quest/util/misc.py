@@ -11,6 +11,7 @@ from ..util.log import logger
 
 from jsonrpc.jsonrpc import JSONRPCRequest
 from stevedore import extension, driver
+from past.builtins import basestring  # for python 2 compatibility
 try:
     import simplejson as json
 except ImportError:
@@ -261,7 +262,7 @@ def listify(liststr, delimiter=','):
     if isinstance(liststr, dict) or isinstance(liststr, list):
         return liststr
 
-    elif isinstance(liststr, str):
+    elif isinstance(liststr, basestring):
         return [s.strip() for s in liststr.split(delimiter)]
 
     else:
