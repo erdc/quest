@@ -6,13 +6,16 @@ import os
 import ulmo
 import pandas as pd
 import geopandas as gpd
-from shapely.geometry import box, Point, Polygon, LineString, shape
+from shapely.geometry import box, Point, shape
 from quest.util.log import logger
 from quest.util.param_util import format_json_options
 import json
 import param
 
 reserved_feature_fields = [
+    'name',
+    'service',
+    'service_id',
     'display_name',
     'description',
     'reserved',
@@ -73,7 +76,7 @@ class ProviderBase(with_metaclass(abc.ABCMeta, object)):
         locations as a geojson python dictionary
         """
         cache_file = os.path.join(util.get_cache_dir(self.name), service + '_features.geojson')
-        if not update_cache:
+        if self.use_cache and not update_cache:
             try:
                 features = gpd.read_file(cache_file)
                 features.set_index('id', inplace=True)
@@ -85,23 +88,36 @@ class ProviderBase(with_metaclass(abc.ABCMeta, object)):
         # get features from service
         features = self.services[service].get_features(**kwargs)
 
+        features['service'] = 'svc://{}:{}'.format(self.name, service)
+        if 'service_id' not in features:
+            features['service_id'] = features.index
+        features['service_id'] = features['service_id'].apply(str)
+        features.index = features['service'] + '/' + features['service_id']
+        features['name'] = features.index
+
         # convert geometry into shapely objects
         if 'bbox' in features.columns:
             features['geometry'] = features['bbox'].apply(lambda row: box(*[float(x) for x in row]))
             del features['bbox']
 
-        if all(x in features.columns for x in ['latitude', 'longitude']):
+        if {'latitude', 'longitude'}.issubset(features.columns):
             fn = lambda row: Point((
                                     float(row['longitude']),
                                     float(row['latitude'])
                                     ))
             features['geometry'] = features.apply(fn, axis=1)
-            features['geometry'] = features.apply(fn, axis=1)
+            del features['latitude']
+            del features['longitude']
+
+        if {'geom_type', 'latitudes', 'logitudes'}.issubset(features.columns):
+            # TODO handle this case or remove from reserved fields and docs
+            pass
+            # del features['geom_type']
+            # del features['latitude']
+            # del features['longitude']
 
         if 'geometry' in features.columns:
-            # TODO
-            # check for geojson str or shapely object
-            pass
+            features['geometry'].apply(shape)
 
         # if no geometry fields are found then this is a geotypical feature
         if 'geometry' not in features.columns:
@@ -135,10 +151,11 @@ class ProviderBase(with_metaclass(abc.ABCMeta, object)):
         # convert to GeoPandas GeoDataFrame
         features = gpd.GeoDataFrame(features, geometry='geometry')
 
-        # write to cache_file
-        util.mkdir_if_doesnt_exist(os.path.split(cache_file)[0])
-        with open(cache_file, 'w') as f:
-            f.write(features.to_json(default=util.to_json_default_handler))
+        if self.use_cache:
+            # write to cache_file
+            util.mkdir_if_doesnt_exist(os.path.split(cache_file)[0])
+            with open(cache_file, 'w') as f:
+                f.write(features.to_json(default=util.to_json_default_handler))
 
         return features
 
