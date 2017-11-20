@@ -10,7 +10,7 @@ import numpy as np
 import geopandas as gpd
 import geojson
 import shapely.wkt
-from shapely.geometry import shape, Polygon
+from shapely.geometry import shape
 
 from .. import util
 from .database import get_db, db_session, select_features
@@ -141,7 +141,8 @@ def get_features(uris=None, expand=False, as_dataframe=False, as_geojson=False,
     filters = filters or dict()
     for name in services:
         provider, service, feature = util.parse_service_uri(name)
-        tmp_feats = _get_features(provider, service, update_cache=update_cache, **filters)
+        driver = util.load_providers()[provider]
+        tmp_feats = driver.get_features(service, update_cache=update_cache, **filters)
         all_features.append(tmp_feats)
 
     # get metadata for features in collections
@@ -357,13 +358,3 @@ def new_feature(collection, display_name=None, geometry=None, geom_type=None, ge
         db.Feature(**data)
 
     return uri
-
-
-def _get_features(provider, service, update_cache, **kwargs):
-    driver = util.load_providers()[provider]
-    features = driver.get_features(service, update_cache=update_cache, **kwargs)
-    features['service'] = 'svc://{}:{}'.format(provider, service)
-    features['service_id'] = features.index
-    features.index = features['service'] + '/' + features['service_id']
-    features['name'] = features.index
-    return features
