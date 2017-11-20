@@ -80,6 +80,7 @@ class ProviderBase(with_metaclass(abc.ABCMeta, object)):
             try:
                 features = gpd.read_file(cache_file)
                 features.set_index('id', inplace=True)
+                self._label_features(features, service)
                 return features
             except:
                 logger.info('updating cache')
@@ -87,13 +88,6 @@ class ProviderBase(with_metaclass(abc.ABCMeta, object)):
 
         # get features from service
         features = self.services[service].get_features(**kwargs)
-
-        features['service'] = 'svc://{}:{}'.format(self.name, service)
-        if 'service_id' not in features:
-            features['service_id'] = features.index
-        features['service_id'] = features['service_id'].apply(str)
-        features.index = features['service'] + '/' + features['service_id']
-        features['name'] = features.index
 
         # convert geometry into shapely objects
         if 'bbox' in features.columns:
@@ -148,6 +142,8 @@ class ProviderBase(with_metaclass(abc.ABCMeta, object)):
             features['parameters'] = ','.join(params['parameters'])
             # features['parameter_codes'] = ','.join(params['parameter_codes'])
 
+        features.drop(labels=['service', 'service_id', 'name'], axis=1, inplace=True, errors='ignore')
+
         # convert to GeoPandas GeoDataFrame
         features = gpd.GeoDataFrame(features, geometry='geometry')
 
@@ -157,7 +153,17 @@ class ProviderBase(with_metaclass(abc.ABCMeta, object)):
             with open(cache_file, 'w') as f:
                 f.write(features.to_json(default=util.to_json_default_handler))
 
+        self._label_features(features, service)
+
         return features
+
+    def _label_features(self, features, service):
+        features['service'] = util.construct_service_uri(self.name, service)
+        if 'service_id' not in features:
+            features['service_id'] = features.index
+        features['service_id'] = features['service_id'].apply(str)
+        features.index = features['service'] + '/' + features['service_id']
+        features['name'] = features.index
 
     def get_services(self):
         return {k: v.metadata for k, v in self.services.items()}
