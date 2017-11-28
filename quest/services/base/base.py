@@ -3,20 +3,25 @@ import abc
 from future.utils import with_metaclass
 from quest import util
 import os
+import pickle
 import ulmo
 import pandas as pd
 import geopandas as gpd
-from shapely.geometry import box, Point, Polygon, LineString, shape
+from shapely.geometry import box, Point, shape
 from quest.util.log import logger
 from quest.util.param_util import format_json_options
 import json
 import param
 
 reserved_feature_fields = [
+    'name',
+    'service',
+    'service_id',
     'display_name',
     'description',
     'reserved',
     'geometry',
+    'parameters',
 
 ]
 reserved_geometry_fields = [
@@ -66,42 +71,52 @@ class ProviderBase(with_metaclass(abc.ABCMeta, object)):
         self.update_frequency = update_frequency #not implemented
         self._services = None
 
-    def get_features(self, service, update_cache=False):
+    def get_features(self, service, update_cache=False, **kwargs):
         """Get Features associated with service.
 
         Take a series of query parameters and return a list of
         locations as a geojson python dictionary
         """
-        cache_file = os.path.join(util.get_cache_dir(self.name), service + '_features.geojson')
-        if not update_cache:
+        cache_file = os.path.join(util.get_cache_dir(self.name), service + '_features.p')
+        if self.use_cache and not update_cache:
             try:
-                features = gpd.read_file(cache_file)
-                features.set_index('id', inplace=True)
+                features = pd.read_pickle(cache_file)
+                self._label_features(features, service)
+
+                # convert to GeoPandas GeoDataFrame
+                features = gpd.GeoDataFrame(features, geometry='geometry')
+
                 return features
-            except:
+            except Exception as e:
+                logger.info(e)
                 logger.info('updating cache')
-                pass
 
         # get features from service
-        features = self._get_features(service)
+        features = self.services[service].get_features(**kwargs)
 
         # convert geometry into shapely objects
         if 'bbox' in features.columns:
             features['geometry'] = features['bbox'].apply(lambda row: box(*[float(x) for x in row]))
             del features['bbox']
 
-        if all(x in features.columns for x in ['latitude', 'longitude']):
+        if {'latitude', 'longitude'}.issubset(features.columns):
             fn = lambda row: Point((
                                     float(row['longitude']),
                                     float(row['latitude'])
                                     ))
             features['geometry'] = features.apply(fn, axis=1)
-            features['geometry'] = features.apply(fn, axis=1)
+            del features['latitude']
+            del features['longitude']
+
+        if {'geom_type', 'latitudes', 'logitudes'}.issubset(features.columns):
+            # TODO handle this case or remove from reserved fields and docs
+            pass
+            # del features['geom_type']
+            # del features['latitude']
+            # del features['longitude']
 
         if 'geometry' in features.columns:
-            # TODO
-            # check for geojson str or shapely object
-            pass
+            features['geometry'].apply(shape)
 
         # if no geometry fields are found then this is a geotypical feature
         if 'geometry' not in features.columns:
@@ -132,15 +147,95 @@ class ProviderBase(with_metaclass(abc.ABCMeta, object)):
             features['parameters'] = ','.join(params['parameters'])
             # features['parameter_codes'] = ','.join(params['parameter_codes'])
 
+        if self.use_cache:
+            # write to cache_file
+            util.mkdir_if_doesnt_exist(os.path.split(cache_file)[0])
+            features.to_pickle(cache_file)
+
+        self._label_features(features, service)
+
         # convert to GeoPandas GeoDataFrame
         features = gpd.GeoDataFrame(features, geometry='geometry')
 
-        # write to cache_file
-        util.mkdir_if_doesnt_exist(os.path.split(cache_file)[0])
-        with open(cache_file, 'w') as f:
-            f.write(features.to_json(default=util.to_json_default_handler))
-
         return features
+
+    def _label_features(self, features, service):
+        features['service'] = util.construct_service_uri(self.name, service)
+        if 'service_id' not in features:
+            features['service_id'] = features.index
+        features['service_id'] = features['service_id'].apply(str)
+        features.index = features['service'] + '/' + features['service_id']
+        features['name'] = features.index
+
+    def get_tags(self, service, update_cache=False):
+
+        cache_file = os.path.join(util.get_cache_dir(self.name), service + '_tags.p')
+        if self.use_cache and not update_cache:
+            try:
+                with open(cache_file, 'rb') as cache:
+                    tags = pickle.load(cache)
+                return tags
+            except:
+                logger.info('updating tag cache')
+
+        features = self.get_features(service=service, update_cache=update_cache)
+        metadata = pd.DataFrame(list(features.metadata))
+
+        # drop metadata fields that are unusable as tag fields
+        metadata.drop(labels=['location'], axis=1, inplace=True, errors='ignore')
+
+        tags = {}
+        for tag in metadata.columns:
+            try:
+                tags[tag] = list(metadata[tag].unique())
+
+                # make sure datetime values are serialized (for RPC server)
+                tags[tag] = json.loads(json.dumps(tags[tag], default=util.to_json_default_handler))
+            except TypeError:
+                values = list(metadata[tag])
+                new_tags = dict()
+                new_tags[tag] = list()
+                for v in values:
+                    if isinstance(v, dict):
+                        self._combine_dicts(new_tags, self._get_tags_from_dict(tag, v))
+                    else:
+                        new_tags[tag].append(v)
+                if not new_tags[tag]:
+                    del new_tags[tag]
+                tags.update({k: list(set(v)) for k, v in new_tags.items()})
+
+        if self.use_cache:
+            # write to cache_file
+            with open(cache_file, 'wb') as cache:
+                pickle.dump(tags, cache)
+
+        return tags
+
+    def _get_tags_from_dict(self, tag, d):
+        """Helper function for `get_tags` to recursively parse dicts and add them as multi-indexed tags
+        """
+        tags = dict()
+        for k, v in d.items():
+            new_tag = '{}:{}'.format(tag, k)
+            if isinstance(v, dict):
+                self._combine_dicts(tags, self._get_tags_from_dict(new_tag, v))
+            else:
+                tags[new_tag] = v
+
+        return tags
+
+    def _combine_dicts(self, this, other):
+        """Helper function for `get_tags` to combine dictionaries by aggregating values rather than overwriting them.
+        """
+        for k, other_v in other.items():
+            other_v = util.listify(other_v)
+            if k in this:
+                this_v = this[k]
+                if isinstance(this_v, list):
+                    other_v.extend(this_v)
+                else:
+                    other_v.append(this_v)
+            this[k] = other_v
 
     def get_services(self):
         return {k: v.metadata for k, v in self.services.items()}
@@ -155,34 +250,12 @@ class ProviderBase(with_metaclass(abc.ABCMeta, object)):
         """
         return self.services[service].download(feature, file_path, dataset, **kwargs)
 
-    def download_options(self, service, fmt=None):
+    def download_options(self, service, fmt):
         """
         needs to return dictionary
         eg. {'path': /path/to/dir/or/file, 'format': 'raster'}
         """
         return self.services[service].download_options(fmt)
-
-    def _get_features(self, service):
-        """
-        should return a pandas dataframe or a python dictionary with
-        indexed by feature uid and containing the following columns
-
-        reserved column/field names
-            display_name -> will be set to uid if not provided
-            description -> will be set to '' if not provided
-            download_url -> optional download url
-
-            defining geometry options:
-                1) geometry -> geojson string or shapely object
-                2) latitude & longitude columns/fields
-                3) geometry_type, latitudes, longitudes columns/fields
-                4) bbox column/field -> tuple with order (lon min, lat min, lon max, lat max)
-
-        all other columns/fields will be accumulated in a dict and placed
-        in a metadata field.
-
-        """
-        return self.services[service].features
 
 
 # base class for services
@@ -230,11 +303,6 @@ class ServiceBase(param.Parameterized):
         }
 
     @property
-    def features(self):
-        features = self._get_features()
-        return features #.drop_duplicates()
-
-    @property
     def parameter_code(self):
         if hasattr(self, 'parameter'):
             pmap = self.parameter_map(invert=True)
@@ -250,6 +318,10 @@ class ServiceBase(param.Parameterized):
             pmap = {v: k for k, v in pmap.items()}
 
         return pmap
+
+    def get_parameters(self, features=None):
+        """Default function that should be overridden if the features argument needs to be handled."""
+        return self.parameters
 
     def download_options(self, fmt):
         """
@@ -281,12 +353,28 @@ class ServiceBase(param.Parameterized):
     def download(self, feature, file_path, dataset, **params):
         raise NotImplementedError()
 
-    def _get_features(self):
-        raise NotImplementedError()
+    def get_features(self, **kwargs):
+        """
+        should return a pandas dataframe or a python dictionary with
+        indexed by feature uid and containing the following columns
 
-    def get_parameters(self, features=None):
-        """Default function that should be overridden if the features argument needs to be handled."""
-        return self.parameters
+        reserved column/field names
+            display_name -> will be set to uid if not provided
+            description -> will be set to '' if not provided
+            download_url -> optional download url
+
+            defining geometry options:
+                1) geometry -> geojson string or shapely object
+                2) latitude & longitude columns/fields
+                3) geometry_type, latitudes, longitudes columns/fields
+                4) bbox column/field -> tuple with order (lon min, lat min, lon max, lat max)
+
+        all other columns/fields will be accumulated in a dict and placed
+        in a metadata field.
+        :param **kwargs:
+
+        """
+        raise NotImplementedError()
 
 
 class TimePeriodServiceBase(ServiceBase):
@@ -309,7 +397,7 @@ class SingleFileServiceBase(ServiceBase):
     eg elevation raster etc
     """
     def download(self, feature, file_path, dataset, **params):
-        feature = self.features.loc[feature]
+        feature = self.get_features().loc[feature]
         reserved = feature.get('reserved')
         download_url = reserved['download_url']
         fmt = reserved.get('extract_from_zip', '')
