@@ -20,12 +20,15 @@ class NasaServiceBase(SingleFileServiceBase):
         'elevation': 'elevation'
     }
 
-    def _get_features(self):
+    def _read_granules(short_name, page_num):
+        return requests.get(granules_url % (short_name, page_num)).json()['feed']['entry']
+
+    def get_features(self, **kwargs):
         page_num = 0
         data = []
         while True:
             page_num += 1
-            granules = _read_granules(self._short_name, page_num)
+            granules = self._read_granules(self._short_name, page_num)
             if len(granules) == 0:
                 break
 
@@ -125,7 +128,3 @@ class NasaProvider(ProviderBase):
     description = 'Services available through the NASA'
     organization_name = 'National Aeronautic and Space Administration'
     organization_abbr = 'NASA'
-
-
-def _read_granules(short_name, page_num):
-    return requests.get(granules_url % (short_name, page_num)).json()['feed']['entry']

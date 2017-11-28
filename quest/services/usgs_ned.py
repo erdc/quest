@@ -25,7 +25,7 @@ class UsgsNedServiceBase(SingleFileServiceBase):
         'elevation': 'elevation'
     }
 
-    def _get_features(self):
+    def get_features(self, **kwargs):
         service = self._description
         features = util.to_geodataframe(
             ned.get_raster_availability(service, (-180, -90, 180, 90))
@@ -34,17 +34,17 @@ class UsgsNedServiceBase(SingleFileServiceBase):
             return features
 
         features['parameters'] = 'elevation'
-        #features['file_format'] = 'raster-gdal'
         features['filename'] = features['download url'].apply(lambda x: x.split('/')[-1])
-        columns = {
-            'name': 'display_name',
-            'download url': 'download_url',
-            'format': 'extract_from_zip',
-            }
-        features['reserved'] = features['download url'].apply(lambda x: {'download_url': x,
-                                                                         'file_format': 'raster-gdal',
-                                                                         'extract_from_zip': '.img'})
-        return features.rename(columns=columns)
+        features['reserved'] = features.apply(
+            lambda x: {'download_url': x['download url'],
+                       'filename': x['filename'],
+                       'file_format': 'raster-gdal',
+                       'extract_from_zip': '.img',
+                       }, axis=1)
+
+        features.drop(labels=['filename', 'download url', 'format'], axis=1, inplace=True)
+
+        return features.rename(columns={'name': 'display_name'})
 
 
 class UsgsNedServiceAlaska(UsgsNedServiceBase):

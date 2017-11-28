@@ -167,53 +167,8 @@ def is_remote_uri(path):
     return bool(re.search('^https?\://', path))
 
 
-def parse_uri(uri):
-    """parse uri and return dictionary.
-
-    if uri starts with svc then parse as a service
-    otherwise it is a collection name
-    if uri is a uuid then it is either a feature or a dataset
-
-    service uri definition
-        <service://<provider[:service]>/<feature or query]>
-        <collection>/
-
-    args:
-        uri (string): uri string to parse
-
-    return:
-        parsed_uri (tuple): resource,
-
-    examples:
-        svc://usgs-nwis:iv/0803200
-        service://gebco-bathymetry
-
-        project://myproj:mycol/93d2e03543224096b14ce2eacd2eb275/temperature/472e7a7dd177405192fcb47a0c959c9d
-        project://myproj:mycol/52b588510ce948b2a2515da02024c53e/temperature/
-
-        service://<name>:<datalayer>/<feature>
-        project://<name>:<collection>/<feature>/<dataset>
-        feature://<collection>/<feature>/<dataset>
-    """
-
-    if uri.startswith('svc://'):
-        resource, name, feature = uri.split('://')[-1].split('/')
-
-    uri_dict = {}
-    uri_dict['resource'], remainder = uri.split('://')
-    parts = remainder.split('/')
-
-    if uri_dict['resource'] not in ['collection', 'service']:
-        raise ValueError('Unknown resource type in uri: %s' % uri_dict['resource'])
-
-    if uri_dict['resource'] == 'service':
-        keys = ['name', 'feature']
-
-    if uri_dict['resource'] == 'collection':
-        keys = ['name', 'feature', 'dataset']
-
-    uri_dict.update({k: parts[i].strip() if i < len(parts) else None for i, k in enumerate(keys)})
-    return uri_dict
+def is_service_uri(uri):
+    return uri.startswith('svc://')
 
 
 def parse_service_uri(uri):
@@ -234,6 +189,14 @@ def parse_service_uri(uri):
     provider, service = (svc.split(':') + [None])[:2]
 
     return provider, service, feature
+
+
+def construct_service_uri(provider, service, feature=None):
+    uri = 'svc://{}:{}'.format(provider, service)
+    if feature is not None:
+        uri = '{}/{}'.format(uri, feature)
+
+    return uri
 
 
 def rpc2py(jsonrpc_str):
@@ -291,12 +254,6 @@ def load_drivers(namespace, names=None):
     return {name: driver.DriverManager(namespace, name, invoke_on_load='True') for name in names}
 
 
-def load_service(uri):
-    if not isinstance(uri, dict):
-        uri = parse_uri(uri)
-    return load_drivers('services', names=uri['name'])[uri['name']].driver
-
-
 def load_providers():
     settings = get_settings()
 
@@ -304,7 +261,8 @@ def load_providers():
     web_services = list_drivers('services')
     web_services.remove('user')
 
-    providers = {name: driver.DriverManager('quest.services', name, invoke_on_load=True).driver for name in web_services}
+    providers = {name: driver.DriverManager('quest.services', name, invoke_on_load=True,
+                                            invoke_kwds={'name': name}).driver for name in web_services}
 
     if len(settings.get('USER_SERVICES', [])) > 0:
         for uri in settings.get('USER_SERVICES', []):

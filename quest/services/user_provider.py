@@ -98,7 +98,7 @@ def get_user_service_base():
                 metadata.update(self.datasets_metadata)
             return metadata
 
-        def _get_features(self):
+        def get_features(self, **kwargs):
             fmt = self.features_format
             paths = self._get_paths(self.features_file)
 
