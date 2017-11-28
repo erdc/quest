@@ -73,6 +73,9 @@ def add_features(collection, features):
                     'collection': collection,
                     'geometry': geometry,
                     })
+
+            # ensure dates are serialized before loading into database
+            data = json.loads(json.dumps(data, default=util.to_json_default_handler))
             db.Feature(**data)
             uris.append(uri)
 
@@ -229,12 +232,18 @@ def _multi_index(d, index):
 
 
 @dispatcher.add_method
-def get_tags(service):
+def get_tags(service_uris, update_cache=False, filter=None, as_count=False):
     """Get searchable tags for a given service.
 
     Args:
-        service(string):
-         name of service
+        service_uris(string or list, Required):
+            uris of services
+        update_cache(bool, Optional):
+            if True, update metadata cache
+        filter(list, Optional):
+            list of tags to include in return value
+        as_count(bool, Optional):
+            if True, return dictionary with the number of values rather than a list of possible values
 
     Returns:
     --------
@@ -243,55 +252,25 @@ def get_tags(service):
 
          Note: nested dicts are parsed out as a multi-index tag where keys for nested dicts are joined with ':'.
     """
-    f = get_features(services=service, as_dataframe=True)
-    metadata = pd.DataFrame(list(f.metadata))
+    # group uris by type
+    grouped_uris = util.classify_uris(service_uris, as_dataframe=False, exclude=['collections', 'features', 'datasets'])
+    services = grouped_uris.get('services') or []
 
-    tags = {}
-    for tag in metadata.columns:
-        try:
-            tags[tag] = list(metadata[tag].unique())
-        except TypeError:
-            values = list(metadata[tag])
-            new_tags = dict()
-            new_tags[tag] = list()
-            for v in values:
-                if isinstance(v, dict):
-                    _combine_dicts(new_tags, _get_tags_from_dict(tag, v))
-                else:
-                    new_tags[tag].append(v)
-            if not new_tags[tag]:
-                del new_tags[tag]
-            tags.update({k: list(set(v)) for k, v in new_tags.items()})
-
-    return tags
-
-
-def _get_tags_from_dict(tag, d):
-    """Helper fucntion for `get_tags` to recursively parse dicts and add them as multi-indexed tags
-    """
     tags = dict()
-    for k, v in d.items():
-        new_tag = '{}:{}'.format(tag, k)
-        if isinstance(v, dict):
-            _combine_dicts(tags, _get_tags_from_dict(new_tag, v))
-        else:
-            tags[new_tag] = v
+
+    for service in services:
+        provider, service, feature = util.parse_service_uri(service)
+        driver = util.load_providers()[provider]
+        service_tags = driver.get_tags(service, update_cache=update_cache)
+        tags.update(service_tags)
+
+    if filter:
+        tags = {k: v for k, v in tags.items() if k in filter}
+
+    if as_count:
+        return {k: len(v) for k, v in tags.items()}
 
     return tags
-
-
-def _combine_dicts(this, other):
-    """Helper function for `get_tags` to combine dictionaries by aggregating values rather than overwriting them.
-    """
-    for k, other_v in other.items():
-        other_v = util.listify(other_v)
-        if k in this:
-            this_v = this[k]
-            if isinstance(this_v, list):
-                other_v.extend(this_v)
-            else:
-                other_v.append(this_v)
-        this[k] = other_v
 
 
 @dispatcher.add_method

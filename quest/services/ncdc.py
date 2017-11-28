@@ -41,9 +41,8 @@ class NcdcServiceBase(TimePeriodServiceBase):
         pmap = self.parameter_map(invert=True)
         return pmap[self.parameter]
 
-    @property
-    def features(self):
-        features = self.get_features()
+    def get_features(self):
+        features = self._get_features()
 
         # remove locations with invalid coordinates
         valid = pd.notnull(features.latitude) & pd.notnull(features.longitude)
@@ -53,6 +52,9 @@ class NcdcServiceBase(TimePeriodServiceBase):
             'longitude': 'longitude',
             'latitude': 'latitude'
         }, inplace=True)
+
+        # drop columns that just duplicate information already in the service_id
+        features.drop(labels=['id', 'network_id', 'WBAN', 'USAF'], axis=1, inplace=True, errors='ignore')
 
         return features
 
@@ -157,7 +159,7 @@ class NcdcServiceGhcnDaily(NcdcServiceBase):
 
         return data
 
-    def get_features(self, **kwargs):
+    def _get_features(self, **kwargs):
         return ghcn_daily.get_stations(as_dataframe=True)
 
 
@@ -207,7 +209,7 @@ class NcdcServiceGsod(NcdcServiceBase):
 
         return data
 
-    def get_features(self, **kwargs):
+    def _get_features(self, **kwargs):
         features = gsod.get_stations()
         features = pd.DataFrame.from_dict(features, orient='index')
         return features

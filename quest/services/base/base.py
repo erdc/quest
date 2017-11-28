@@ -3,6 +3,7 @@ import abc
 from future.utils import with_metaclass
 from quest import util
 import os
+import pickle
 import ulmo
 import pandas as pd
 import geopandas as gpd
@@ -20,6 +21,7 @@ reserved_feature_fields = [
     'description',
     'reserved',
     'geometry',
+    'parameters',
 
 ]
 reserved_geometry_fields = [
@@ -75,16 +77,19 @@ class ProviderBase(with_metaclass(abc.ABCMeta, object)):
         Take a series of query parameters and return a list of
         locations as a geojson python dictionary
         """
-        cache_file = os.path.join(util.get_cache_dir(self.name), service + '_features.geojson')
+        cache_file = os.path.join(util.get_cache_dir(self.name), service + '_features.p')
         if self.use_cache and not update_cache:
             try:
-                features = gpd.read_file(cache_file)
-                features.set_index('id', inplace=True)
+                features = pd.read_pickle(cache_file)
                 self._label_features(features, service)
+
+                # convert to GeoPandas GeoDataFrame
+                features = gpd.GeoDataFrame(features, geometry='geometry')
+
                 return features
-            except:
+            except Exception as e:
+                logger.info(e)
                 logger.info('updating cache')
-                pass
 
         # get features from service
         features = self.services[service].get_features(**kwargs)
@@ -142,18 +147,15 @@ class ProviderBase(with_metaclass(abc.ABCMeta, object)):
             features['parameters'] = ','.join(params['parameters'])
             # features['parameter_codes'] = ','.join(params['parameter_codes'])
 
-        features.drop(labels=['service', 'service_id', 'name'], axis=1, inplace=True, errors='ignore')
-
-        # convert to GeoPandas GeoDataFrame
-        features = gpd.GeoDataFrame(features, geometry='geometry')
-
         if self.use_cache:
             # write to cache_file
             util.mkdir_if_doesnt_exist(os.path.split(cache_file)[0])
-            with open(cache_file, 'w') as f:
-                f.write(features.to_json(default=util.to_json_default_handler))
+            features.to_pickle(cache_file)
 
         self._label_features(features, service)
+
+        # convert to GeoPandas GeoDataFrame
+        features = gpd.GeoDataFrame(features, geometry='geometry')
 
         return features
 
@@ -164,6 +166,76 @@ class ProviderBase(with_metaclass(abc.ABCMeta, object)):
         features['service_id'] = features['service_id'].apply(str)
         features.index = features['service'] + '/' + features['service_id']
         features['name'] = features.index
+
+    def get_tags(self, service, update_cache=False):
+
+        cache_file = os.path.join(util.get_cache_dir(self.name), service + '_tags.p')
+        if self.use_cache and not update_cache:
+            try:
+                with open(cache_file, 'rb') as cache:
+                    tags = pickle.load(cache)
+                return tags
+            except:
+                logger.info('updating tag cache')
+
+        features = self.get_features(service=service, update_cache=update_cache)
+        metadata = pd.DataFrame(list(features.metadata))
+
+        # drop metadata fields that are unusable as tag fields
+        metadata.drop(labels=['location'], axis=1, inplace=True, errors='ignore')
+
+        tags = {}
+        for tag in metadata.columns:
+            try:
+                tags[tag] = list(metadata[tag].unique())
+
+                # make sure datetime values are serialized (for RPC server)
+                tags[tag] = json.loads(json.dumps(tags[tag], default=util.to_json_default_handler))
+            except TypeError:
+                values = list(metadata[tag])
+                new_tags = dict()
+                new_tags[tag] = list()
+                for v in values:
+                    if isinstance(v, dict):
+                        self._combine_dicts(new_tags, self._get_tags_from_dict(tag, v))
+                    else:
+                        new_tags[tag].append(v)
+                if not new_tags[tag]:
+                    del new_tags[tag]
+                tags.update({k: list(set(v)) for k, v in new_tags.items()})
+
+        if self.use_cache:
+            # write to cache_file
+            with open(cache_file, 'wb') as cache:
+                pickle.dump(tags, cache)
+
+        return tags
+
+    def _get_tags_from_dict(self, tag, d):
+        """Helper function for `get_tags` to recursively parse dicts and add them as multi-indexed tags
+        """
+        tags = dict()
+        for k, v in d.items():
+            new_tag = '{}:{}'.format(tag, k)
+            if isinstance(v, dict):
+                self._combine_dicts(tags, self._get_tags_from_dict(new_tag, v))
+            else:
+                tags[new_tag] = v
+
+        return tags
+
+    def _combine_dicts(self, this, other):
+        """Helper function for `get_tags` to combine dictionaries by aggregating values rather than overwriting them.
+        """
+        for k, other_v in other.items():
+            other_v = util.listify(other_v)
+            if k in this:
+                this_v = this[k]
+                if isinstance(this_v, list):
+                    other_v.extend(this_v)
+                else:
+                    other_v.append(this_v)
+            this[k] = other_v
 
     def get_services(self):
         return {k: v.metadata for k, v in self.services.items()}

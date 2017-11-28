@@ -51,7 +51,7 @@ def test_get_features_from_service(api, service, expected, tolerance):
 @slow
 def test_get_features_with_search_term(api):
     features = api.get_features('svc://ncdc:ghcn-daily', filters={'search_terms': ['ZI']})
-    expected = 21
+    expected = 259
     tolerance = 10
     assert abs(len(features) - expected) < tolerance
 

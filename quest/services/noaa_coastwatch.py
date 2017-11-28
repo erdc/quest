@@ -42,13 +42,9 @@ class NoaaServiceBase(TimePeriodServiceBase):
             'parameter_codes': list(self._parameter_map.keys())
         }
 
-    @property
-    def features(self):
-        features = self.get_features()
-        return features.drop_duplicates()
-
     def get_features(self, **kwargs):
         raise NotImplementedError()
+        # TODO drop duplicates?
     
     @property
     def feature(self):
