@@ -41,21 +41,16 @@ def get_metadata(uris, as_dataframe=False):
     # get metadata for service type uris
     if 'services' in grouped_uris.groups.keys():
         svc_df = grouped_uris.get_group('services')
-        svc_df = pd.DataFrame(svc_df['uri'].apply(util.parse_service_uri).tolist(),
-                              columns=['provider', 'service', 'feature'])
+        svc_df[['provider', 'service', 'feature']] = svc_df['uri'].apply(util.parse_service_uri).apply(pd.Series)
 
         for (provider, service), grp in svc_df.groupby(['provider', 'service']):
-            svc = 'svc://{}:{}'.format(provider, service)
+            # svc = .format(provider, service)
             driver = util.load_providers()[provider]
             features = driver.get_features(service)
-            selected_features = grp['feature'].tolist()
+            selected_features = grp['uri'].tolist()
             if None not in selected_features:
                 features = features.loc[selected_features]
 
-            features['service'] = svc
-            features['service_id'] = features.index
-            features.index = features['service'] + '/' + features['service_id']
-            features['name'] = features.index
             metadata.append(features)
 
     if 'collections' in grouped_uris.groups.keys():
