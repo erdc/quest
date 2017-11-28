@@ -17,7 +17,7 @@ class UsgsNlcdServiceBase(SingleFileServiceBase):
         'landcover': 'landcover'
     }
 
-    def _get_features(self):
+    def get_features(self, **kwargs):
         base_url = 'https://www.sciencebase.gov/catalog/items'
         params = [
             ('filter', 'tags!=tree canopy'),
@@ -36,16 +36,17 @@ class UsgsNlcdServiceBase(SingleFileServiceBase):
         features = features.loc[~features.title.str.contains('Tree Canopy')]
         features['geometry'] = features['spatial'].apply(_bbox2poly)
         features['download_url'] = features.webLinks.apply(_parse_links)
-        #features['extract_from_zip'] = '.tif'
-        features['filename'] = features['download_url'].str.split('FNAME=', expand=True)[1]
-        features['reserved'] = features['download_url'].apply(
-            lambda x: {'download_url': x, 'file_format': 'raster-gdal', 'extract_from_zip':'.tif'})
-
+        features['filename'] = features['download_url'].str.rsplit('/', n=1, expand=True)[1]
+        features['reserved'] = features.apply(
+            lambda x: {'download_url': x['download_url'],
+                       'filename': x['filename'],
+                       'file_format': 'raster-gdal',
+                       'extract_from_zip': '.tif',
+                       }, axis=1)
 
         features['parameters'] = 'landcover'
-        features['file_format'] = 'raster-gdal'
         features.rename(columns={'id': 'service_id', 'title': 'display_name'},
-                  inplace=True)
+                        inplace=True)
         features.index = features['service_id']
 
         # remove extra fields. nested dicts can cause problems
@@ -53,6 +54,8 @@ class UsgsNlcdServiceBase(SingleFileServiceBase):
         del features['webLinks']
         del features['spatial']
         del features['link']
+        del features['download_url']
+        del features['filename']
 
         return features
 
