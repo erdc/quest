@@ -38,3 +38,4 @@ dependencies:
     - sortedcollections
     - pytest-cov
     - param
+    - sphinx_rtd_theme
