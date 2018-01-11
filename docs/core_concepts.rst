@@ -34,8 +34,12 @@ These are the actual individual data files or in some cases a folder of data.
 Datasets are always located at a feature. Currently a dataset can only be
 attached to a single feature by design.
 
-Web Services
-^^^^^^^^^^^^
+Providers
+~~~~~~~~~
 
-Web services are the primary means of ingesting data into Quest.
-todo: add info about providers and services and user services
+Data providers are the top level source of data. Providers are composed of one or more `Services`_, and typically represent an organization or specific part of an organization that provides data. In Quest Providers are a way of grouping related services.
+
+Services
+^^^^^^^^
+
+A data service is a specific type or channel of data that is offered from a `Provider`_, and are the primary means of ingesting data into Quest.
