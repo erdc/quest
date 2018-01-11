@@ -2,6 +2,7 @@ from setuptools import setup
 from setuptools.command.test import test as TestCommand
 import sys
 
+
 class PyTest(TestCommand):
     def finalize_options(self):
         TestCommand.finalize_options(self)
@@ -14,7 +15,8 @@ class PyTest(TestCommand):
         errno = pytest.main(self.test_args)
         sys.exit(errno)
 
+
 setup(
-    setup_requires=['pbr'],
+    setup_requires=['pbr', 'sphinx', 'sphinx_rtd_theme'],
     pbr=True,
 )
