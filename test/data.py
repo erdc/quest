@@ -219,7 +219,7 @@ SERVICES_FEATURE_COUNT = [
     ('svc://usgs-nlcd:2006', 131, 100),
     ('svc://usgs-nlcd:2011', 203, 100),
     ('svc://usgs-nwis:dv', 36368, 1000),
-    ('svc://usgs-nwis:iv', 16446, 1000),
+    ('svc://usgs-nwis:iv', 19615, 1000),
 
 ]
 
