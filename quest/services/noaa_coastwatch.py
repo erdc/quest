@@ -1,6 +1,9 @@
 """QUEST wrapper for NCDC GHCN and GSOD Services."""
 import os
-import datetime
+
+# For python 2 compatibility
+from future.standard_library import install_aliases
+install_aliases()
 
 import pandas as pd
 import param
@@ -11,15 +14,10 @@ from ..util.log import logger
 from .base import ProviderBase, TimePeriodServiceBase
 from .. import util
 
-BASE_PATH = 'noaa'
-BASE_URL = 'http://coastwatch.pfeg.noaa.gov/erddap/tabledap/'
-
-
-# noaa_url = 'http://coastwatch.pfeg.noaa.gov/erddap/tabledap/nosCoopsCA.csvp?stationID%2CstationName%2CdateEstablished%2Clongitude%2Clatitude'
-
 
 class NoaaServiceBase(TimePeriodServiceBase):
     BASE_URL = 'http://coastwatch.pfeg.noaa.gov/erddap/tabledap/'
+    BASE_PATH = 'noaa'
 
     @property
     def metadata(self):
@@ -92,7 +90,7 @@ class NoaaServiceBase(TimePeriodServiceBase):
             data.index = pd.to_datetime(data.index)
             data.rename(columns={self.parameter_code: self.parameter})
 
-            file_path = os.path.join(file_path, BASE_PATH, self.service_name, dataset, '{0}.h5'.format(dataset))
+            file_path = os.path.join(file_path, self.BASE_PATH, self.service_name, dataset, '{0}.h5'.format(dataset))
 
             metadata = {
                 'file_path': file_path,
