@@ -144,8 +144,9 @@ def authenticate_provider(uri):
 
 
     """
-    driver = util.load_providers()[uri]
-    driver.authenticate_me()
+    # driver = util.load_providers()[uri]
+    # driver.authenticate_me()
+
 
 
 

@@ -1,4 +1,4 @@
-from .base import ProviderBase, SingleFileServiceBase
+from .base import ProviderBase, SingleFileServiceBase, PublishBase
 from hs_restclient import HydroShare, HydroShareAuthBasic
 from shapely.geometry import Point, box
 import pandas as pd
@@ -6,10 +6,10 @@ import pandas as pd
 
 class HSServiceBase(SingleFileServiceBase):
 
-    def __init__(self, provider, **kwargs):
-        super(HSServiceBase, self).__init__(provider, **kwargs)
-        auth = self.provider.auth
-        self.hs = HydroShare(auth=auth)
+    # def __init__(self, provider, **kwargs):
+    #     super(HSServiceBase, self).__init__(provider, **kwargs)
+    #     auth = self.provider.auth
+    #     self.hs = HydroShare(auth=auth)
 
     def get_features(self, **kwargs):
         results = list(self.hs.resources())
@@ -71,5 +71,12 @@ class HydroProvider(ProviderBase):
     organization_abbr = 'ERDC'
     auth = None
 
-    def authenticate_me(self):
-        self.auth = HydroShareAuthBasic(username=input("username: "), password=input("password: "))
+    # def authenticate_me(self):
+    #     self.auth = HydroShareAuthBasic(username=input("username: "), password=input("password: "))
+
+
+class HydroPublisher(PublishBase):
+
+    def systems_check(self):
+        print("Hi mom!")
+        return
