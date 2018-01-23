@@ -6,6 +6,11 @@ import pandas as pd
 
 class HSServiceBase(SingleFileServiceBase):
 
+    def __init__(self, provider, **kwargs):
+        super(HSServiceBase, self).__init__(provider, **kwargs)
+        auth = self.provider.auth
+        self.hs = HydroShare(auth=auth)
+
     def get_features(self, **kwargs):
         results = list(self.hs.resources())
 
@@ -65,3 +70,6 @@ class HydroProvider(ProviderBase):
     organization_name = 'U.S. Army Engineering Research and Development Center'
     organization_abbr = 'ERDC'
     auth = None
+
+    def authenticate_me(self):
+        self.auth = HydroShareAuthBasic(username=input("username: "), password=input("password: "))
