@@ -1,6 +1,8 @@
 Core Concepts
 -------------
 
+Quest uses a hierarchical structure to organize and manage datasets, and data sources. The dataset hierarchy begins with `projects` which contains `collections` which contain `features` which have `datasets`. A more detailed description of each level is given below.
+
 Projects
 ^^^^^^^^
 
@@ -33,6 +35,10 @@ Datasets
 These are the actual individual data files or in some cases a folder of data.
 Datasets are always located at a feature. Currently a dataset can only be
 attached to a single feature by design.
+
+____
+
+Data sources are organized into `providers` which contain one or more `services.
 
 Providers
 ~~~~~~~~~

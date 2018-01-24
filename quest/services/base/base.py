@@ -50,7 +50,7 @@ class ProviderBase(with_metaclass(abc.ABCMeta, object)):
         if self.service_base_class is None:
             return {}  # TODO or should I raise a NotImplementedError
         if self._services is None:
-            self._services = {s.service_name: s(name=s.service_name)
+            self._services = {s.service_name: s(name=s.service_name, provider=self)
                               for s in self.service_base_class.__subclasses__()}
         return self._services
 
@@ -277,6 +277,10 @@ class ServiceBase(param.Parameterized):
 
     name = param.String(default='Service', precedence=-1)
 
+    def __init__(self, provider, **kwargs):
+        self.provider = provider
+        super(ServiceBase, self).__init__(**kwargs)
+
     @property
     def title(self):
         return '{} Download Options'.format(self.display_name)
@@ -397,7 +401,7 @@ class SingleFileServiceBase(ServiceBase):
     eg elevation raster etc
     """
     def download(self, feature, file_path, dataset, **params):
-        feature = self.get_features().loc[feature]
+        feature = self.provider.get_features(self.name).loc[feature]
         reserved = feature.get('reserved')
         download_url = reserved['download_url']
         fmt = reserved.get('extract_from_zip', '')
