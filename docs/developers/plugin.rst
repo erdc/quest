@@ -96,7 +96,7 @@ a. Required Service Class Attributes
   * ``description`` (String): A brief description of the service that will be available in the service's metadata.
   * ``service_type`` (String): A keyword that indicates the type of data that the service provides. Must be one of `geo-discrete`, `geo-seamless` or `geo-typical`.  (# TODO: provide link to description of service types in the docs)
   * ``unmapped_parameters_available`` (Bool): Whether or not additional parameters are available from the service other than those that are listed in the ``_parameter_map``.
-  * ``geom_type`` (String): Describes what type of geometry represents the locations of the data (for `geo-discrete` services only). Must be `Point`, `Line`, `Polygone`. Leave as ``None`` for service of type other than `geo-discrete`.
+  * ``geom_type`` (String): Describes what type of geometry represents the locations of the data (for `geo-discrete` services only). Must be `Point`, `Line`, `Polygon`. Leave as ``None`` for service of type other than `geo-discrete`.
   * ``datatype`` (String): Represents the type of data that is accessible from the service. Must be `timeseries`, `raster`, or `other`.
   * ``geographical_areas`` (List): A list of descriptive words that represent the areas where data is available (e.g. `['North America', 'Europe']`). Should be left as ``None`` for `geo-typical` service types.
   * ``bounding_boxes`` (List): A list of bounding boxes represented as tuples in the form (x-min, y-min, x-max, y-max). For example `[(-180, -90, 180, 90)]`.
@@ -121,10 +121,10 @@ In some cases the attributes will be the same for both services, so they can be 
         ]
         smtk_template = None
 
-        def download(self, feature, file_path, dataset, **params):
+        def get_features(self, **kwargs):
             pass  #TODO: This will be implemented later
 
-        def get_features(self, **kwargs):
+        def download(self, feature, file_path, dataset, **params):
             pass  #TODO: This will be implemented later
 
 
@@ -149,14 +149,48 @@ In some cases the attributes will be the same for both services, so they can be 
 
 b. Implement the ``get_features`` Method
 ........................................
+The purpose of the ``get_features`` method is to extract key metadata from the service that describes what data is available from that service. For `geo-discrete` services this would include a list of locations where the service has data in addition to other key metadata at each location. The return value for ``get_features`` should be a Pandas DataFrame indexed by a unique id (known as the `service_id`) with the following columns:
 
+ * `display_name`: (will be set to `service_id` if not provided)
+ * `description`: (will be set to '' if not provided)
+ * `service_id`: a unique id that is used by the web service to identify the data
+
+For `geo-discrete` services the DataFrame must also include a representation of the features' geometry. Any of the following options are valid ways to specify the geometry:
+
+ 1) `geometry`: a geojson string or Shapely object
+ 2) `latitude` and `longitude`: two columns with the decimal degree coordinates of a point
+ 3) `geometry_type`, `latitudes`, and `longitudes`: `Point`, `Line`, or `Polygon` with a list of coordinates
+ 4) `bbox`: tuple with order (lon min, lat min, lon max, lat max)
+
+All other fields that the DataFrame contains will be accumulated into a ``dict`` and placed in a column called `metadata`.
+
+Similar to the attributes the ``get_features`` method may be implemented in the service classes (e.g. ``ExampleService1`` and ``ExampleService2``), or in the base class (e.g. ``ExampleServiceBase``), or some combination of both.
 
 c. Implement the ``download`` Method
 ....................................
+The ``download`` method is responsible for retrieving the data from the data source using the specified download options, save it to disk, and then return a dictionary of key metadata. The download method should accept several arguments:
+
+ * `feature`: the service uri (including the service_id) for the feature that is associated with the data to be downloaded
+ * `file_path`: the path to the directory on disk where Quest expects the data to be written
+ * `dataset`: the Quest dataset id associated with the data to be downloaded
+ * `**params`: key-word arguments for the dataset options
+
+After downloading the data and saving it to disk, this method should return a dictionary ith the following keys:
+
+ * `metadata`: any metadata that was returned by the data source when it was downloaded in the form of a ``dict``
+ * `file_path`: the final file path (including the filename) where the data file was writen
+ * `file_format`: the format that the file was written in (to be used to determine which I/O plugin to use to read the file)
+ * `datatype`: a string representing the type of data. Must be `timeseries`, `raster`, or `other`.
+ * `parameter`: a string representing the parameter of the data
+ * `unit`: a string representing the units of the data
 
 
 d. Specify the Download Options
 ...............................
+Data sources's APIs often allow various options to be specified to determine what data to download, what format it should be in, etc.
+
+The download options that are needed for each service are defined using the Python library `Param (https://ioam.github.io/param/)`_. This library enables parameters to have features like type and range checking, documentation strings, default values, etc. Refer to the `Param documentation (https://ioam.github.io/param/)`_ for more information.
+
 
 .. todo::
 
