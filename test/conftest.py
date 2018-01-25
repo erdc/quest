@@ -12,6 +12,8 @@ import errno
 import quest
 from quest.scripts import rpc_server
 
+from data import SERVICES
+
 base_path = os.path.dirname(os.path.abspath(__file__))
 FILES_DIR = os.path.join(base_path, 'files')
 
@@ -56,14 +58,18 @@ def get_or_generate_test_cache(update=False, skip=False):
         start = time()
     warnings.simplefilter('ignore')
     drivers = quest.util.load_providers()
-    for name in quest.api.get_services():
+    for name in SERVICES:
         provider, service, feature = quest.util.parse_service_uri(name)
         if provider.startswith('user'):
             continue
         driver = drivers[provider]
         cache_file = os.path.join(quest.util.get_cache_dir(driver.name), service + '_features.p')
         if update or not os.path.exists(cache_file):
-            quest.api.get_tags(name, update_cache=update)
+            try:
+                quest.api.get_tags(name, update_cache=update)
+            except Exception as e:
+                print('The following error prevented the cache for the {0} service from updating: {1}: {2}'
+                      .format(name, type(e).__name__, str(e)))
     warnings.simplefilter('default')
     if start is not None:
         print('Generated test cash in {0} seconds'.format(time() - start))

@@ -51,7 +51,5 @@ def test_download(api, feature, options):
     api.new_collection('test')
     collection_feature = api.add_features('test', feature)
     d = api.stage_for_download(collection_feature, options=options)[0]
-    result = api.download_datasets(d)
-    if result[d] != 'downloaded':
-        pprint(api.get_metadata(d))
+    result = api.download_datasets(d, raise_on_error=True)
     assert result[d] == 'downloaded'
