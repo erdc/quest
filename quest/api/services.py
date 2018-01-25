@@ -34,14 +34,15 @@ def get_providers(expand=None):
 
 
 @dispatcher.add_method
-def get_services(expand=None, parameter=None, service_type='geo-discrete'):
+def get_services(expand=None, parameter=None, service_type=None):
     """Return list of Services.
 
     Args:
          expand (bool, Optional, Default=False):
             include services' details and format as dict
          parameter (string, Optional, Default=None):
-         service_type (string, Optional, Default='geo-discrete'):
+         service_type (string, Optional, Default=None'):
+            filter to only include specific type
 
     Returns:
           services (list or dict, Default=dict):
