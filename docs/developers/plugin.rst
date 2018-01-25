@@ -170,7 +170,7 @@ c. Implement the ``download`` Method
 ....................................
 The ``download`` method is responsible for retrieving the data from the data source using the specified download options, save it to disk, and then return a dictionary of key metadata. The download method should accept several arguments:
 
- * `feature`: the service uri (including the service_id) for the feature that is associated with the data to be downloaded
+ * `feature`: the service_id for the feature that is associated with the data to be downloaded
  * `file_path`: the path to the directory on disk where Quest expects the data to be written
  * `dataset`: the Quest dataset id associated with the data to be downloaded
  * `**params`: key-word arguments for the dataset options
