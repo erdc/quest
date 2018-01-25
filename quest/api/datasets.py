@@ -63,6 +63,12 @@ def download(feature, file_path, dataset=None, **kwargs):
 
 @dispatcher.add_method
 @add_async
+def publish(feature, file_path, dataset=None, **kwargs):
+    pass
+
+
+@dispatcher.add_method
+@add_async
 def download_datasets(datasets, raise_on_error=False):
     """Download datasets that have been staged with stage_for_download.
 
@@ -165,6 +171,11 @@ def download_options(uris, fmt='json'):
         options[uri] = driver.download_options(service, fmt)
 
     return options
+
+
+@dispatcher.add_method
+def publish_options(uris, fmt='json'):
+    pass
 
 
 @dispatcher.add_method
@@ -317,6 +328,11 @@ def stage_for_download(uris, options=None):
         datasets.append(dataset_uri)
 
     return datasets
+
+
+@dispatcher.add_method
+def stage_for_publish(uris, options=None):
+    pass
 
 
 @dispatcher.add_method
