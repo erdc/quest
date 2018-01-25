@@ -401,7 +401,8 @@ class SingleFileServiceBase(ServiceBase):
     eg elevation raster etc
     """
     def download(self, feature, file_path, dataset, **params):
-        feature = self.provider.get_features(self.name).loc[feature]
+        feature_id = util.construct_service_uri(self.provider.name, self.name, feature)
+        feature = self.provider.get_features(self.name).loc[feature_id]
         reserved = feature.get('reserved')
         download_url = reserved['download_url']
         fmt = reserved.get('extract_from_zip', '')

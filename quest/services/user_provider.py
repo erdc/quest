@@ -22,7 +22,7 @@ def get_user_service_base():
         parameter = param.ObjectSelector(default=None, doc="""parameter""")
 
         @classmethod
-        def instance(cls, service_name, service_data, uri, is_remote):
+        def instance(cls, service_name, service_data, provider, uri, is_remote):
             parameters = util.listify(service_data['metadata'].pop('parameters'))
 
             if len(parameters) > 1:
@@ -30,7 +30,7 @@ def get_user_service_base():
             else:
                 cls.params()['parameter'] = param.String(default=parameters[0], doc="""parameter""", constant=True)
 
-            self = UserServiceBase(name=service_name)
+            self = UserServiceBase(name=service_name, provider=provider)
             self.service_name = service_name
             self.uri = uri
             self.is_remote = is_remote
@@ -200,6 +200,7 @@ class UserProvider(ProviderBase):
         self._metadata['service_uri'] = self.uri
         self._services = {name: get_user_service_base().instance(service_name=name,
                                                                  service_data=data,
+                                                                 provider=self,
                                                                  uri=self.uri,
                                                                  is_remote=self.is_remote)
                           for name, data in provider_data['services'].items()}
