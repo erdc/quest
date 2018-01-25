@@ -6,10 +6,10 @@ import pandas as pd
 
 class HSServiceBase(SingleFileServiceBase):
 
-    # def __init__(self, provider, **kwargs):
-    #     super(HSServiceBase, self).__init__(provider, **kwargs)
-    #     auth = self.provider.auth
-    #     self.hs = HydroShare(auth=auth)
+    def __init__(self, provider, **kwargs):
+        super(HSServiceBase, self).__init__(provider, **kwargs)
+        auth = self.provider.auth
+        self.hs = HydroShare(auth=auth)
 
     def get_features(self, **kwargs):
         results = list(self.hs.resources())
@@ -76,6 +76,9 @@ class HydroProvider(ProviderBase):
 
 
 class HydroPublisher(PublishBase):
+
+    # def __init__(self, provider, **kwargs):
+    #     super(HydroPublisher, self).__init__(provider, **kwargs)
 
     def systems_check(self):
         print("Hi mom!")

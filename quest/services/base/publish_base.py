@@ -14,51 +14,108 @@ import json
 import param
 
 
-class PublishBase():
-    """Base class for data publish plugins
-    """
-    # service_base_class = None
+class PublishBase(param.Parameterized):
+    # service_name = None
     # display_name = None
     # description = None
-    # organization_name = None
-    # organization_abbr = None
-
-    # @property
-    # def services(self):
-    #     pass
+    # service_type = None
+    # unmapped_parameters_available = None
+    # geom_type = None
+    # datatype = None
+    # geographical_areas = None
+    # bounding_boxes = None
+    # smtk_template = None
+    # _parameter_map = None
     #
-    # @property
-    # def metadata(self):
-    #     pass
+    # name = param.String(default='Service', precedence=-1)
 
-    def __init__(self):
+    # def __init__(self, provider, **kwargs):
+    #     self.provider = provider
+    #     super(ServiceBase, self).__init__(**kwargs)
+
+    @property
+    def title(self):
+        # return '{} Download Options'.format(self.display_name)
         pass
 
-    def get_features(self, service, update_cache=False, **kwargs):
+    @property
+    def metadata(self):
+        # return {
+        #     'display_name': self.display_name,
+        #     'description': self.description,
+        #     'service_type': self.service_type,
+        #     'parameters': list(self._parameter_map.values()),
+        #     'unmapped_parameters_available': self.unmapped_parameters_available,
+        #     'geom_type': self.geom_type,
+        #     'datatype': self.datatype,
+        #     'geographical_areas': self.geographical_areas,
+        #     'bounding_boxes': self.bounding_boxes
+        # }
         pass
 
-    def _label_features(self, features, service):
+    @property
+    def parameters(self):
+        # return {
+        #     'parameters': list(self._parameter_map.values()),
+        #     'parameter_codes': list(self._parameter_map.keys())
+        # }
         pass
 
-    def get_tags(self, service, update_cache=False):
+    @property
+    def parameter_code(self):
+        # if hasattr(self, 'parameter'):
+        #     pmap = self.parameter_map(invert=True)
+        #     return pmap[self.parameter]
         pass
 
-    def _get_tags_from_dict(self, tag, d):
+    def parameter_map(self, invert=False):
+        # pmap = self._parameter_map
+        #
+        # if pmap is None:
+        #     raise NotImplementedError()
+        #
+        # if invert:
+        #     pmap = {v: k for k, v in pmap.items()}
+        #
+        # return pmap
         pass
 
-    def _combine_dicts(self, this, other):
+    def get_parameters(self, features=None):
+        # """Default function that should be overridden if the features argument needs to be handled."""
+        # return self.parameters
         pass
 
-    def get_services(self):
+    def publish_options(self, fmt):
+        # """
+        # needs to return dictionary
+        # eg. {'path': /path/to/dir/or/file, 'format': 'raster'}
+        # """
+        #
+        # if fmt == 'param':
+        #     schema = self
+        #
+        # elif fmt == 'smtk':
+        #     if self.smtk_template is None:
+        #         return ''
+        #     parameters = sorted(self.parameters['parameters'])
+        #     parameters = [(p.capitalize(), p) for p in parameters]
+        #     schema = util.build_smtk('download_options',
+        #                              self.smtk_template,
+        #                              title=self.title,
+        #                              parameters=parameters)
+        #
+        # elif fmt == 'json':
+        #     schema = format_json_options(self)
+        #
+        # else:
+        #     raise ValueError('{} is an unrecognized format.'.format(fmt))
+        #
+        # return schema
         pass
 
-    def get_parameters(self, service, features=None):
+    def publish(self, feature, file_path, dataset, **params):
+        # raise NotImplementedError()
         pass
 
-    def download(self, service, feature, file_path, dataset, **kwargs):
-        pass
-
-    def download_options(self, service, fmt):
-        pass
 
 
