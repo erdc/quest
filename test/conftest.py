@@ -10,39 +10,22 @@ import warnings
 import errno
 
 import quest
-from quest.scripts import rpc_server
 
 from data import SERVICES
 
 base_path = os.path.dirname(os.path.abspath(__file__))
 FILES_DIR = os.path.join(base_path, 'files')
 
-# use different default ports for Python 2 and Python 3 so they can both be tested simultaneously
-RPC_PORT = 4440 + sys.version_info.major
-
 
 def pytest_addoption(parser):
     parser.addoption('--update-cache', action='store_true')
-    parser.addoption('--rpc-only', action='store_true')
-    parser.addoption('--python-only', action='store_true')
     parser.addoption('--skip-slow', action='store_true')
     parser.addoption('--test-download', action='store_true')
-    parser.addoption('--rpc-port-range', dest='rpc_port_range', nargs=2, default=None,
-                     help="start and end port for range or ports to scan for an available port.")
 
 
 def pytest_generate_tests(metafunc):
     if 'api' in metafunc.fixturenames:
-        api_params = ['python', 'rpc']
-
-        if sys.version_info.major == 3:
-            if metafunc.config.getoption('--python-only'):
-                api_params.remove('rpc')
-            elif metafunc.config.getoption('--rpc-only'):
-                api_params.remove('python')
-        else:
-            api_params.remove('rpc')  # RPC server doesn't support Python 2
-            print('The RPC server is not supported in Python 2.')
+        api_params = ['python']
 
         metafunc.parametrize("api", api_params, indirect=True, scope='session')
 
@@ -104,47 +87,10 @@ def get_base_dir(request, pytestconfig):
     return base_dir
 
 
-def get_available_port(request):
-    port_range = request.config.getoption('rpc_port_range')
-    if port_range is not None:
-        port_range = range(int(port_range[0]), int(port_range[1]) + 1)
-    else:
-        port_range = range(RPC_PORT, RPC_PORT + 1)
-
-    for port in port_range:
-        try:
-            s = socket.socket()
-            s.connect(('localhost', port))
-            s.close()
-        except socket.error as e:
-            if e.errno == errno.ECONNREFUSED:  # (i.e. port is not being used)
-                return port
-
-
-def start_rpc_server(base_dir, port):
-    os.chdir(base_dir)
-    rpc_server.start_server(port=port, threaded=True)
-
-server_process = None
-port = None
-
-
 @pytest.fixture(scope='session')
 def api(request, get_base_dir):
     if request.param == 'python':
         return quest.api
-    elif request.param == 'rpc':
-        global server_process
-        global port
-        server_running = server_process.is_alive() if hasattr(server_process, 'is_alive') else False
-        if not server_running:
-            port = get_available_port(request)
-            server_process = Thread(target=start_rpc_server, args=[get_base_dir, port])
-            server_process.start()
-            sleep(1)
-
-        request.addfinalizer(lambda: rpc_server.stop_server(port=port))
-        return rpc_server.RPCClient(port=port)
 
 
 @pytest.fixture

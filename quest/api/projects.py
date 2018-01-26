@@ -1,5 +1,4 @@
 """API functions related to Projects."""
-from jsonrpc import dispatcher
 import os
 import pandas as pd
 import shutil
@@ -23,7 +22,6 @@ def active_db():
     return dbpath
 
 
-@dispatcher.add_method
 def add_project(name, path, activate=True):
     """Add a existing QUEST project to the list of available projects
 
@@ -58,7 +56,6 @@ def add_project(name, path, activate=True):
     return project
 
 
-@dispatcher.add_method
 def new_project(name, display_name=None, description=None, metadata=None,
                 folder=None, activate=True):
     """Create a new QUEST project and add it to list of available projects.
@@ -116,7 +113,6 @@ def new_project(name, display_name=None, description=None, metadata=None,
     return _load_project(name)
 
 
-@dispatcher.add_method
 def delete_project(name):
     """Delete a project.
 
@@ -148,7 +144,6 @@ def delete_project(name):
     return remove_project(name)
 
 
-@dispatcher.add_method
 def get_active_project():
     """Get active project name.
 
@@ -161,7 +156,6 @@ def get_active_project():
     return util.read_yaml(path).get('active_project', 'default')
 
 
-@dispatcher.add_method
 def get_projects(expand=False, as_dataframe=False):
     """Get list of available projects.
 
@@ -200,7 +194,6 @@ def get_projects(expand=False, as_dataframe=False):
     return projects
 
 
-@dispatcher.add_method
 def remove_project(name):
     """Remove a project from the list of available projects.
 
@@ -245,7 +238,6 @@ def remove_project(name):
     return projects
 
 
-@dispatcher.add_method
 def set_active_project(name):
     """Set active QUEST project.
 

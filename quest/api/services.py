@@ -4,13 +4,11 @@ Providers are inferred by aggregating information from service plugins.
 """
 from __future__ import absolute_import
 from __future__ import print_function
-from jsonrpc import dispatcher
 from .. import util
 import os
 import requests
 
 
-@dispatcher.add_method
 def get_providers(expand=None):
     """Return list of Providers.
 
@@ -22,7 +20,7 @@ def get_providers(expand=None):
             list of all available providers
 
     """
-    providers = util.load_providers() #util.load_drivers('services')
+    providers = util.load_providers()
     p = {k: v.metadata for k, v in providers.items()}
     if not expand:
         p = sorted(p.keys())
@@ -30,7 +28,6 @@ def get_providers(expand=None):
     return p
 
 
-@dispatcher.add_method
 def get_services(expand=None, parameter=None, service_type=None):
     """Return list of Services.
 
@@ -62,7 +59,6 @@ def get_services(expand=None, parameter=None, service_type=None):
     return services
 
 
-@dispatcher.add_method
 def add_provider(uri):
     """Add a custom web service created from a file or http folder.
 
@@ -102,7 +98,6 @@ def add_provider(uri):
     return msg
 
 
-@dispatcher.add_method
 def delete_provider(uri):
     """Remove 'user' service.
 
@@ -133,7 +128,6 @@ def delete_provider(uri):
     return msg
 
 
-@dispatcher.add_method
 def authenticate_provider(uri):
     """Authenticate the user.
 

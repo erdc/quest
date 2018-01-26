@@ -1,7 +1,5 @@
 """API functions related to Collections."""
 from __future__ import print_function
-import os
-from jsonrpc import dispatcher
 from .. import util
 from .projects import _get_project_dir
 import pandas as pd
@@ -9,7 +7,6 @@ from .database import get_db, db_session
 import os
 
 
-@dispatcher.add_method
 def get_collections(expand=False, as_dataframe=False):
     """Get available collections.
 
@@ -38,7 +35,6 @@ def get_collections(expand=False, as_dataframe=False):
     return collections
 
 
-@dispatcher.add_method
 def new_collection(name, display_name=None, description=None, metadata=None):
     """Create a new collection.
 
