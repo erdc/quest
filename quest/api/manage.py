@@ -6,7 +6,6 @@ delete, move, and copy fn for collections/features/datasets
 
 import os
 import shutil
-from jsonrpc import dispatcher
 from ..util.log import logger
 import pandas as pd
 
@@ -20,7 +19,6 @@ from .tasks import add_async
 from .. import util
 
 
-@dispatcher.add_method
 @add_async
 def delete(uris):
     """Delete metadata for resource(s)
@@ -84,7 +82,6 @@ def delete(uris):
     return True
 
 
-@dispatcher.add_method
 @add_async
 def move(uris, destination_collection, as_dataframe=None, expand=None):
 
@@ -134,7 +131,6 @@ def move(uris, destination_collection, as_dataframe=None, expand=None):
     return {'features': new_features, 'datasets': new_datasets}
 
 
-@dispatcher.add_method
 @add_async
 def copy(uris, destination_collection, as_dataframe=None, expand=None):
 

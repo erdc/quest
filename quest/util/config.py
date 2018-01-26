@@ -3,7 +3,6 @@
 """
 
 import appdirs
-from jsonrpc import dispatcher
 import logging
 import os
 import yaml
@@ -13,7 +12,6 @@ log = logging.getLogger(__name__)
 settings = {}
 
 
-@dispatcher.add_method
 def get_settings():
     """Get the settings currently being used by QUEST.
 
@@ -41,7 +39,6 @@ def get_settings():
     return settings
 
 
-@dispatcher.add_method
 def update_settings(config={}):
     """Update settings currently being used by QUEST
 
@@ -86,7 +83,6 @@ def update_settings(config={}):
     return True
 
 
-@dispatcher.add_method
 def update_settings_from_file(filename):
     """Update settings currently being used by QUEST from a yaml file
 
@@ -128,7 +124,6 @@ def update_settings_from_file(filename):
     return True
 
 
-@dispatcher.add_method
 def save_settings(filename=None):
     """Save settings currently being used by QUEST to a yaml file
 

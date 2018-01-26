@@ -1,9 +1,7 @@
 """API functions related to versions."""
 import quest
-from jsonrpc import dispatcher
 
 
-@dispatcher.add_method
 def get_quest_version():
     """Get QUEST version.
 
@@ -14,7 +12,6 @@ def get_quest_version():
     return quest.__version__
 
 
-@dispatcher.add_method
 def get_api_version():
     """Get QUEST API version.
 

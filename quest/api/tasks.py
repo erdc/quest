@@ -2,7 +2,6 @@ from concurrent.futures import CancelledError
 from functools import wraps
 from distributed import Client, LocalCluster
 import psutil
-from jsonrpc import dispatcher
 import pandas as pd
 from tornado import gen
 import sys
@@ -54,7 +53,6 @@ def add_async(f):
     return wrapper
 
 
-@dispatcher.add_method
 def get_pending_tasks(**kwargs):
     """Return list of pending tasks
 
@@ -70,7 +68,6 @@ def get_pending_tasks(**kwargs):
     return get_tasks(**kwargs)
 
 
-@dispatcher.add_method
 def get_task(task_id, with_future=None):
     """Get details for a task.
 
@@ -88,7 +85,6 @@ def get_task(task_id, with_future=None):
     return task
 
 
-@dispatcher.add_method
 def get_tasks(filters=None, expand=None, as_dataframe=None, with_future=None):
     """Get all available tasks.
 
@@ -138,7 +134,6 @@ def get_tasks(filters=None, expand=None, as_dataframe=None, with_future=None):
     return task_list
 
 
-@dispatcher.add_method
 def cancel_tasks(task_ids):
     """Cancel tasks.
 
@@ -154,7 +149,6 @@ def cancel_tasks(task_ids):
     return
 
 
-@dispatcher.add_method
 def remove_tasks(task_ids=None, status=None):
     """Remove tasks.
 

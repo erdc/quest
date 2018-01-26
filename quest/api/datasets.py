@@ -1,5 +1,4 @@
 """Datasets API functions."""
-from jsonrpc import dispatcher
 import os
 
 from ..util.log import logger
@@ -23,7 +22,6 @@ class DatasetStatus:
     FILTERED = 'filter applied'
 
 
-@dispatcher.add_method
 @add_async
 def download(feature, file_path, dataset=None, **kwargs):
     """Download dataset and save it locally.
@@ -61,13 +59,11 @@ def download(feature, file_path, dataset=None, **kwargs):
     return data
 
 
-@dispatcher.add_method
 @add_async
 def publish(feature, file_path, dataset=None, **kwargs):
     pass
 
 
-@dispatcher.add_method
 @add_async
 def download_datasets(datasets, raise_on_error=False):
     """Download datasets that have been staged with stage_for_download.
@@ -137,7 +133,6 @@ def download_datasets(datasets, raise_on_error=False):
     return status
 
 
-@dispatcher.add_method
 def download_options(uris, fmt='json'):
     """List optional kwargs that can be specified when downloading a dataset.
 
@@ -173,12 +168,10 @@ def download_options(uris, fmt='json'):
     return options
 
 
-@dispatcher.add_method
 def publish_options(uris, fmt='json'):
     pass
 
 
-@dispatcher.add_method
 @add_async
 def get_datasets(expand=None, filters=None, as_dataframe=None):
     """Return all available datasets in active project.
@@ -224,7 +217,6 @@ def get_datasets(expand=None, filters=None, as_dataframe=None):
 
 
 @add_async
-@dispatcher.add_method
 def new_dataset(feature, source=None, display_name=None,
                 description=None, file_path=None, metadata=None):
     """Create a new dataset at a feature.
@@ -282,7 +274,6 @@ def new_dataset(feature, source=None, display_name=None,
     return name
 
 
-@dispatcher.add_method
 def stage_for_download(uris, options=None):
     """Apply download options before downloading
     Args:
@@ -330,12 +321,10 @@ def stage_for_download(uris, options=None):
     return datasets
 
 
-@dispatcher.add_method
 def stage_for_publish(uris, options=None):
     pass
 
 
-@dispatcher.add_method
 def describe_dataset():
     """Show metadata associated with downloaded dataset.
 
@@ -348,7 +337,6 @@ def describe_dataset():
     pass
 
 
-@dispatcher.add_method
 def open_dataset(dataset, fmt=None):
     """Open the dataset and return in format specified by fmt
 
@@ -379,7 +367,6 @@ def open_dataset(dataset, fmt=None):
     return io.open(path, fmt=fmt)
 
 
-@dispatcher.add_method
 @add_async
 def visualize_dataset(dataset, update_cache=False, **kwargs):
     """Visualize the dataset as a matplotlib/bokeh plot.
@@ -432,7 +419,6 @@ def visualize_dataset(dataset, update_cache=False, **kwargs):
     return visualization_path
 
 
-@dispatcher.add_method
 def visualize_dataset_options(dataset, fmt='json'):
     """Return visualization available options for dataset.
 

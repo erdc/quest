@@ -3,7 +3,6 @@
 get/update metadata for projects/collections/datasets.
 """
 
-from jsonrpc import dispatcher
 import pandas as pd
 import geopandas as gpd
 import shapely.wkt
@@ -12,7 +11,6 @@ from .. import util
 from .database import get_db, db_session, select_collections, select_features, select_datasets
 
 
-@dispatcher.add_method
 def get_metadata(uris, as_dataframe=False):
     """Get metadata for uris.
 
@@ -91,7 +89,6 @@ def get_metadata(uris, as_dataframe=False):
     return metadata
 
 
-@dispatcher.add_method
 def update_metadata(uris, display_name=None, description=None,
                     metadata=None, quest_metadata=None):
     """Update metadata for resource(s)

@@ -1,12 +1,10 @@
 """API functions related to Parameters."""
-from jsonrpc import dispatcher
 import pandas as pd
 from .services import get_services
 import os
 from .. import util
 
 
-@dispatcher.add_method
 def get_mapped_parameters():
     """Get list of common parameters.
 
@@ -22,7 +20,6 @@ def get_mapped_parameters():
     return sorted(list(set(parameters)))
 
 
-@dispatcher.add_method
 def get_parameters(service_uri, update_cache=False):
     """Get available parameters, even unmapped ones, for specified service.
 
@@ -50,19 +47,16 @@ def get_parameters(service_uri, update_cache=False):
     return parameters
 
 
-@dispatcher.add_method
 def new_parameter(uri, parameter_name, ):
     """Add new parameter to collection."""
     pass
 
 
-@dispatcher.add_method
 def update_parameter():
     """Add update parameter metadata in a collection."""
     pass
 
 
-@dispatcher.add_method
 def delete_parameter():
     """delete a parameter in a collection."""
     pass
