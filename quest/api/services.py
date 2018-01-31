@@ -4,13 +4,10 @@ Providers are inferred by aggregating information from service plugins.
 """
 from __future__ import absolute_import
 from __future__ import print_function
-from builtins import str
 from jsonrpc import dispatcher
 from .. import util
-
 import os
 import requests
-from stevedore import driver
 
 
 @dispatcher.add_method
@@ -134,3 +131,42 @@ def delete_provider(uri):
         msg = 'service not found'
 
     return msg
+
+
+@dispatcher.add_method
+def authenticate_provider(uri):
+    """Authenticate the user.
+
+    Args:
+        uri (string, Required):
+            uri of 'user service'
+     Returns:
+
+
+    """
+    driver = util.load_providers()[uri]
+    driver.authenticate_me()
+
+
+def unauthenticate_provider(uri):
+    """Un-Authenticate the user.
+
+    Args:
+        uri (string, Required):
+            uri of 'user service'
+     Returns:
+
+
+    """
+    driver = util.load_providers()[uri]
+    driver.unauthenticate_me()
+
+
+
+
+
+
+
+
+
+
