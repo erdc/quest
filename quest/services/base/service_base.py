@@ -25,9 +25,9 @@ class ServiceBase(param.Parameterized):
 
     name = param.String(default='Service', precedence=-1)
 
-    # def __init__(self, provider, **kwargs):
-    #     self.provider = provider
-    #     super(ServiceBase, self).__init__(**kwargs)
+    def __init__(self, provider, **kwargs):
+        self.provider = provider
+        super(ServiceBase, self).__init__(**kwargs)
 
     @property
     def title(self):
@@ -149,7 +149,8 @@ class SingleFileServiceBase(ServiceBase):
     eg elevation raster etc
     """
     def download(self, feature, file_path, dataset, **params):
-        feature = self.get_features().loc[feature]
+        feature_id = util.construct_service_uri(self.provider.name, self.name, feature)
+        feature = self.provider.get_features(self.name).loc[feature_id]
         reserved = feature.get('reserved')
         download_url = reserved['download_url']
         fmt = reserved.get('extract_from_zip', '')

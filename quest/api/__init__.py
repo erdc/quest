@@ -10,10 +10,11 @@ __version__ = '2.3'
 
 __all__ = (
     'add_features',
+    'add_project',
     'add_provider',  # add custom url or local folder as a service
     'apply_filter',
     'apply_filter_options',
-    'add_project',
+    'authenticate_provider',
     'cancel_tasks',
     'copy',
     'delete',  # replaces delete_dataset, delete_collection, delete_feature
@@ -55,6 +56,7 @@ __all__ = (
     'set_active_project',
     'stage_for_download',
     'stage_for_publish',
+    'unauthenticate_provider',
     'update_metadata',  # replaces update_collection, update_feature, update_dataset
     'update_settings',
     'update_settings_from_file',
@@ -148,8 +150,9 @@ from .services import (
     get_services,
     add_provider,
     delete_provider,
+    authenticate_provider,
+    unauthenticate_provider,
 )
-
 
 from .tasks import (
     get_pending_tasks,

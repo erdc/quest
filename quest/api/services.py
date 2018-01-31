@@ -144,12 +144,22 @@ def authenticate_provider(uri):
 
 
     """
-    # driver = util.load_providers()[uri]
-    # driver.authenticate_me()
+    driver = util.load_providers()[uri]
+    driver.authenticate_me()
 
 
+def unauthenticate_provider(uri):
+    """Un-Authenticate the user.
+
+    Args:
+        uri (string, Required):
+            uri of 'user service'
+     Returns:
 
 
+    """
+    driver = util.load_providers()[uri]
+    driver.unauthenticate_me()
 
 
 
