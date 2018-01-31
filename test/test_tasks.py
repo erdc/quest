@@ -2,7 +2,6 @@ from time import sleep
 from quest.api.tasks import add_async
 import pytest
 import quest
-from jsonrpc import dispatcher
 from types import ModuleType
 import sys
 
@@ -21,14 +20,12 @@ def task_cleanup(api, request):
     request.addfinalizer(remove_tasks)
 
 
-@dispatcher.add_method
 @add_async
 def long_process(delay, msg):
     sleep(delay)
     return {'delay': delay, 'msg': msg}
 
 
-@dispatcher.add_method
 @add_async
 def long_process_with_exception(delay, msg):
     sleep(delay)

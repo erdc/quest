@@ -14,7 +14,7 @@ channels:
     - defaults
 
 dependencies:
-    - python=3.5
+    - python=3
     - fiona
     - rasterio
     - gdal
@@ -38,3 +38,6 @@ dependencies:
     - pytest-cov
     - param
     - sphinx_rtd_theme
+
+    - pip:
+      - hs_restclient

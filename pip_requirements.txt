@@ -18,3 +18,4 @@ distributed
 psutil
 pint
 tornado
+hs_restclient

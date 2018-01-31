@@ -38,3 +38,6 @@ dependencies:
     - pytest-cov
     - param
     - sphinx_rtd_theme
+
+    - pip:
+      - hs_restclient
