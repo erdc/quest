@@ -9,7 +9,6 @@ import geopandas as gpd
 import re
 from ..util.log import logger
 
-from jsonrpc.jsonrpc import JSONRPCRequest
 from stevedore import extension, driver
 from past.builtins import basestring  # for python 2 compatibility
 try:
@@ -198,22 +197,6 @@ def construct_service_uri(provider, service, feature=None):
         uri = '{}/{}'.format(uri, feature)
 
     return uri
-
-
-def rpc2py(jsonrpc_str):
-    """Convert jsonrpc dict or string to a python quest function call
-
-    args:
-        jsonrpc_str (string): json rpc request
-
-    returns:
-        converts to python and calls quest function
-    """
-    import quest
-    r = JSONRPCRequest.from_json(jsonrpc_str).data
-    fn = getattr(quest.api, r.get('method'))
-    kwargs = r.get('params')
-    return fn(**kwargs)
 
 
 def listify(liststr, delimiter=','):

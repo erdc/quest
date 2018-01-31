@@ -2,15 +2,11 @@
 
 This will eventually hold filter related functionality
 """
-import pandas as pd
-
 from .. import util
-from jsonrpc import dispatcher
 from .metadata import get_metadata
 from .tasks import add_async
 
 
-@dispatcher.add_method
 def get_filters(filters=None, expand=False, **kwargs):
 
     """List available filter plugins
@@ -60,7 +56,6 @@ def get_filters(filters=None, expand=False, **kwargs):
     return avail
 
 
-@dispatcher.add_method
 @add_async
 def apply_filter(name, options=None, as_dataframe=None, expand=None, **kwargs):
     """Apply Filter to dataset.
@@ -108,7 +103,6 @@ def apply_filter(name, options=None, as_dataframe=None, expand=None, **kwargs):
     return result
 
 
-@dispatcher.add_method
 def apply_filter_options(name, fmt='json', **kwargs):
     """Retrieve kwarg options for apply_filter.
 

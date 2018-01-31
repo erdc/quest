@@ -4,7 +4,6 @@ Features are unique identifiers with a web service or collection.
 """
 import json
 import itertools
-from jsonrpc import dispatcher
 import pandas as pd
 import numpy as np
 import geopandas as gpd
@@ -19,7 +18,6 @@ from .metadata import get_metadata
 from .tasks import add_async
 
 
-@dispatcher.add_method
 @add_async
 def add_features(collection, features):
     """Add features to a collection based on the passed in feature uris.
@@ -82,7 +80,6 @@ def add_features(collection, features):
     return uris
 
 
-@dispatcher.add_method
 @add_async
 def get_features(uris=None, expand=False, as_dataframe=False, as_geojson=False,
                  update_cache=False, filters=None,
@@ -231,7 +228,6 @@ def _multi_index(d, index):
     return d
 
 
-@dispatcher.add_method
 def get_tags(service_uris, update_cache=False, filter=None, as_count=False):
     """Get searchable tags for a given service.
 
@@ -273,7 +269,6 @@ def get_tags(service_uris, update_cache=False, filter=None, as_count=False):
     return tags
 
 
-@dispatcher.add_method
 @add_async
 def new_feature(collection, display_name=None, geometry=None, geom_type=None, geom_coords=None,
                 description=None, metadata=None):
