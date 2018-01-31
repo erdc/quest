@@ -5,6 +5,7 @@ Central location for all hard coded data needed for tests.
 DOWNLOAD_OPTIONS_FROM_ALL_SERVICES = {
  # 'svc://nasa:srtm-3-arc-second': {},
  # 'svc://nasa:srtm-30-arc-second': {},
+ 'svc://cuahsi-hs:hs_geo': {},
  'svc://ncdc:ghcn-daily': {'properties': [{'default': None,
     'description': 'parameter',
     'name': 'parameter',

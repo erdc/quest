@@ -27,7 +27,7 @@ stages:
     - conda env create -q -n quest-$MY_PY_VER-$CI_BUILD_REF -f ${MY_PY_VER}_conda_environment.yml
     - source activate quest-$MY_PY_VER-$CI_BUILD_REF
     - python setup.py develop
-    - py.test test -l --verbose --cov=quest --rpc-port-range $MY_RPC_START_PORT $MY_RPC_END_PORT --update-cache --test-download
+    - py.test test -l --verbose --cov=quest --update-cache --test-download
     - source deactivate
     - conda env remove -q -y -n quest-$MY_PY_VER-$CI_BUILD_REF
 

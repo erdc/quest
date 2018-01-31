@@ -81,7 +81,7 @@ def _param_to_json(pobj):
     if hasattr(pobj, 'softbounds'):
         schema['bounds'] = pobj.softbounds
     if hasattr(pobj, 'get_range'):
-        schema['range'] = sorted(list(l) for l in pobj.get_range().items())  # convert each tuple to a list for RPC
+        schema['range'] = sorted(list(l) for l in pobj.get_range().items())
 
     return schema
 

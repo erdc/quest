@@ -23,15 +23,12 @@ Custom Test Options
 
 Several custom options have been configured to allow several subsets of the tests to be run.
 
-    * `--python-only`: Only runs tests through the Python interpreter (RPC tests will not be run)
-    * `--rpc-only`: Only runs tests through the RPC server. (There are several tests that cannot be run through the RPC server and these tests will still be run through Python).
     * `--skip-slow`: Any tests that have been marked as slow (e.g. the `get_features` tests) will not be run.
     * `--update-cache`: Triggers the feature metadata for each service to be re-downloaded (this process takes 5 or 6 minutes).
-    * `--rpc-port-range <START_PORT> <END_PORT>`: Provides a range of ports to scan through to find an available port to use for the RPC server.
 
 For example, to run most of the tests very quickly you can run::
 
-    (quest) $ pytest test --python-only --skip-slow
+    (quest) $ pytest test --skip-slow
 
 This will will give you the most bang for you buck, running the majority of the tests in just several seconds.
 

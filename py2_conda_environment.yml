@@ -22,7 +22,6 @@ dependencies:
     - numpy
     - geojson
     - jinja2
-    - json-rpc
     - ulmo>=0.8.3.2
     - pyyaml
     - matplotlib
@@ -39,3 +38,6 @@ dependencies:
     - pytest-cov
     - param
     - sphinx_rtd_theme
+
+    - pip:
+      - hs_restclient
