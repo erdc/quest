@@ -2,16 +2,16 @@ from .base import ProviderBase, SingleFileServiceBase, PublishBase
 from hs_restclient import HydroShare, HydroShareAuthBasic
 from shapely.geometry import Point, box
 import pandas as pd
+import getpass
+from ..api.database import get_db, db_session
+import os
 
 
 class HSServiceBase(SingleFileServiceBase):
 
-    def __init__(self, provider, **kwargs):
-        super(HSServiceBase, self).__init__(provider, **kwargs)
+    def get_features(self, **kwargs):
         auth = self.provider.auth
         self.hs = HydroShare(auth=auth)
-
-    def get_features(self, **kwargs):
         results = list(self.hs.resources())
 
         features = pd.DataFrame(results)
@@ -63,16 +63,44 @@ class HSGeoService(HSServiceBase):
     _parameter_map = {}
 
 
-class HydroProvider(ProviderBase):
+class HSProvider(ProviderBase):
     service_base_class = HSServiceBase
     display_name ='Hydro Web Services'
     description = 'Services avaliable through the ERDC HydroSHare Server.'
     organization_name = 'U.S. Army Engineering Research and Development Center'
     organization_abbr = 'ERDC'
-    auth = None
 
-    # def authenticate_me(self):
-    #     self.auth = HydroShareAuthBasic(username=input("username: "), password=input("password: "))
+    def authenticate_me(self, **kwargs):
+
+        username = input("Enter Username: ")
+        password = input("Enter Password: ")
+
+        try:
+            self._auth = HydroShareAuthBasic(username=username, password=password)
+            hs = HydroShare(auth=self.auth)
+            hs.resources(count=1)
+            db = get_db()
+            with db_session:
+                p = db.Providers.select().filter(provider=self.name).first()
+
+                provider_metadata = {
+                    'provider': self.name,
+                    'username': username,
+                    'password': password,
+                }
+
+                if p is None:
+                    db.Providers(**provider_metadata)
+                else:
+                    p.set(**provider_metadata)
+
+            return True
+
+        except Exception as e:
+            print("Credentials were invalid.")
+
+        return False
+
 
 
 class HydroPublisher(PublishBase):

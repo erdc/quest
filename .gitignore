@@ -5,3 +5,4 @@ quest/.QUEST_Store
 docs/_build/
 __pycache__
 .cache/
+.idea/*
