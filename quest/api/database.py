@@ -65,6 +65,11 @@ def define_models(db):
         # setup relationships
         feature = orm.Required(Feature)
 
+    class Providers(db.Entity):
+        provider = orm.PrimaryKey(str)
+        username = orm.Required(str)
+        password = orm.Required(str)
+
 
 def get_db(dbpath=None, reconnect=False):
     """Get database object.
