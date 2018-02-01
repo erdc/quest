@@ -2,16 +2,22 @@ from .base import ProviderBase, SingleFileServiceBase, PublishBase
 from hs_restclient import HydroShare, HydroShareAuthBasic
 from shapely.geometry import Point, box
 import pandas as pd
-import getpass
 from ..api.database import get_db, db_session
-import os
 
 
 class HSServiceBase(SingleFileServiceBase):
 
     def get_features(self, **kwargs):
-        auth = self.provider.auth
-        self.hs = HydroShare(auth=auth)
+        db = get_db()
+        with db_session:
+            p = db.Providers.select().filter(provider=self.name).first()
+
+        if p is not None:
+            auth = self.provider.auth
+            self.hs = HydroShare(auth=auth)
+        else:
+            self.hs = HydroShare()
+
         results = list(self.hs.resources())
 
         features = pd.DataFrame(results)
