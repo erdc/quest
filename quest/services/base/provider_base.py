@@ -275,6 +275,6 @@ class ProviderBase(with_metaclass(abc.ABCMeta, object)):
         with db_session:
             p = db.Providers.select().filter(provider=self.name).first()
             if p is None:
-                raise ValueError('Provider does not exist')
+                raise ValueError('Provider does not exist in the database.')
             else:
                 p.delete()
