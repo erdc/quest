@@ -113,3 +113,6 @@ class HydroPublisher(PublishBase):
 
     def __init__(self, provider, **kwargs):
         super(HydroPublisher, self).__init__(provider, **kwargs)
+
+    def publish (self, feature, file_path, dataset, **params):
+        pass
