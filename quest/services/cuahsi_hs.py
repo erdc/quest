@@ -2,6 +2,7 @@ from .base import ProviderBase, SingleFileServiceBase, PublishBase
 from hs_restclient import HydroShare, HydroShareAuthBasic
 from shapely.geometry import Point, box
 import pandas as pd
+from getpass import getpass
 from ..api.database import get_db, db_session
 
 
@@ -78,8 +79,8 @@ class HSProvider(ProviderBase):
 
     def authenticate_me(self, **kwargs):
 
-        username = input("Enter Username: ")
-        password = input("Enter Password: ")
+        username = getpass("Enter Username: ")
+        password = getpass("Enter Password: ")
 
         try:
             self._auth = HydroShareAuthBasic(username=username, password=password)
