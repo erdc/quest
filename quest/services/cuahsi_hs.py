@@ -109,12 +109,7 @@ class HSProvider(ProviderBase):
         return False
 
 
-
 class HydroPublisher(PublishBase):
 
-    # def __init__(self, provider, **kwargs):
-    #     super(HydroPublisher, self).__init__(provider, **kwargs)
-
-    def systems_check(self):
-        print("Hi mom!")
-        return
+    def __init__(self, provider, **kwargs):
+        super(HydroPublisher, self).__init__(provider, **kwargs)

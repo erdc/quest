@@ -140,7 +140,7 @@ def download_options(uris, fmt='json'):
         uris (string or list, Required):
             uris of features or datasets
         fmt (string, Required, Default='json'):
-            format in which to return download_options. One of ['json', 'smtk', 'param']
+            format in which to return download_options. One of ['json', 'param']
 
 
     Returns:

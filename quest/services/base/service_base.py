@@ -84,16 +84,6 @@ class ServiceBase(param.Parameterized):
         if fmt == 'param':
             schema = self
 
-        elif fmt == 'smtk':
-            if self.smtk_template is None:
-                return ''
-            parameters = sorted(self.parameters['parameters'])
-            parameters = [(p.capitalize(), p) for p in parameters]
-            schema = util.build_smtk('download_options',
-                                     self.smtk_template,
-                                     title=self.title,
-                                     parameters=parameters)
-
         elif fmt == 'json':
             schema = format_json_options(self)
 
