@@ -15,6 +15,7 @@ reserved_feature_fields = [
     'name',
     'service',
     'service_id',
+    'publisher_id',
     'display_name',
     'description',
     'reserved',
@@ -38,6 +39,7 @@ class ProviderBase(with_metaclass(abc.ABCMeta, object)):
     """Base class for data provider plugins
     """
     service_base_class = None
+    publish_base_class = None
     display_name = None
     description = None
     organization_name = None
@@ -51,6 +53,15 @@ class ProviderBase(with_metaclass(abc.ABCMeta, object)):
             self._services = {s.service_name: s(name=s.service_name, provider=self)
                               for s in self.service_base_class.__subclasses__()}
         return self._services
+
+    @property
+    def publishes(self):
+        if self.publish_base_class is None:
+            return {}
+        if self._publishes is None:
+            self._publishes = {p.publisher_name: p(name=p.publisher_name, provider=self) for p in self.publish_base_class.__subclasses__()}
+
+        return self._publishes
 
     @property
     def metadata(self):
@@ -79,6 +90,7 @@ class ProviderBase(with_metaclass(abc.ABCMeta, object)):
         self.use_cache = use_cache #not implemented
         self.update_frequency = update_frequency #not implemented
         self._services = None
+        self._publishes = None
         self._auth = None
 
     def get_features(self, service, update_cache=False, **kwargs):
@@ -266,6 +278,9 @@ class ProviderBase(with_metaclass(abc.ABCMeta, object)):
         eg. {'path': /path/to/dir/or/file, 'format': 'raster'}
         """
         return self.services[service].download_options(fmt)
+
+    def publish(self, publisher):
+        return self.publishers[publisher].publish()
 
     def authenticate_me(self, **kwargs):
         raise NotImplementedError

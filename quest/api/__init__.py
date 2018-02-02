@@ -35,6 +35,7 @@ __all__ = (
     'get_pending_tasks',
     'get_projects',
     'get_providers',
+    'get_publishers',
     'get_quest_version',
     'get_services',
     'get_settings',
@@ -147,6 +148,7 @@ from .database import get_db
 
 from .services import (
     get_providers,
+    get_publishers,
     get_services,
     add_provider,
     delete_provider,
