@@ -114,5 +114,24 @@ class HydroPublisher(PublishBase):
     def __init__(self, provider, **kwargs):
         super(HydroPublisher, self).__init__(provider, **kwargs)
 
-    def publish (self, feature, file_path, dataset, **params):
-        pass
+    def publish(self, feature):
+        self.hs = None
+
+        db = get_db()
+        with db_session:
+            p = db.Providers.select().filter(provider=self.name).first()
+
+        if p is not None:
+            auth = self.provider.auth
+            self.hs = HydroShare(auth=auth)
+        else:
+            raise ValueError('Provider does not exist in the database.')
+
+        abstract = 'My abstract'
+        title = 'My resource'
+        keywords = ('my keyword 1', 'my keyword 2')
+        rtype = 'GenericResource'
+        fpath = '/path/to/a/file'
+        metadata = '[{"coverage":{"type":"period", "value":{"start":"01/01/2000", "end":"12/12/2010"}}}, {"creator":{"name":"John Smith"}}, {"creator":{"name":"Lisa Miller"}}]'
+        extra_metadata = '{"key-1": "value-1", "key-2": "value-2"}'
+        resource_id = self.hs.createResource(rtype, title, resource_file=fpath, keywords=keywords, abstract=abstract, metadata=metadata, extra_metadata=extra_metadata)

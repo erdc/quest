@@ -60,20 +60,16 @@ def download(feature, file_path, dataset=None, **kwargs):
 
 
 @add_async
-def publish(feature, file_path, dataset=None, **kwargs):
-    service_uri = feature
-    if not service_uri.startswith('svc://'):
+def publish(feature):
+    publisher_uri = feature
+    if not publisher_uri.startswith('pub://'):
         df = get_metadata(feature, as_dataframe=True)[0]
-        df = df['service'] + '/' + df['service_id']
-        service_uri = df.tolist()[0]
+        df = df['publisher'] + '/' + df['publisher_id']
+        publisher_uri = df.tolist()[0]
 
-    if file_path is None:
-        pass
-
-    provider, service, feature = util.parse_service_uri(service_uri)
+    provider, publisher, feature = util.parse_service_uri(publisher_uri)
     driver = util.load_providers()[provider]
-    data = driver.publish(service=service, feature=feature,
-                           file_path=file_path, dataset=dataset, **kwargs)
+    data = driver.publish(publisher=publisher, feature=feature)
     return data
 
 @add_async
