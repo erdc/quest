@@ -61,8 +61,20 @@ def download(feature, file_path, dataset=None, **kwargs):
 
 @add_async
 def publish(feature, file_path, dataset=None, **kwargs):
-    pass
+    service_uri = feature
+    if not service_uri.startswith('svc://'):
+        df = get_metadata(feature, as_dataframe=True)[0]
+        df = df['service'] + '/' + df['service_id']
+        service_uri = df.tolist()[0]
 
+    if file_path is None:
+        pass
+
+    provider, service, feature = util.parse_service_uri(service_uri)
+    driver = util.load_providers()[provider]
+    data = driver.publish(service=service, feature=feature,
+                           file_path=file_path, dataset=dataset, **kwargs)
+    return data
 
 @add_async
 def download_datasets(datasets, raise_on_error=False):
