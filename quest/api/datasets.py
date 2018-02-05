@@ -69,7 +69,7 @@ def publish(feature):
 
     provider, publisher, feature = util.parse_service_uri(publisher_uri)
     driver = util.load_providers()[provider]
-    data = driver.publish(publisher=publisher, feature=feature)
+    data = driver.publish(publisher=publisher)
     return data
 
 @add_async

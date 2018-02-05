@@ -39,7 +39,7 @@ class ProviderBase(with_metaclass(abc.ABCMeta, object)):
     """Base class for data provider plugins
     """
     service_base_class = None
-    publish_base_class = None
+    publishers_list = None
     display_name = None
     description = None
     organization_name = None
@@ -55,11 +55,11 @@ class ProviderBase(with_metaclass(abc.ABCMeta, object)):
         return self._services
 
     @property
-    def publishes(self):
-        if self.publish_base_class is None:
+    def publishers(self):
+        if self.publishers_list is None:
             return {}
         if self._publishes is None:
-            self._publishes = {p.publisher_name: p(name=p.publisher_name, provider=self) for p in self.publish_base_class.__subclasses__()}
+            self._publishes = {p.publisher_name: p(name=p.publisher_name, provider=self) for p in self.publishers_list}
 
         return self._publishes
 
@@ -75,15 +75,17 @@ class ProviderBase(with_metaclass(abc.ABCMeta, object)):
         }
 
     @property
-    def auth(self):
-        if self._auth is None:
+    def credentials(self):
+        if self._credentials is None:
             db = get_db()
             with db_session:
                 p = db.Providers.select().filter(provider=self.name).first()
                 if p is None:
                     raise ValueError('The {0} Provider has not been authenticated yet. Please call quest.api.authenticate_provider({0})'.format(self.name))
                 else:
-                    self._auth = dict(username=p.username, password=p.password)
+                    self._credentials = dict(username=p.username, password=p.password)
+
+        return self._credentials
 
     def __init__(self, name=None, use_cache=True, update_frequency='M'):
         self.name = name
@@ -91,7 +93,7 @@ class ProviderBase(with_metaclass(abc.ABCMeta, object)):
         self.update_frequency = update_frequency #not implemented
         self._services = None
         self._publishes = None
-        self._auth = None
+        self._credentials = None
 
     def get_features(self, service, update_cache=False, **kwargs):
         """Get Features associated with service.
@@ -190,7 +192,6 @@ class ProviderBase(with_metaclass(abc.ABCMeta, object)):
         features['name'] = features.index
 
     def get_tags(self, service, update_cache=False):
-
         cache_file = os.path.join(util.get_cache_dir(self.name), service + '_tags.p')
         if self.use_cache and not update_cache:
             try:
@@ -261,6 +262,9 @@ class ProviderBase(with_metaclass(abc.ABCMeta, object)):
 
     def get_services(self):
         return {k: v.metadata for k, v in self.services.items()}
+
+    def get_publishers(self):
+        return {k: v.metadata for k, v in self.publishers.items()}
 
     def get_parameters(self, service, features=None):
         return self.services[service].get_parameters(features=features)

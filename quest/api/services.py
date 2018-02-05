@@ -63,7 +63,7 @@ def get_publishers(expand=None, publisher_type=None):
     providers = util.load_providers()
     publishers = {}
     for provider, pub in providers.items():
-        for publisher, pub_metadata in pub.get_services().items():
+        for publisher, pub_metadata in pub.get_publishers().items():
             name = 'pub://%s:%s' % (provider, publisher)
             if publisher_type == pub_metadata['publisher_type'] or publisher_type is None:
                 pub_metadata.update({'name': name})
