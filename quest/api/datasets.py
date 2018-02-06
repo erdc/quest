@@ -60,9 +60,17 @@ def download(feature, file_path, dataset=None, **kwargs):
 
 
 @add_async
-def publish(feature, file_path, dataset=None, **kwargs):
-    pass
+def publish(feature):
+    publisher_uri = feature
+    if not publisher_uri.startswith('pub://'):
+        df = get_metadata(feature, as_dataframe=True)[0]
+        df = df['publisher'] + '/' + df['publisher_id']
+        publisher_uri = df.tolist()[0]
 
+    provider, publisher, feature = util.parse_service_uri(publisher_uri)
+    driver = util.load_providers()[provider]
+    data = driver.publish(publisher=publisher)
+    return data
 
 @add_async
 def download_datasets(datasets, raise_on_error=False):
@@ -140,7 +148,7 @@ def download_options(uris, fmt='json'):
         uris (string or list, Required):
             uris of features or datasets
         fmt (string, Required, Default='json'):
-            format in which to return download_options. One of ['json', 'smtk', 'param']
+            format in which to return download_options. One of ['json', 'param']
 
 
     Returns:
