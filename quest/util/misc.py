@@ -245,8 +245,7 @@ def load_providers():
     web_services = list_drivers('services')
     web_services.remove('user')
 
-    providers = {name: driver.DriverManager('quest.services', name, invoke_on_load=True,
-                                            invoke_kwds={'name': name}).driver for name in web_services}
+    providers = {name: driver.DriverManager('quest.services', name, invoke_on_load=True, invoke_kwds={'name': name}).driver for name in web_services}
 
     if len(settings.get('USER_SERVICES', [])) > 0:
         for uri in settings.get('USER_SERVICES', []):

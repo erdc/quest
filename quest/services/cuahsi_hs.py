@@ -9,14 +9,11 @@ from ..api.database import get_db, db_session
 class HSServiceBase(SingleFileServiceBase):
 
     def get_features(self, **kwargs):
-        db = get_db()
-        with db_session:
-            p = db.Providers.select().filter(provider=self.name).first()
 
-        if p is not None:
+        try:
             auth = self.provider.auth
             self.hs = HydroShare(auth=auth)
-        else:
+        except:
             self.hs = HydroShare()
 
         results = list(self.hs.resources())
@@ -70,12 +67,44 @@ class HSGeoService(HSServiceBase):
     _parameter_map = {}
 
 
+class HSPublisher(PublishBase):
+    publisher_name = "hs_normal"
+    display_name = "HydroShare Publisher"
+    description = "empty"
+
+    def __init__(self, provider, **kwargs):
+        super(HSPublisher, self).__init__(provider, **kwargs)
+
+    def publish(self):
+
+        try:
+            auth = self.provider.auth
+        except:
+            raise ValueError('Provider does not exist in the database.')
+
+        self.hs = HydroShare(auth=auth)
+        abstract = 'My latex abstract'
+        title = 'My latex resource'
+        keywords = ('Latex', 'examples')
+        rtype = 'GenericResource'
+        fpath = '/Users/rditlaav/Documents/service.py'
+        metadata = '[{"coverage":{"type":"period", "value":{"start":"01/01/2000", "end":"12/12/2010"}}}, {"creator":{"name":"John Smith"}}, {"creator":{"name":"Lisa Miller"}}]'
+        resource_id = self.hs.createResource(rtype, title, resource_file=fpath, keywords=keywords, abstract=abstract, metadata=metadata)
+        print("Resource ID: ", resource_id)
+
+
 class HSProvider(ProviderBase):
     service_base_class = HSServiceBase
-    display_name ='Hydro Web Services'
+    publishers_list = [HSPublisher]
+    display_name = 'Hydro Web Services'
     description = 'Services avaliable through the ERDC HydroSHare Server.'
     organization_name = 'U.S. Army Engineering Research and Development Center'
     organization_abbr = 'ERDC'
+
+    @property
+    def auth(self):
+        return HydroShareAuthBasic(**self.credentials)
+
 
     def authenticate_me(self, **kwargs):
 
@@ -107,14 +136,3 @@ class HSProvider(ProviderBase):
             print("Credentials were invalid.")
 
         return False
-
-
-
-class HydroPublisher(PublishBase):
-
-    # def __init__(self, provider, **kwargs):
-    #     super(HydroPublisher, self).__init__(provider, **kwargs)
-
-    def systems_check(self):
-        print("Hi mom!")
-        return
