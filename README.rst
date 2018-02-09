@@ -9,7 +9,7 @@ Environmental Simulator Quest
     :target: https://ci.appveyor.com/project/dharhas/quest
 
 
-Python API for Quest
+Python API for Quest.
 
 See *.rst files in the docs folder for documentation
 

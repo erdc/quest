@@ -1,4 +1,4 @@
-"""io plugin for timeseries datasets."""
+"""io plugin for raster datasets."""
 
 from .base import IoBase
 import os
@@ -37,8 +37,8 @@ class RasterGdal(IoBase):
     def visualize(self, path, reproject=False, crs=None):
         """Visualize raster dataset."""
         import rasterio
-
-        base, ext = os.path.splitext(path)
+        
+        base,ext = os.path.splitext(path)
 
         if reproject:
             reproject_dst = base + '-reproject' + ext
@@ -47,10 +47,10 @@ class RasterGdal(IoBase):
             with rasterio.open(path) as src:
                 # write out tif file
                 subprocess.check_output(['gdalwarp', path, reproject_dst, '-s_srs', src.crs.to_string(), '-t_srs', crs])
-            base, ext = os.path.splitext(reproject_dst)
-            path = reproject_dst
+            base,ext = os.path.splitext(reproject_dst)
+            path=reproject_dst          
 
-        dst = base + '.jpg'
+        dst=base+'.jpg'
         try:
 
             subprocess.check_output(['gdal_translate', '-expand', 'rgb', '-of','JPEG', path, dst])
