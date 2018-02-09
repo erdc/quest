@@ -41,8 +41,7 @@ install:
   # Useful for debugging any issues with conda
   - conda info -a
   # Create quest conda env and install deps
-  - conda install python=$PYTHON_VERSION
-  - conda env create -q -n test-environment -f $ENV_FILE
+  - conda env create -q -n test-environment -f $ENV_FILE python=$PYTHON_VERSION
   - source activate test-environment
   - python setup.py install
 

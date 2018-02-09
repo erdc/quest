@@ -27,8 +27,7 @@ install:
   - "conda config --set always_yes yes --set changeps1 no"
   - "conda update -q conda"
   - "conda info -a"
-  - "conda install python=%PYTHON_VERSION%"
-  - "conda env create -q -n test-environment -f %ENV_FILE%"
+  - "conda env create -q -n test-environment -f %ENV_FILE% python=%PYTHON_VERSION%"
   - "activate test-environment"
   - "python setup.py install"
 
