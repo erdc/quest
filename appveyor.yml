@@ -21,6 +21,8 @@ environment:
 init:
   - "ECHO %PYTHON_VERSION% %MINICONDA%"
 
+build: false
+
 install:
   # Install miniconda using a powershell script.
   - "set PATH=%MINICONDA%;%MINICONDA%\\Scripts;%PATH%"
