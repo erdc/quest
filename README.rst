@@ -1,9 +1,13 @@
 Environmental Simulator Quest
 -----------------------------
 
-.. image:: https://public.git.erdc.dren.mil/ci/projects/7/status.png?ref=master
-   :target: https://public.git.erdc.dren.mil/ci/projects/7?ref=master
-   :alt: Build status of the master branch on gitlab-ci
+.. image:: https://travis-ci.org/erdc/quest.svg?branch=master
+    :target: https://travis-ci.org/erdc/quest
+
+
+.. image:: https://ci.appveyor.com/api/projects/status/e20arxcfrcmb2ylm/branch/master?svg=true
+    :target: https://ci.appveyor.com/project/dharhas/quest
+
 
 Python API for Quest
 
