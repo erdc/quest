@@ -1,5 +1,7 @@
 linters:
     flake8:
+      enable: true
     pep8:
+      enable: true
 files:
     ignore: ['*.ipynb']
