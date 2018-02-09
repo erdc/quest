@@ -1,0 +1,55 @@
+language: python
+
+# Setting sudo to false opts in to Travis-CI container-based builds.
+sudo: false
+
+# Turn off email notifications
+notifications:
+  email: false
+
+os:
+  - linux
+  - osx
+
+env:
+  - PYTHON_VERSION="2.7"
+  - PYTHON_VERSION="3.4"
+  - PYTHON_VERSION="3.5"
+  - PYTHON_VERSION="3.6"
+
+# commands to install ulmo
+install:
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      OS_VERSION="Linux";
+    else
+      OS_VERSION="MacOSX";
+    fi
+  # We do this conditionally because it saves us some downloading if the
+  # version is the same.
+  - if [[ "$PYTHON_VERSION" == "2.7" ]]; then
+      wget https://repo.continuum.io/miniconda/Miniconda2-latest-${OS_VERSION}-x86_64.sh -O miniconda.sh;
+      ENV_FILE=py2_conda_environment.yml
+    else
+      wget https://repo.continuum.io/miniconda/Miniconda3-latest-${OS_VERSION}-x86_64.sh -O miniconda.sh;
+      ENV_FILE=py3_conda_environment.yml
+    fi
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  # Useful for debugging any issues with conda
+  - conda info -a
+  # Create quest conda env and install deps
+  - conda install python=$PYTHON_VERSION
+  - conda env create -q -n test-environment -f $ENV_FILE
+  - source activate test-environment
+  - python setup.py install
+
+# command to run tests
+script:
+  coverage run --source=quest setup.py test
+
+# generate test coverage information
+after_success:
+  coveralls
