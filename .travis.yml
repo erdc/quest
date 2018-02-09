@@ -28,10 +28,10 @@ install:
   # version is the same.
   - if [[ "$PYTHON_VERSION" == "2.7" ]]; then
       wget https://repo.continuum.io/miniconda/Miniconda2-latest-${OS_VERSION}-x86_64.sh -O miniconda.sh;
-      ENV_FILE=py2_conda_environment.yml
+      ENV_FILE=py2_conda_environment.yml;
     else
       wget https://repo.continuum.io/miniconda/Miniconda3-latest-${OS_VERSION}-x86_64.sh -O miniconda.sh;
-      ENV_FILE=py3_conda_environment.yml
+      ENV_FILE=py3_conda_environment.yml;
     fi
   - bash miniconda.sh -b -p $HOME/miniconda
   - export PATH="$HOME/miniconda/bin:$PATH"
