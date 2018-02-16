@@ -50,7 +50,7 @@ __all__ = (
     'new_project',
     'open_dataset',
     'publish',
-    'publish_options',
+    'get_publish_options',
     'remove_project',
     'remove_tasks',
     'save_settings',
@@ -90,12 +90,11 @@ from .datasets import (
     publish,
     download_datasets,
     download_options,
-    publish_options,
+    get_publish_options,
     get_datasets,
     new_dataset,
     open_dataset,
     stage_for_download,
-    stage_for_publish,
     visualize_dataset,
     visualize_dataset_options,
 )
@@ -116,7 +115,6 @@ from .features import (
 from .filters import (
     get_filters,
     apply_filter,
-    # apply_filter_set
     apply_filter_options,
 )
 

@@ -12,7 +12,7 @@ from ..api.datasets import DatasetStatus
 class FilterBase(param.Parameterized):
     """Base class for data filters."""
     _name = None
-    name = param.String(default='Filter', precedence=-1)
+    # name = param.String(default='Filter', precedence=-1)
     smtk_template = None
 
     # metadata attributes

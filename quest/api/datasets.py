@@ -60,16 +60,10 @@ def download(feature, file_path, dataset=None, **kwargs):
 
 
 @add_async
-def publish(feature):
-    publisher_uri = feature
-    if not publisher_uri.startswith('pub://'):
-        df = get_metadata(feature, as_dataframe=True)[0]
-        df = df['publisher'] + '/' + df['publisher_id']
-        publisher_uri = df.tolist()[0]
-
+def publish(publisher_uri, options=None):
     provider, publisher, feature = util.parse_service_uri(publisher_uri)
     driver = util.load_providers()[provider]
-    data = driver.publish(publisher=publisher)
+    data = driver.publish(publisher=publisher, options=options)
     return data
 
 @add_async
@@ -176,8 +170,27 @@ def download_options(uris, fmt='json'):
     return options
 
 
-def publish_options(uris, fmt='json'):
-    pass
+def get_publish_options(publish_uri, fmt='json'):
+    # get the correct driver
+    # make a call to publish_options on driver
+    uris = util.listify(publish_uri)
+    options = {}
+    for uri in uris:
+        publish_uri = uri
+        # if not publish_uri.startswith('pub://'):
+        #     feature = uri
+        #     if feature.startswith('d'):
+        #         feature = get_metadata(uri)[uri]['feature']
+        #
+        #     df = get_metadata(feature, as_dataframe=True).iloc[0]
+        #     df = df['service'] + '/' + df['service_id']
+        #     publish_uri = df
+
+        provider, publisher, feature = util.parse_service_uri(publish_uri)
+        driver = util.load_providers()[provider]
+        options[uri] = driver.publish_options(publisher, fmt)
+
+    return options
 
 
 @add_async
@@ -327,10 +340,6 @@ def stage_for_download(uris, options=None):
         datasets.append(dataset_uri)
 
     return datasets
-
-
-def stage_for_publish(uris, options=None):
-    pass
 
 
 def describe_dataset():

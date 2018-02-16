@@ -37,5 +37,5 @@ class PublishBase(param.Parameterized):
 
         return schema
 
-    def publish(self, feature, file_path, dataset, **params):
+    def publish(self, options):
         raise NotImplementedError()
