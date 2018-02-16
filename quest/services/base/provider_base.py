@@ -283,8 +283,11 @@ class ProviderBase(with_metaclass(abc.ABCMeta, object)):
         """
         return self.services[service].download_options(fmt)
 
-    def publish(self, publisher):
-        return self.publishers[publisher].publish()
+    def publish(self, publisher, options):
+        return self.publishers[publisher].publish(options)
+
+    def publish_options(self, publisher, fmt):
+        return self.publishers[publisher].publish_options(fmt)
 
     def authenticate_me(self, **kwargs):
         raise NotImplementedError

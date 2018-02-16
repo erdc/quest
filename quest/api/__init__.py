@@ -95,7 +95,6 @@ from .datasets import (
     new_dataset,
     open_dataset,
     stage_for_download,
-    stage_for_publish,
     visualize_dataset,
     visualize_dataset_options,
 )
@@ -116,7 +115,6 @@ from .features import (
 from .filters import (
     get_filters,
     apply_filter,
-    # apply_filter_set
     apply_filter_options,
 )
 

@@ -23,7 +23,7 @@ class ServiceBase(param.Parameterized):
     smtk_template = None
     _parameter_map = None
 
-    name = param.String(default='Service', precedence=-1)
+    # name = param.String(default='Service', precedence=-1)
 
     def __init__(self, provider, **kwargs):
         self.provider = provider

@@ -4,6 +4,9 @@ from shapely.geometry import Point, box
 import pandas as pd
 from getpass import getpass
 from ..api.database import get_db, db_session
+from ..api.metadata import get_metadata
+import param
+from ..util import param_util
 
 
 class HSServiceBase(SingleFileServiceBase):
@@ -12,7 +15,7 @@ class HSServiceBase(SingleFileServiceBase):
 
         try:
             auth = self.provider.auth
-            self.hs = HydroShare(auth=auth)
+            self.hs = HydroShare(auth=auth, hostname='134.164.253.116', port=443, use_https=True, verify=False)
         except:
             self.hs = HydroShare()
 
@@ -72,24 +75,28 @@ class HSPublisher(PublishBase):
     display_name = "HydroShare Publisher"
     description = "empty"
 
+    title = param.String(default="example title", doc="Title of resource", precedence=1)
+    abstract = param.String(default="example abstract",  precedence=2, doc="An description of the resource to be added to HydroShare.")
+    keywords = param.List(precedence=3, doc="list of keyword strings to describe the resource")
+    dataset = param_util.DatasetSelector(filters={'status': 'downloaded'}, precedence=4, doc="dataset to publish to HydroShare")
+
     def __init__(self, provider, **kwargs):
         super(HSPublisher, self).__init__(provider, **kwargs)
 
-    def publish(self):
+    def publish(self, options=None):
 
         try:
             auth = self.provider.auth
         except:
             raise ValueError('Provider does not exist in the database.')
 
-        self.hs = HydroShare(auth=auth)
-        abstract = 'My latex abstract'
-        title = 'My latex resource'
-        keywords = ('Latex', 'examples')
+        p = param.ParamOverrides(self, options)
+        hs = HydroShare(auth=auth, hostname='134.164.253.116', port=443, use_https=True, verify=False)
         rtype = 'GenericResource'
-        fpath = '/Users/rditlaav/Documents/service.py'
-        metadata = '[{"coverage":{"type":"period", "value":{"start":"01/01/2000", "end":"12/12/2010"}}}, {"creator":{"name":"John Smith"}}, {"creator":{"name":"Lisa Miller"}}]'
-        resource_id = self.hs.createResource(rtype, title, resource_file=fpath, keywords=keywords, abstract=abstract, metadata=metadata)
+        dataset_metadata = get_metadata(p.dataset)[p.dataset]
+        fpath = dataset_metadata['file_path']
+        metadata = dataset_metadata['metadata']
+        resource_id = hs.createResource(rtype, p.title, resource_file=fpath, keywords=p.keywords, abstract=p.abstract, metadata=metadata)
         print("Resource ID: ", resource_id)
 
 
@@ -105,15 +112,14 @@ class HSProvider(ProviderBase):
     def auth(self):
         return HydroShareAuthBasic(**self.credentials)
 
-
     def authenticate_me(self, **kwargs):
 
-        username = getpass("Enter Username: ")
+        username = input("Enter Username: ")
         password = getpass("Enter Password: ")
 
         try:
-            self._auth = HydroShareAuthBasic(username=username, password=password)
-            hs = HydroShare(auth=self.auth)
+            auth = HydroShareAuthBasic(username=username, password=password)
+            hs = HydroShare(auth=auth, hostname='134.164.253.116', port=443, use_https=True, verify=False)
             hs.resources(count=1)
             db = get_db()
             with db_session:
