@@ -4,7 +4,6 @@
 | -------- | ------------ | 
 | [![Build Status](https://travis-ci.org/erdc/quest.svg?branch=master)](https://travis-ci.org/erdc/quest) | [![Build Status](https://ci.appveyor.com/api/projects/status/e20arxcfrcmb2ylm/branch/master?svg=true)](https://ci.appveyor.com/project/dharhas/quest) | 
 
-Python API for Quest
 
 ### Project Description
 Quest is a python library that provides an API the ability to search, publish and download data (both geographical and non-geographical) across multiple data sources including both local repositories and web based services. The library also allows provides tools in order to manipulate and manage the data that the user is working with. 
@@ -12,7 +11,7 @@ Quest is a python library that provides an API the ability to search, publish an
 ### Project Links
 - Here is a live link for the Quest Documentation: https://quest.erdc.dren.mil/Documentation/Quest/
 
-## setup dev environment
+## Setup Dev Environment
 
 - Install miniconda
 - Install conda-env
@@ -30,7 +29,7 @@ Quest is a python library that provides an API the ability to search, publish an
 
     python setup.py develop
 
-## development workflow
+## Development Workflow
 
 - change to master branch
 
