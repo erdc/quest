@@ -9,15 +9,33 @@ import param
 from ..util import param_util
 
 
-class HSServiceBase(SingleFileServiceBase):
+class DDServiceBase(SingleFileServiceBase):
 
     def get_features(self, **kwargs):
+        raise NotImplementedError()
 
+
+class DDGeoService(DDServiceBase):
+    service_name = 'dd_geo'
+    display_name = 'Data Depot Geo Service'
+    description = 'Data Depot is a repository for ERDC ERS.'
+    service_type = 'geo-discrete'
+    unmapped_parameters_available = True
+    geom_type = 'Point'
+    datatype = 'timeseries'
+    geographical_areas = ['Worldwide']
+    bounding_boxes = [
+        [-180, -90, 180, 90],
+    ]
+    _parameter_map = {}
+
+    def get_features(self, **kwargs):
+        print("DDGeoService")
         try:
             auth = self.provider.auth
-            self.hs = HydroShare(auth=auth, hostname='134.164.253.116', port=443, use_https=True, verify=False)
+            self.hs = HydroShare(auth=auth, hostname='192.168.56.106', port=8000, verify=False, use_https=False)
         except:
-            self.hs = HydroShare()
+            self.hs = HydroShare(hostname='192.168.56.106', port=8000, verify=False, use_https=False)
 
         results = list(self.hs.resources())
 
@@ -48,31 +66,52 @@ class HSServiceBase(SingleFileServiceBase):
             if coverage_type == 'point':
                 geometry = Point(float(coverage.get('value').get('north')), float(coverage.get('value').get('east')))
             elif coverage_type == 'box':
-                geometry = box(float(coverage.get('value').get('westlimit')), float(coverage.get('value').get('southlimit')), float(coverage.get('value').get('eastlimit')), float(coverage.get('value').get('northlimit')))
+                geometry = box(float(coverage.get('value').get('westlimit')),
+                               float(coverage.get('value').get('southlimit')),
+                               float(coverage.get('value').get('eastlimit')),
+                               float(coverage.get('value').get('northlimit')))
         return geometry
 
-    def _get_parameters(self, features=None):
-        pass
-
-
-class HSGeoService(HSServiceBase):
-    service_name = 'hs_geo'
-    display_name = 'HydroShare Geo Service'
-    description = 'Center for Operational Oceanographic Products and Services'
-    service_type = 'geo-discrete'
+class DDNormService(DDServiceBase):
+    service_name = "dd_norm"
+    display_name = "Data Depot Normal Service"
+    description = 'Data Depot is a repository for ERDC ERS.'
+    service_type = "norm-discrete"
     unmapped_parameters_available = True
-    geom_type = 'Point'
-    datatype = 'timeseries'
-    geographical_areas = ['Worldwide']
-    bounding_boxes = [
-        [-180, -90, 180, 90],
-    ]
     _parameter_map = {}
 
+    def get_features(self, **kwargs):
+        print("DDNormService")
+        try:
+            auth = self.provider.auth
+            self.hs = HydroShare(auth=auth, hostname='192.168.56.106', port=8000, verify=False, use_https=False)
+            print("We got something")
+        except:
+            self.hs = HydroShare(hostname='192.168.56.106', port=8000, verify=False, use_https=False)
+            print("We didn't get something")
 
-class HSPublisher(PublishBase):
-    publisher_name = "hs_normal"
-    display_name = "HydroShare Publisher"
+        results = list(self.hs.resources())
+        print("Aaron")
+        features = pd.DataFrame(results)
+        features['service_id'] = features['resource_id'].apply(str)
+        features.index = features['service_id']
+        features.rename(columns={
+            'resource_title': 'display_name',
+            'bag_url': 'download url'
+        }, inplace=True)
+        features['filename'] = features['download url'].apply(lambda x: x.split('/')[-1])
+        features['reserved'] = features.apply(
+            lambda x: {'download_url': x['download url'],
+                       'filename': x['filename'],
+                       'file_format': 'zip',
+                       }, axis=1)
+
+        return features
+
+
+class DDPublisher(PublishBase):
+    publisher_name = "dd_normal"
+    display_name = "Data Depot Publisher"
     description = "empty"
 
     title = param.String(default="example title", doc="Title of resource", precedence=1)
@@ -81,7 +120,7 @@ class HSPublisher(PublishBase):
     dataset = param_util.DatasetSelector(filters={'status': 'downloaded'}, precedence=4, doc="dataset to publish to HydroShare")
 
     def __init__(self, provider, **kwargs):
-        super(HSPublisher, self).__init__(provider, **kwargs)
+        super(DDPublisher, self).__init__(provider, **kwargs)
 
     def publish(self, options=None):
 
@@ -100,11 +139,11 @@ class HSPublisher(PublishBase):
         print("Resource ID: ", resource_id)
 
 
-class HSProvider(ProviderBase):
-    service_base_class = HSServiceBase
-    publishers_list = [HSPublisher]
-    display_name = 'Hydro Web Services'
-    description = 'Services avaliable through the ERDC HydroSHare Server.'
+class DDProvider(ProviderBase):
+    service_base_class = DDServiceBase
+    publishers_list = [DDPublisher]
+    display_name = 'Data Depot Services'
+    description = 'Services avaliable through the ERDC Data Depot Server.'
     organization_name = 'U.S. Army Engineering Research and Development Center'
     organization_abbr = 'ERDC'
 
@@ -119,7 +158,7 @@ class HSProvider(ProviderBase):
 
         try:
             auth = HydroShareAuthBasic(username=username, password=password)
-            hs = HydroShare(auth=auth)
+            hs = HydroShare(auth=auth, hostname='192.168.56.106', port=8000, verify=False)
             hs.resources(count=1) # Assuming that if this doesn't grab a resource then it will error out in the try statement.
             db = get_db()
             with db_session:
