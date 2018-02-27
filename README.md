@@ -1,12 +1,8 @@
 # Environmental Simulator Quest
 
-.. image:: https://travis-ci.org/erdc/quest.svg?branch=master
-    :target: https://travis-ci.org/erdc/quest
-
-
-.. image:: https://ci.appveyor.com/api/projects/status/e20arxcfrcmb2ylm/branch/master?svg=true
-    :target: https://ci.appveyor.com/project/dharhas/quest
-
+| Workflow | Build/Deploy |
+| -------- | ------------ | 
+| [![Build Status](https://travis-ci.org/erdc/quest.svg?branch=master)](https://travis-ci.org/erdc/quest) | [![Build Status](https://ci.appveyor.com/api/projects/status/e20arxcfrcmb2ylm/branch/master?svg=true)](https://ci.appveyor.com/project/dharhas/quest) | 
 
 Python API for Quest
 
