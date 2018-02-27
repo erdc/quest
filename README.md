@@ -1,23 +1,17 @@
-Environmental Simulator Quest
------------------------------
+# Environmental Simulator Quest
 
-.. image:: https://travis-ci.org/erdc/quest.svg?branch=master
-    :target: https://travis-ci.org/erdc/quest
-
-
-.. image:: https://ci.appveyor.com/api/projects/status/e20arxcfrcmb2ylm/branch/master?svg=true
-    :target: https://ci.appveyor.com/project/dharhas/quest
+| Workflow | Build/Deploy |
+| -------- | ------------ | 
+| [![Build Status](https://travis-ci.org/erdc/quest.svg?branch=master)](https://travis-ci.org/erdc/quest) | [![Build Status](https://ci.appveyor.com/api/projects/status/e20arxcfrcmb2ylm/branch/master?svg=true)](https://ci.appveyor.com/project/dharhas/quest) | 
 
 
-Python API for Quest
+### Project Description
+Quest is a python library that provides an API the ability to search, publish and download data (both geographical and non-geographical) across multiple data sources including both local repositories and web based services. The library also allows provides tools in order to manipulate and manage the data that the user is working with. 
 
-See *.rst files in the docs folder for documentation
+### Project Links
+- Here is a live link for the Quest Documentation: https://quest.erdc.dren.mil/Documentation/Quest/
 
-Development Workflow
---------------------
-
-setup dev environment
-+++++++++++++++++++++
+## Setup Dev Environment
 
 - Install miniconda
 - Install conda-env
@@ -35,8 +29,7 @@ setup dev environment
 
     python setup.py develop
 
-development workflow
-++++++++++++++++++++
+## Development Workflow
 
 - change to master branch
 
@@ -78,20 +71,4 @@ development workflow
 - If everything looks good, use Gitlab to do a merge request from your branch to master
 - Once the merge has been accepted, do not continuing working in that branch. make a new branch starting at step 1
 
-**Never work on the same branch as someone else, if you need to continue work**
-**on a branch started by someone else, checkout that branch and make a new branch. i.e.:**
-
-    git fetch
-
-    git checkout bobs-branch
-
-    git checkout -b my-bobs-branch
-
-    etc
-
-**naming branches** use descriptive names following the pattern 'type of branch/name'**
-
-- add-dataset/noaa
-- bugfix/user-services
-- feature/caching-api
 
