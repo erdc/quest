@@ -1,4 +1,4 @@
-#Environmental Simulator Quest
+# Environmental Simulator Quest
 
 .. image:: https://travis-ci.org/erdc/quest.svg?branch=master
     :target: https://travis-ci.org/erdc/quest
@@ -12,9 +12,9 @@ Python API for Quest
 
 See *.rst files in the docs folder for documentation
 
-#Development Workflow
+# Development Workflow
 
-##setup dev environment
+## setup dev environment
 
 - Install miniconda
 - Install conda-env
@@ -32,7 +32,7 @@ See *.rst files in the docs folder for documentation
 
     python setup.py develop
 
-##development workflow
+## development workflow
 
 - change to master branch
 
