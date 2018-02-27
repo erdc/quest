@@ -11,17 +11,42 @@ from ..util import param_util
 
 class HSServiceBase(SingleFileServiceBase):
 
-    def get_features(self, **kwargs):
+    @property
+    def hs(self):
+        return self.provider.get_hs()
 
-        try:
-            auth = self.provider.auth
-            self.hs = HydroShare(auth=auth, hostname='134.164.253.116', port=443, use_https=True, verify=False)
-        except:
-            self.hs = HydroShare()
+    def get_features(self, **kwargs):
+        raise NotImplementedError()
+
+
+class HSGeoService(HSServiceBase):
+    service_name = 'hs_geo'
+    display_name = 'HydroShare Geo Service'
+    description = 'HydroShare is a cuahsi repository fpr geo-discrete resources.'
+    service_type = 'geo-discrete'
+    unmapped_parameters_available = True
+    geom_type = 'Point'
+    datatype = 'timeseries'
+    geographical_areas = ['Worldwide']
+    bounding_boxes = [
+        [-180, -90, 180, 90],
+    ]
+    _parameter_map = {}
+
+    def get_features(self, **kwargs):
 
         results = list(self.hs.resources())
 
-        features = pd.DataFrame(results)
+        if len(results) == 0:
+            raise ValueError('No resource available from HydroShare.')
+
+        results2 = [item for item in results if len(item['coverages']) != 0]
+
+        if len(results2) == 0:
+            raise ValueError("There is no resources with coverages in HydroShare Repository.")
+
+
+        features = pd.DataFrame(results2)
         idx = features['coverages'].apply(lambda x: len([c for c in x if c['type'] != 'period']) > 0)
         features = features[idx]
 
@@ -48,26 +73,39 @@ class HSServiceBase(SingleFileServiceBase):
             if coverage_type == 'point':
                 geometry = Point(float(coverage.get('value').get('north')), float(coverage.get('value').get('east')))
             elif coverage_type == 'box':
-                geometry = box(float(coverage.get('value').get('westlimit')), float(coverage.get('value').get('southlimit')), float(coverage.get('value').get('eastlimit')), float(coverage.get('value').get('northlimit')))
+                geometry = box(float(coverage.get('value').get('westlimit')),
+                               float(coverage.get('value').get('southlimit')),
+                               float(coverage.get('value').get('eastlimit')),
+                               float(coverage.get('value').get('northlimit')))
+
         return geometry
 
-    def _get_parameters(self, features=None):
-        pass
 
-
-class HSGeoService(HSServiceBase):
-    service_name = 'hs_geo'
-    display_name = 'HydroShare Geo Service'
-    description = 'Center for Operational Oceanographic Products and Services'
-    service_type = 'geo-discrete'
+class HSNormService(HSServiceBase):
+    service_name = "hs_norm"
+    display_name = "HydroShare Normal Service"
+    description = 'HydroShare is a cuahsi repository for all recource types.'
+    service_type = "norm-discrete"
     unmapped_parameters_available = True
-    geom_type = 'Point'
-    datatype = 'timeseries'
-    geographical_areas = ['Worldwide']
-    bounding_boxes = [
-        [-180, -90, 180, 90],
-    ]
     _parameter_map = {}
+
+    def get_features(self, **kwargs):
+        results = list(self.hs.resources())
+        features = pd.DataFrame(results)
+        features['service_id'] = features['resource_id'].apply(str)
+        features.index = features['service_id']
+        features.rename(columns={
+            'resource_title': 'display_name',
+            'bag_url': 'download url'
+        }, inplace=True)
+        features['filename'] = features['download url'].apply(lambda x: x.split('/')[-1])
+        features['reserved'] = features.apply(
+            lambda x: {'download_url': x['download url'],
+                       'filename': x['filename'],
+                       'file_format': 'zip',
+                       }, axis=1)
+
+        return features
 
 
 class HSPublisher(PublishBase):
@@ -83,34 +121,51 @@ class HSPublisher(PublishBase):
     def __init__(self, provider, **kwargs):
         super(HSPublisher, self).__init__(provider, **kwargs)
 
+    @property
+    def hs(self):
+        return self.provider.get_hs()
+
     def publish(self, options=None):
 
-        try:
-            auth = self.provider.auth
-        except:
-            raise ValueError('Provider does not exist in the database.')
-
         p = param.ParamOverrides(self, options)
-        hs = HydroShare(auth=auth, hostname='134.164.253.116', port=443, use_https=True, verify=False)
         rtype = 'GenericResource'
         dataset_metadata = get_metadata(p.dataset)[p.dataset]
         fpath = dataset_metadata['file_path']
         metadata = dataset_metadata['metadata']
-        resource_id = hs.createResource(rtype, p.title, resource_file=fpath, keywords=p.keywords, abstract=p.abstract, metadata=metadata)
-        print("Resource ID: ", resource_id)
+        resource_id = self.hs.createResource(rtype, p.title, resource_file=fpath, keywords=p.keywords, abstract=p.abstract, metadata=metadata)
+
+        return resource_id
 
 
 class HSProvider(ProviderBase):
     service_base_class = HSServiceBase
     publishers_list = [HSPublisher]
-    display_name = 'Hydro Web Services'
-    description = 'Services avaliable through the ERDC HydroSHare Server.'
+    display_name = 'HydroShare Services'
+    description = 'Services avaliable through the ERDC Data Depot Server.'
     organization_name = 'U.S. Army Engineering Research and Development Center'
     organization_abbr = 'ERDC'
 
     @property
     def auth(self):
         return HydroShareAuthBasic(**self.credentials)
+
+    def get_hs(self, auth=None, require_valid_auth=False):
+        try:
+            auth = auth or self.auth
+            hs = HydroShare(auth=auth)
+            list(hs.resources(count=1))
+            return hs
+        except Exception as e:
+            if require_valid_auth:
+                raise e
+
+        try:
+            hs = HydroShare()
+            list(hs.resources(count=1))
+        except:
+            raise ValueError("Cannot connect to the  HydroShare.")
+
+        return hs
 
     def authenticate_me(self, **kwargs):
 
@@ -119,8 +174,7 @@ class HSProvider(ProviderBase):
 
         try:
             auth = HydroShareAuthBasic(username=username, password=password)
-            hs = HydroShare(auth=auth)
-            hs.resources(count=1) # Assuming that if this doesn't grab a resource then it will error out in the try statement.
+            self.get_hs(auth=auth, require_valid_auth=True)
             db = get_db()
             with db_session:
                 p = db.Providers.select().filter(provider=self.name).first()
@@ -139,6 +193,6 @@ class HSProvider(ProviderBase):
             return True
 
         except Exception as e:
-            print("Credentials were invalid.")
+            print("Either credentials invalid or unable to connect to Data Depot.")
 
         return False

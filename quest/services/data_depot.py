@@ -11,6 +11,10 @@ from ..util import param_util
 
 class DDServiceBase(SingleFileServiceBase):
 
+    @property
+    def hs(self):
+        return self.provider.get_hs()
+
     def get_features(self, **kwargs):
         raise NotImplementedError()
 
@@ -30,16 +34,19 @@ class DDGeoService(DDServiceBase):
     _parameter_map = {}
 
     def get_features(self, **kwargs):
-        print("DDGeoService")
-        try:
-            auth = self.provider.auth
-            self.hs = HydroShare(auth=auth, hostname='192.168.56.106', port=8000, verify=False, use_https=False)
-        except:
-            self.hs = HydroShare(hostname='192.168.56.106', port=8000, verify=False, use_https=False)
 
         results = list(self.hs.resources())
 
-        features = pd.DataFrame(results)
+        if len(results) == 0:
+            raise ValueError('No resource available from Data Depot.')
+
+        results2 = [item for item in results if len(item['coverages']) != 0]
+
+        if len(results2) == 0:
+            raise ValueError("There is no resources with coverages in Data Depot Repository.")
+
+
+        features = pd.DataFrame(results2)
         idx = features['coverages'].apply(lambda x: len([c for c in x if c['type'] != 'period']) > 0)
         features = features[idx]
 
@@ -70,7 +77,9 @@ class DDGeoService(DDServiceBase):
                                float(coverage.get('value').get('southlimit')),
                                float(coverage.get('value').get('eastlimit')),
                                float(coverage.get('value').get('northlimit')))
+
         return geometry
+
 
 class DDNormService(DDServiceBase):
     service_name = "dd_norm"
@@ -81,17 +90,7 @@ class DDNormService(DDServiceBase):
     _parameter_map = {}
 
     def get_features(self, **kwargs):
-        print("DDNormService")
-        try:
-            auth = self.provider.auth
-            self.hs = HydroShare(auth=auth, hostname='192.168.56.106', port=8000, verify=False, use_https=False)
-            print("We got something")
-        except:
-            self.hs = HydroShare(hostname='192.168.56.106', port=8000, verify=False, use_https=False)
-            print("We didn't get something")
-
         results = list(self.hs.resources())
-        print("Aaron")
         features = pd.DataFrame(results)
         features['service_id'] = features['resource_id'].apply(str)
         features.index = features['service_id']
@@ -122,21 +121,20 @@ class DDPublisher(PublishBase):
     def __init__(self, provider, **kwargs):
         super(DDPublisher, self).__init__(provider, **kwargs)
 
+    @property
+    def hs(self):
+        return self.provider.get_hs()
+
     def publish(self, options=None):
 
-        try:
-            auth = self.provider.auth
-        except:
-            raise ValueError('Provider does not exist in the database.')
-
         p = param.ParamOverrides(self, options)
-        hs = HydroShare(auth=auth, hostname='134.164.253.116', port=443, use_https=True, verify=False)
         rtype = 'GenericResource'
         dataset_metadata = get_metadata(p.dataset)[p.dataset]
         fpath = dataset_metadata['file_path']
         metadata = dataset_metadata['metadata']
-        resource_id = hs.createResource(rtype, p.title, resource_file=fpath, keywords=p.keywords, abstract=p.abstract, metadata=metadata)
-        print("Resource ID: ", resource_id)
+        resource_id = self.hs.createResource(rtype, p.title, resource_file=fpath, keywords=p.keywords, abstract=p.abstract, metadata=metadata)
+
+        return resource_id
 
 
 class DDProvider(ProviderBase):
@@ -151,6 +149,30 @@ class DDProvider(ProviderBase):
     def auth(self):
         return HydroShareAuthBasic(**self.credentials)
 
+    def get_hs(self, auth=None, require_valid_auth=False):
+        connection_info = {'hostname': '192.168.56.106',
+                           'port': 8000,
+                           'verify': False,
+                           'use_https': False
+                           }
+
+        try:
+            auth = auth or self.auth
+            hs = HydroShare(auth=auth, **connection_info)
+            list(hs.resources(count=1))
+            return hs
+        except Exception as e:
+            if require_valid_auth:
+                raise e
+
+        try:
+            hs = HydroShare(**connection_info)
+            list(hs.resources(count=1))
+        except:
+            raise ValueError("Cannot connect to the Data Depot Share.")
+
+        return hs
+
     def authenticate_me(self, **kwargs):
 
         username = input("Enter Username: ")
@@ -158,8 +180,7 @@ class DDProvider(ProviderBase):
 
         try:
             auth = HydroShareAuthBasic(username=username, password=password)
-            hs = HydroShare(auth=auth, hostname='192.168.56.106', port=8000, verify=False)
-            hs.resources(count=1) # Assuming that if this doesn't grab a resource then it will error out in the try statement.
+            self.get_hs(auth=auth, require_valid_auth=True)
             db = get_db()
             with db_session:
                 p = db.Providers.select().filter(provider=self.name).first()
@@ -178,6 +199,6 @@ class DDProvider(ProviderBase):
             return True
 
         except Exception as e:
-            print("Credentials were invalid.")
+            print("Either credentials invalid or unable to connect to Data Depot.")
 
         return False
