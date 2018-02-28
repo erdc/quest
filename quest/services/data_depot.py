@@ -108,38 +108,95 @@ class DDNormService(DDServiceBase):
         return features
 
 
-class DDPublisher(PublishBase):
-    publisher_name = "dd_normal"
-    display_name = "Data Depot Publisher"
-    description = "empty"
-
-    title = param.String(default="example title", doc="Title of resource", precedence=1)
-    abstract = param.String(default="example abstract",  precedence=2, doc="An description of the resource to be added to HydroShare.")
-    keywords = param.List(precedence=3, doc="list of keyword strings to describe the resource")
-    dataset = param_util.DatasetSelector(filters={'status': 'downloaded'}, precedence=4, doc="dataset to publish to HydroShare")
-
-    def __init__(self, provider, **kwargs):
-        super(DDPublisher, self).__init__(provider, **kwargs)
+class DDPublishBase(PublishBase):
 
     @property
     def hs(self):
         return self.provider.get_hs()
 
     def publish(self, options=None):
+        return NotImplementedError
 
+
+class DDNormPublisher(DDPublishBase):
+    publisher_name = "dd_pub_normal"
+    display_name = "Data Depot Publisher"
+    description = "empty"
+
+    _parameter_map = {
+        'CS': 'sea_water_speed',
+        'CD': 'direction_of_sea_water_velocity',
+        'WS': 'wind_speed',
+        'WD': 'wind_from_direction',
+        'WG': 'wind_speed_from_gust',
+        'RF': 'collective_rainfall',
+        'Vis': 'visibility_in_air',
+        'CN': 'sea_water_electric_conductivity',
+        'AT': 'air_temperature',
+        'RH': 'relative_humidity',
+        'WT': 'sea_water_temperature',
+        'BP': 'barometric_pressure',
+        }
+
+    title = param.String(default="example title", doc="Title of resource", precedence=1)
+    abstract = param.String(default="example abstract",  precedence=2, doc="An description of the resource to be added to HydroShare.")
+    keywords = param.List(precedence=3, doc="list of keyword strings to describe the resource")
+    dataset = param_util.DatasetSelector(filters={'status': 'downloaded'}, precedence=4, doc="dataset to publish to HydroShare")
+    resource_type = param.ObjectSelector(default=None, doc='parameter', precedence=1, objects=sorted(_parameter_map.values()))
+
+    def publish(self, options=None):
+        resource_id = None
         p = param.ParamOverrides(self, options)
-        rtype = 'GenericResource'
+        rtype = p.resource_type
         dataset_metadata = get_metadata(p.dataset)[p.dataset]
         fpath = dataset_metadata['file_path']
         metadata = dataset_metadata['metadata']
-        resource_id = self.hs.createResource(rtype, p.title, resource_file=fpath, keywords=p.keywords, abstract=p.abstract, metadata=metadata)
+        # resource_id = self.hs.createResource(rtype, p.title, resource_file=fpath, keywords=p.keywords, abstract=p.abstract, metadata=metadata)
+
+        return resource_id
+
+
+class DDWeirdPublisher(DDPublishBase):
+    publisher_name = "dd_pub_weird"
+    display_name = "Data Depot Publisher"
+    description = "empty"
+
+    _parameter_map = {
+        'CS': 'sea_water_speed',
+        'CD': 'direction_of_sea_water_velocity',
+        'WS': 'wind_speed',
+        'WD': 'wind_from_direction',
+        'WG': 'wind_speed_from_gust',
+        'RF': 'collective_rainfall',
+        'Vis': 'visibility_in_air',
+        'CN': 'sea_water_electric_conductivity',
+        'AT': 'air_temperature',
+        'RH': 'relative_humidity',
+        'WT': 'sea_water_temperature',
+        'BP': 'barometric_pressure',
+        }
+
+    title = param.String(default="example title", doc="Title of resource", precedence=1)
+    abstract = param.String(default="example abstract",  precedence=2, doc="An description of the resource to be added to HydroShare.")
+    keywords = param.List(precedence=3, doc="list of keyword strings to describe the resource")
+    dataset = param_util.DatasetSelector(filters={'status': 'downloaded'}, precedence=4, doc="dataset to publish to HydroShare")
+    resource_type = param.ObjectSelector(default=None, doc='parameter', precedence=5, objects=sorted(_parameter_map.values()))
+
+    def publish(self, options=None):
+        resource_id = None
+        p = param.ParamOverrides(self, options)
+        rtype = p.resource_type
+        dataset_metadata = get_metadata(p.dataset)[p.dataset]
+        fpath = dataset_metadata['file_path']
+        metadata = dataset_metadata['metadata']
+        # resource_id = self.hs.createResource(rtype, p.title, resource_file=fpath, keywords=p.keywords, abstract=p.abstract, metadata=metadata)
 
         return resource_id
 
 
 class DDProvider(ProviderBase):
     service_base_class = DDServiceBase
-    publishers_list = [DDPublisher]
+    publish_base_class = DDPublishBase
     display_name = 'Data Depot Services'
     description = 'Services avaliable through the ERDC Data Depot Server.'
     organization_name = 'U.S. Army Engineering Research and Development Center'

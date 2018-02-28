@@ -7,6 +7,7 @@ class PublishBase(param.Parameterized):
     display_name = None
     description = None
     publisher_type = None
+    _parameter_map = None
 
     def __init__(self, provider, **kwargs):
         self.provider = provider
