@@ -1,13 +1,13 @@
 from .base import ProviderBase, SingleFileServiceBase, PublishBase
 from hs_restclient import HydroShare, HydroShareAuthBasic
-from shapely.geometry import Point, box
-import pandas as pd
-from getpass import getpass
 from ..api.database import get_db, db_session
+from shapely.geometry import Point, box
 from ..api.metadata import get_metadata
-import param
 from ..util import param_util
-
+from getpass import getpass
+import pandas as pd
+import param
+import os
 
 class DDServiceBase(SingleFileServiceBase):
 
@@ -121,7 +121,7 @@ class DDPublisher(PublishBase):
         'ModelInstanceResource': 'Model Instance',
         'ModelProgramResource': 'Model Program',
         'MODFLOWModelInstanceResource': 'MODFLOW Model Instance',
-        'NetcdfResource': 'Multidiementionsal (NetCDF)',
+        'NetcdfResource': 'Multidimentionsal (NetCDF)',
         'ScriptResource': 'Script',
         'SWATModelInstanceResource': 'SWAT Model Instance',
         'TimeSeriesResource': 'Time Series',
@@ -129,9 +129,9 @@ class DDPublisher(PublishBase):
 
     title = param.String(default="example title", doc="Title of resource", precedence=1)
     abstract = param.String(default="example abstract",  precedence=2, doc="An description of the resource to be added to HydroShare.")
-    keywords = param.List(precedence=3, doc="list of keyword strings to describe the resource")
-    dataset = param_util.DatasetSelector(filters={'status': 'downloaded'}, precedence=4, doc="dataset to publish to HydroShare")
-    resource_type = param.ObjectSelector(default=None, doc='parameter', precedence=1, objects=sorted(_parameter_map.values()))
+    keywords = param.List(default=[], precedence=3, doc="list of keyword strings to describe the resource")
+    dataset = param_util.DatasetListSelector(default=(), filters={'status': 'downloaded'}, precedence=4, doc="dataset to publish to HydroShare")
+    resource_type = param.ObjectSelector(default="", doc='parameter', precedence=1, objects=sorted(_parameter_map.values()))
 
     def __init__(self, provider, **kwargs):
         super(DDPublisher, self).__init__(provider, **kwargs)
@@ -141,12 +141,122 @@ class DDPublisher(PublishBase):
         return self.provider.get_hs()
 
     def publish(self, options=None):
+        resource_id = None
         p = param.ParamOverrides(self, options)
-        rtype = p.resource_type
-        dataset_metadata = get_metadata(p.dataset)[p.dataset]
-        fpath = dataset_metadata['file_path']
-        metadata = dataset_metadata['metadata']
-        resource_id = self.hs.createResource(rtype, p.title, resource_file=fpath, keywords=p.keywords, abstract=p.abstract, metadata=metadata)
+
+        if p.resource_type == "":
+            raise ValueError("There was no resource type selected.")
+
+        if len(p.dataset) == 1:
+            dataset_metadata = get_metadata(p.dataset)[p.dataset]
+            metadata = dataset_metadata['metadata']
+            fpath = dataset_metadata['file_path']
+            filename, file_extension = os.path.splitext(fpath)
+
+            if p.resource_type == 'GeographicFeatureResource':
+                geo_feature_list = ['.zip', '.shp', '.shx', '.dbf', '.prj', '.sbx', '.sbn', '.cpg', '.xml', '.fbn', '.fbx', '.ain', '.alh', '.atx', '.ixs', '.mxs']
+                if file_extension not in geo_feature_list:
+                    raise ValueError("Dataset file is not supported in the Geographic Feature Resource Type.")
+            elif p.resource_type == 'RasterResource':
+                if file_extension != '.tif' or file_extension != '.zip':
+                    raise ValueError("Dataset file is not supported in the Geographic Raster Resource Type.")
+            elif p.resource_type == 'NetcdfResource':
+                if file_extension != '.nc':
+                    raise ValueError("Dataset file is not supported in the Multidimensional (NetCDF) Resource Type.")
+            elif p.resource_type == 'ScriptResource':
+                if file_extension != '.r' or file_extension != '.py' or file_extension != '.m':
+                    raise ValueError("Dataset file is not supported in the Script Resource Type.")
+            elif p.resource_type == 'TimeSeriesResource':
+                if file_extension != '.sqlite' or file_extension != '.csv':
+                    raise ValueError("Dataset file is not supported in the Time Series Resource Type.")
+
+            resource_id = self.create_resource(p.resource_type, p.title, resource_file=fpath, keywords=p.keywords, abstract=p.abstract, metadata=metadata)
+
+        elif len(p.dataset) > 1:
+            error_flag = None
+            error_message = ""
+            metadata = {}
+
+            resource_id = self.create_resource(p.resource_type, p.title, keywords=p.keywords, abstract=p.abstract)
+
+            for dataset in p.dataset:
+                dataset_metadata = get_metadata(p.dataset)[p.dataset]
+                metadata[dataset] = dataset_metadata['metadata']
+                fpath = dataset_metadata['file_path']
+                filename, file_extension = os.path.splitext(fpath)
+
+                if p.resource_type == 'GeographicFeatureResource':
+                    geo_feature_list = ['.zip', '.shp', '.shx', '.dbf', '.prj', '.sbx', '.sbn', '.cpg', '.xml', '.fbn', '.fbx', '.ain', '.alh', '.atx', '.ixs', '.mxs']
+                    if file_extension not in geo_feature_list:
+                        error_flag = True
+                        error_message = "Dataset file is not supported in the Geographic Feature Resource Type."
+                elif p.resource_type == 'RasterResource':
+                    error_flag = True
+                    error_message = "This resource type does not allow multiple files."
+                elif p.resource_type == 'NetcdfResource':
+                    if file_extension != '.nc':
+                        error_flag = True
+                        error_message = "Dataset file is not supported in the Multidimensional (NetCDF) Resource Type."
+                elif p.resource_type == 'ScriptResource':
+                    if file_extension != '.r' or file_extension != '.py' or file_extension != '.m':
+                        error_flag = True
+                        error_message = "Dataset file is not supported in the Script Resource Type."
+                elif p.resource_type == 'TimeSeriesResource':
+                    error_flag = True
+                    error_message = "This resource type does not allow multiple files."
+
+                if error_flag is True:
+                    self.delete_resource(resource_id)
+                    raise ValueError(error_message)
+                else:
+                    self.add_file_to_resource(resource_id, fpath)
+
+            self.hs.updateScienceMetadata(resource_id, metadata=metadata)
+
+        else:
+            raise ValueError("There was no datasets selected.")
+
+        return resource_id
+
+    def create_resource(self, title=None, abstract=None, keywords=None, resource_type=None, file_path=None, metadata=None, extra_metadata=None):
+
+        if os.path.isdir(file_path) is True:
+            raise ValueError("The file path cannot be a directory.")
+
+        try:
+            resource_id = self.hs.createResource(resource_type, title, resource_file=file_path, keywords=keywords, abstract=abstract, metadata=metadata, extra_metadata=extra_metadata)
+        except Exception as e:
+            raise e
+
+        return resource_id
+
+    def delete_resource(self, resource_id):
+
+        try:
+            self.hs.deleteResource(resource_id)
+        except Exception as e:
+            raise e
+
+        return
+
+    def add_file_to_resource(self, resource_id, file_path):
+
+        if os.path.isdir(file_path) is True:
+            raise ValueError("The file path cannot be a directory.")
+
+        try:
+            resource_id = self.hs.addResourceFile(resource_id, file_path)
+        except Exception as e:
+            raise e
+
+        return resource_id
+
+    def delete_file_from_resource(self, resource_id=None, file_name=None):
+
+        try:
+            resource_id = self.hs.deleteResourceFile(resource_id, file_name)
+        except Exception as e:
+            raise e
 
         return resource_id
 
