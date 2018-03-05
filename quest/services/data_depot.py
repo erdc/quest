@@ -9,6 +9,7 @@ import pandas as pd
 import param
 import os
 
+
 class DDServiceBase(SingleFileServiceBase):
 
     @property
@@ -113,25 +114,26 @@ class DDPublisher(PublishBase):
     display_name = "Data Depot Publisher"
     description = "empty"
 
-    _parameter_map = {
-        'CompositeResource': 'Composite',
-        'GenericResource': 'Generic',
-        'GeographicFeatureResource': 'Geographic Feature',
-        'RasterResource': 'Geographic Raster',
-        'ModelInstanceResource': 'Model Instance',
-        'ModelProgramResource': 'Model Program',
-        'MODFLOWModelInstanceResource': 'MODFLOW Model Instance',
-        'NetcdfResource': 'Multidimentionsal (NetCDF)',
-        'ScriptResource': 'Script',
-        'SWATModelInstanceResource': 'SWAT Model Instance',
-        'TimeSeriesResource': 'Time Series',
-        }
+    _resource_type_map = {
+        'Composite': 'CompositeResource',
+        'Generic': 'GenericResource',
+        'Geographic Feature': 'GeographicFeatureResource',
+        'Geographic Raster': 'RasterResource',
+        'MODFLOW Model Instance': 'MODFLOWModelInstanceResource',
+        'Model Instance': 'ModelInstanceResource',
+        'Model Program': 'ModelProgramResource',
+        'Multidimentionsal (NetCDF)': 'NetcdfResource',
+        'SWAT Model Instance': 'SWATModelInstanceResource',
+        'Script': 'ScriptResource',
+        'Time Series': 'TimeSeriesResource'
+    }
 
-    title = param.String(default="example title", doc="Title of resource", precedence=1)
-    abstract = param.String(default="example abstract",  precedence=2, doc="An description of the resource to be added to HydroShare.")
-    keywords = param.List(default=[], precedence=3, doc="list of keyword strings to describe the resource")
-    dataset = param_util.DatasetListSelector(default=(), filters={'status': 'downloaded'}, precedence=4, doc="dataset to publish to HydroShare")
-    resource_type = param.ObjectSelector(default="", doc='parameter', precedence=1, objects=sorted(_parameter_map.values()))
+
+    title = param.String(default="example title", doc="Title of resource", precedence=2)
+    abstract = param.String(default="example abstract",  precedence=3, doc="An description of the resource to be added to HydroShare.")
+    keywords = param.List(default=[], precedence=4, doc="list of keyword strings to describe the resource")
+    dataset = param_util.DatasetListSelector(default=(), filters={'status': 'downloaded'}, precedence=5, doc="dataset to publish to HydroShare")
+    resource_type = param.ObjectSelector(doc='parameter', precedence=1, objects=sorted(_resource_type_map.keys()))
 
     def __init__(self, provider, **kwargs):
         super(DDPublisher, self).__init__(provider, **kwargs)
@@ -141,87 +143,52 @@ class DDPublisher(PublishBase):
         return self.provider.get_hs()
 
     def publish(self, options=None):
-        resource_id = None
+
         p = param.ParamOverrides(self, options)
+        valid_file_paths = []
+        valid_extensions = []
 
         if p.resource_type == "":
             raise ValueError("There was no resource type selected.")
+        else:
+            resource_type = self._resource_type_map[p.resource_type]
 
-        if len(p.dataset) == 1:
-            dataset_metadata = get_metadata(p.dataset)[p.dataset]
-            metadata = dataset_metadata['metadata']
+        extension_dict = {'GeographicFeatureResource': ['.zip', '.shp', '.shx', '.dbf', '.prj', '.sbx', '.sbn', '.cpg', '.xml', '.fbn', '.fbx', '.ain', '.alh', '.atx', '.ixs', '.mxs'],
+                          'RasterResource': ['.zip', '.tif'],
+                          'NetcdfResource': ['.nc'],
+                          'ScriptResource': ['.r', '.py', '.m'],
+                          'TimeSeriesResource': ['.sqlite', '.csv']}
+
+        if resource_type in ['GeographicFeatureResource', 'RasterResource', 'NetcdfResource', 'ScriptResource', 'TimeSeriesResource']:
+            valid_extensions = extension_dict[resource_type]
+
+        if len(p.dataset) > 1 and resource_type in ['TimeSeriesResource', 'RasterResource']:
+            raise ValueError("The selected resource cannot have more than one dataset.")
+
+        if len(p.dataset) == 0:
+            raise ValueError("There was no dataset selected.")
+
+        for dataset in p.dataset:
+            dataset_metadata = get_metadata(dataset)[dataset]
             fpath = dataset_metadata['file_path']
             filename, file_extension = os.path.splitext(fpath)
 
-            if p.resource_type == 'GeographicFeatureResource':
-                geo_feature_list = ['.zip', '.shp', '.shx', '.dbf', '.prj', '.sbx', '.sbn', '.cpg', '.xml', '.fbn', '.fbx', '.ain', '.alh', '.atx', '.ixs', '.mxs']
-                if file_extension not in geo_feature_list:
-                    raise ValueError("Dataset file is not supported in the Geographic Feature Resource Type.")
-            elif p.resource_type == 'RasterResource':
-                if file_extension != '.tif' or file_extension != '.zip':
-                    raise ValueError("Dataset file is not supported in the Geographic Raster Resource Type.")
-            elif p.resource_type == 'NetcdfResource':
-                if file_extension != '.nc':
-                    raise ValueError("Dataset file is not supported in the Multidimensional (NetCDF) Resource Type.")
-            elif p.resource_type == 'ScriptResource':
-                if file_extension != '.r' or file_extension != '.py' or file_extension != '.m':
-                    raise ValueError("Dataset file is not supported in the Script Resource Type.")
-            elif p.resource_type == 'TimeSeriesResource':
-                if file_extension != '.sqlite' or file_extension != '.csv':
-                    raise ValueError("Dataset file is not supported in the Time Series Resource Type.")
-
-            resource_id = self.create_resource(p.resource_type, p.title, resource_file=fpath, keywords=p.keywords, abstract=p.abstract, metadata=metadata)
-
-        elif len(p.dataset) > 1:
-            error_flag = None
-            error_message = ""
-            metadata = {}
-
-            resource_id = self.create_resource(p.resource_type, p.title, keywords=p.keywords, abstract=p.abstract)
-
-            for dataset in p.dataset:
-                dataset_metadata = get_metadata(p.dataset)[p.dataset]
-                metadata[dataset] = dataset_metadata['metadata']
-                fpath = dataset_metadata['file_path']
-                filename, file_extension = os.path.splitext(fpath)
-
-                if p.resource_type == 'GeographicFeatureResource':
-                    geo_feature_list = ['.zip', '.shp', '.shx', '.dbf', '.prj', '.sbx', '.sbn', '.cpg', '.xml', '.fbn', '.fbx', '.ain', '.alh', '.atx', '.ixs', '.mxs']
-                    if file_extension not in geo_feature_list:
-                        error_flag = True
-                        error_message = "Dataset file is not supported in the Geographic Feature Resource Type."
-                elif p.resource_type == 'RasterResource':
-                    error_flag = True
-                    error_message = "This resource type does not allow multiple files."
-                elif p.resource_type == 'NetcdfResource':
-                    if file_extension != '.nc':
-                        error_flag = True
-                        error_message = "Dataset file is not supported in the Multidimensional (NetCDF) Resource Type."
-                elif p.resource_type == 'ScriptResource':
-                    if file_extension != '.r' or file_extension != '.py' or file_extension != '.m':
-                        error_flag = True
-                        error_message = "Dataset file is not supported in the Script Resource Type."
-                elif p.resource_type == 'TimeSeriesResource':
-                    error_flag = True
-                    error_message = "This resource type does not allow multiple files."
-
-                if error_flag is True:
-                    self.delete_resource(resource_id)
-                    raise ValueError(error_message)
+            if len(valid_extensions) != 0:
+                if file_extension in valid_extensions:
+                    valid_file_paths.append(fpath)
                 else:
-                    self.add_file_to_resource(resource_id, fpath)
+                    raise ValueError("There was a problem with one of the dataset file extentions for your resource.")
+            else:
+                valid_file_paths.append(fpath)
 
-            self.hs.updateScienceMetadata(resource_id, metadata=metadata)
+        resource_id = self.create_resource(resource_type=resource_type, title=p.title, file_path=valid_file_paths[0], keywords=p.keywords, abstract=p.abstract)
 
-        else:
-            raise ValueError("There was no datasets selected.")
+        for path in valid_file_paths[1:]:
+            self.add_file_to_resource(resource_id, path)
 
         return resource_id
 
-    def create_resource(self, title=None, abstract=None, keywords=None, resource_type=None, file_path=None, metadata=None, extra_metadata=None):
-
-        if os.path.isdir(file_path) is True:
-            raise ValueError("The file path cannot be a directory.")
+    def create_resource(self, title=None, abstract=None, keywords=None, resource_type=None, file_path="", metadata=None, extra_metadata=None):
 
         try:
             resource_id = self.hs.createResource(resource_type, title, resource_file=file_path, keywords=keywords, abstract=abstract, metadata=metadata, extra_metadata=extra_metadata)
@@ -264,7 +231,7 @@ class DDPublisher(PublishBase):
 class DDProvider(ProviderBase):
     service_base_class = DDServiceBase
     publishers_list = [DDPublisher]
-    display_name = 'HydroShare Services'
+    display_name = 'Data Depot Services'
     description = 'Services avaliable through the ERDC Data Depot Server.'
     organization_name = 'U.S. Army Engineering Research and Development Center'
     organization_abbr = 'ERDC'
