@@ -1,5 +1,4 @@
-quest.egg-info/
-*.pyc
+quest.egg-info/*
 quest/.QUEST_Store
 .QUEST_Store
 docs/_build/
