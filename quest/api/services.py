@@ -60,6 +60,20 @@ def get_services(expand=None, parameter=None, service_type=None):
 
 
 def get_publishers(expand=None, publisher_type=None):
+    """
+        This method returns a list of avaliable publishers.
+
+        How it works:
+
+            The method first gets a dictionary filled with the available providers
+            in Quest. Then we loop through grabbing the keys and the objects within
+            the dictionary. Then we loop again, accessing each service getting another
+            dictionary with the provider as the key and the metadata as the values.
+            Then we create a publish uri, and get the publisher class name for the
+            service. We return a list of publishers.
+
+
+    """
     providers = util.load_providers()
     publishers = {}
     for provider, pub in providers.items():

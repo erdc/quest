@@ -50,18 +50,17 @@ class ProviderBase(with_metaclass(abc.ABCMeta, object)):
         if self.service_base_class is None:
             return {}  # TODO or should I raise a NotImplementedError
         if self._services is None:
-            self._services = {s.service_name: s(name=s.service_name, provider=self)
-                              for s in self.service_base_class.__subclasses__()}
+            self._services = {s.service_name: s(name=s.service_name, provider=self) for s in self.service_base_class.__subclasses__()}
         return self._services
 
     @property
     def publishers(self):
         if self.publishers_list is None:
             return {}
-        if self._publishes is None:
-            self._publishes = {p.publisher_name: p(name=p.publisher_name, provider=self) for p in self.publishers_list}
+        if self._publishers is None:
+            self._publishers = {p.publisher_name: p(name=p.publisher_name, provider=self) for p in self.publishers_list}
 
-        return self._publishes
+        return self._publishers
 
     @property
     def metadata(self):
@@ -92,7 +91,7 @@ class ProviderBase(with_metaclass(abc.ABCMeta, object)):
         self.use_cache = use_cache #not implemented
         self.update_frequency = update_frequency #not implemented
         self._services = None
-        self._publishes = None
+        self._publishers = None
         self._credentials = None
 
     def get_features(self, service, update_cache=False, **kwargs):

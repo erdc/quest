@@ -9,7 +9,8 @@ import pandas as pd
 import param
 import os
 
-class HSServiceBase(SingleFileServiceBase):
+
+class DDServiceBase(SingleFileServiceBase):
 
     @property
     def hs(self):
@@ -19,10 +20,10 @@ class HSServiceBase(SingleFileServiceBase):
         raise NotImplementedError()
 
 
-class HSGeoService(HSServiceBase):
-    service_name = 'hs_geo'
-    display_name = 'HydroShare Geo Service'
-    description = 'HydroShare is a cuahsi repository fpr geo-discrete resources.'
+class DDGeoService(DDServiceBase):
+    service_name = 'dd_geo'
+    display_name = 'Data Depot Geo Service'
+    description = 'Data Depot is a repository for ERDC ERS.'
     service_type = 'geo-discrete'
     unmapped_parameters_available = True
     geom_type = 'Point'
@@ -38,12 +39,12 @@ class HSGeoService(HSServiceBase):
         results = list(self.hs.resources())
 
         if len(results) == 0:
-            raise ValueError('No resource available from HydroShare.')
+            raise ValueError('No resource available from Data Depot.')
 
         results2 = [item for item in results if len(item['coverages']) != 0]
 
         if len(results2) == 0:
-            raise ValueError("There is no resources with coverages in HydroShare Repository.")
+            raise ValueError("There is no resources with coverages in Data Depot Repository.")
 
 
         features = pd.DataFrame(results2)
@@ -81,10 +82,10 @@ class HSGeoService(HSServiceBase):
         return geometry
 
 
-class HSNormService(HSServiceBase):
-    service_name = "hs_norm"
-    display_name = "HydroShare Normal Service"
-    description = 'HydroShare is a cuahsi repository for all recource types.'
+class DDNormService(DDServiceBase):
+    service_name = "dd_norm"
+    display_name = "Data Depot Normal Service"
+    description = 'Data Depot is a repository for ERDC ERS.'
     service_type = "norm-discrete"
     unmapped_parameters_available = True
     _parameter_map = {}
@@ -108,7 +109,7 @@ class HSNormService(HSServiceBase):
         return features
 
 
-class HSPublisher(PublishBase):
+class DDPublisher(PublishBase):
     publisher_name = "dd_pub"
     display_name = "Data Depot Publisher"
     description = "empty"
@@ -127,16 +128,15 @@ class HSPublisher(PublishBase):
         'Time Series': 'TimeSeriesResource'
     }
 
+
     title = param.String(default="example title", doc="Title of resource", precedence=2)
-    abstract = param.String(default="example abstract", precedence=3,
-                            doc="An description of the resource to be added to HydroShare.")
+    abstract = param.String(default="example abstract",  precedence=3, doc="An description of the resource to be added to HydroShare.")
     keywords = param.List(default=[], precedence=4, doc="list of keyword strings to describe the resource")
-    dataset = param_util.DatasetListSelector(default=(), filters={'status': 'downloaded'}, precedence=5,
-                                             doc="dataset to publish to HydroShare")
+    dataset = param_util.DatasetListSelector(default=(), filters={'status': 'downloaded'}, precedence=5, doc="dataset to publish to HydroShare")
     resource_type = param.ObjectSelector(doc='parameter', precedence=1, objects=sorted(_resource_type_map.keys()))
 
     def __init__(self, provider, **kwargs):
-        super(HSPublisher, self).__init__(provider, **kwargs)
+        super(DDPublisher, self).__init__(provider, **kwargs)
 
     @property
     def hs(self):
@@ -153,16 +153,13 @@ class HSPublisher(PublishBase):
         else:
             resource_type = self._resource_type_map[p.resource_type]
 
-        extension_dict = {
-            'GeographicFeatureResource': ['.zip', '.shp', '.shx', '.dbf', '.prj', '.sbx', '.sbn', '.cpg', '.xml',
-                                          '.fbn', '.fbx', '.ain', '.alh', '.atx', '.ixs', '.mxs'],
-            'RasterResource': ['.zip', '.tif'],
-            'NetcdfResource': ['.nc'],
-            'ScriptResource': ['.r', '.py', '.m'],
-            'TimeSeriesResource': ['.sqlite', '.csv']}
+        extension_dict = {'GeographicFeatureResource': ['.zip', '.shp', '.shx', '.dbf', '.prj', '.sbx', '.sbn', '.cpg', '.xml', '.fbn', '.fbx', '.ain', '.alh', '.atx', '.ixs', '.mxs'],
+                          'RasterResource': ['.zip', '.tif'],
+                          'NetcdfResource': ['.nc'],
+                          'ScriptResource': ['.r', '.py', '.m'],
+                          'TimeSeriesResource': ['.sqlite', '.csv']}
 
-        if resource_type in ['GeographicFeatureResource', 'RasterResource', 'NetcdfResource', 'ScriptResource',
-                             'TimeSeriesResource']:
+        if resource_type in ['GeographicFeatureResource', 'RasterResource', 'NetcdfResource', 'ScriptResource', 'TimeSeriesResource']:
             valid_extensions = extension_dict[resource_type]
 
         if len(p.dataset) > 1 and resource_type in ['TimeSeriesResource', 'RasterResource']:
@@ -180,26 +177,21 @@ class HSPublisher(PublishBase):
                 if file_extension in valid_extensions:
                     valid_file_paths.append(fpath)
                 else:
-                    raise ValueError(
-                        "There was a problem with one of the dataset file extentions for your resource.")
+                    raise ValueError("There was a problem with one of the dataset file extentions for your resource.")
             else:
                 valid_file_paths.append(fpath)
 
-        resource_id = self.create_resource(resource_type=resource_type, title=p.title,
-                                           file_path=valid_file_paths[0], keywords=p.keywords, abstract=p.abstract)
+        resource_id = self.create_resource(resource_type=resource_type, title=p.title, file_path=valid_file_paths[0], keywords=p.keywords, abstract=p.abstract)
 
         for path in valid_file_paths[1:]:
             self.add_file_to_resource(resource_id, path)
 
         return resource_id
 
-    def create_resource(self, title=None, abstract=None, keywords=None, resource_type=None, file_path="",
-                        metadata=None, extra_metadata=None):
+    def create_resource(self, title=None, abstract=None, keywords=None, resource_type=None, file_path="", metadata=None, extra_metadata=None):
 
         try:
-            resource_id = self.hs.createResource(resource_type, title, resource_file=file_path, keywords=keywords,
-                                                 abstract=abstract, metadata=metadata,
-                                                 extra_metadata=extra_metadata)
+            resource_id = self.hs.createResource(resource_type, title, resource_file=file_path, keywords=keywords, abstract=abstract, metadata=metadata, extra_metadata=extra_metadata)
         except Exception as e:
             raise e
 
@@ -236,10 +228,10 @@ class HSPublisher(PublishBase):
         return resource_id
 
 
-class HSProvider(ProviderBase):
-    service_base_class = HSServiceBase
-    publishers_list = [HSPublisher]
-    display_name = 'HydroShare Services'
+class DDProvider(ProviderBase):
+    service_base_class = DDServiceBase
+    publishers_list = [DDPublisher]
+    display_name = 'Data Depot Services'
     description = 'Services avaliable through the ERDC Data Depot Server.'
     organization_name = 'U.S. Army Engineering Research and Development Center'
     organization_abbr = 'ERDC'
@@ -249,9 +241,15 @@ class HSProvider(ProviderBase):
         return HydroShareAuthBasic(**self.credentials)
 
     def get_hs(self, auth=None, require_valid_auth=False):
+        connection_info = {'hostname': '192.168.56.106',
+                           'port': 8000,
+                           'verify': False,
+                           'use_https': False
+                           }
+
         try:
             auth = auth or self.auth
-            hs = HydroShare(auth=auth)
+            hs = HydroShare(auth=auth, **connection_info)
             list(hs.resources(count=1))
             return hs
         except Exception as e:
@@ -259,10 +257,10 @@ class HSProvider(ProviderBase):
                 raise e
 
         try:
-            hs = HydroShare()
+            hs = HydroShare(**connection_info)
             list(hs.resources(count=1))
         except:
-            raise ValueError("Cannot connect to the  HydroShare.")
+            raise ValueError("Cannot connect to the Data Depot Share.")
 
         return hs
 
@@ -295,4 +293,3 @@ class HSProvider(ProviderBase):
             print("Either credentials invalid or unable to connect to Data Depot.")
 
         return False
-
