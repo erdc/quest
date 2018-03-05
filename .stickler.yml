@@ -1,5 +1,10 @@
 linters:
   flake8:
+    ignore: 'E501'
+    max-line-length: 120
+    fixer: true
   pep8:
+    max-line-length: 120
+    fixer: true
 files:
   ignore: ['*.ipynb']
