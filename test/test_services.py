@@ -3,7 +3,7 @@ import pytest
 
 from conftest import FILES_DIR
 
-from data import SERVICES, SERVICE_FEATURE_DOWNLOAD_OPTIONS
+from data import ALL_SERVICES, SERVICE_FEATURE_DOWNLOAD_OPTIONS
 
 test_download = pytest.mark.skipif(
     not pytest.config.getoption("--test-download"),
@@ -38,7 +38,7 @@ def test_get_providers(api):
 
 
 def test_get_services(api):
-    assert sorted(api.get_services()) == SERVICES
+    assert sorted(api.get_services()) == ALL_SERVICES
 
 @test_download
 @pytest.mark.parametrize('feature, options', SERVICE_FEATURE_DOWNLOAD_OPTIONS)

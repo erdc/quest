@@ -83,7 +83,7 @@ usgs_nwis=quest.api.stage_for_download(usgs_nwis, options={'parameter':'streamfl
 # ndbc THIS IS VERY FLAKY DISABLING
 # thse downloads are a bit slow and limited to 30 day window. air_pressure returning no data even though data exists
 
-#ndbc=quest.api.stage_for_download(ndbc, download_options={'parameter':'wind', 'start_date':start_30, 'end_date':end})
+#ndbc=quest.api.stage_for_download(ndbc, options={'parameter':'wind', 'start_date':start_30, 'end_date':end})
 #images.update({
 #    'noaa-ndbc-wind-41036': quest.api.view_in_collection(collection_name, service="noaa-coops", location="41036", parameter="wind"),
 #    'noaa-ndbc-wind-41037': quest.api.view_in_collection(collection_name, service="noaa-coops", location="41037", parameter="wind"),
