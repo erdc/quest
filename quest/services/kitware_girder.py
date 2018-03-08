@@ -11,13 +11,13 @@ import os
 
 
 class GirderServiceBase(SingleFileServiceBase):
-    pass
-    # @property
-    # def hs(self):
-    #     return self.provider.get_hs()
-    #
-    # def get_features(self, **kwargs):
-    #     raise NotImplementedError()
+
+    @property
+    def gc(self):
+        return self.provider.get_gc()
+
+    def get_features(self, **kwargs):
+        raise NotImplementedError()
 
 
 class GirderGeoService(GirderServiceBase):
@@ -138,9 +138,9 @@ class GirderPublisher(PublishBase):
     def __init__(self, provider, **kwargs):
         super(GirderPublisher, self).__init__(provider, **kwargs)
 
-    # @property
-    # def hs(self):
-    #     return self.provider.get_hs()
+    @property
+    def gc(self):
+        return self.provider.get_gc()
 
     # def publish(self, options=None):
     #     """Authenticate the user.
@@ -244,34 +244,30 @@ class GirderProvider(ProviderBase):
     organization_name = 'U.S. Army Engineering Research and Development Center'
     organization_abbr = 'ERDC'
 
-    # @property
-    # def auth(self):
-    #     return HydroShareAuthBasic(**self.credentials)
-    #
-    # def get_hs(self, auth=None, require_valid_auth=False):
-    #     connection_info = {'hostname': '192.168.56.106',
-    #                        'port': 8000,
-    #                        'verify': False,
-    #                        'use_https': False
-    #                        }
-    #
-    #     try:
-    #         auth = auth or self.auth
-    #         hs = HydroShare(auth=auth, **connection_info)
-    #         list(hs.resources(count=1))
-    #         return hs
-    #     except Exception as e:
-    #         if require_valid_auth:
-    #             raise e
-    #
-    #     try:
-    #         hs = HydroShare(**connection_info)
-    #         list(hs.resources(count=1))
-    #     except:
-    #         raise ValueError("Cannot connect to the Data Depot Share.")
-    #
-    #     return hs
-    #
+    @property
+    def auth(self):
+        return HydroShareAuthBasic(**self.credentials)
+
+    def get_gc(self, auth=None, require_valid_auth=False):
+        connection_info = 'https://data.kitware.com/api/v1'
+
+        try:
+            auth = auth or self.auth
+            hs = HydroShare(auth=auth, **connection_info)
+            list(hs.resources(count=1))
+            return hs
+        except Exception as e:
+            if require_valid_auth:
+                raise e
+
+        try:
+            hs = HydroShare(**connection_info)
+            list(hs.resources(count=1))
+        except:
+            raise ValueError("Cannot connect to the Girder.")
+
+        return hs
+
     # def authenticate_me(self, **kwargs):
     #
     #     username = input("Enter Username: ")
