@@ -11,7 +11,7 @@ import os
 
 
 class GirderServiceBase(SingleFileServiceBase):
-
+    pass
     # @property
     # def hs(self):
     #     return self.provider.get_hs()
