@@ -112,7 +112,7 @@ class DDNormService(DDServiceBase):
 class DDPublisher(PublishBase):
     publisher_name = "dd_pub"
     display_name = "Data Depot Publisher"
-    description = "empty"
+    description = "Data Depot is a repository for ERDC ERS."
 
     _resource_type_map = {
         'Composite': 'CompositeResource',
@@ -143,7 +143,15 @@ class DDPublisher(PublishBase):
         return self.provider.get_hs()
 
     def publish(self, options=None):
+        """Authenticate the user.
 
+        Args:
+            uri (string, Required):
+                uri of 'user service'
+         Returns:
+
+
+        """
         p = param.ParamOverrides(self, options)
         valid_file_paths = []
         valid_extensions = []
