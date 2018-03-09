@@ -289,7 +289,7 @@ class HSProvider(ProviderBase):
 
             return True
 
-        except Exception as e:
+        except:
             print("Either credentials invalid or unable to connect to HydroShare.")
 
         return False
