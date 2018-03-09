@@ -125,14 +125,6 @@ class GirderPublisher(PublishBase):
         return self.provider.get_gc()
 
     def publish(self, options=None):
-        """Authenticate the user.
-
-        Args:
-            uri (string, Required):
-                uri of 'user service'
-         Returns:
-
-        """
         try:
             p = param.ParamOverrides(self, options)
             params = {'name': p.name, 'description': p.description}
