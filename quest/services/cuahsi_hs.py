@@ -109,9 +109,9 @@ class HSNormService(HSServiceBase):
 
 
 class HSPublisher(PublishBase):
-    publisher_name = "dd_pub"
-    display_name = "Data Depot Publisher"
-    description = "empty"
+    publisher_name = "hs_pub"
+    display_name = "HydroShare Publisher"
+    description = "HydroShare is a cuahsi repository for all resource types"
 
     _resource_type_map = {
         'Composite': 'CompositeResource',
@@ -180,8 +180,7 @@ class HSPublisher(PublishBase):
                 if file_extension in valid_extensions:
                     valid_file_paths.append(fpath)
                 else:
-                    raise ValueError(
-                        "There was a problem with one of the dataset file extentions for your resource.")
+                    raise ValueError("There was a problem with one of the dataset file extentions for your resource.")
             else:
                 valid_file_paths.append(fpath)
 
@@ -240,9 +239,8 @@ class HSProvider(ProviderBase):
     service_base_class = HSServiceBase
     publishers_list = [HSPublisher]
     display_name = 'HydroShare Services'
-    description = 'Services avaliable through the ERDC Data Depot Server.'
-    organization_name = 'U.S. Army Engineering Research and Development Center'
-    organization_abbr = 'ERDC'
+    description = 'Services avaliable through the live HydroShare Server.'
+    organization_name = 'Cuahsi'
 
     @property
     def auth(self):
@@ -291,8 +289,8 @@ class HSProvider(ProviderBase):
 
             return True
 
-        except Exception as e:
-            print("Either credentials invalid or unable to connect to Data Depot.")
+        except:
+            print("Either credentials invalid or unable to connect to HydroShare.")
 
         return False
 
