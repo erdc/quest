@@ -18,7 +18,7 @@ import param
 class GirderPublisher(PublishBase):
     publisher_name = "girder_pub"
     display_name = "Girder Publisher"
-    description = "Girder is a preository for ERDC ERS."
+    description = "This is a Girder plugin for the live server."
 
     title = param.String(default="example title", doc="Title of resource", precedence=1)
     collection_description = param.String(default="", doc="Description of resource", precedence=2)
@@ -28,7 +28,7 @@ class GirderPublisher(PublishBase):
     dataset = param_util.DatasetListSelector(default=(),
                                              filters={'status': 'downloaded'},
                                              precedence=5,
-                                             doc="dataset to publish to HydroShare")
+                                             doc="dataset to publish")
 
     def __init__(self, provider, **kwargs):
         super(GirderPublisher, self).__init__(provider, **kwargs)
@@ -60,9 +60,8 @@ class GirderProvider(ProviderBase):
     service_base_class = None
     publishers_list = [GirderPublisher]
     display_name = 'Girder Services'
-    description = 'Services avaliable through the AFRL Girder Server.'
-    organization_name = 'U.S. Air Force Research Laboratory'
-    organization_abbr = 'AFRL'
+    description = 'Services avaliable through the Live Girder Server.'
+    organization_name = 'Kitware'
 
     def get_gc(self):
         connection_info = 'https://data.kitware.com/api/v1'
