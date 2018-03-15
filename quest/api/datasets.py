@@ -303,6 +303,7 @@ def stage_for_download(uris, options=None):
             staged dataset uids
     """
     uris = util.listify(uris)
+    display_name = None
     datasets = []
 
     if not isinstance(options, list):
@@ -319,7 +320,7 @@ def stage_for_download(uris, options=None):
         dataset_metadata = get_metadata(dataset_uri)[dataset_uri]
 
         parameter = kwargs.get('parameter') if kwargs else None
-        parameter_name = parameter or "empty_paramter_type"
+        parameter_name = parameter or "no_paramter"
 
         if dataset_metadata['display_name'] == dataset_uri:
             dataset_feature = dataset_metadata['feature']
@@ -327,18 +328,13 @@ def stage_for_download(uris, options=None):
             service = feature_metadata['service']
             provider, service, _ = util.parse_service_uri(service)
             display_name = '{0}-{1}-{2}'.format(provider, parameter_name, dataset_uri[:7])
-            quest_metadata = {
-                'display_name': display_name,
-                'options': kwargs,
-                'status': DatasetStatus.STAGED,
-                'parameter': parameter
-            }
-        else:
-            quest_metadata = {
-                'options': kwargs,
-                'status': DatasetStatus.STAGED,
-                'parameter': parameter
-            }
+
+        quest_metadata = {
+            'display_name': display_name or dataset_uri,
+            'options': kwargs,
+            'status': DatasetStatus.STAGED,
+            'parameter': parameter
+        }
 
         with db_session:
             dataset = db.Dataset[dataset_uri]
