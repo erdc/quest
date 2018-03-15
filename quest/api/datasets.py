@@ -171,21 +171,10 @@ def download_options(uris, fmt='json'):
 
 
 def get_publish_options(publish_uri, fmt='json'):
-    # get the correct driver
-    # make a call to publish_options on driver
     uris = util.listify(publish_uri)
     options = {}
     for uri in uris:
         publish_uri = uri
-        # if not publish_uri.startswith('pub://'):
-        #     feature = uri
-        #     if feature.startswith('d'):
-        #         feature = get_metadata(uri)[uri]['feature']
-        #
-        #     df = get_metadata(feature, as_dataframe=True).iloc[0]
-        #     df = df['service'] + '/' + df['service_id']
-        #     publish_uri = df
-
         provider, publisher, feature = util.parse_service_uri(publish_uri)
         driver = util.load_providers()[provider]
         options[uri] = driver.publish_options(publisher, fmt)
@@ -314,6 +303,7 @@ def stage_for_download(uris, options=None):
             staged dataset uids
     """
     uris = util.listify(uris)
+    display_name = None
     datasets = []
 
     if not isinstance(options, list):
@@ -327,10 +317,23 @@ def stage_for_download(uris, options=None):
         if uri.startswith('f'):
             dataset_uri = new_dataset(uri, source='download')
 
+        dataset_metadata = get_metadata(dataset_uri)[dataset_uri]
+
+        parameter = kwargs.get('parameter') if kwargs else None
+        parameter_name = parameter or "no_paramter"
+
+        if dataset_metadata['display_name'] == dataset_uri:
+            dataset_feature = dataset_metadata['feature']
+            feature_metadata = get_metadata(dataset_feature)[dataset_feature]
+            service = feature_metadata['service']
+            provider, service, _ = util.parse_service_uri(service)
+            display_name = '{0}-{1}-{2}'.format(provider, parameter_name, dataset_uri[:7])
+
         quest_metadata = {
+            'display_name': display_name or dataset_uri,
             'options': kwargs,
             'status': DatasetStatus.STAGED,
-            'parameter': kwargs.get('parameter') if kwargs else None
+            'parameter': parameter
         }
 
         with db_session:

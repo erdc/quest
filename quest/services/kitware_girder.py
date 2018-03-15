@@ -28,7 +28,7 @@ class GirderPublisher(PublishBase):
     dataset = param_util.DatasetListSelector(default=(),
                                              filters={'status': 'downloaded'},
                                              precedence=5,
-                                             doc="dataset to publish")
+                                             doc="dataset to publish to HydroShare")
 
     def __init__(self, provider, **kwargs):
         super(GirderPublisher, self).__init__(provider, **kwargs)
