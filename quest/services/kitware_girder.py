@@ -15,7 +15,6 @@ import param
 # the user wants to put into it.
 
 
-
 class GirderPublisher(PublishBase):
     publisher_name = "girder_pub"
     display_name = "Girder Publisher"
@@ -26,7 +25,10 @@ class GirderPublisher(PublishBase):
     folder_name = param.String(default="example folder title", doc="Folder Title", precedence=3)
     folder_description = param.String(default="", doc="Folder Description", precedence=4)
     # Have the option to make the resource public.
-    dataset = param_util.DatasetListSelector(default=(), filters={'status': 'downloaded'}, precedence=5, doc="dataset to publish to HydroShare")
+    dataset = param_util.DatasetListSelector(default=(),
+                                             filters={'status': 'downloaded'},
+                                             precedence=5,
+                                             doc="dataset to publish to HydroShare")
 
     def __init__(self, provider, **kwargs):
         super(GirderPublisher, self).__init__(provider, **kwargs)
@@ -40,7 +42,10 @@ class GirderPublisher(PublishBase):
             p = param.ParamOverrides(self, options)
             params = {'name': p.title, 'description': p.collection_description}
             resource_information_dict = self.gc.createResource(path='collection', params=params)
-            folder_creation_dict = self.gc.createFolder(parentId=resource_information_dict['_id'], name=p.folder_name, description=p.folder_description, parentType='collection')
+            folder_creation_dict = self.gc.createFolder(parentId=resource_information_dict['_id'],
+                                                        name=p.folder_name,
+                                                        description=p.folder_description,
+                                                        parentType='collection')
             for dataset in p.dataset:
                 dataset_metadata = get_metadata(dataset)[dataset]
                 fpath = dataset_metadata['file_path']
@@ -98,7 +103,6 @@ class GirderProvider(ProviderBase):
                     p.set(**provider_metadata)
 
             return True
-
         except:
             print("Either credentials invalid or unable to connect to the Girder live server.")
 
