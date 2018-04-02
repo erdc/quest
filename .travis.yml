@@ -47,7 +47,8 @@ install:
 
 # command to run tests
 script:
-  coverage run --source=quest setup.py test
+  pytest test --cov=quest --update-cache --test-download -s -vv
+
 
 # generate test coverage information
 after_success:
