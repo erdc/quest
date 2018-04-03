@@ -203,8 +203,6 @@ DOWNLOAD_OPTIONS_FROM_ALL_SERVICES = {
   'title': 'NWIS Instantaneous Values Service Download Options'},
  'svc://cuahsi-hydroshare:hs_geo': {},
  'svc://cuahsi-hydroshare:hs_norm': {},
- 'svc://data-depot:dd_geo': {},
- 'svc://data-depot:dd_norm': {}
 }
 
 
