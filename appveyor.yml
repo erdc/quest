@@ -8,9 +8,6 @@ environment:
     - PYTHON_VERSION: 2.7
       MINICONDA: C:\Miniconda
       ENV_FILE: py2_conda_environment.yml
-    - PYTHON_VERSION: 3.4
-      MINICONDA: C:\Miniconda3
-      ENV_FILE: py3_conda_environment.yml
     - PYTHON_VERSION: 3.5
       MINICONDA: C:\Miniconda3
       ENV_FILE: py3_conda_environment.yml
@@ -34,4 +31,4 @@ install:
   - "python setup.py install"
 
 test_script:
-  - "%CMD_IN_ENV% python setup.py test"
+  - "%CMD_IN_ENV% pytest test --cov=quest --update-cache --test-download -s -vv"

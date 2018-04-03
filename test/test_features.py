@@ -1,6 +1,7 @@
 import pytest
 
-from data import SERVICES_FEATURE_COUNT, SERVICES
+from data import SERVICES_FEATURE_COUNT, CACHED_SERVICES
+
 
 slow = pytest.mark.skipif(
     pytest.config.getoption("--skip-slow"),
@@ -90,7 +91,7 @@ def test_delete_features(api):
 
 
 @slow
-@pytest.mark.parametrize('service', SERVICES)
+@pytest.mark.parametrize('service', CACHED_SERVICES)
 def test_get_tags(api, service):
     tags = api.get_tags(service)
     assert isinstance(tags, dict)

@@ -41,4 +41,4 @@ dependencies:
     - sphinx_rtd_theme
     - hs_restclient
     - jupyter
-    - girder_client
+    - girder-client

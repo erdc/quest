@@ -18,7 +18,7 @@ quest.api.new_collection('col3')
 quest.api.set_active_project('test_data')
 quest.api.new_collection('col1')
 feature = quest.api.add_features('col1', 'svc://usgs-nwis:iv/01516350')
-dataset = quest.api.stage_for_download(feature, download_options={'parameter': 'streamflow'})
+dataset = quest.api.stage_for_download(feature, options={'parameter': 'streamflow'})
 quest.api.download_datasets(dataset)
 
 

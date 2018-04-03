@@ -11,7 +11,8 @@ import errno
 
 import quest
 
-from data import SERVICES
+from data import CACHED_SERVICES
+
 
 base_path = os.path.dirname(os.path.abspath(__file__))
 FILES_DIR = os.path.join(base_path, 'files')
@@ -41,7 +42,7 @@ def get_or_generate_test_cache(update=False, skip=False):
         start = time()
     warnings.simplefilter('ignore')
     drivers = quest.util.load_providers()
-    for name in SERVICES:
+    for name in CACHED_SERVICES:
         provider, service, feature = quest.util.parse_service_uri(name)
         if provider.startswith('user'):
             continue
@@ -49,6 +50,7 @@ def get_or_generate_test_cache(update=False, skip=False):
         cache_file = os.path.join(quest.util.get_cache_dir(driver.name), service + '_features.p')
         if update or not os.path.exists(cache_file):
             try:
+                print('Updating test cache for service: {0}'.format(name))
                 quest.api.get_tags(name, update_cache=update)
             except Exception as e:
                 print('The following error prevented the cache for the {0} service from updating: {1}: {2}'

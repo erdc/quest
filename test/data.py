@@ -203,8 +203,6 @@ DOWNLOAD_OPTIONS_FROM_ALL_SERVICES = {
   'title': 'NWIS Instantaneous Values Service Download Options'},
  'svc://cuahsi-hydroshare:hs_geo': {},
  'svc://cuahsi-hydroshare:hs_norm': {},
- 'svc://data-depot:dd_geo': {},
- 'svc://data-depot:dd_norm': {}
 }
 
 
@@ -228,7 +226,10 @@ SERVICES_FEATURE_COUNT = [
 
 ]
 
-SERVICES = sorted(DOWNLOAD_OPTIONS_FROM_ALL_SERVICES.keys())
+
+CACHED_SERVICES = [s[0] for s in SERVICES_FEATURE_COUNT]
+
+ALL_SERVICES = sorted(DOWNLOAD_OPTIONS_FROM_ALL_SERVICES.keys())
 
 SERVICE = 'svc://usgs-nwis:iv'
 FEATURE = 'f92ad0e35d04402ab1b1d4621b48a636'

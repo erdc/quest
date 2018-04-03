@@ -107,7 +107,7 @@ for svc in chosen_services:
 
         datasets = []
         for parameter in chosen_parameters:
-            datasets.extend(quest.api.stage_for_download(feats, download_options={'parameter': parameter}))
+            datasets.extend(quest.api.stage_for_download(feats, options={'parameter': parameter}))
         print('\n~~~Downloading data for chosen parameters~~~\n')
         try:
             stat = quest.api.download_datasets(datasets=datasets, raise_on_error=True)
