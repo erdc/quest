@@ -79,8 +79,6 @@ def get_publishers(expand=None, publisher_type=None):
     Returns:
         providers (list or dict,Default=list):
             list of all available providers
-
-
     """
     providers = util.load_providers()
     publishers = {}
