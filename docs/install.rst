@@ -12,20 +12,11 @@ Install Released Conda Package
 
     a. Install Quest into new environment::
 
-        conda config --set ssl_verify false
-        conda create -n quest -c conda-forge -c https://quest.erdc.dren.mil/Software/es-conda-channel/ terrapin quest
-        conda config --set ssl_verify true
-
-    .. note::
-
-        Because of the DoD certificates on the es-conda-channel server conda's SSL verification must be turned off to install packages from this channel.
-
+        conda create -n quest -c conda-forge -c erdc quest terrapin
 
     b. Install Quest into existing environment::
 
-        conda config --set ssl_verify false
-        conda install -c conda-forge -c https://quest.erdc.dren.mil/Software/es-conda-channel/ terrapin quest
-        conda config --set ssl_verify true
+        conda install -c erdc -c conda-forge quest terrapin
 
     .. note::
 
@@ -38,7 +29,7 @@ Install from Source
 
 1. Clone the repository::
 
-    git clone git@public.git.erdc.dren.mil:computational-analysis-and-mechanics/quest.git
+    git clone https://github.com/erdc/quest.git
 
 2. Install the dependencies using conda or pip (conda is recommended):
 
@@ -50,7 +41,6 @@ Conda Install
     b. Create new environment with dependenciest::
 
             conda env create -n quest --file py3_conda_environment.yml
-            # (use py2_conda_environment.yml if you want a Python 2 based install)
             source activate quest  # (use 'activate quest' on windows)
 
     c. Install Quest in develop mode::
@@ -61,9 +51,7 @@ Conda Install
     ........
     d. Some filters (e.g. watershed delineation) require the package `terrapin` that is available through the es-conda-channel::
 
-        conda config --set ssl_verify false
-        conda install -y -c https://quest.erdc.dren.mil/Software/es-conda-channel/ terrapin
-        conda config --set ssl_verify true
+        conda install -c erdc -c conda-forge terrapin
 
     e. Run tests::
 
