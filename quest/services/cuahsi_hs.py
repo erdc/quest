@@ -45,7 +45,6 @@ class HSGeoService(HSServiceBase):
         if len(results2) == 0:
             raise ValueError("There is no resources with coverages in HydroShare Repository.")
 
-
         features = pd.DataFrame(results2)
         idx = features['coverages'].apply(lambda x: len([c for c in x if c['type'] != 'period']) > 0)
         features = features[idx]
@@ -134,9 +133,6 @@ class HSPublisher(PublishBase):
     dataset = param_util.DatasetListSelector(default=(), filters={'status': 'downloaded'}, precedence=5,
                                              doc="dataset to publish to HydroShare")
     resource_type = param.ObjectSelector(doc='parameter', precedence=1, objects=sorted(_resource_type_map.keys()))
-
-    def __init__(self, provider, **kwargs):
-        super(HSPublisher, self).__init__(provider, **kwargs)
 
     @property
     def hs(self):
@@ -237,8 +233,8 @@ class HSPublisher(PublishBase):
 
 class HSProvider(ProviderBase):
     service_base_class = HSServiceBase
-    publishers_list = [HSPublisher]
-    display_name = 'HydroShare Services'
+    publisher_base_class = HSPublisher
+    display_name = 'HydroShare Provider'
     description = 'Services avaliable through the live HydroShare Server.'
     organization_name = 'Cuahsi'
 

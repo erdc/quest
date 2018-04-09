@@ -30,9 +30,6 @@ class GirderPublisher(PublishBase):
                                              precedence=5,
                                              doc="dataset to publish to HydroShare")
 
-    def __init__(self, provider, **kwargs):
-        super(GirderPublisher, self).__init__(provider, **kwargs)
-
     @property
     def gc(self):
         return self.provider.get_gc()
@@ -58,7 +55,7 @@ class GirderPublisher(PublishBase):
 
 class GirderProvider(ProviderBase):
     service_base_class = None
-    publishers_list = [GirderPublisher]
+    publisher_base_class = GirderPublisher
     display_name = 'Girder Services'
     description = 'Services avaliable through the Live Girder Server.'
     organization_name = 'Kitware'
