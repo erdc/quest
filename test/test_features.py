@@ -14,7 +14,7 @@ pytestmark = pytest.mark.usefixtures('reset_projects_dir', 'set_active_project')
 
 FEATURE_URIS = [
                 'svc://usgs-ned:19-arc-second/581d2561e4b08da350d5a3b2',
-                'svc://ncdc:gsod/028140-99999',
+                'svc://noaa-ncdc:gsod/028140-99999',
                 'svc://usgs-nwis:iv/01529950',
                 ]
 
@@ -51,7 +51,7 @@ def test_get_features_from_service(api, service, expected, tolerance):
 
 @slow
 def test_get_features_with_search_term(api):
-    features = api.get_features('svc://ncdc:ghcn-daily', filters={'search_terms': ['ZI']})
+    features = api.get_features('svc://noaa-ncdc:ghcn-daily', filters={'search_terms': ['ZI']})
     expected = 270
     tolerance = 10
     assert abs(len(features) - expected) < tolerance
@@ -59,7 +59,7 @@ def test_get_features_with_search_term(api):
 
 @slow
 def test_get_features_with_tag(api):
-    features = api.get_features('svc://ncdc:ghcn-daily', filters={'country': 'ZI'})
+    features = api.get_features('svc://noaa-ncdc:ghcn-daily', filters={'country': 'ZI'})
     expected = 20
     tolerance = 5
     assert abs(len(features) - expected) < tolerance

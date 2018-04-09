@@ -8,7 +8,7 @@ from threading import Thread
 from time import sleep, time
 import warnings
 import errno
-
+import logging
 import quest
 
 from data import CACHED_SERVICES
@@ -41,6 +41,7 @@ def get_or_generate_test_cache(update=False, skip=False):
         print('Generating the services metadata cache for tests. This may take several minutes.')
         start = time()
     warnings.simplefilter('ignore')
+    logging.basicConfig()
     drivers = quest.util.load_providers()
     for name in CACHED_SERVICES:
         provider, service, feature = quest.util.parse_service_uri(name)
