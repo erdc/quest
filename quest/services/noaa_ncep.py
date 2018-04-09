@@ -72,9 +72,7 @@ class NCEP_GFS_Service(NCEPServiceBase):
 
 class NCEPProvider(ProviderBase):
     service_base_class = NCEPServiceBase
-    publishers_list = []
     display_name = 'NCEP GFS Provider'
     description = 'Services avaliable through the NOAA NCEP Server.'
     organization_name = 'National Centers for Environmental Prediction'
     organization_abbr = 'NCEP'
-
