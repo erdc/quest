@@ -39,7 +39,7 @@ class ProviderBase(with_metaclass(abc.ABCMeta, object)):
     """Base class for data provider plugins
     """
     service_base_class = None
-    publishers_list = None
+    publisher_base_class = None
     display_name = None
     description = None
     organization_name = None
@@ -48,17 +48,18 @@ class ProviderBase(with_metaclass(abc.ABCMeta, object)):
     @property
     def services(self):
         if self.service_base_class is None:
-            return {}  # TODO or should I raise a NotImplementedError
+            return {}
         if self._services is None:
             self._services = {s.service_name: s(name=s.service_name, provider=self) for s in self.service_base_class.__subclasses__()}
         return self._services
 
     @property
     def publishers(self):
-        if self.publishers_list is None:
+        if self.publisher_base_class is None:
             return {}
         if self._publishers is None:
-            self._publishers = {p.publisher_name: p(name=p.publisher_name, provider=self) for p in self.publishers_list}
+            publishers_list = self.publisher_base_class.__subclasses__() or [self.publisher_base_class]
+            self._publishers = {p.publisher_name: p(name=p.publisher_name, provider=self) for p in publishers_list}
 
         return self._publishers
 
