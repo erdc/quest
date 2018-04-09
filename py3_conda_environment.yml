@@ -42,3 +42,4 @@ dependencies:
     - hs_restclient
     - jupyter
     - girder-client
+    - ckanapi
