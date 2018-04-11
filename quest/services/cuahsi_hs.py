@@ -35,7 +35,7 @@ class HSGeoService(HSServiceBase):
 
     def get_features(self, **kwargs):
 
-        results = list(self.hs.resources())
+        results = list(self.hs.resources(coverage_type="box", north="90", south="-90", east="180", west="-180"))
 
         if len(results) == 0:
             raise ValueError('No resource available from HydroShare.')
