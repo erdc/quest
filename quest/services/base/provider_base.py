@@ -283,8 +283,8 @@ class ProviderBase(with_metaclass(abc.ABCMeta, object)):
         """
         return self.services[service].download_options(fmt)
 
-    def publish(self, publisher, options):
-        return self.publishers[publisher].publish(options)
+    def publish(self, publisher, **kwargs):
+        return self.publishers[publisher].publish(**kwargs)
 
     def publish_options(self, publisher, fmt):
         return self.publishers[publisher].publish_options(fmt)

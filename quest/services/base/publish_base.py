@@ -38,5 +38,5 @@ class PublishBase(param.Parameterized):
 
         return schema
 
-    def publish(self, options):
+    def publish(self, **kwargs):
         raise NotImplementedError()

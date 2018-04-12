@@ -51,7 +51,7 @@ def get_user_service_base():
 
             return self
 
-        def download(self, feature, file_path, dataset, **params):
+        def download(self, feature, file_path, dataset, **kwargs):
             if self.datasets_mapping is not None:
                 fnames = self.datasets_mapping
                 if isinstance(dict, self.datasets_mapping):
