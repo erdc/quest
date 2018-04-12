@@ -127,6 +127,7 @@ def add_provider(uri):
             util.update_settings({'USER_SERVICES': user_services})
             util.save_settings()
             msg = 'service added'
+            util.load_providers(update_cache=True)
         else:
             msg = 'service already present'
     else:
@@ -159,6 +160,7 @@ def delete_provider(uri):
         util.update_settings({'USER_SERVICES': user_services})
         util.save_settings()
         msg = 'service removed'
+        util.load_providers(update_cache=True)
     else:
         msg = 'service not found'
 

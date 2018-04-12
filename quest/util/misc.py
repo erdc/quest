@@ -19,6 +19,7 @@ except ImportError:
 from uuid import uuid4, UUID
 import quest
 
+the_providers = None
 
 def generate_cache(update=False):
     """Downloads features for all services and caches results.
@@ -238,22 +239,27 @@ def load_drivers(namespace, names=None):
     return {name: driver.DriverManager(namespace, name, invoke_on_load='True') for name in names}
 
 
-def load_providers():
-    settings = get_settings()
+def load_providers(update_cache=False):
+    global the_providers
 
-    # add web services
+    settings = get_settings()
     web_services = list_drivers('services')
     web_services.remove('user')
 
-    providers = {name: driver.DriverManager('quest.services', name, invoke_on_load=True, invoke_kwds={'name': name}).driver for name in web_services}
+    if update_cache or the_providers is None:
+        providers = {name: driver.DriverManager('quest.services', name, invoke_on_load=True, invoke_kwds={'name': name}).driver for name in web_services}
 
-    if len(settings.get('USER_SERVICES', [])) > 0:
-        for uri in settings.get('USER_SERVICES', []):
-            try:
-                drv = driver.DriverManager('quest.services', 'user', invoke_on_load=True, invoke_kwds={'uri': uri}).driver
-                providers['user-' + drv.name] = drv
-            except Exception as e:
-                logger.error('Failed to load local service from %s, with exception: %s' % (uri, str(e)))
+        if len(settings.get('USER_SERVICES', [])) > 0:
+            for uri in settings.get('USER_SERVICES', []):
+                try:
+                    drv = driver.DriverManager('quest.services', 'user', invoke_on_load=True, invoke_kwds={'uri': uri}).driver
+                    providers['user-' + drv.name] = drv
+                except Exception as e:
+                    logger.error('Failed to load local service from %s, with exception: %s' % (uri, str(e)))
+
+        the_providers = providers
+    else:
+        providers = the_providers
 
     return providers
 
