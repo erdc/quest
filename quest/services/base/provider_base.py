@@ -60,7 +60,6 @@ class ProviderBase(with_metaclass(abc.ABCMeta, object)):
         if self._publishers is None:
             publishers_list = self.publisher_base_class.__subclasses__() or [self.publisher_base_class]
             self._publishers = {p.publisher_name: p(name=p.publisher_name, provider=self) for p in publishers_list}
-
         return self._publishers
 
     @property
