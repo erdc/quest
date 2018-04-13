@@ -130,7 +130,7 @@ class HSPublisher(PublishBase):
     title = param.String(default="", doc="", precedence=2)
     abstract = param.String(default="", doc="", precedence=3)
     keywords = param.List(default=[], doc="", precedence=4)
-    dataset = param_util.DatasetListSelector(default=(), filters={'status': 'downloaded'}, doc="", precedence=5)
+    dataset = param_util.DatasetListSelector(default=(), queries=['status == "downloaded" or status == "filter applied"'], doc="", precedence=5)
 
     @property
     def hs(self):
