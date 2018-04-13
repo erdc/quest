@@ -27,7 +27,10 @@ class NasaServiceBase(SingleFileServiceBase):
         return self.provider.get_user_info()
 
     def _read_granules(self, short_name, page_num):
-        return requests.get(granules_url % (short_name, page_num), auth=(self.info['username'], self.info['password'])).json()['feed']['entry']
+        try:
+            return requests.get(granules_url % (short_name, page_num), auth=(self.info['username'], self.info['password'])).json()['feed']['entry']
+        except ValueError:
+            return requests.get(granules_url % (short_name, page_num)).json()['feed']['entry']
 
     def get_features(self, **kwargs):
         page_num = 0
