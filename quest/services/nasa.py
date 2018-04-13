@@ -139,7 +139,7 @@ class NasaProvider(ProviderBase):
     organization_abbr = 'NASA'
 
     def get_user_info(self):
-        the_info = {**self.credentials}
+        the_info = self.credentials
         return the_info
 
     def authenticate_me(self, **kwargs):
