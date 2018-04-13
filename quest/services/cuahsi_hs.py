@@ -4,6 +4,7 @@ from ..api.database import get_db, db_session
 from shapely.geometry import Point, box
 from ..api.metadata import get_metadata
 from ..util import param_util
+from getpass import getpass
 import pandas as pd
 import param
 import os
@@ -130,7 +131,7 @@ class HSPublisher(PublishBase):
     title = param.String(default="", doc="", precedence=2)
     abstract = param.String(default="", doc="", precedence=3)
     keywords = param.List(default=[], doc="", precedence=4)
-    dataset = param_util.DatasetListSelector(default=(), filters={'status': 'downloaded'}, doc="", precedence=5)
+    dataset = param_util.DatasetListSelector(default=(), queries=['status == "downloaded" or status == "filter applied"'],, doc="", precedence=5)
 
     @property
     def hs(self):
@@ -259,8 +260,8 @@ class HSProvider(ProviderBase):
 
     def authenticate_me(self, **kwargs):
 
-        username = kwargs['username']
-        password = kwargs['password']
+        username = input("Enter Username: ")
+        password = getpass("Enter Password: ")
 
         try:
             auth = HydroShareAuthBasic(username=username, password=password)
