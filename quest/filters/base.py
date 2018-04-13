@@ -56,7 +56,7 @@ class FilterBase(param.Parameterized):
 
     @property
     def description(self):
-        return '{} Filter Applied'.format(self.metadata['group'].capitalize)
+        return '{} Filter Applied'.format(self.metadata['group'].capitalize())
 
     @abc.abstractmethod
     def register(self):

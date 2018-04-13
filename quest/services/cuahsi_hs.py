@@ -130,7 +130,7 @@ class HSPublisher(PublishBase):
     abstract = param.String(default="example abstract", precedence=3,
                             doc="An description of the resource to be added to HydroShare.")
     keywords = param.List(default=[], precedence=4, doc="list of keyword strings to describe the resource")
-    dataset = param_util.DatasetListSelector(default=(), filters={'status': 'downloaded'}, precedence=5,
+    dataset = param_util.DatasetListSelector(default=(), queries=['status == "downloaded" or status == "filter applied"'], precedence=5,
                                              doc="dataset to publish to HydroShare")
     resource_type = param.ObjectSelector(doc='parameter', precedence=1, objects=sorted(_resource_type_map.keys()))
 

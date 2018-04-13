@@ -82,7 +82,7 @@ def add_features(collection, features):
 
 @add_async
 def get_features(uris=None, expand=False, as_dataframe=False, as_geojson=False,
-                 update_cache=False, filters=None,
+                 update_cache=False, filters=None, queries=None,
                  services=None, collections=None, features=None):
     """Retrieve list of features from resources.
 
@@ -104,6 +104,8 @@ def get_features(uris=None, expand=False, as_dataframe=False, as_geojson=False,
                     bbox (string, optional): filter features by bounding box
 
             Features can also be filtered by any other metadata fields
+        queries(list, Optional, Default=None):
+            list of string arguments to pass to pandas.DataFrame.query to filter the features
         services (comma separated strings, or list of strings, Deprecated):
             list of services to search in for features
         collections (comma separated strings or list of strings, Deprecated):
@@ -199,6 +201,10 @@ def get_features(uris=None, expand=False, as_dataframe=False, as_geojson=False,
             else:
                 idx = features.metadata.map(lambda x: _multi_index(x, k) == v)
                 features = features[idx]
+
+    if queries is not None:
+        for query in queries:
+            features = features.query(query)
 
     if not (expand or as_dataframe or as_geojson):
         return features.index.astype('unicode').tolist()
