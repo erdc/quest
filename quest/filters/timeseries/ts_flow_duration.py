@@ -6,6 +6,7 @@ import os
 
 class TsFlowDuration(FilterBase):
     _name = 'flow-duration'
+    group = 'Timeseries'
 
     dataset = util.param.DatasetSelector(default=None,
                                          doc="""Dataset to apply filter to.""",

@@ -1,18 +1,14 @@
 import pytest
 import os
-import sys
 import shutil
-import socket
 import tempfile
-from threading import Thread
-from time import sleep, time
+from time import time
 import warnings
-import errno
 import logging
+
 import quest
 
 from data import CACHED_SERVICES
-
 
 base_path = os.path.dirname(os.path.abspath(__file__))
 FILES_DIR = os.path.join(base_path, 'files')
@@ -40,8 +36,13 @@ def get_or_generate_test_cache(update=False, skip=False):
     if not os.path.exists(test_cache_dir) or update:
         print('Generating the services metadata cache for tests. This may take several minutes.')
         start = time()
+
+    # prevent warnings
     warnings.simplefilter('ignore')
-    logging.basicConfig()
+
+    # configure logger for ulmo
+    logging.getLogger('ulmo').addHandler(logging.StreamHandler())
+
     drivers = quest.util.load_providers()
     for name in CACHED_SERVICES:
         provider, service, feature = quest.util.parse_service_uri(name)
@@ -56,7 +57,10 @@ def get_or_generate_test_cache(update=False, skip=False):
             except Exception as e:
                 print('The following error prevented the cache for the {0} service from updating: {1}: {2}'
                       .format(name, type(e).__name__, str(e)))
+
+    # re-enable warnings
     warnings.simplefilter('default')
+
     if start is not None:
         print('Generated test cash in {0} seconds'.format(time() - start))
 
