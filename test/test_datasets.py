@@ -111,6 +111,15 @@ def test_get_datasets(api, dataset_save_path):
     assert actual == []
 
 
+def test_get_datasets_with_query(api):
+    datasets = api.get_datasets(queries=['status == "downloaded" or status == "filter applied"'])
+    expected = 1
+    assert len(datasets) == expected
+
+    datasets = api.get_datasets(queries=['file_path != None'])
+    assert len(datasets) == expected
+
+
 def test_new_dataset(api):
     """Create a new dataset at a feature.
 

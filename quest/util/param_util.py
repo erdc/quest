@@ -7,17 +7,16 @@ from .misc import to_json_default_handler
 
 
 class DatasetSelector(param.ObjectSelector):
-    __slots__ = ['filters']
+    __slots__ = ['filters', 'queries']
 
-    def __init__(self, filters=None, **params):
+    def __init__(self, filters=None, queries=None, **params):
         self.filters = filters
+        self.queries = queries
         super(DatasetSelector, self).__init__(**params)
 
     @property
     def datasets(self):
-        # ds = quest.api.get_datasets(filters=self.filters, as_dataframe=True)
-        # return ds.display_name.to_dict()
-        return quest.api.get_datasets(filters=self.filters)
+        return quest.api.get_datasets(filters=self.filters, queries=self.queries)
 
     def get_range(self):
         self.objects = self.datasets
@@ -25,15 +24,16 @@ class DatasetSelector(param.ObjectSelector):
 
 
 class FeatureSelector(param.ObjectSelector):
-    __slots__ = ['filters']
+    __slots__ = ['filters', 'queries']
 
-    def __init__(self, filters=None, **params):
+    def __init__(self, filters=None, queries=None,  **params):
         self.filters = filters
+        self.queries = queries
         super(FeatureSelector, self).__init__(**params)
 
     @property
     def features(self):
-        return quest.api.get_features(quest.api.get_collections(), filters=self.filters)
+        return quest.api.get_features(quest.api.get_collections(), filters=self.filters, queries=self.queries)
 
     def get_range(self):
         self.objects = self.features
@@ -41,15 +41,16 @@ class FeatureSelector(param.ObjectSelector):
 
 
 class DatasetListSelector(param.ListSelector):
-    __slots__ = ['filters']
+    __slots__ = ['filters', 'queries']
 
-    def __init__(self, filters=None, **params):
+    def __init__(self, filters=None, queries=None, **params):
         self.filters = filters
+        self.queries = queries
         super(DatasetListSelector, self).__init__(**params)
 
     @property
     def datasets(self):
-        return quest.api.get_datasets(filters=self.filters)
+        return quest.api.get_datasets(filters=self.filters, queries=self.queries)
 
     def get_range(self):
         self.objects = self.datasets
