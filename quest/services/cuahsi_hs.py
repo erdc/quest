@@ -9,6 +9,7 @@ import pandas as pd
 import param
 import os
 
+
 class HSServiceBase(SingleFileServiceBase):
 
     @property
@@ -35,7 +36,7 @@ class HSGeoService(HSServiceBase):
 
     def get_features(self, **kwargs):
 
-        results = list(self.hs.resources())
+        results = list(self.hs.resources(coverage_type="box", north="90", south="-90", east="180", west="-180"))
 
         if len(results) == 0:
             raise ValueError('No resource available from HydroShare.')
@@ -126,21 +127,18 @@ class HSPublisher(PublishBase):
         'Time Series': 'TimeSeriesResource'
     }
 
-    title = param.String(default="example title", doc="Title of resource", precedence=2)
-    abstract = param.String(default="example abstract", precedence=3,
-                            doc="An description of the resource to be added to HydroShare.")
-    keywords = param.List(default=[], precedence=4, doc="list of keyword strings to describe the resource")
-    dataset = param_util.DatasetListSelector(default=(), filters={'status': 'downloaded'}, precedence=5,
-                                             doc="dataset to publish to HydroShare")
-    resource_type = param.ObjectSelector(doc='parameter', precedence=1, objects=sorted(_resource_type_map.keys()))
+    resource_type = param.ObjectSelector(default=None, doc="", precedence=1, objects=sorted(_resource_type_map.keys()))
+    title = param.String(default="", doc="", precedence=2)
+    abstract = param.String(default="", doc="", precedence=3)
+    keywords = param.List(default=[], doc="", precedence=4)
+    dataset = param_util.DatasetListSelector(default=(), filters={'status': 'downloaded'}, doc="", precedence=5)
 
     @property
     def hs(self):
         return self.provider.get_hs()
 
-    def publish(self, options=None):
-
-        p = param.ParamOverrides(self, options)
+    def publish(self, **kwargs):
+        p = param.ParamOverrides(self, kwargs)
         valid_file_paths = []
         valid_extensions = []
 

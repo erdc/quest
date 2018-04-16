@@ -34,9 +34,9 @@ class GirderPublisher(PublishBase):
     def gc(self):
         return self.provider.get_gc()
 
-    def publish(self, options=None):
+    def publish(self, **kwargs):
         try:
-            p = param.ParamOverrides(self, options)
+            p = param.ParamOverrides(self, kwargs)
             params = {'name': p.title, 'description': p.collection_description}
             resource_information_dict = self.gc.createResource(path='collection', params=params)
             folder_creation_dict = self.gc.createFolder(parentId=resource_information_dict['_id'],

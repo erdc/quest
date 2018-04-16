@@ -60,10 +60,10 @@ def download(feature, file_path, dataset=None, **kwargs):
 
 
 @add_async
-def publish(publisher_uri, options=None):
+def publish(publisher_uri, **kwargs):
     provider, publisher, feature = util.parse_service_uri(publisher_uri)
     driver = util.load_providers()[provider]
-    data = driver.publish(publisher=publisher, options=options)
+    data = driver.publish(publisher=publisher, **kwargs)
     return data
 
 @add_async

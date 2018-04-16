@@ -65,8 +65,8 @@ class NoaaServiceBase(TimePeriodServiceBase):
 
         return pmap
 
-    def download(self, feature, file_path, dataset, **params):
-        p = param.ParamOverrides(self, params)
+    def download(self, feature, file_path, dataset, **kwargs):
+        p = param.ParamOverrides(self, kwargs)
         self.parameter = p.parameter
         self.end = pd.to_datetime(p.end)
         self.start = pd.to_datetime(p.start)

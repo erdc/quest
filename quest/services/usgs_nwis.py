@@ -18,8 +18,8 @@ class NwisServiceBase(TimePeriodServiceBase):
     period = param.String(default='P365D', precedence=4, doc='time period (e.g. P365D = 365 days or P4W = 4 weeks)')
     smtk_template = 'start_end_or_period.sbt'
 
-    def download(self, feature, file_path, dataset, **params):
-        p = param.ParamOverrides(self, params)
+    def download(self, feature, file_path, dataset, **kwargs):
+        p = param.ParamOverrides(self, kwargs)
 
         parameter = p.parameter
         start = p.start

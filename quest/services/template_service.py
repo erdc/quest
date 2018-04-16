@@ -26,7 +26,7 @@ class ExampleServiceBase(ServiceBase):
     smtk_template = None
     _parameter_map = dict()
 
-    def download(self, feature, file_path, dataset, **params):
+    def download(self, feature, file_path, dataset, **kwwargs):
         metadata = {}  # get metadata from service
         data = None  # data structure containing downloaded data
 

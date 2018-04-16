@@ -92,7 +92,7 @@ class ServiceBase(param.Parameterized):
 
         return schema
 
-    def download(self, feature, file_path, dataset, **params):
+    def download(self, feature, file_path, dataset, **kwargs):
         raise NotImplementedError()
 
     def get_features(self, **kwargs):
@@ -138,7 +138,7 @@ class SingleFileServiceBase(ServiceBase):
     """Base file for datasets that are a single file download
     eg elevation raster etc
     """
-    def download(self, feature, file_path, dataset, **params):
+    def download(self, feature, file_path, dataset, **kwargs):
         feature_id = util.construct_service_uri(self.provider.name, self.name, feature)
         feature = self.provider.get_features(self.name).loc[feature_id]
         reserved = feature.get('reserved')
