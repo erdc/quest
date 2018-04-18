@@ -69,7 +69,7 @@ def test_get_features_with_tag(api):
 def test_get_features_with_query(api):
     features = api.get_features('svc://noaa-ncdc:ghcn-daily',
                                 queries=["display_name == 'DALGARANGA' or display_name == 'TARDIE STATION'"])
-    expected = 1
+    expected = 2
     tolerance = 1
     assert abs(len(features) - expected) < tolerance
 
