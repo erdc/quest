@@ -6,6 +6,18 @@ import quest
 from .misc import to_json_default_handler
 
 
+class NamedString(object):
+    def __init__(self, name, string):
+        self.name = name
+        self.string = string
+
+    def __str__(self):
+        return self.string
+
+    def __repr__(self):
+        return self.string
+
+
 class DatasetSelector(param.ObjectSelector):
     __slots__ = ['filters', 'queries']
 
@@ -16,7 +28,8 @@ class DatasetSelector(param.ObjectSelector):
 
     @property
     def datasets(self):
-        return quest.api.get_datasets(filters=self.filters, queries=self.queries)
+        datasets = quest.api.get_datasets(filters=self.filters, queries=self.queries, expand=True)
+        return [NamedString(v['display_name'], k) for k, v in datasets.items()]
 
     def get_range(self):
         self.objects = self.datasets
@@ -33,7 +46,8 @@ class FeatureSelector(param.ObjectSelector):
 
     @property
     def features(self):
-        return quest.api.get_features(quest.api.get_collections(), filters=self.filters, queries=self.queries)
+        features = quest.api.get_features(quest.api.get_collections(), filters=self.filters, queries=self.queries, expand=True)
+        return [NamedString(v['display_name'], k) for k, v in features.items()]
 
     def get_range(self):
         self.objects = self.features
@@ -50,7 +64,8 @@ class DatasetListSelector(param.ListSelector):
 
     @property
     def datasets(self):
-        return quest.api.get_datasets(filters=self.filters, queries=self.queries)
+        datasets = quest.api.get_datasets(filters=self.filters, queries=self.queries, expand=True)
+        return [NamedString(v['display_name'], k) for k, v in datasets.items()]
 
     def get_range(self):
         self.objects = self.datasets
