@@ -2,6 +2,8 @@
 
 """
 from .base import ProviderBase, SingleFileServiceBase
+from ..api.database import get_db, db_session
+from getpass import getpass
 import pandas as pd
 import requests
 
@@ -20,8 +22,15 @@ class NasaServiceBase(SingleFileServiceBase):
         'elevation': 'elevation'
     }
 
-    def _read_granules(short_name, page_num):
-        return requests.get(granules_url % (short_name, page_num)).json()['feed']['entry']
+    @property
+    def info(self):
+        return self.provider.get_user_info()
+
+    def _read_granules(self, short_name, page_num):
+        try:
+            return requests.get(granules_url % (short_name, page_num), auth=(self.info['username'], self.info['password'])).json()['feed']['entry']
+        except ValueError:
+            return requests.get(granules_url % (short_name, page_num)).json()['feed']['entry']
 
     def get_features(self, **kwargs):
         page_num = 0
@@ -128,3 +137,35 @@ class NasaProvider(ProviderBase):
     description = 'Services available through the NASA'
     organization_name = 'National Aeronautic and Space Administration'
     organization_abbr = 'NASA'
+
+    def get_user_info(self):
+        the_info = self.credentials
+        return the_info
+
+    def authenticate_me(self, **kwargs):
+
+        username = input("Enter Username: ")
+        password = getpass("Enter Password: ")
+
+        try:
+            db = get_db()
+            with db_session:
+                p = db.Providers.select().filter(provider=self.name).first()
+
+                provider_metadata = {
+                    'provider': self.name,
+                    'username': username,
+                    'password': password,
+                }
+
+                if p is None:
+                    db.Providers(**provider_metadata)
+                else:
+                    p.set(**provider_metadata)
+
+            return True
+
+        except:
+            print("Either credentials invalid or unable to connect to HydroShare.")
+
+        return False
