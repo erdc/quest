@@ -207,8 +207,8 @@ DOWNLOAD_OPTIONS_FROM_ALL_SERVICES = {
 
 
 SERVICES_FEATURE_COUNT = [
-    # ('svc://nasa:srtm-3-arc-second', 14297, 1000),
-    # ('svc://nasa:srtm-30-arc-second', 27, 10),
+    ('svc://nasa:srtm-3-arc-second', 14297, 1000),
+    ('svc://nasa:srtm-30-arc-second', 27, 10),
     ('svc://noaa-ncdc:ghcn-daily', 104126, 5000),
     ('svc://noaa-ncdc:gsod', 28754, 1500),
     ('svc://noaa-coast:coops-meteorological', 375, 50),
@@ -253,8 +253,8 @@ DATASET_METADATA =  {
 }
 
 SERVICE_FEATURE_DOWNLOAD_OPTIONS = [
-    # ('svc://nasa:srtm-3-arc-second/G1034711987-LPDAAC_ECS' , None),
-    # ('svc://nasa:srtm-30-arc-second/G1005651728-LPDAAC_ECS', None),
+    ('svc://nasa:srtm-3-arc-second/G1034711987-LPDAAC_ECS' , None),
+    ('svc://nasa:srtm-30-arc-second/G1005651728-LPDAAC_ECS', None),
     ('svc://noaa-ncdc:ghcn-daily/ACW00011604', {'parameter': 'air_temperature:daily:total', 'start': '1949-01-01', 'end': '1949-01-02'}),
     ('svc://noaa-ncdc:gsod/717580-99999', {'parameter': 'air_temperature:daily:max', 'start': '2016-01-01', 'end': '2016-01-02'}),
     ('svc://noaa-coast:coops-meteorological/1611400', {'parameter': 'air_temperature', 'start': '2015-05-23', 'end': '2015-05-24'}),

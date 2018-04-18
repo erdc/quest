@@ -56,7 +56,6 @@ __all__ = (
     'save_settings',
     'set_active_project',
     'stage_for_download',
-    'stage_for_publish',
     'unauthenticate_provider',
     'update_metadata',  # replaces update_collection, update_feature, update_dataset
     'update_settings',
