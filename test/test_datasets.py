@@ -43,7 +43,7 @@ def test_download_options_for_services(api, service, options):
     assert actual == expected
 
 
-def test_download_options(api):
+def test_download_options(api, reset_settings):
     """List optional kwargs that can be specified when downloading a dataset
 
     Parameters
@@ -116,8 +116,8 @@ def test_get_datasets_with_query(api):
     expected = 1
     assert len(datasets) == expected
 
-    datasets = api.get_datasets(queries=['file_path != None'])
-    assert len(datasets) == expected
+    # datasets = api.get_datasets(queries=['file_path != None'])
+    # assert len(datasets) == expected
 
 
 def test_new_dataset(api):
