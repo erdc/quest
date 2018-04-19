@@ -302,8 +302,6 @@ DOWNLOAD_OPTIONS_FROM_ALL_SERVICES = {
     'description': 'Parameter3',
     'name': 'product',
     'range': [['NAM', 'NAM'],
-     ['NAM (RTMA version) CONUS Precipitation Analysis (Stage2 4km Resolution)',
-      'NAM (RTMA version) CONUS Precipitation Analysis (Stage2 4km Resolution)'],
      ['NAM - Binary Universal Form for the Representation of meteorological data (BUFR)',
       'NAM - Binary Universal Form for the Representation of meteorological data (BUFR)'],
      ['NAM 104 AWIPS Grid (N. Hemisphere polar stereographic grid (NGM Super C grid))',
@@ -362,13 +360,7 @@ DOWNLOAD_OPTIONS_FROM_ALL_SERVICES = {
      ['NAM NEST over HAWAII (3 km Resolution - Grid 196)',
       'NAM NEST over HAWAII (3 km Resolution - Grid 196)'],
      ['NAM NEST over PUERTO RICO (3 km Resolution - Grid 194)',
-      'NAM NEST over PUERTO RICO (3 km Resolution - Grid 194)'],
-     ['NAM Precipitation Analysis (4km Analysis mapped to 15km grid)',
-      'NAM Precipitation Analysis (4km Analysis mapped to 15km grid)'],
-     ['NAM Precipitation Analysis (Stage 4)',
-      'NAM Precipitation Analysis (Stage 4)'],
-     ['NAM Radar and Gauge Analysis under Stage2',
-      'NAM Radar and Gauge Analysis under Stage2']],
+      'NAM NEST over PUERTO RICO (3 km Resolution - Grid 194)']],
     'type': 'ObjectSelector'}],
   'title': 'NCEP NAM Service Download Options'}
 }
