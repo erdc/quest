@@ -77,8 +77,8 @@ class GirderProvider(ProviderBase):
 
     def authenticate_me(self, **kwargs):
         connection_info = 'https://data.kitware.com/api/v1'
-        username = input("Enter Username: ")
-        password = getpass("Enter Password: ")
+        username = kwargs['username']
+        password = kwargs['password']
 
         try:
             gc = girder_client.GirderClient(apiUrl=connection_info)

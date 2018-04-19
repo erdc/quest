@@ -25,6 +25,7 @@ __all__ = (
     'download_options',
     'get_active_project',
     'get_api_version',
+    'get_auth_status',
     'get_collections',
     'get_datasets',
     'get_features',
@@ -56,7 +57,6 @@ __all__ = (
     'save_settings',
     'set_active_project',
     'stage_for_download',
-    'stage_for_publish',
     'unauthenticate_provider',
     'update_metadata',  # replaces update_collection, update_feature, update_dataset
     'update_settings',
@@ -150,6 +150,7 @@ from .services import (
     get_services,
     add_provider,
     delete_provider,
+    get_auth_status,
     authenticate_provider,
     unauthenticate_provider,
 )
