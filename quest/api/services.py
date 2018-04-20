@@ -46,9 +46,9 @@ def get_services(expand=None, parameter=None, service_type=None):
     """
     providers = util.load_providers() # util.load_drivers('services')
     services = {}
-    for provider, svc in providers.items():
-        for service, svc_metadata in svc.get_services().items():
-            name = 'svc://%s:%s' % (provider, service)
+    for provider_name, provider in providers.items():
+        for service, svc_metadata in provider.get_services().items():
+            name = 'svc://%s:%s' % (provider_name, service)
             if service_type == svc_metadata['service_type'] or service_type is None:
                 if parameter in svc_metadata['parameters'] or parameter is None:
                     svc_metadata.update({'name': name})
