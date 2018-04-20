@@ -4,6 +4,7 @@ Providers are inferred by aggregating information from service plugins.
 """
 from __future__ import absolute_import
 from __future__ import print_function
+from ..api.database import get_db, db_session
 from .. import util
 import os
 import requests
@@ -167,7 +168,28 @@ def delete_provider(uri):
     return msg
 
 
-def authenticate_provider(uri):
+def get_auth_status(uri):
+    """Check to see if a provider has been authenticated
+
+    Args:
+        uri (string, Required):
+            uri of 'user service'
+     Returns:
+        True on success
+        False on not authenticated
+
+    """
+    db = get_db()
+    with db_session:
+        p = db.Providers.select().filter(provider=uri).first()
+
+        if p is None:
+            return False
+
+    return True
+
+
+def authenticate_provider(uri, **kwargs):
     """Authenticate the user.
 
     Args:
@@ -178,7 +200,7 @@ def authenticate_provider(uri):
 
     """
     driver = util.load_providers()[uri]
-    driver.authenticate_me()
+    driver.authenticate_me(**kwargs)
 
 
 def unauthenticate_provider(uri):

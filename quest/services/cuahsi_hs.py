@@ -4,7 +4,6 @@ from ..api.database import get_db, db_session
 from shapely.geometry import Point, box
 from ..api.metadata import get_metadata
 from ..util import param_util
-from getpass import getpass
 import pandas as pd
 import param
 import os
@@ -260,8 +259,8 @@ class HSProvider(ProviderBase):
 
     def authenticate_me(self, **kwargs):
 
-        username = input("Enter Username: ")
-        password = getpass("Enter Password: ")
+        username = kwargs['username']
+        password = kwargs['password']
 
         try:
             auth = HydroShareAuthBasic(username=username, password=password)
