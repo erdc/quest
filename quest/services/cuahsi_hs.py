@@ -260,8 +260,8 @@ class HSProvider(ProviderBase):
 
     def authenticate_me(self, **kwargs):
 
-        username = input("Enter Username: ")
-        password = getpass("Enter Password: ")
+        username = kwargs.get('username') or input("Enter Username: ")
+        password = kwargs.get('password') or getpass("Enter Password: ")
 
         try:
             auth = HydroShareAuthBasic(username=username, password=password)

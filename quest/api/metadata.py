@@ -44,12 +44,21 @@ def get_metadata(uris, as_dataframe=False):
         for (provider, service), grp in svc_df.groupby(['provider', 'service']):
             # svc = .format(provider, service)
             driver = util.load_providers()[provider]
-            features = driver.get_features(service)
-            selected_features = grp['uri'].tolist()
-            if None not in selected_features:
-                features = features.loc[selected_features]
+            if not grp.query('feature != feature').empty:
+                service_metadata = driver.get_services()[service]
+                index = util.construct_service_uri(provider, service)
+                metadata.append(pd.DataFrame(service_metadata, index=[index]))
 
-            metadata.append(features)
+            # Next process service features
+            selected_features = grp.query('feature == feature').uri.tolist()  # select rows where feature is not None (nan)
+            if selected_features:
+                # add selected service features if any
+                features = driver.get_features(service)
+                features = features.loc[selected_features]
+                metadata.append(features)
+
+
+
 
     if 'collections' in grouped_uris.groups.keys():
         # get metadata for collections
