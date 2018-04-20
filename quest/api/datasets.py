@@ -336,7 +336,7 @@ def stage_for_download(uris, options=None):
             display_name = '{0}-{1}-{2}'.format(provider, parameter_name, dataset_uri[:7])
 
         quest_metadata = {
-            'display_name': display_name or dataset_uri,
+            'display_name': display_name or dataset_metadata['display_name'],
             'options': kwargs,
             'status': DatasetStatus.STAGED,
             'parameter': parameter
