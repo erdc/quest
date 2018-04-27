@@ -18,7 +18,7 @@ class RstMerge(FilterBase):
 
     datasets = util.param.DatasetListSelector(default=None,
                                               doc="""Dataset to apply filter to.""",
-                                              filters={'datatype': 'raster'},
+                                              queries=["datatype == 'raster' or datatype == 'discrete-raster'"],
                                               )
     bbox = param.List(default=None,
                       bounds=(4, 4),
@@ -44,14 +44,16 @@ class RstMerge(FilterBase):
 
         cname = orig_metadata['collection']
         feature = new_feature(cname,
-                              display_name=self.display_name,
+                              # display_name=self.display_name,
                               geom_type='Polygon',
                               geom_coords=None)
 
         new_dset = new_dataset(feature,
                                source='derived',
-                               display_name=self.display_name,
+                               # display_name=self.display_name,
                                description=self.description)
+
+        self.set_display_name(new_dset)
 
         prj = os.path.dirname(active_db())
         dst = os.path.join(prj, cname, new_dset)

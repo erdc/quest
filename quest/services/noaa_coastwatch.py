@@ -192,7 +192,7 @@ class NoaaServiceNDBC(NoaaServiceBase):
 
 class NoaaServiceCoopsMet(NoaaServiceBase):
     service_name = 'coops-meteorological'
-    display_name = 'NOAA COOPS'
+    display_name = 'NOAA COOPS Met'
     description = 'Center for Operational Oceanographic Products and Services'
     service_type = 'geo-discrete'
     unmapped_parameters_available = True
@@ -269,7 +269,7 @@ class NoaaServiceCoopsMet(NoaaServiceBase):
 
 class NoaaServiceCoopsWater(NoaaServiceBase):
     service_name = 'coops-water'
-    display_name = 'NOAA COOPS'
+    display_name = 'NOAA COOPS Water'
     description = 'Center for Operational Oceanographic Products and Services'
     service_type = 'geo-discrete'
     unmapped_parameters_available = True
