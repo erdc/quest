@@ -80,6 +80,9 @@ def update_settings(config={}):
         from .. import init
         init()
 
+    from . import load_providers
+    load_providers(update_cache=True)
+
     return True
 
 

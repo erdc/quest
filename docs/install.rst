@@ -12,11 +12,11 @@ Install Released Conda Package
 
     a. Install Quest into new environment::
 
-        conda create -n quest -c conda-forge -c erdc quest terrapin
+        conda create -n quest -c conda-forge -c erdc quest
 
     b. Install Quest into existing environment::
 
-        conda install -c erdc -c conda-forge quest terrapin
+        conda install -c erdc -c conda-forge quest
 
     .. note::
 
@@ -49,11 +49,8 @@ Conda Install
 
     Optional
     ........
-    d. Some filters (e.g. watershed delineation) require the package `terrapin` that is available through the es-conda-channel::
 
-        conda install -c erdc -c conda-forge terrapin
-
-    e. Run tests::
+    d. Run tests::
 
         python setup.py test
 

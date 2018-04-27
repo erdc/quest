@@ -11,6 +11,7 @@ name: quest
 
 channels:
     - conda-forge
+    - erdc
     - defaults
 
 dependencies:
@@ -42,3 +43,5 @@ dependencies:
     - hs_restclient
     - jupyter
     - girder-client
+    - terrapin
+    - ncep_client
