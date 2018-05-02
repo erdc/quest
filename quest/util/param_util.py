@@ -39,7 +39,7 @@ class DatasetSelector(param.ObjectSelector):
 class FeatureSelector(param.ObjectSelector):
     __slots__ = ['filters', 'queries']
 
-    def __init__(self, filters=None, queries=None,  **params):
+    def __init__(self, filters=None, queries=None, **params):
         self.filters = filters
         self.queries = queries
         super(FeatureSelector, self).__init__(**params)
