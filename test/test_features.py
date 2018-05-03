@@ -65,6 +65,15 @@ def test_get_features_with_tag(api):
     assert abs(len(features) - expected) < tolerance
 
 
+@slow
+def test_get_features_with_query(api):
+    features = api.get_features('svc://noaa-ncdc:ghcn-daily',
+                                queries=["display_name == 'DALGARANGA' or display_name == 'TARDIE STATION'"])
+    expected = 2
+    tolerance = 1
+    assert abs(len(features) - expected) < tolerance
+
+
 def test_new_feature(api):
 
     c = api.new_feature(collection='col3', display_name='NewFeat', geom_type='Point', geom_coords=[-94.2, 23.4])

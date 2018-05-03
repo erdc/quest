@@ -75,9 +75,11 @@ class TsBase(FilterBase):
 
         new_dset = new_dataset(orig_metadata['feature'],
                                source='derived',
-                               display_name=self.display_name,
+                               # display_name=self.display_name,
                                description=self.description,
                                )
+
+        self.set_display_name(new_dset)
 
         # save dataframe
         file_path = os.path.split(orig_metadata['file_path'])[0]

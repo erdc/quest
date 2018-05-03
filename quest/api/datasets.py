@@ -183,7 +183,7 @@ def get_publish_options(publish_uri, fmt='json'):
 
 
 @add_async
-def get_datasets(expand=None, filters=None, as_dataframe=None):
+def get_datasets(expand=None, filters=None, queries=None, as_dataframe=None):
     """Return all available datasets in active project.
 
     Args:
@@ -191,6 +191,8 @@ def get_datasets(expand=None, filters=None, as_dataframe=None):
             include dataset details and format as dict
         filters(dict, Optional, Default=None):
              filter dataset by any metadata field
+        queries(list, Optional, Default=None):
+            list of string arguments to pass to pandas.DataFrame.query to filter the datasets
         as_dataframe (bool or None, Optional, Default=None):
             include dataset details and format as pandas dataframe
     Returns:
@@ -217,6 +219,10 @@ def get_datasets(expand=None, filters=None, as_dataframe=None):
                 continue
 
             datasets = datasets.loc[datasets[k] == v]
+
+    if queries is not None:
+        for query in queries:
+            datasets = datasets.query(query)
 
     if not expand and not as_dataframe:
         datasets = datasets['name'].tolist()
@@ -330,7 +336,7 @@ def stage_for_download(uris, options=None):
             display_name = '{0}-{1}-{2}'.format(provider, parameter_name, dataset_uri[:7])
 
         quest_metadata = {
-            'display_name': display_name or dataset_uri,
+            'display_name': display_name or dataset_metadata['display_name'],
             'options': kwargs,
             'status': DatasetStatus.STAGED,
             'parameter': parameter

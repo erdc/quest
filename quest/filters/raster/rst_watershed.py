@@ -144,7 +144,7 @@ class RstWatershedDelineation(FilterBase):
                         nodata=-9999)
 
         feature = new_feature(collection_name,
-                              display_name=self.display_name,
+                              # display_name=self.display_name,
                               geom_type='Polygon',
                               geom_coords=boundary_list[0]['coordinates'])
 
@@ -152,14 +152,16 @@ class RstWatershedDelineation(FilterBase):
             outlet_points = [src.xy(*p(*point, inverse=True)) for point in proj_points]
             # create new snapped outlet point feature 
             outlet_feature = new_feature(collection_name,
-                                         display_name=self.display_name+'_outlet',
+                                         # display_name=self.display_name+'_outlet',
                                          geom_type='Point',
                                          geom_coords=[outlet_points[0]])
 
         new_dset = new_dataset(feature,
                                source='derived',
-                               display_name=self.display_name,
+                               # display_name=self.display_name,
                                description=self.description)
+
+        self.set_display_name(new_dset)
 
         prj = os.path.dirname(active_db())
         dst = os.path.join(prj,  collection_name, new_dset)
@@ -233,8 +235,10 @@ class RstFlowAccum(FilterBase):
 
         new_dset = new_dataset(orig_metadata['feature'],
                                source='derived',
-                               display_name=self.display_name,
+                               # display_name=self.display_name,
                                description=self.description)
+
+        self.set_display_name(new_dset)
 
         prj = os.path.dirname(active_db())
         dst = os.path.join(prj, collection_name, new_dset)
@@ -295,8 +299,10 @@ class RstFlowAccumulation(FilterBase):
 
         new_dset = new_dataset(orig_metadata['feature'],
                                source='derived',
-                               display_name=self.display_name,
+                               # display_name=self.display_name,
                                description=self.description)
+
+        self.set_display_name(new_dset)
 
         prj = os.path.dirname(active_db())
         collection_name = orig_metadata['collection']
@@ -353,10 +359,14 @@ class RstFill(FilterBase):
         orig_metadata = get_metadata(dataset)[dataset]
         src_path = orig_metadata['file_path']
 
-        new_dset = new_dataset(orig_metadata['feature'],
-                               source='derived',
-                               display_name=self.display_name,
-                               description=self.description)
+        new_dset = new_dataset(
+            orig_metadata['feature'],
+            source='derived',
+            # display_name=self.display_name,
+            description=self.description
+        )
+
+        self.set_display_name(new_dset)
 
         prj = os.path.dirname(active_db())
         collection_name = orig_metadata['collection']
@@ -466,9 +476,12 @@ class RstSnapOutlet(FilterBase):
                 snapped_points = [src.xy(*p(*point, inverse=True)) for point in proj_points]
 
             # create new snapped outlet point feature 
-            outlet_feature = new_feature(collection_name,
-                            display_name=self.display_name+'_snapped_outlet', geom_type='Point',
-                            geom_coords=[snapped_points[0]])
+            outlet_feature = new_feature(
+                collection_name,
+                # display_name=self.display_name+'_snapped_outlet',
+                geom_type='Point',
+                geom_coords=[snapped_points[0]]
+            )
             print('outlet points snapped, new feature created:', snapped_points, outlet_feature)
 
         return {'datasets': {}, 'features': {'outlet': outlet_feature}}

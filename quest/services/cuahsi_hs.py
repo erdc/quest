@@ -3,7 +3,8 @@ from hs_restclient import HydroShare, HydroShareAuthBasic
 from ..api.database import get_db, db_session
 from shapely.geometry import Point, box
 from ..api.metadata import get_metadata
-from ..util import param_util
+from ..util import param_util, listify
+from getpass import getpass
 import pandas as pd
 import param
 import os
@@ -129,8 +130,8 @@ class HSPublisher(PublishBase):
     resource_type = param.ObjectSelector(default=None, doc="", precedence=1, objects=sorted(_resource_type_map.keys()))
     title = param.String(default="", doc="", precedence=2)
     abstract = param.String(default="", doc="", precedence=3)
-    keywords = param.List(default=[], doc="", precedence=4)
-    dataset = param_util.DatasetListSelector(default=(), filters={'status': 'downloaded'}, doc="", precedence=5)
+    keywords = param.List(default=None, doc="", precedence=4)
+    dataset = param_util.DatasetListSelector(default=(), queries=['status == "downloaded" or status == "filter applied"'], doc="", precedence=5)
 
     @property
     def hs(self):
@@ -145,6 +146,8 @@ class HSPublisher(PublishBase):
             raise ValueError("There was no resource type selected.")
         else:
             resource_type = self._resource_type_map[p.resource_type]
+
+        datasets = listify(p.dataset)
 
         extension_dict = {
             'GeographicFeatureResource': ['.zip', '.shp', '.shx', '.dbf', '.prj', '.sbx', '.sbn', '.cpg', '.xml',
@@ -236,13 +239,17 @@ class HSProvider(ProviderBase):
     organization_name = 'Cuahsi'
 
     @property
+    def connection_info(self):
+        return {}
+
+    @property
     def auth(self):
         return HydroShareAuthBasic(**self.credentials)
 
     def get_hs(self, auth=None, require_valid_auth=False):
         try:
             auth = auth or self.auth
-            hs = HydroShare(auth=auth)
+            hs = HydroShare(auth=auth, **self.connection_info)
             list(hs.resources(count=1))
             return hs
         except Exception as e:
@@ -259,8 +266,8 @@ class HSProvider(ProviderBase):
 
     def authenticate_me(self, **kwargs):
 
-        username = kwargs['username']
-        password = kwargs['password']
+        username = kwargs.get('username') or input("Enter Username: ")
+        password = kwargs.get('password') or getpass("Enter Password: ")
 
         try:
             auth = HydroShareAuthBasic(username=username, password=password)
@@ -283,7 +290,7 @@ class HSProvider(ProviderBase):
             return True
 
         except:
-            print("Either credentials invalid or unable to connect to HydroShare.")
+            print("Either credentials invalid or unable to connect to {}.".format(self.name))
 
         return False
 

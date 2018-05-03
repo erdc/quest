@@ -51,17 +51,17 @@ class FilterBase(param.Parameterized):
         return '{} Options'.format(self.name.replace('-', ' ').title())
 
     @property
-    def display_name(self):
-        return 'Created by filter {}'.format(self.name)
-
-    @property
     def description(self):
-        return '{} Filter Applied'.format(self.metadata['group'].capitalize)
+        return 'Created by filter {}'.format(self.name)
 
     @abc.abstractmethod
     def register(self):
         """Register plugin by setting filter name, geotype and uid."""
         pass
+
+    def set_display_name(self, dataset):
+        display_name = '{}-{}'.format(self._name, dataset[:7])
+        update_metadata(dataset, display_name=display_name)
 
     def apply_filter(self, **options):
         """Function that applies filter"""

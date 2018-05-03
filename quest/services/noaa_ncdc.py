@@ -41,8 +41,8 @@ class NcdcServiceBase(TimePeriodServiceBase):
         pmap = self.parameter_map(invert=True)
         return pmap[self.parameter]
 
-    def get_features(self):
-        features = self._get_features()
+    def get_features(self, **kwargs):
+        features = self._get_features(**kwargs)
 
         # remove locations with invalid coordinates
         valid = pd.notnull(features.latitude) & pd.notnull(features.longitude)
