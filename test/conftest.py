@@ -29,7 +29,8 @@ def pytest_generate_tests(metafunc):
 
 
 def get_or_generate_test_cache(update=False, skip=False):
-    test_cache_dir = os.path.join(quest.util.get_quest_dir(), 'test_cache')
+    test_cache_dir = os.environ.get('QUEST_CACHE_DIR') or os.path.join(quest.util.get_quest_dir(), 'test_cache')
+    print(test_cache_dir)
     if skip:
         return test_cache_dir
     quest.api.update_settings({'CACHE_DIR': test_cache_dir})

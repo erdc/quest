@@ -16,6 +16,15 @@ env:
   - PYTHON_VERSION="3.5"
   - PYTHON_VERSION="3.6"
 
+matrix
+  exclude:
+    - env: PYTHON_VERSION="2.7"
+      os: linux
+
+cache:
+  directories:
+    -$HOME/quest_test_cache
+
 # commands to install ulmo
 install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
@@ -43,6 +52,7 @@ install:
   - conda env create -q -n test-environment -f $ENV_FILE python=$PYTHON_VERSION
   - source activate test-environment
   - python setup.py install
+  - export QUEST_CACHE_DIR=$HOME/quest_test_cache
 
 # command to run tests
 script:
