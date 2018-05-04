@@ -24,8 +24,8 @@ install:
   # Install miniconda using a powershell script.
   - "set PATH=%MINICONDA%;%MINICONDA%\\Scripts;%PATH%"
   - "conda config --set always_yes yes --set changeps1 no"
-  - "conda update -q conda"
-  - "set PATH=%MINICONDA%;%MINICONDA%\\Scripts;%PATH%"
+#  - "conda update -q conda"
+#  - "set PATH=%MINICONDA%;%MINICONDA%\\Scripts;%PATH%"
   - "conda info -a"
   - "conda env create -q -n test-environment -f %ENV_FILE% python=%PYTHON_VERSION%"
   - "activate test-environment"
