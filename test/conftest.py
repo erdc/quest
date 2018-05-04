@@ -17,6 +17,7 @@ FILES_DIR = os.path.join(base_path, 'files')
 def pytest_addoption(parser):
     parser.addoption('--update-cache', action='store_true')
     parser.addoption('--skip-slow', action='store_true')
+    parser.addoption('--skip-tasks', action='store_true')
     parser.addoption('--test-download', action='store_true')
 
 

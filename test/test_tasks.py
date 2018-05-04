@@ -10,6 +10,11 @@ skip_py2 = pytest.mark.skipif(
     reason="async functions are not compatible with the RPC server on Python 2"
 )
 
+skip_tasks = pytest.mark.skipif(
+    pytest.config.getoption("--skip-tasks"),
+    reason="--skip-tasks option was set"
+)
+
 @pytest.fixture
 def task_cleanup(api, request):
     def remove_tasks():
@@ -64,6 +69,7 @@ def test_launch_tasks(api, task_cleanup):
         assert {'delay': 1, 'msg': msg} == api.get_task(task)['result']
 
 
+@skip_tasks
 @skip_py2
 def test_add_remove_tasks(api, task_cleanup):
     test_tasks = [
@@ -105,6 +111,7 @@ def test_add_remove_tasks(api, task_cleanup):
     assert len(api.get_tasks()) == 0
 
 
+@skip_tasks
 @skip_py2
 def test_task_with_exception(api, task_cleanup):
     test_tasks = [

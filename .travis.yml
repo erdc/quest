@@ -46,7 +46,7 @@ install:
 
 # command to run tests
 script:
-  pytest test --cov=quest --update-cache --test-download -s -vv
+  pytest test --cov=quest --skip-tasks -s -vv
 
 
 # generate test coverage information
