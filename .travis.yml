@@ -52,7 +52,9 @@ install:
   - conda env create -q -n test-environment -f $ENV_FILE python=$PYTHON_VERSION
   - source activate test-environment
   - python setup.py install
+  - echo $QUEST_CACHE_DIR
   - export QUEST_CACHE_DIR=$HOME/quest_test_cache
+  - echo $TRAVIS_EVENT_TYPE
 
 # command to run tests
 script:
