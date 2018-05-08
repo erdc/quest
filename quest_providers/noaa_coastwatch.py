@@ -10,9 +10,9 @@ import param
 from urllib.error import HTTPError
 from urllib.parse import quote, urlencode
 
-from ..util.log import logger
-from .base import ProviderBase, TimePeriodServiceBase
-from .. import util
+from quest.util.log import logger
+from quest.services.base import ProviderBase, TimePeriodServiceBase
+from quest import util
 
 
 class NoaaServiceBase(TimePeriodServiceBase):
@@ -102,7 +102,7 @@ class NoaaServiceBase(TimePeriodServiceBase):
             }
 
             # save data to disk
-            io = util.load_drivers('io', 'timeseries-hdf5')
+            io = util.load_entities('io', 'timeseries-hdf5')
             io = io['timeseries-hdf5'].driver
             io.write(file_path, data, metadata)
             del metadata['service_id']
@@ -192,7 +192,7 @@ class NoaaServiceNDBC(NoaaServiceBase):
 
 class NoaaServiceCoopsMet(NoaaServiceBase):
     service_name = 'coops-meteorological'
-    display_name = 'NOAA COOPS Met'
+    display_name = 'NOAA COOPS'
     description = 'Center for Operational Oceanographic Products and Services'
     service_type = 'geo-discrete'
     unmapped_parameters_available = True
@@ -269,7 +269,7 @@ class NoaaServiceCoopsMet(NoaaServiceBase):
 
 class NoaaServiceCoopsWater(NoaaServiceBase):
     service_name = 'coops-water'
-    display_name = 'NOAA COOPS Water'
+    display_name = 'NOAA COOPS'
     description = 'Center for Operational Oceanographic Products and Services'
     service_type = 'geo-discrete'
     unmapped_parameters_available = True
@@ -353,3 +353,4 @@ class NoaaProvider(ProviderBase):
     description = 'Services available from NOAA'
     organization_name = 'National Oceanic and Atmospheric Administration'
     organization_abbr = 'NOAA'
+    name = 'noaa-coast'

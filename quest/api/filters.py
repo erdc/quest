@@ -32,7 +32,7 @@ def get_filters(filters=None, expand=False, **kwargs):
             all available filters
 
     """
-    avail = [dict(name=k, **v.metadata) for k, v in util.load_drivers('filters').items()]
+    avail = [dict(name=k, **v.metadata) for k, v in util.load_entities('filters').items()]
 
     if filters is not None:
         for k, v in filters.items():
@@ -84,7 +84,7 @@ def apply_filter(name, options=None, as_dataframe=None, expand=None, **kwargs):
     options = options or dict()
     options.update(kwargs)
 
-    driver = util.load_drivers('filters', name)[name].driver
+    driver = util.load_entities('filters', name)[name].driver
     result = driver.apply_filter(**options)
 
     new_datasets = util.listify(result.get('datasets', []))
@@ -117,5 +117,5 @@ def apply_filter_options(name, fmt='json', **kwargs):
         filter options (json or smtk scheme):
             filter options that can be applied when calling quest.api.apply_filter
     """
-    driver = util.load_drivers('filters', name)[name].driver
+    driver = util.load_entities('filters', name)[name].driver
     return driver.apply_filter_options(fmt, **kwargs)

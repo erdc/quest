@@ -1,23 +1,26 @@
 from geojson import LineString, Point, Polygon, Feature, FeatureCollection, MultiPolygon
-import shapely.geometry
 from jinja2 import Environment, FileSystemLoader
+from stevedore import driver
+from past.builtins import basestring  # for python 2 compatibility
 from .config import get_settings
 from .. import get_pkg_data_path
-import os
-import pandas as pd
-import geopandas as gpd
-import re
 from ..util.log import logger
+from uuid import uuid4, UUID
 
-from stevedore import extension, driver
-from past.builtins import basestring  # for python 2 compatibility
+import shapely.geometry
+import geopandas as gpd
+import pandas as pd
+import importlib
+import inspect
+import pkgutil
+import quest
+import os
+import re
+
 try:
     import simplejson as json
 except ImportError:
     import json
-
-from uuid import uuid4, UUID
-import quest
 
 the_providers = None
 
@@ -216,25 +219,30 @@ def listify(liststr, delimiter=','):
         return [liststr]
 
 
-def list_drivers(namespace):
-    namespace = 'quest.' + namespace
-    mgr = extension.ExtensionManager(
-            namespace=namespace,
-            invoke_on_load=False,
-        )
-    return [x.name for x in mgr]
+def list_plugins(namespace):
+    try:
+        import quest_providers
+        return [ modname for _, modname, iskpg in pkgutil.iter_modules(quest_providers.__path__) ]
+    except Exception as e:
+        raise e
 
 
-def load_drivers(namespace, names=None):
+def load_entities(namespace, names=None):
     names = listify(names)
     namespace = 'quest.' + namespace
 
     if names is None:
-        mgr = extension.ExtensionManager(
-            namespace=namespace,
-            invoke_on_load=True,
-        )
-        return dict((x.name, x.obj) for x in mgr)
+        try:
+            import quest_providers
+            plugin_dict = {}
+            for _, modname, ispkg in pkgutil.iter_modules(quest_providers.__path__):
+                plugin_module = importlib.import_module("quest_providers." + modname)
+                for name, obj in inspect.getmembers(plugin_module, inspect.isclass):
+                    if issubclass(obj, ProviderBase) and obj.__module__ == plugin_name:
+                        providers[modname] = obj(modname)
+            return plugin_dict
+        except Exception as e:
+            raise e
 
     return {name: driver.DriverManager(namespace, name, invoke_on_load='True') for name in names}
 
@@ -243,17 +251,27 @@ def load_providers(update_cache=False):
     global the_providers
 
     settings = get_settings()
-    web_services = list_drivers('services')
-    web_services.remove('user')
+    providers = {}
 
     if update_cache or the_providers is None:
-        providers = {name: driver.DriverManager('quest.services', name, invoke_on_load=True, invoke_kwds={'name': name}).driver for name in web_services}
+        from quest.services.base import ProviderBase
+        try:
+            import quest_providers
+            for _, modname, ispkg in pkgutil.iter_modules(quest_providers.__path__):
+                if "user_provider" != modname:
+                    plugin_name = "quest_providers." + modname
+                    plugin_module = importlib.import_module(plugin_name)
+                    for name, obj in inspect.getmembers(plugin_module, inspect.isclass):
+                        if issubclass(obj, ProviderBase) and obj.__module__ == plugin_name:
+                            providers[obj.name] = obj()
+        except Exception as e:
+            raise e
 
         if len(settings.get('USER_SERVICES', [])) > 0:
             for uri in settings.get('USER_SERVICES', []):
                 try:
                     drv = driver.DriverManager('quest.services', 'user', invoke_on_load=True, invoke_kwds={'uri': uri}).driver
-                    providers[drv.name] = drv
+                    providers['user-' + drv.name] = drv
                 except Exception as e:
                     logger.error('Failed to load local service from %s, with exception: %s' % (uri, str(e)))
 

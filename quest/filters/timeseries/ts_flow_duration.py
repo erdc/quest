@@ -17,7 +17,7 @@ class TsFlowDuration(FilterBase):
 
         dataset = self.dataset
 
-        input = util.load_drivers('io', 'timeseries-hdf5')
+        input = util.load_entities('io', 'timeseries-hdf5')
         input = input['timeseries-hdf5'].driver
         orig_metadata = get_metadata(dataset)[dataset]
         if orig_metadata['file_path'] is None:
@@ -59,7 +59,7 @@ class TsFlowDuration(FilterBase):
         # save dataframe
         save_path = os.path.split(orig_metadata['file_path'])[0]
         save_path = os.path.join(save_path, new_dset)
-        output = util.load_drivers('io', 'xyHdf5')
+        output = util.load_entities('io', 'xyHdf5')
         output = output['xyHdf5'].driver
         output.write(save_path, new_df, new_metadata)
 

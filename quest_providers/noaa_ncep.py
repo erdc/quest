@@ -1,4 +1,4 @@
-from .base import ProviderBase, ServiceBase
+from quest.services.base import ProviderBase, ServiceBase
 from ncep_client import NCEP_Client
 from shapely.geometry import box
 import pandas as pd
@@ -127,3 +127,4 @@ class NCEPProvider(ProviderBase):
     description = 'Services avaliable through the NOAA NCEP Server.'
     organization_name = 'National Centers for Environmental Prediction'
     organization_abbr = 'NCEP'
+    name = 'noaa-ncep'

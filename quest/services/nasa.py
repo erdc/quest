@@ -1,9 +1,10 @@
 """QUEST wrapper for USGS NWIS Services
 
 """
-from .base import ProviderBase, SingleFileServiceBase
-from ..api.database import get_db, db_session
+from quest.services.base import ProviderBase, SingleFileServiceBase
+from quest.api.database import get_db, db_session
 from getpass import getpass
+from pprint import pprint
 import pandas as pd
 import requests
 
@@ -33,6 +34,7 @@ class NasaServiceBase(SingleFileServiceBase):
             return requests.get(granules_url % (short_name, page_num)).json()['feed']['entry']
 
     def get_features(self, **kwargs):
+
         page_num = 0
         data = []
         while True:

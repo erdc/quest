@@ -2,8 +2,8 @@
 
 import pandas as pd
 import requests
-from .base import ProviderBase, SingleFileServiceBase
-from .. import util
+from quest.services.base import ProviderBase, SingleFileServiceBase
+from quest import util
 
 
 class UsgsNlcdServiceBase(SingleFileServiceBase):
@@ -97,6 +97,7 @@ class UsgsNlcdProvider(ProviderBase):
                   'the USDA Natural Resources Conservation Service (NRCS).'
     organization_name = 'United States Geological Survey'
     organization_abbr = 'USGS'
+    name = 'usgs-nlcd'
 
 
 def _bbox2poly(bbox):

@@ -385,10 +385,10 @@ def open_dataset(dataset, fmt=None):
     if path is None:
         raise ValueError('No dataset file found')
 
-    if file_format not in util.list_drivers('io'):
+    if file_format not in util.list_plugins('io'):
         raise ValueError('No reader available for: %s' % file_format)
 
-    io = util.load_drivers('io', file_format)
+    io = util.load_entities('io', file_format)
     io = io[file_format].driver
     return io.open(path, fmt=fmt)
 
@@ -425,10 +425,10 @@ def visualize_dataset(dataset, update_cache=False, **kwargs):
     if path is None:
             raise ValueError('No dataset file found')
 
-    if file_format not in util.list_drivers('io'):
+    if file_format not in util.list_plugins('io'):
             raise ValueError('No reader available for: %s' % file_format)
 
-    io = util.load_drivers('io', file_format)
+    io = util.load_entities('io', file_format)
     io = io[file_format].driver
 
     title = m.get('display_name')
@@ -466,10 +466,10 @@ def visualize_dataset_options(dataset, fmt='json'):
     if path is None:
         raise ValueError('No dataset file found')
 
-    if file_format not in util.list_drivers('io'):
+    if file_format not in util.list_plugins('io'):
         raise ValueError('No reader available for: %s' % file_format)
 
-    io = util.load_drivers('io', file_format)
+    io = util.load_entities('io', file_format)
     io = io[file_format].driver
 
     return io.visualize_options(path, fmt)

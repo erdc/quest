@@ -44,7 +44,7 @@ def get_services(expand=None, parameter=None, service_type=None):
             all available services
 
     """
-    providers = util.load_providers() # util.load_drivers('services')
+    providers = util.load_providers() # util.load_entities('services')
     services = {}
     for provider_name, provider in providers.items():
         for service, svc_metadata in provider.get_services().items():

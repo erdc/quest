@@ -1,7 +1,7 @@
-from .base import ProviderBase, PublishBase
-from ..api.database import get_db, db_session
-from ..api.metadata import get_metadata
-from ..util import param_util
+from quest.services.base import ProviderBase, PublishBase
+from quest.api.database import get_db, db_session
+from quest.api.metadata import get_metadata
+from quest.util import param_util
 from getpass import getpass
 import girder_client
 import param
@@ -59,6 +59,7 @@ class GirderProvider(ProviderBase):
     display_name = 'Girder Services'
     description = 'Services avaliable through the Live Girder Server.'
     organization_name = 'Kitware'
+    name = 'kitware-girder'
 
     def get_gc(self):
         connection_info = 'https://data.kitware.com/api/v1'

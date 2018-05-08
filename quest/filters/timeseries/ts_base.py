@@ -51,7 +51,7 @@ class TsBase(FilterBase):
 
         dataset = self.dataset
 
-        io = util.load_drivers('io', 'timeseries-hdf5')
+        io = util.load_entities('io', 'timeseries-hdf5')
         io = io['timeseries-hdf5'].driver
         orig_metadata = get_metadata(dataset)[dataset]
         if orig_metadata['file_path'] is None:

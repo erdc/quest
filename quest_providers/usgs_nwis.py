@@ -1,13 +1,13 @@
 """QUEST wrapper for USGS NWIS Services."""
 
-from .base import ProviderBase, TimePeriodServiceBase
+from quest.services.base import ProviderBase, TimePeriodServiceBase
 import concurrent.futures
 from functools import partial
 from builtins import range
 import pandas as pd
 import os
 from ulmo.usgs import nwis
-from .. import util, get_pkg_data_path
+from quest import util, get_pkg_data_path
 from builtins import range
 import param
 
@@ -78,7 +78,7 @@ class NwisServiceBase(TimePeriodServiceBase):
         }
 
         # save data to disk
-        io = util.load_drivers('io', 'timeseries-hdf5')
+        io = util.load_entities('io', 'timeseries-hdf5')
         io = io['timeseries-hdf5'].driver
         io.write(file_path, df, metadata)
         del metadata['service_id']
@@ -198,6 +198,7 @@ class NwisProvider(ProviderBase):
     description = 'Services available through the USGS National Water Information System'
     organization_name = 'United States Geological Survey'
     organization_abbr = 'USGS'
+    name = 'usgs-nwis'
 
 
 def _chunks(l, n=100):

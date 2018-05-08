@@ -1,9 +1,9 @@
-from .base import ProviderBase, SingleFileServiceBase, PublishBase
+from quest.services.base import ProviderBase, SingleFileServiceBase, PublishBase
 from hs_restclient import HydroShare, HydroShareAuthBasic
-from ..api.database import get_db, db_session
+from quest.api.database import get_db, db_session
 from shapely.geometry import Point, box
-from ..api.metadata import get_metadata
-from ..util import param_util, listify
+from quest.api.metadata import get_metadata
+from quest.util import param_util, listify
 from getpass import getpass
 import pandas as pd
 import param
@@ -237,6 +237,7 @@ class HSProvider(ProviderBase):
     display_name = 'HydroShare Provider'
     description = 'Services avaliable through the live HydroShare Server.'
     organization_name = 'Cuahsi'
+    name = 'cuahsi-hydroshare'
 
     @property
     def connection_info(self):

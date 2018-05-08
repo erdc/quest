@@ -2,8 +2,8 @@
 
 """
 
-from .. import util
-from .base import ProviderBase, ServiceBase
+from quest import util
+from quest.services.base import ProviderBase, ServiceBase
 
 import geojson
 from geojson import Feature, FeatureCollection, Polygon
@@ -54,8 +54,8 @@ def get_user_service_base():
         def download(self, feature, file_path, dataset, **kwargs):
             if self.datasets_mapping is not None:
                 fnames = self.datasets_mapping
-                if isinstance(self.datasets_mapping, dict) and 'parameter' in kwargs:
-                    fnames = self.datasets_mapping[kwargs['parameter']]
+                if isinstance(dict, self.datasets_mapping):
+                    fnames = self.dataset_mapping[self.parameter]
                 fnames = [f.replace('<feature>', feature) for f in util.listify(fnames)]
             else:
                 fnames = self.features.loc[feature]['_download_url']
@@ -63,8 +63,8 @@ def get_user_service_base():
             final_path = []
             for src, file_name in zip(self._get_paths(fnames), fnames):
                 dst = file_path
-                if self.datasets_save_folder is not None:
-                    dst = os.path.join(dst, self.datasets_save_folder, self.service_folder)
+                if self.dataset_save_folder is not None:
+                    dst = os.path.join(dst, self.dataset_save_folder, self.svc_folder)
 
                 dst = os.path.join(dst, file_name)
                 base, _ = os.path.split(dst)
@@ -174,6 +174,7 @@ class UserProvider(ProviderBase):
     description = None
     organization_name = None
     organization_abbr = None
+    name = user
 
     def __init__(self, uri, name=None, use_cache=True, update_frequency='M'):
         super(UserProvider, self).__init__(name=name, use_cache=use_cache, update_frequency=update_frequency)
@@ -195,7 +196,7 @@ class UserProvider(ProviderBase):
         config_file = self._get_path('quest.yml')
         with uri_open(config_file, self.is_remote) as yml:
             provider_data = yaml.load(yml)
-        self.name = 'user-{}'.format(provider_data['name'])
+        self.name = provider_data['name']
         self._metadata = provider_data['metadata']
         self._metadata['service_uri'] = self.uri
         self._services = {name: get_user_service_base().instance(service_name=name,

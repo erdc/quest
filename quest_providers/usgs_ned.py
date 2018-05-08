@@ -2,8 +2,8 @@
 Example Services
 """
 
-from .base import ProviderBase, SingleFileServiceBase
-from .. import util
+from quest.services.base import ProviderBase, SingleFileServiceBase
+from quest import util
 from ulmo.usgs import ned
 from geojson import FeatureCollection, dump
 import json
@@ -81,3 +81,4 @@ class UsgsNedProvider(ProviderBase):
     description = 'National Elevation Dataset at several resolutions'
     organization_name = 'United States Geological Survey'
     organization_abbr = 'USGS'
+    name = 'usgs-ned'

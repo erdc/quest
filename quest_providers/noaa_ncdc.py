@@ -6,8 +6,8 @@ import pandas as pd
 import param
 from ulmo.ncdc import ghcn_daily, gsod
 
-from .base import ProviderBase, TimePeriodServiceBase
-from .. import util
+from quest.services.base import ProviderBase, TimePeriodServiceBase
+from quest import util
 # from ulmo.ncdc.ghcn_daily.core import _get_inventory as _get_ghcn_inventory
 
 BASE_PATH = 'ncdc'
@@ -41,8 +41,8 @@ class NcdcServiceBase(TimePeriodServiceBase):
         pmap = self.parameter_map(invert=True)
         return pmap[self.parameter]
 
-    def get_features(self, **kwargs):
-        features = self._get_features(**kwargs)
+    def get_features(self):
+        features = self._get_features()
 
         # remove locations with invalid coordinates
         valid = pd.notnull(features.latitude) & pd.notnull(features.longitude)
@@ -103,7 +103,7 @@ class NcdcServiceBase(TimePeriodServiceBase):
         }
 
         # save data to disk
-        io = util.load_drivers('io', 'timeseries-hdf5')
+        io = util.load_entities('io', 'timeseries-hdf5')
         io = io['timeseries-hdf5'].driver
         io.write(file_path, self.data, metadata)
         del metadata['service_id']
@@ -221,3 +221,4 @@ class NcdcProvider(ProviderBase):
     description = 'Services available through the NCDC'
     organization_name = 'National Climatic Data Center'
     organization_abbr = 'NCDC'
+    name = 'noaa-ncdc'

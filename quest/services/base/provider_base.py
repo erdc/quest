@@ -88,7 +88,6 @@ class ProviderBase(with_metaclass(abc.ABCMeta, object)):
         return self._credentials
 
     def __init__(self, name=None, use_cache=True, update_frequency='M'):
-        self.name = name
         self.use_cache = use_cache #not implemented
         self.update_frequency = update_frequency #not implemented
         self._services = None
