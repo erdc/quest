@@ -16,7 +16,7 @@ env:
   - PYTHON_VERSION="3.5"
   - PYTHON_VERSION="3.6"
 
-matrix
+matrix:
   exclude:
     - env: PYTHON_VERSION="2.7"
       os: linux
