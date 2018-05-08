@@ -54,7 +54,6 @@ install:
   - python setup.py install
   - export QUEST_CACHE_DIR=$TRAVIS_BUILD_DIR/quest_test_cache
   - echo $QUEST_CACHE_DIR
-  - ls -l $QUEST_CACHE_DIR
 
 # command to run tests
 script:
