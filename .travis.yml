@@ -57,11 +57,11 @@ install:
 
 # command to run tests
 script:
-  if [[ "$TRAVIS_EVENT_TYPE" == "cron" ]]; then
-    pytest test --cov=quest -s -vv --skip-tasks --update-cache --test-download
-  else
-    pytest test --cov=quest -s -vv --skip-tasks
-  fi
+  - if [[ "$TRAVIS_EVENT_TYPE" == "cron" ]]; then
+      pytest test --cov=quest -s -vv --skip-tasks --update-cache --test-download;
+    else
+      pytest test --cov=quest -s -vv --skip-tasks;
+    fi
 
 
 # generate test coverage information
