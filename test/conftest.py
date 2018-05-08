@@ -43,7 +43,7 @@ def get_or_generate_test_cache(update=False, skip=False):
     warnings.simplefilter('ignore')
 
     # configure logger for ulmo
-    logging.getLogger('ulmo').addHandler(logging.StreamHandler())
+    logging.getLogger('ulmo').addHandler(logging.NullHandler())
 
     drivers = quest.util.load_providers()
     for name in CACHED_SERVICES:
