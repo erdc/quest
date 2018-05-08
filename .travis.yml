@@ -52,13 +52,16 @@ install:
   - conda env create -q -n test-environment -f $ENV_FILE python=$PYTHON_VERSION
   - source activate test-environment
   - python setup.py install
-  - echo $QUEST_CACHE_DIR
   - export QUEST_CACHE_DIR=$HOME/quest_test_cache
-  - echo $TRAVIS_EVENT_TYPE
+  - echo $QUEST_CACHE_DIR
 
 # command to run tests
 script:
-  pytest test --cov=quest --skip-tasks -s -vv
+  if [[ "$TRAVIS_EVENT_TYPE" == "cron" ]]; then
+    pytest test --cov=quest -s -vv --skip-tasks --update-cache --test-download
+  else
+    pytest test --cov=quest -s -vv --skip-tasks
+  fi
 
 
 # generate test coverage information
