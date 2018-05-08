@@ -107,9 +107,11 @@ def classify_uris(uris, grouped=True, as_dataframe=True, require_same_type=False
 
     uuid_idx = df['uri'].apply(is_uuid)
     service_idx = df['uri'].str.startswith('svc://')
+    publish_idx = df['uri'].str.startswith('pub://')
     feature_idx = uuid_idx & df['uri'].str.startswith('f')
     dataset_idx = uuid_idx & df['uri'].str.startswith('d')
 
+    df['type'][publish_idx] = 'publishers'
     df['type'][service_idx] = 'providers'
     df['type'][feature_idx] = 'features'
     df['type'][dataset_idx] = 'datasets'
