@@ -2,7 +2,7 @@
 Example Services
 """
 
-from quest.services.base import ProviderBase, SingleFileServiceBase
+from quest.providers.base import ProviderBase, SingleFileServiceBase
 from quest import util
 from ulmo.usgs import ned
 from geojson import FeatureCollection, dump

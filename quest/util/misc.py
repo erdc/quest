@@ -25,7 +25,7 @@ except ImportError:
 the_providers = None
 
 def generate_cache(update=False):
-    """Downloads features for all services and caches results.
+    """Downloads features for all providers and caches results.
 
     Args:
         update (bool):
@@ -116,7 +116,7 @@ def classify_uris(uris, grouped=True, as_dataframe=True, require_same_type=False
     feature_idx = uuid_idx & df['uri'].str.startswith('f')
     dataset_idx = uuid_idx & df['uri'].str.startswith('d')
 
-    df['type'][service_idx] = 'services'
+    df['type'][service_idx] = 'providers'
     df['type'][feature_idx] = 'features'
     df['type'][dataset_idx] = 'datasets'
     df.set_index('uri', drop=False, inplace=True)
@@ -240,7 +240,7 @@ def load_entities(namespace, names=None):
     namespace = 'quest.' + namespace
 
     if names is None:
-        from quest.services.base import ProviderBase
+        from quest.providers.base import ProviderBase
         try:
             import quest_providers
             plugin_dict = {}
@@ -264,7 +264,7 @@ def load_providers(update_cache=False):
     providers = {}
 
     if update_cache or the_providers is None:
-        from quest.services.base import ProviderBase
+        from quest.providers.base import ProviderBase
         import quest_providers
         for _, modname, ispkg in pkgutil.iter_modules(quest_providers.__path__):
             try:
@@ -277,10 +277,10 @@ def load_providers(update_cache=False):
                 continue
 
         if len(settings.get('USER_SERVICES', [])) > 0:
-            from quest.services import user_provider
+            from quest.providers import user_provider
             for uri in settings.get('USER_SERVICES', []):
                 try:
-                    # drv = driver.DriverManager('quest.services', 'user', invoke_on_load=True, invoke_kwds={'uri': uri}).driver
+                    # drv = driver.DriverManager('quest.providers', 'user', invoke_on_load=True, invoke_kwds={'uri': uri}).driver
                     plugin = user_provider.UserProvider(uri=uri)
                     providers['user-' + plugin.name] = plugin
                 except Exception as e:

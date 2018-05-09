@@ -20,9 +20,9 @@ print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 for k, v in providers.items():
     print('{: <20} {: <20}'.format(k, v['display_name']))
 
-# get list of services
+# get list of providers
 services = quest.api.get_services(expand=True)
-print('\n%s QUEST services are available:' % len(services))
+print('\n%s QUEST providers are available:' % len(services))
 print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 for k, v in services.items():
     print('{: <50} {: <20}'.format(k, v['display_name']))
@@ -36,7 +36,7 @@ for p in mapped_parameters:
     print('{:}'.format(p))
 
 
-# filter services by parameter
+# filter providers by parameter
 print('\n--------------------------------------------------')
 print('      Filter Services by Parameter')
 print('--------------------------------------------------')
@@ -51,9 +51,9 @@ if not choice:
     choice = '7'
 choice = int(choice)
 
-# get list of services
+# get list of providers
 services = quest.api.get_services(expand=True, parameter=mapped_parameters[choice])
-print('\n%s QUEST services contain the %s parameter:' % (len(services), mapped_parameters[choice]))
+print('\n%s QUEST providers contain the %s parameter:' % (len(services), mapped_parameters[choice]))
 print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 for k, v in services.items():
     print('{: <50} {: <20}'.format(k, v['display_name']))
@@ -71,9 +71,9 @@ for i, (k, v) in enumerate(sorted(services.items())):
     svcs[i] = k
     print('{: >2}. {: <50} {: <20}'.format(i, k, v['display_name']))
 
-choice = input('\nEnter services to include (comma seperated) (default=6,8)')
+choice = input('\nEnter providers to include (comma seperated) (default=6,8)')
 while ('14' not in choice) and ('4' in choice or '5' in choice):
-    print('NOAA services are not currently available/n')
+    print('NOAA providers are not currently available/n')
     choice=input('Choose another service ')
 if not choice:
     choice = '6, 8'

@@ -3,7 +3,7 @@
 """
 
 from quest import util
-from quest.services.base import ProviderBase, ServiceBase
+from quest.providers.base import ProviderBase, ServiceBase
 
 import geojson
 from geojson import Feature, FeatureCollection, Polygon
@@ -203,7 +203,7 @@ class UserProvider(ProviderBase):
                                                                  provider=self,
                                                                  uri=self.uri,
                                                                  is_remote=self.is_remote)
-                          for name, data in provider_data['services'].items()}
+                          for name, data in provider_data['providers'].items()}
 
     def _get_path(self, filename):
         uri = self.uri

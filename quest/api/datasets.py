@@ -32,7 +32,7 @@ def download(feature, file_path, dataset=None, **kwargs):
         file_path (string, Required):
             path location to save downloaded data
         dataset (string, Optional, Default=None):
-            maybe only be used by some services
+            maybe only be used by some providers
         async: (bool, Optional, Default=False)
             if True, download in background
         kwargs:

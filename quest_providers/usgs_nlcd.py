@@ -1,8 +1,8 @@
-"""services based on www.sciencebase.gov."""
+"""providers based on www.sciencebase.gov."""
 
 import pandas as pd
 import requests
-from quest.services.base import ProviderBase, SingleFileServiceBase
+from quest.providers.base import ProviderBase, SingleFileServiceBase
 from quest import util
 
 

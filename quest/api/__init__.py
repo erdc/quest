@@ -144,7 +144,7 @@ from .projects import (
 
 from .database import get_db
 
-from .services import (
+from .providers import (
     get_providers,
     get_publishers,
     get_services,

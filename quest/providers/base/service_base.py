@@ -6,10 +6,10 @@ from quest.util.param_util import format_json_options
 import param
 
 
-# base class for services
+# base class for providers
 # TODO can I make this an abc and have it be a Paramitarized?
 class ServiceBase(param.Parameterized):
-    """Base class for data services
+    """Base class for data providers
     """
     service_name = None
     display_name = None

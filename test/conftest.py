@@ -36,7 +36,7 @@ def get_or_generate_test_cache(update=False, skip=False):
     quest.api.update_settings({'CACHE_DIR': test_cache_dir})
     start = None
     if not os.path.exists(test_cache_dir) or update:
-        print('Generating the services metadata cache for tests. This may take several minutes.')
+        print('Generating the providers metadata cache for tests. This may take several minutes.')
         start = time()
 
     # prevent warnings

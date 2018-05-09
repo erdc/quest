@@ -37,8 +37,8 @@ def get_metadata(uris, as_dataframe=False):
     metadata = []
 
     # get metadata for service type uris
-    if 'services' in grouped_uris.groups.keys():
-        svc_df = grouped_uris.get_group('services')
+    if 'providers' in grouped_uris.groups.keys():
+        svc_df = grouped_uris.get_group('providers')
         svc_df[['provider', 'service', 'feature']] = svc_df['uri'].apply(util.parse_service_uri).apply(pd.Series)
 
         for (provider, service), grp in svc_df.groupby(['provider', 'service']):
@@ -121,7 +121,7 @@ def update_metadata(uris, display_name=None, description=None,
             metadata at each uri keyed on uris
     """
     # group uris by type
-    grouped_uris = util.classify_uris(uris, as_dataframe=False, exclude=['services'], require_same_type=True)
+    grouped_uris = util.classify_uris(uris, as_dataframe=False, exclude=['providers'], require_same_type=True)
     resource = list(grouped_uris)[0]
     uris = grouped_uris[resource]
 

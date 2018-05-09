@@ -86,7 +86,7 @@ class RstWatershedDelineation(FilterBase):
 
         # get metadata, path etc from first dataset, i.e. assume all datasets
         # are in same folder. This will break if you try and combine datasets
-        # from different services
+        # from different providers
 
         orig_metadata = get_metadata(dataset)[dataset]
         collection_name = orig_metadata['collection']
@@ -217,7 +217,7 @@ class RstFlowAccum(FilterBase):
 
         # get metadata, path etc from first dataset, i.e. assume all datasets
         # are in same folder. This will break if you try and combine datasets
-        # from different services
+        # from different providers
 
         orig_metadata = get_metadata(dataset)[dataset]
         src_path = orig_metadata['file_path']
@@ -292,7 +292,7 @@ class RstFlowAccumulation(FilterBase):
 
         # get metadata, path etc from first dataset, i.e. assume all datasets
         # are in same folder. This will break if you try and combine datasets
-        # from different services
+        # from different providers
 
         orig_metadata = get_metadata(dataset)[dataset]
         src_path = orig_metadata['file_path']
@@ -354,7 +354,7 @@ class RstFill(FilterBase):
 
         # get metadata, path etc from first dataset, i.e. assume all datasets
         # are in same folder. This will break if you try and combine datasets
-        # from different services
+        # from different providers
 
         orig_metadata = get_metadata(dataset)[dataset]
         src_path = orig_metadata['file_path']
@@ -423,7 +423,7 @@ class RstSnapOutlet(FilterBase):
 
         # get metadata, path etc from first dataset, i.e. assume all datasets
         # are in same folder. This will break if you try and combine datasets
-        # from different services
+        # from different providers
 
         orig_metadata = get_metadata(dataset)[dataset]
         collection_name = orig_metadata['collection']

@@ -34,17 +34,17 @@ def get_services(expand=None, parameter=None, service_type=None):
 
     Args:
          expand (bool, Optional, Default=False):
-            include services' details and format as dict
+            include providers' details and format as dict
          parameter (string, Optional, Default=None):
          service_type (string, Optional, Default=None'):
             filter to only include specific type
 
     Returns:
-          services (list or dict, Default=dict):
-            all available services
+          providers (list or dict, Default=dict):
+            all available providers
 
     """
-    providers = util.load_providers() # util.load_entities('services')
+    providers = util.load_providers() # util.load_entities('providers')
     services = {}
     for provider_name, provider in providers.items():
         for service, svc_metadata in provider.get_services().items():
@@ -72,7 +72,7 @@ def get_publishers(expand=None, publisher_type=None):
 
     Args:
          expand (bool, Optional, Default=False):
-            include services' details and format as dict
+            include providers' details and format as dict
          publisher_type (string, Optional, Default=None'):
             filter to only include specific type
 
@@ -149,7 +149,7 @@ def delete_provider(uri):
     if uri.startswith('svc://'):
         provider, service, _ = util.parse_service_uri(uri)
         if not provider.startswith('user'):
-            raise ValueError('Can only remove user services')
+            raise ValueError('Can only remove user providers')
 
         uri = get_providers(expand=True)[provider].get('service_uri')
 

@@ -1,4 +1,4 @@
-from quest.services.base import ProviderBase, PublishBase
+from quest.providers.base import ProviderBase, PublishBase
 from quest.api.database import get_db, db_session
 from quest.api.metadata import get_metadata
 from quest.util import param_util

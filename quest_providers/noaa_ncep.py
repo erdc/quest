@@ -1,4 +1,4 @@
-from quest.services.base import ProviderBase, ServiceBase
+from quest.providers.base import ProviderBase, ServiceBase
 from ncep_client import NCEP_Client
 from shapely.geometry import box
 import pandas as pd

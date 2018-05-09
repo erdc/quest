@@ -11,7 +11,7 @@ from urllib.error import HTTPError
 from urllib.parse import quote, urlencode
 
 from quest.util.log import logger
-from quest.services.base import ProviderBase, TimePeriodServiceBase
+from quest.providers.base import ProviderBase, TimePeriodServiceBase
 from quest import util
 
 

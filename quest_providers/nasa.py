@@ -1,7 +1,7 @@
 """QUEST wrapper for USGS NWIS Services
 
 """
-from quest.services.base import ProviderBase, SingleFileServiceBase
+from quest.providers.base import ProviderBase, SingleFileServiceBase
 from quest.api.database import get_db, db_session
 from getpass import getpass
 from pprint import pprint

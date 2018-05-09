@@ -1,7 +1,7 @@
 """Quest
     ~~~~~~~~~~~~~~~~~~~~~
 
-    A library for environmental data services.
+    A library for environmental data providers.
     Part of the Environmental Simulator project.
 """
 from __future__ import (absolute_import, division,

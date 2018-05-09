@@ -1,6 +1,6 @@
 """QUEST wrapper for USGS NWIS Services."""
 
-from quest.services.base import ProviderBase, TimePeriodServiceBase
+from quest.providers.base import ProviderBase, TimePeriodServiceBase
 import concurrent.futures
 from functools import partial
 from builtins import range

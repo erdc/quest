@@ -3,7 +3,7 @@ import quest
 
 #
 #
-# quest.api.update_settings({'BASE_DIR':'/Users/rditllkw/QUEST/data-services-library/test/files'})
+# quest.api.update_settings({'BASE_DIR':'/Users/rditllkw/QUEST/data-providers-library/test/files'})
 # quest.api.update_settings({'PROJECTS_DIR':'projects_template'})
 quest.api.new_project('project1')
 quest.api.new_project('project2')

@@ -6,7 +6,7 @@ import pandas as pd
 import param
 from ulmo.ncdc import ghcn_daily, gsod
 
-from quest.services.base import ProviderBase, TimePeriodServiceBase
+from quest.providers.base import ProviderBase, TimePeriodServiceBase
 from quest import util
 # from ulmo.ncdc.ghcn_daily.core import _get_inventory as _get_ghcn_inventory
 

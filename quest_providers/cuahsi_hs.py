@@ -1,4 +1,4 @@
-from quest.services.base import ProviderBase, SingleFileServiceBase, PublishBase
+from quest.providers.base import ProviderBase, SingleFileServiceBase, PublishBase
 from hs_restclient import HydroShare, HydroShareAuthBasic
 from quest.api.database import get_db, db_session
 from shapely.geometry import Point, box
