@@ -161,13 +161,13 @@ class HSPublisher(PublishBase):
                              'TimeSeriesResource']:
             valid_extensions = extension_dict[resource_type]
 
-        if len(p.dataset) > 1 and resource_type in ['TimeSeriesResource', 'RasterResource']:
+        if len(datasets) > 1 and resource_type in ['TimeSeriesResource', 'RasterResource']:
             raise ValueError("The selected resource cannot have more than one dataset.")
 
-        if len(p.dataset) == 0:
+        if len(datasets) == 0:
             raise ValueError("There was no dataset selected.")
 
-        for dataset in p.dataset:
+        for dataset in datasets:
             dataset_metadata = get_metadata(dataset)[dataset]
             fpath = dataset_metadata['file_path']
             filename, file_extension = os.path.splitext(fpath)
