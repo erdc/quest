@@ -174,7 +174,6 @@ class UserProvider(ProviderBase):
     description = None
     organization_name = None
     organization_abbr = None
-    name = user
 
     def __init__(self, uri, name=None, use_cache=True, update_frequency='M'):
         super(UserProvider, self).__init__(name=name, use_cache=use_cache, update_frequency=update_frequency)

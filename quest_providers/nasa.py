@@ -12,6 +12,7 @@ collections_url = 'https://cmr.earthdata.nasa.gov/search/collections.json?short_
 
 granules_url = 'https://cmr.earthdata.nasa.gov/search/granules.json?short_name=%s&page_size=1000&page_num=%s'
 
+raise ValueError('This Plugin is disabled')
 
 class NasaServiceBase(SingleFileServiceBase):
     service_type = 'geo-discrete'

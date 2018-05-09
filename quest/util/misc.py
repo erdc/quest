@@ -1,6 +1,6 @@
 from geojson import LineString, Point, Polygon, Feature, FeatureCollection, MultiPolygon
 from jinja2 import Environment, FileSystemLoader
-from stevedore import driver
+from stevedore import extension, driver
 from past.builtins import basestring  # for python 2 compatibility
 from .config import get_settings
 from .. import get_pkg_data_path
@@ -220,11 +220,19 @@ def listify(liststr, delimiter=','):
 
 
 def list_plugins(namespace):
-    try:
-        import quest_providers
-        return [ modname for _, modname, iskpg in pkgutil.iter_modules(quest_providers.__path__) ]
-    except Exception as e:
-        raise e
+    if namespace == "provider":
+        try:
+            import quest_providers
+            return [ modname for _, modname, iskpg in pkgutil.iter_modules(quest_providers.__path__) ]
+        except Exception as e:
+            raise e
+    else:
+        namespace = 'quest.' + namespace
+        mgr = extension.ExtensionManager(
+            namespace=namespace,
+            invoke_on_load=False,
+        )
+        return [x.name for x in mgr]
 
 
 def load_entities(namespace, names=None):
@@ -232,14 +240,16 @@ def load_entities(namespace, names=None):
     namespace = 'quest.' + namespace
 
     if names is None:
+        from quest.services.base import ProviderBase
         try:
             import quest_providers
             plugin_dict = {}
             for _, modname, ispkg in pkgutil.iter_modules(quest_providers.__path__):
-                plugin_module = importlib.import_module("quest_providers." + modname)
+                plugin_name = "quest_providers." + modname
+                plugin_module = importlib.import_module(plugin_name)
                 for name, obj in inspect.getmembers(plugin_module, inspect.isclass):
                     if issubclass(obj, ProviderBase) and obj.__module__ == plugin_name:
-                        providers[modname] = obj(modname)
+                        plugin_dict[modname] = obj(modname)
             return plugin_dict
         except Exception as e:
             raise e
@@ -255,23 +265,24 @@ def load_providers(update_cache=False):
 
     if update_cache or the_providers is None:
         from quest.services.base import ProviderBase
-        try:
-            import quest_providers
-            for _, modname, ispkg in pkgutil.iter_modules(quest_providers.__path__):
-                if "user_provider" != modname:
-                    plugin_name = "quest_providers." + modname
-                    plugin_module = importlib.import_module(plugin_name)
-                    for name, obj in inspect.getmembers(plugin_module, inspect.isclass):
-                        if issubclass(obj, ProviderBase) and obj.__module__ == plugin_name:
-                            providers[obj.name] = obj()
-        except Exception as e:
-            raise e
+        import quest_providers
+        for _, modname, ispkg in pkgutil.iter_modules(quest_providers.__path__):
+            try:
+                plugin_name = "quest_providers." + modname
+                plugin_module = importlib.import_module(plugin_name)
+                for name, obj in inspect.getmembers(plugin_module, inspect.isclass):
+                    if issubclass(obj, ProviderBase) and obj.__module__ == plugin_name:
+                        providers[obj.name] = obj()
+            except:
+                continue
 
         if len(settings.get('USER_SERVICES', [])) > 0:
+            from quest.services import user_provider
             for uri in settings.get('USER_SERVICES', []):
                 try:
-                    drv = driver.DriverManager('quest.services', 'user', invoke_on_load=True, invoke_kwds={'uri': uri}).driver
-                    providers['user-' + drv.name] = drv
+                    # drv = driver.DriverManager('quest.services', 'user', invoke_on_load=True, invoke_kwds={'uri': uri}).driver
+                    plugin = user_provider.UserProvider(uri=uri)
+                    providers['user-' + plugin.name] = plugin
                 except Exception as e:
                     logger.error('Failed to load local service from %s, with exception: %s' % (uri, str(e)))
 
