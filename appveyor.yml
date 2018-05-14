@@ -32,4 +32,4 @@ install:
   - "python setup.py install"
 
 test_script:
-  - "%CMD_IN_ENV% pytest test --cov=quest --update-cache --skip-tasks -s -vv"
+  - "%CMD_IN_ENV% pytest test --cov=quest --update-cache -s -vv"
