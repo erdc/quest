@@ -4,10 +4,11 @@ Providers are inferred by aggregating information from service plugins.
 """
 from __future__ import absolute_import
 from __future__ import print_function
-from ..api.database import get_db, db_session
-from .. import util
-import os
+from ..util import save_settings, get_settings, update_settings, parse_service_uri
+from quest.database.database import get_db, db_session
+from ..plugins import load_providers
 import requests
+import os
 
 
 def get_providers(expand=None):
@@ -21,7 +22,7 @@ def get_providers(expand=None):
             list of all available providers
 
     """
-    providers = util.load_providers()
+    providers = load_providers()
     p = {k: v.metadata for k, v in providers.items()}
     if not expand:
         p = sorted(p.keys())
@@ -44,7 +45,7 @@ def get_services(expand=None, parameter=None, service_type=None):
             all available providers
 
     """
-    providers = util.load_providers() # util.load_entities('providers')
+    providers = load_providers() # load_entities('providers')
     services = {}
     for provider_name, provider in providers.items():
         for service, svc_metadata in provider.get_services().items():
@@ -80,7 +81,7 @@ def get_publishers(expand=None, publisher_type=None):
         providers (list or dict,Default=list):
             list of all available providers
     """
-    providers = util.load_providers()
+    providers = load_providers()
     publishers = {}
     for provider, pub in providers.items():
         for publisher, pub_metadata in pub.get_publishers().items():
@@ -120,13 +121,13 @@ def add_provider(uri):
         valid = os.path.isfile(path)
 
     if valid:
-        user_services = util.get_settings()['USER_SERVICES']
+        user_services = get_settings()['USER_SERVICES']
         if uri not in user_services:
             user_services.append(uri)
-            util.update_settings({'USER_SERVICES': user_services})
-            util.save_settings()
+            update_settings({'USER_SERVICES': user_services})
+            save_settings()
             msg = 'service added'
-            util.load_providers(update_cache=True)
+            load_providers(update_cache=True)
         else:
             msg = 'service already present'
     else:
@@ -147,19 +148,19 @@ def delete_provider(uri):
 
     """
     if uri.startswith('svc://'):
-        provider, service, _ = util.parse_service_uri(uri)
+        provider, service, _ = parse_service_uri(uri)
         if not provider.startswith('user'):
             raise ValueError('Can only remove user providers')
 
         uri = get_providers(expand=True)[provider].get('service_uri')
 
-    user_services = util.get_settings()['USER_SERVICES']
+    user_services = get_settings()['USER_SERVICES']
     if uri in user_services:
         user_services.remove(uri)
-        util.update_settings({'USER_SERVICES': user_services})
-        util.save_settings()
+        update_settings({'USER_SERVICES': user_services})
+        save_settings()
         msg = 'service removed'
-        util.load_providers(update_cache=True)
+        load_providers(update_cache=True)
     else:
         msg = 'service not found'
 
@@ -197,7 +198,7 @@ def authenticate_provider(uri, **kwargs):
 
 
     """
-    driver = util.load_providers()[uri]
+    driver = load_providers()[uri]
     driver.authenticate_me(**kwargs)
 
 
@@ -211,7 +212,7 @@ def unauthenticate_provider(uri):
 
 
     """
-    driver = util.load_providers()[uri]
+    driver = load_providers()[uri]
     driver.unauthenticate_me()
 
 

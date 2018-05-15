@@ -12,7 +12,7 @@ import shapely.wkt
 from shapely.geometry import shape
 
 from .. import util
-from .database import get_db, db_session, select_features
+from quest.database.database import get_db, db_session, select_features
 from .collections import get_collections
 from .metadata import get_metadata
 from .tasks import add_async

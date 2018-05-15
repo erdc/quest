@@ -142,8 +142,6 @@ from .projects import (
     active_db,
 )
 
-from .database import get_db
-
 from .providers import (
     get_providers,
     get_publishers,

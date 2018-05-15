@@ -8,7 +8,7 @@ import geopandas as gpd
 import shapely.wkt
 
 from .. import util
-from .database import get_db, db_session, select_collections, select_features, select_datasets
+from quest.database.database import get_db, db_session, select_collections, select_features, select_datasets
 
 
 def get_metadata(uris, as_dataframe=False):

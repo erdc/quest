@@ -11,7 +11,7 @@ import pandas as pd
 
 from .features import get_features, add_features
 from .datasets import get_datasets
-from .database import get_db, db_session
+from quest.database.database import get_db, db_session
 from .projects import _get_project_dir
 from .collections import get_collections
 from .metadata import get_metadata, update_metadata
