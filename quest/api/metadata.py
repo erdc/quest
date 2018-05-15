@@ -8,6 +8,7 @@ import geopandas as gpd
 import shapely.wkt
 
 from .. import util
+from .. import plugins
 from quest.database.database import get_db, db_session, select_collections, select_features, select_datasets
 
 
@@ -44,7 +45,7 @@ def get_metadata(uris, as_dataframe=False):
         for (provider, service), grp in svc_df.groupby(['provider', 'service']):
             # First process service uris (without the feature)
 
-            driver = util.load_providers()[provider]
+            driver = plugins.load_providers()[provider]
             if not grp.query('feature != feature').empty:
                 service_metadata = driver.get_services()[service]
                 index = util.construct_service_uri(provider, service)

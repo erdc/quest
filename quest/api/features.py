@@ -12,6 +12,7 @@ import shapely.wkt
 from shapely.geometry import shape
 
 from .. import util
+from .. import plugins
 from quest.database.database import get_db, db_session, select_features
 from .collections import get_collections
 from .metadata import get_metadata
@@ -143,7 +144,7 @@ def get_features(uris=None, expand=False, as_dataframe=False, as_geojson=False,
     filters = filters or dict()
     for name in services:
         provider, service, feature = util.parse_service_uri(name)
-        driver = util.load_providers()[provider]
+        driver = plugins.load_providers()[provider]
         tmp_feats = driver.get_features(service, update_cache=update_cache, **filters)
         all_features.append(tmp_feats)
 
@@ -262,7 +263,7 @@ def get_tags(service_uris, update_cache=False, filter=None, as_count=False):
 
     for service in services:
         provider, service, feature = util.parse_service_uri(service)
-        driver = util.load_providers()[provider]
+        driver = plugins.load_providers()[provider]
         service_tags = driver.get_tags(service, update_cache=update_cache)
         tags.update(service_tags)
 

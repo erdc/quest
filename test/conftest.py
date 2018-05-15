@@ -45,7 +45,7 @@ def get_or_generate_test_cache(update=False, skip=False):
     # configure logger for ulmo
     logging.getLogger('ulmo').addHandler(logging.NullHandler())
 
-    drivers = quest.util.load_providers()
+    drivers = quest.plugins.load_providers()
     for name in CACHED_SERVICES:
         provider, service, feature = quest.util.parse_service_uri(name)
         if provider.startswith('user'):
