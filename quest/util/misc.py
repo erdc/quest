@@ -1,28 +1,25 @@
 from geojson import LineString, Point, Polygon, Feature, FeatureCollection, MultiPolygon
-import shapely.geometry
 from jinja2 import Environment, FileSystemLoader
+from past.builtins import basestring  # for python 2 compatibility
 from .config import get_settings
 from .. import get_pkg_data_path
-import os
-import pandas as pd
-import geopandas as gpd
-import re
-from ..util.log import logger
+from uuid import uuid4, UUID
 
-from stevedore import extension, driver
-from past.builtins import basestring  # for python 2 compatibility
+import shapely.geometry
+import geopandas as gpd
+import pandas as pd
+import quest
+import os
+import re
+
 try:
     import simplejson as json
 except ImportError:
     import json
 
-from uuid import uuid4, UUID
-import quest
-
-the_providers = None
 
 def generate_cache(update=False):
-    """Downloads features for all services and caches results.
+    """Downloads features for all providers and caches results.
 
     Args:
         update (bool):
@@ -113,7 +110,7 @@ def classify_uris(uris, grouped=True, as_dataframe=True, require_same_type=False
     feature_idx = uuid_idx & df['uri'].str.startswith('f')
     dataset_idx = uuid_idx & df['uri'].str.startswith('d')
 
-    df['type'][service_idx] = 'services'
+    df['type'][service_idx] = 'providers'
     df['type'][feature_idx] = 'features'
     df['type'][dataset_idx] = 'datasets'
     df.set_index('uri', drop=False, inplace=True)
@@ -214,54 +211,6 @@ def listify(liststr, delimiter=','):
 
     else:
         return [liststr]
-
-
-def list_drivers(namespace):
-    namespace = 'quest.' + namespace
-    mgr = extension.ExtensionManager(
-            namespace=namespace,
-            invoke_on_load=False,
-        )
-    return [x.name for x in mgr]
-
-
-def load_drivers(namespace, names=None):
-    names = listify(names)
-    namespace = 'quest.' + namespace
-
-    if names is None:
-        mgr = extension.ExtensionManager(
-            namespace=namespace,
-            invoke_on_load=True,
-        )
-        return dict((x.name, x.obj) for x in mgr)
-
-    return {name: driver.DriverManager(namespace, name, invoke_on_load='True') for name in names}
-
-
-def load_providers(update_cache=False):
-    global the_providers
-
-    settings = get_settings()
-    web_services = list_drivers('services')
-    web_services.remove('user')
-
-    if update_cache or the_providers is None:
-        providers = {name: driver.DriverManager('quest.services', name, invoke_on_load=True, invoke_kwds={'name': name}).driver for name in web_services}
-
-        if len(settings.get('USER_SERVICES', [])) > 0:
-            for uri in settings.get('USER_SERVICES', []):
-                try:
-                    drv = driver.DriverManager('quest.services', 'user', invoke_on_load=True, invoke_kwds={'uri': uri}).driver
-                    providers[drv.name] = drv
-                except Exception as e:
-                    logger.error('Failed to load local service from %s, with exception: %s' % (uri, str(e)))
-
-        the_providers = providers
-    else:
-        providers = the_providers
-
-    return providers
 
 
 def remove_key(d, key):

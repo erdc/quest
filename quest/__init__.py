@@ -1,7 +1,7 @@
 """Quest
     ~~~~~~~~~~~~~~~~~~~~~
 
-    A library for environmental data services.
+    A library for environmental data providers.
     Part of the Environmental Simulator project.
 """
 from __future__ import (absolute_import, division,
@@ -26,7 +26,7 @@ def get_pkg_data_path(*args):
     return os.path.join(_ROOT, 'data', *args)
 
 
-from . import util, api
+from . import util, api, database
 
 
 def init():
@@ -37,6 +37,6 @@ def init():
         api.set_active_project('default')
 
     # init active project db
-    api.get_db(api.active_db(), reconnect=True)
+    database.get_db(api.active_db(), reconnect=True)
 
 init()

@@ -20,23 +20,23 @@ def _get_available_parameters(parameters):
         available_parameters = list(available_parameters)
     return available_parameters
 
-# get list of available services
+# get list of available providers
 services = quest.api.get_services()
 
 # make a dict so we can refer to each service by a number rather than service code
 svc_dict = {k: v for k, v in enumerate(services)}
 
-print('%s QUEST services are available:' % len(services))
+print('%s QUEST providers are available:' % len(services))
 for n, service in enumerate(services):
     parameters = quest.api.get_parameters(svc_dict[n])
     available_parameters = _get_available_parameters(parameters)
     print("\t%s - %s, (provides %s)" % (n, service, available_parameters))
 
 
-chosen_services = input('Choose services to use (comma separated numbers or hit Enter for all):')
+chosen_services = input('Choose providers to use (comma separated numbers or hit Enter for all):')
 if not chosen_services:
     chosen_services = list(svc_dict.keys())
-    print('\tUsing all services')
+    print('\tUsing all providers')
 else:
     chosen_services = [int(n) for n in chosen_services.split(',')]
 

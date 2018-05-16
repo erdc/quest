@@ -12,7 +12,8 @@ import shapely.wkt
 from shapely.geometry import shape
 
 from .. import util
-from .database import get_db, db_session, select_features
+from .. import plugins
+from quest.database.database import get_db, db_session, select_features
 from .collections import get_collections
 from .metadata import get_metadata
 from .tasks import add_async
@@ -88,7 +89,7 @@ def get_features(uris=None, expand=False, as_dataframe=False, as_geojson=False,
 
     Args:
         uris (string or list, Required):
-            uris of services, collections, or features
+            uris of providers, collections, or features
         as_dataframe (bool, Optional, Default=False):
            include feature details and format as a pandas DataFrame indexed by feature uris
         as_geojson (bool, Optional, Default=False):
@@ -107,7 +108,7 @@ def get_features(uris=None, expand=False, as_dataframe=False, as_geojson=False,
         queries(list, Optional, Default=None):
             list of string arguments to pass to pandas.DataFrame.query to filter the features
         services (comma separated strings, or list of strings, Deprecated):
-            list of services to search in for features
+            list of providers to search in for features
         collections (comma separated strings or list of strings, Deprecated):
             list of collections to search in for features
         features (comma separated strings or list of strings, Deprecated):
@@ -129,7 +130,7 @@ def get_features(uris=None, expand=False, as_dataframe=False, as_geojson=False,
     if not any(grouped_uris):
         raise ValueError('At least one service, collection, or feature uri must be specified.')
 
-    services = grouped_uris.get('services') or []
+    services = grouped_uris.get('providers') or []
     collections = grouped_uris.get('collections') or []
     features = grouped_uris.get('features') or []
 
@@ -139,11 +140,11 @@ def get_features(uris=None, expand=False, as_dataframe=False, as_geojson=False,
     if features is not None:
         all_features.append(get_metadata(features, as_dataframe=True))
 
-    # get metadata for features in services
+    # get metadata for features in providers
     filters = filters or dict()
     for name in services:
         provider, service, feature = util.parse_service_uri(name)
-        driver = util.load_providers()[provider]
+        driver = plugins.load_providers()[provider]
         tmp_feats = driver.get_features(service, update_cache=update_cache, **filters)
         all_features.append(tmp_feats)
 
@@ -239,7 +240,7 @@ def get_tags(service_uris, update_cache=False, filter=None, as_count=False):
 
     Args:
         service_uris(string or list, Required):
-            uris of services
+            uris of providers
         update_cache(bool, Optional):
             if True, update metadata cache
         filter(list, Optional):
@@ -256,13 +257,13 @@ def get_tags(service_uris, update_cache=False, filter=None, as_count=False):
     """
     # group uris by type
     grouped_uris = util.classify_uris(service_uris, as_dataframe=False, exclude=['collections', 'features', 'datasets'])
-    services = grouped_uris.get('services') or []
+    services = grouped_uris.get('providers') or []
 
     tags = dict()
 
     for service in services:
         provider, service, feature = util.parse_service_uri(service)
-        driver = util.load_providers()[provider]
+        driver = plugins.load_providers()[provider]
         service_tags = driver.get_tags(service, update_cache=update_cache)
         tags.update(service_tags)
 

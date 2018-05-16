@@ -1,13 +1,14 @@
 """Datasets API functions."""
-import os
 
-from ..util.log import logger
-from .. import util
-from .database import get_db, db_session, select_datasets
-import pandas as pd
+from quest.database.database import get_db, db_session, select_datasets
+from ..plugins import load_providers, load_plugins, list_plugins
+from ..util import logger, parse_service_uri, listify, uuid
 from .metadata import get_metadata, update_metadata
 from .projects import _get_project_dir
 from .tasks import add_async
+
+import pandas as pd
+import os
 
 
 class DatasetStatus:
@@ -32,7 +33,7 @@ def download(feature, file_path, dataset=None, **kwargs):
         file_path (string, Required):
             path location to save downloaded data
         dataset (string, Optional, Default=None):
-            maybe only be used by some services
+            maybe only be used by some providers
         async: (bool, Optional, Default=False)
             if True, download in background
         kwargs:
@@ -52,8 +53,8 @@ def download(feature, file_path, dataset=None, **kwargs):
     if file_path is None:
         pass
 
-    provider, service, feature = util.parse_service_uri(service_uri)
-    driver = util.load_providers()[provider]
+    provider, service, feature = parse_service_uri(service_uri)
+    driver = load_providers()[provider]
     data = driver.download(service=service, feature=feature,
                            file_path=file_path, dataset=dataset, **kwargs)
     return data
@@ -61,8 +62,8 @@ def download(feature, file_path, dataset=None, **kwargs):
 
 @add_async
 def publish(publisher_uri, **kwargs):
-    provider, publisher, feature = util.parse_service_uri(publisher_uri)
-    driver = util.load_providers()[provider]
+    provider, publisher, feature = parse_service_uri(publisher_uri)
+    driver = load_providers()[provider]
     data = driver.publish(publisher=publisher, **kwargs)
     return data
 
@@ -150,7 +151,7 @@ def download_options(uris, fmt='json'):
             download options that can be specified when calling
             quest.api.stage_for_download or quest.api.download
     """
-    uris = util.listify(uris)
+    uris = listify(uris)
     options = {}
     for uri in uris:
         service_uri = uri
@@ -163,20 +164,20 @@ def download_options(uris, fmt='json'):
             df = df['service'] + '/' + df['service_id']
             service_uri = df
 
-        provider, service, feature = util.parse_service_uri(service_uri)
-        driver = util.load_providers()[provider]
+        provider, service, feature = parse_service_uri(service_uri)
+        driver = load_providers()[provider]
         options[uri] = driver.download_options(service, fmt)
 
     return options
 
 
 def get_publish_options(publish_uri, fmt='json'):
-    uris = util.listify(publish_uri)
+    uris = listify(publish_uri)
     options = {}
     for uri in uris:
         publish_uri = uri
-        provider, publisher, feature = util.parse_service_uri(publish_uri)
-        driver = util.load_providers()[provider]
+        provider, publisher, feature = parse_service_uri(publish_uri)
+        driver = load_providers()[provider]
         options[uri] = driver.publish_options(publisher, fmt)
 
     return options
@@ -262,7 +263,7 @@ def new_dataset(feature, source=None, display_name=None,
         if f is None:
             raise ValueError('feature {} does not exist'.format(feature))
 
-    name = util.uuid('dataset')
+    name = uuid('dataset')
     if source is None:
         source = 'user_created'
 
@@ -308,7 +309,7 @@ def stage_for_download(uris, options=None):
         uris (list):
             staged dataset uids
     """
-    uris = util.listify(uris)
+    uris = listify(uris)
     display_name = None
     datasets = []
 
@@ -332,7 +333,7 @@ def stage_for_download(uris, options=None):
             dataset_feature = dataset_metadata['feature']
             feature_metadata = get_metadata(dataset_feature)[dataset_feature]
             service = feature_metadata['service']
-            provider, service, _ = util.parse_service_uri(service)
+            provider, service, _ = parse_service_uri(service)
             display_name = '{0}-{1}-{2}'.format(provider, parameter_name, dataset_uri[:7])
 
         quest_metadata = {
@@ -385,10 +386,10 @@ def open_dataset(dataset, fmt=None):
     if path is None:
         raise ValueError('No dataset file found')
 
-    if file_format not in util.list_drivers('io'):
+    if file_format not in list_plugins('io'):
         raise ValueError('No reader available for: %s' % file_format)
 
-    io = util.load_drivers('io', file_format)
+    io = load_plugins('io', file_format)
     io = io[file_format].driver
     return io.open(path, fmt=fmt)
 
@@ -425,10 +426,10 @@ def visualize_dataset(dataset, update_cache=False, **kwargs):
     if path is None:
             raise ValueError('No dataset file found')
 
-    if file_format not in util.list_drivers('io'):
+    if file_format not in list_plugins('io'):
             raise ValueError('No reader available for: %s' % file_format)
 
-    io = util.load_drivers('io', file_format)
+    io = load_plugins('io', file_format)
     io = io[file_format].driver
 
     title = m.get('display_name')
@@ -466,10 +467,9 @@ def visualize_dataset_options(dataset, fmt='json'):
     if path is None:
         raise ValueError('No dataset file found')
 
-    if file_format not in util.list_drivers('io'):
+    if file_format not in list_plugins('io'):
         raise ValueError('No reader available for: %s' % file_format)
 
-    io = util.load_drivers('io', file_format)
-    io = io[file_format].driver
+    io = load_plugins('io', file_format)[file_format]
 
     return io.visualize_options(path, fmt)

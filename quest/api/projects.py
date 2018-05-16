@@ -4,7 +4,7 @@ import pandas as pd
 import shutil
 from ..util.log import logger
 from .. import util
-from .database import db_session, get_db, init_db
+from quest.database.database import db_session, get_db, init_db
 
 
 PROJECT_DB_FILE = 'metadata.db'

@@ -1,6 +1,6 @@
 """API functions related to Parameters."""
 import pandas as pd
-from .services import get_services
+from .providers import get_services
 import os
 from .. import util
 

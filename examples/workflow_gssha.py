@@ -23,7 +23,7 @@ if cname not in quest.api.get_collections():
     quest.api.new_collection(cname)
 
 # we do not need to specify parameter or download options for elevation
-# or landcover data since the services are single parameter,
+# or landcover data since the providers are single parameter,
 # single file downloads
 services = ['svc://usgs-ned:1-arc-second']
 filters = {'bbox': bbox}

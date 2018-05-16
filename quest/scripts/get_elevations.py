@@ -3,14 +3,14 @@ import quest
 
 @click.group()
 def cli():
-    """Quest script to extract elevation data along a path/polygon from raster elevation web services
+    """Quest script to extract elevation data along a path/polygon from raster elevation web providers
     """
     pass
 
 
 @cli.command('list')
 def list_elevation_services():
-    """Lists available elevation services
+    """Lists available elevation providers
     """
     services = quest.api.get_services(parameter='elevation', datatype='raster')
     click.echo('\n                             Available Elevation Datasets:')

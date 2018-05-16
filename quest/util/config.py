@@ -80,7 +80,7 @@ def update_settings(config={}):
         from .. import init
         init()
 
-    from . import load_providers
+    from ..plugins import load_providers
     load_providers(update_cache=True)
 
     return True
@@ -118,7 +118,7 @@ def update_settings_from_file(filename):
     # convert keys to uppercase
     config = dict((k.upper(), v) for k, v in config.items())
 
-    # recursively parse for local services
+    # recursively parse for local providers
     config['USER_SERVICES'] = _expand_dirs(config['USER_SERVICES'])
     log.info('Settings read from %s' % filename)
 

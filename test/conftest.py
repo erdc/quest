@@ -36,7 +36,7 @@ def get_or_generate_test_cache(update=False, skip=False):
     quest.api.update_settings({'CACHE_DIR': test_cache_dir})
     start = None
     if not os.path.exists(test_cache_dir) or update:
-        print('Generating the services metadata cache for tests. This may take several minutes.')
+        print('Generating the providers metadata cache for tests. This may take several minutes.')
         start = time()
 
     # prevent warnings
@@ -45,7 +45,7 @@ def get_or_generate_test_cache(update=False, skip=False):
     # configure logger for ulmo
     logging.getLogger('ulmo').addHandler(logging.NullHandler())
 
-    drivers = quest.util.load_providers()
+    drivers = quest.plugins.load_providers()
     for name in CACHED_SERVICES:
         provider, service, feature = quest.util.parse_service_uri(name)
         if provider.startswith('user'):

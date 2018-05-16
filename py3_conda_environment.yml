@@ -28,7 +28,6 @@ dependencies:
     - click
     - werkzeug
     - peewee
-    - stevedore
     - geopandas
     - distributed>=1.18
     - psutil
