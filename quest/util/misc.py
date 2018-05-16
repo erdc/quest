@@ -1,13 +1,38 @@
 from geojson import LineString, Point, Polygon, Feature, FeatureCollection, MultiPolygon
+import shapely.geometry
+from jinja2 import Environment, FileSystemLoader
+from .config import get_settings
+from .. import get_pkg_data_path
+import os
+import pandas as pd
+import geopandas as gpd
+import re
+from ..util.log import logger
+
+from stevedore import extension, driver
+from past.builtins import basestring  # for python 2 compatibility
+try:
+    import simplejson as json
+except ImportError:
+    import json
+
+from uuid import uuid4, UUID
+import quest
+
+from geojson import LineString, Point, Polygon, Feature, FeatureCollection, MultiPolygon
 from jinja2 import Environment, FileSystemLoader
 from past.builtins import basestring  # for python 2 compatibility
 from .config import get_settings
 from .. import get_pkg_data_path
+from ..util.log import logger
 from uuid import uuid4, UUID
 
 import shapely.geometry
 import geopandas as gpd
 import pandas as pd
+import importlib
+import inspect
+import pkgutil
 import quest
 import os
 import re
@@ -18,30 +43,43 @@ except ImportError:
     import json
 
 
-def generate_cache(update=False):
-    """Downloads features for all providers and caches results.
+def _abs_path(path, mkdir=True):
+    """Gets the absolute path for a file to be within the Quest directory,
+    and will create a directory of that filename.
 
     Args:
-        update (bool):
-            whether to update cached files.
+        param1 (string): A string that is a filename.
+        param2 (bool): A boolean if the user wants to create the directory.
+    Returns:
+        A string of an absolute path with a file from somwhere with in the Quest directory.
     """
-    for service in quest.api.get_services():
-        quest.api.get_features(service, update_cache=update)
+    if not os.path.isabs(path):
+        path = os.path.join(get_quest_dir(), path)
 
+    if mkdir:
+        mkdir_if_doesnt_exist(path)
 
-def append_features(old, new):
-    if not old:
-        return new
-
-    existing_features = [feature['id'] for feature in old['features']]
-    for feature in new['features']:
-        if feature['id'] not in existing_features:
-            old['features'].append(feature)
-
-    return old
+    return path
 
 
 def bbox2poly(x1, y1, x2, y2, reverse_order=False, as_geojson=False, as_shapely=False):
+    """Converts a bounding box to a polygon.
+
+    Args:
+        param1 (int): An int for the first x coordinate.
+        param2 (int): An int for the first y coordinate.
+        param3 (int): An int for the second x coordinate.
+        param4 (int): An int for the second y coordinate.
+        param5 (bool): A boolean to switch the order of the x and y coordinates.
+        param6 (bool): A bool to convert the polygon to a geojson object.
+        param7 (bool): A bool to convert the polygon to a shapely object.
+
+    Returns:
+        If the bool is false for both geojson and shapely then just a list is returned.
+        If the bool is true for both geojson and shapely then a shapley object is returned.
+        If the bool is true for just the geojson, then a geojson object is returned.
+        If the bool is true for just the shapely, then a shapely object is returned.
+    """
     if reverse_order:
         x1, y1 = y1, x1
         x2, y2 = y2, x2
@@ -88,7 +126,14 @@ def bbox2poly(x1, y1, x2, y2, reverse_order=False, as_geojson=False, as_shapely=
 
 
 def build_smtk(smtk_subdir, smtk_filename, **kwargs):
-    """build smtk file from template and kwargs and stream as string.
+    """Build smtk file from the template, kwargs, and stream as a string.
+
+    Args:
+        param1 (string):
+        param2 (string):
+        param3 (kwargs):
+
+    Returns:
 
     """
     env = Environment(loader=FileSystemLoader(os.path.join(get_pkg_data_path('smtk'), smtk_subdir)))
@@ -96,9 +141,20 @@ def build_smtk(smtk_subdir, smtk_filename, **kwargs):
 
 
 def classify_uris(uris, grouped=True, as_dataframe=True, require_same_type=False, exclude=None):
-    """convert list of uris into a pandas dataframe.
+    """Converts a list of uris into a pandas dataframe.
 
-    classified by resource type
+    Notes:
+        Classified by resource type.
+
+    Args:
+        param1 (?):
+        param2 (bool):
+        param3 (bool):
+        param4 (bool):
+        param5 (?):
+
+    Returns:
+        A pandas dataframe.
     """
     uris = listify(uris)
 
@@ -107,10 +163,12 @@ def classify_uris(uris, grouped=True, as_dataframe=True, require_same_type=False
 
     uuid_idx = df['uri'].apply(is_uuid)
     service_idx = df['uri'].str.startswith('svc://')
+    publish_idx = df['uri'].str.startswith('pub://')
     feature_idx = uuid_idx & df['uri'].str.startswith('f')
     dataset_idx = uuid_idx & df['uri'].str.startswith('d')
 
-    df['type'][service_idx] = 'providers'
+    df['type'][service_idx] = 'services'
+    df['type'][publish_idx] = 'publishers'
     df['type'][feature_idx] = 'features'
     df['type'][dataset_idx] = 'datasets'
     df.set_index('uri', drop=False, inplace=True)
@@ -135,7 +193,35 @@ def classify_uris(uris, grouped=True, as_dataframe=True, require_same_type=False
     return df
 
 
+def construct_service_uri(provider, service, feature=None):
+    """Builds a uri from the given parameters.
+
+    Args:
+        param1 (string): A string of the provider.
+        param2 (string): A string of the service.
+        param3 (string): A string of the feature.
+
+    Returns:
+        If there is no feature then the uri will just be the provider
+        and service, else the feature will be appended to the end of the
+        uri.
+    """
+    uri = 'svc://{}:{}'.format(provider, service)
+    if feature is not None:
+        uri = '{}/{}'.format(uri, feature)
+
+    return uri
+
+
 def get_cache_dir(service=None):
+    """Gets the absolute path of the cached directory.
+
+    Args:
+        param1 (string): A string of the specific service the user wants.
+
+    Returns:
+        A string of the path to the cached directory.
+    """
     settings = get_settings()
     path = _abs_path(settings['CACHE_DIR'])
     if service is not None:
@@ -144,119 +230,129 @@ def get_cache_dir(service=None):
     return path
 
 
-def get_quest_dir():
-    settings = get_settings()
-    return settings['BASE_DIR']
-
-
-def mkdir_if_doesnt_exist(dir_path):
-    """makes a directory if it doesn't exist"""
-    if not os.path.exists(dir_path):
-        os.makedirs(dir_path)
-
-
 def get_projects_dir():
+    """Gets the absolute path of the projects directory within Quest.
+
+    Returns:
+        An absolute path leading to the project directory from within Quest.
+    """
     settings = get_settings()
     return _abs_path(settings['PROJECTS_DIR'], mkdir=False)
 
 
+def get_quest_dir():
+    """Gets the absolute path of the Quest directory.
+
+    Returns:
+        An absolute path of the Quest directory.
+    """
+    settings = get_settings()
+    return settings['BASE_DIR']
+
+
 def is_remote_uri(path):
-    """check if uri points to a http/https url."""
+    """Checks if the incoming path is a remote uri.
+
+    Args:
+        param1 (string): A string that is either a path or uri.
+
+    Returns:
+        If the path is a remote destination then true, false otherwise.
+    """
     return bool(re.search('^https?\://', path))
 
 
-def is_service_uri(uri):
-    return uri.startswith('svc://')
+def is_uuid(uuid):
+    """Check if string is a uuid4.
 
+    Notes:
+        source: https://gist.github.com/ShawnMilo/7777304
 
-def parse_service_uri(uri):
-    """parse service uri into provider, service, feature.
+    Args:
+        param1 (int): A universal unique identifier.
 
-    Examples:
-        usgs-nwis:dv/0800345522
-        gebco-bathymetry
-        usgs-ned:1-arc-second
-
-    args:
-            uri (string): service uri_dict
-
-        returns:
-            parsed_uri (tuple): tuple containing provider, service, feature
+    Returns:
+        If the uuid is version 4 then true, else false otherwise.
     """
-    svc, feature = (uri.split('://')[-1].split('/', 1) + [None])[:2]
-    provider, service = (svc.split(':') + [None])[:2]
+    try:
+        val = UUID(uuid, version=4)
+    except ValueError:
+        # If it's a value error, then the string is not a valid UUID.
+        return False
 
-    return provider, service, feature
-
-
-def construct_service_uri(provider, service, feature=None):
-    uri = 'svc://{}:{}'.format(provider, service)
-    if feature is not None:
-        uri = '{}/{}'.format(uri, feature)
-
-    return uri
+    # If the uuid_string is a valid hex code, but an invalid uuid4,
+    # the UUID.__init__ will convert it to a valid uuid4.
+    # This is bad for validation purposes.
+    return val.hex == uuid
 
 
 def listify(liststr, delimiter=','):
-    """If input is a string, split on comma and convert to python list
+    """Converts a string into a list.
+
+    Args:
+        param1 (string): A string of words or etc.
+        param2 (char): A char that will be used as the delimiter identifier.
+
+    Returns:
+        If a string then a string will be a list.
+        If nothing is sent in, then none will be returned.
+        If a list, then a list will be returned.
+        If not a list or string, then the item will be returned.
     """
     if liststr is None:
         return None
 
     if isinstance(liststr, dict) or isinstance(liststr, list):
         return liststr
-
     elif isinstance(liststr, basestring):
         return [s.strip() for s in liststr.split(delimiter)]
-
     else:
         return [liststr]
 
 
-def remove_key(d, key):
-    r = dict(d)
-    del r[key]
-    return r
+def mkdir_if_doesnt_exist(dir_path):
+    """Creates a directory if not already exists.
+
+    Args:
+        param (string): A string of an absolute path to a directory.
+    """
+    if not os.path.exists(dir_path):
+        os.makedirs(dir_path)
 
 
-def jsonify(f):
-    def wrapped_f(*args, **kw):
-        if 'json' in list(kw.keys()):
-            kw = json.loads(kw['json'])
+def parse_service_uri(uri):
+    """Parses a service uri into separate provider, service, and feature strings.
 
-        as_json = kw.get('as_json')
-        if as_json:
-            del kw['as_json']
-            return json.dumps(f(*args, **kw), sort_keys=True, indent=4, separators=(',', ': '))
-        else:
-            return f(*args, **kw)
-    return wrapped_f  # the wrapped function gets returned.
+    Examples:
+        usgs-nwis:dv/0800345522
+        gebco-bathymetry
+        usgs-ned:1-arc-second
 
+    Args:
+        param1 (string): A string that is a uri.
 
-def stringify(args):
-    return isinstance(args, list) and ','.join(args) or None
+    Returns:
+        Three strings are returned from the parsed uri.
+    """
+    svc, feature = (uri.split('://')[-1].split('/', 1) + [None])[:2]
+    print("svc: ", svc)
+    print("feature: ", feature)
+    provider, service = (svc.split(':') + [None])[:2]
+    print("provider: ", provider)
+    print("service: ", service)
 
-
-def to_dataframe(feature_collection):
-    features = {}
-    for feature in feature_collection['features']:
-        data = feature['properties']
-        coords = pd.np.array(feature['geometry']['coordinates'])
-        if len(coords.shape) > 1:
-            coords = coords.mean(axis=1)
-        data.update({
-            'geom_type': feature['geometry']['type'],
-            'geom_coords': feature['geometry']['coordinates'],
-            'longitude': coords.flatten()[0],
-            'latitude': coords.flatten()[1],
-            'service_id': feature['id']
-        })
-
-        features[feature['id']] = data
-    return pd.DataFrame.from_dict(features, orient='index')
+    return provider, service, feature
 
 
 def to_geodataframe(feature_collection):
+    """Converts a dictionary to a GeoPandas Dataframe object.
+
+    Args:
+        param1 (dictionary): A dictionary that contains features.
+
+    Returns:
+        A GeoPandas Dataframe.
+    """
     features = {}
     for feature in feature_collection['features']:
         data = feature['properties']
@@ -269,12 +365,15 @@ def to_geodataframe(feature_collection):
     return gpd.GeoDataFrame.from_dict(features, orient='index')
 
 
-def to_json_default_handler(obj):
-    if hasattr(obj, 'isoformat'):
-        return obj.isoformat()
-
-
 def to_geojson(df):
+    """Converts a dataframe to a geojson object.
+
+    Args:
+        param1 (dataframe): A dataframe that is being converted to a geojson object.
+
+    Returns:
+        A geojson object is what is being returned.
+    """
     _func = {
         'LineString': LineString,
         'Point': Point,
@@ -303,22 +402,39 @@ def to_geojson(df):
             properties = json.loads(row.dropna().to_json())
             properties.update({'metadata': metadata})
             features.append(Feature(geometry=geometry, properties=properties,
-                            id=uid))
+                                    id=uid))
 
     return FeatureCollection(features)
 
 
+def to_json_default_handler(obj):
+    """Gets an attribute from the object.
+
+    Notes:
+        This method is confusing and the name is confusing.
+
+    Args:
+        param1 (object): An object of some nature.
+
+    Returns:
+        If the object has an attribute isoformat, then return it.
+    """
+    if hasattr(obj, 'isoformat'):
+        return obj.isoformat()
+
+
 def uuid(resource_type):
-    """Generate new uuid.
+    """Generate a new uuid.
 
-    First character of uuid is replaced with 'f' or 'd' respectively
-    for resource_type feature, dataset respectovely
+    Notes:
+        First character of uuid is replaced with 'f' or 'd' respectively
+        for resource_type feature, dataset respectovely
 
-    args:
-        resource_type (string): type of resource i.e. 'feature' or 'dataset'
+    Args:
+        param1 (string): A string that is a type of resource i.e. 'feature' or 'dataset'.
 
-    returns:
-        uuid (string)
+    Returns:
+        A new uuid from the resource type.
     """
     uuid = uuid4().hex
 
@@ -330,31 +446,3 @@ def uuid(resource_type):
 
     return uuid
 
-
-def is_uuid(uuid):
-    """Check if string is a uuid4
-
-    Validate that a UUID string is in fact a valid uuid4.
-    source: https://gist.github.com/ShawnMilo/7777304
-    """
-
-    try:
-        val = UUID(uuid, version=4)
-    except ValueError:
-        # If it's a value error, then the string is not a valid UUID.
-        return False
-
-    # If the uuid_string is a valid hex code, but an invalid uuid4,
-    # the UUID.__init__ will convert it to a valid uuid4.
-    # This is bad for validation purposes.
-    return val.hex == uuid
-
-
-def _abs_path(path, mkdir=True):
-    if not os.path.isabs(path):
-        path = os.path.join(get_quest_dir(), path)
-
-    if mkdir:
-        mkdir_if_doesnt_exist(path)
-
-    return path
