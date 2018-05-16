@@ -10,7 +10,7 @@ the_providers = None
 
 the_plugins = {'provider': 'quest_provider_plugins',
                'io': 'quest_io_plugins',
-               'filters': 'quest_filters_plugins',
+               'filters': 'quest_filter_plugins',
                }
 
 the_plugin_classes = {'provider': ProviderBase,
