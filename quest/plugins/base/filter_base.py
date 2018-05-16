@@ -5,7 +5,6 @@ import param
 from future.utils import with_metaclass
 
 from quest.util import listify, format_json_options, build_smtk
-from quest.api.metadata import update_metadata
 
 
 class FilterBase(param.Parameterized):
@@ -59,10 +58,12 @@ class FilterBase(param.Parameterized):
         pass
 
     def set_display_name(self, dataset):
+        from quest.api.metadata import update_metadata
         display_name = '{}-{}'.format(self._name, dataset[:7])
         update_metadata(dataset, display_name=display_name)
 
     def apply_filter(self, **options):
+        from quest.api.metadata import update_metadata
         from quest.api.datasets import DatasetStatus
         """Function that applies filter"""
         options.pop('name', None)

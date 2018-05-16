@@ -25,9 +25,9 @@ class GirderPublisher(PublishBase):
     folder_description = param.String(default="", doc="Folder Description", precedence=4)
     # Have the option to make the resource public.
     dataset = param_util.DatasetListSelector(default=(),
-                                             filters={'status': 'downloaded'},
+                                             queries=['status == "downloaded" or status == "filter applied"'],
                                              precedence=5,
-                                             doc="dataset to publish to HydroShare")
+                                             doc="Dataset to publish to Girder")
 
     @property
     def gc(self):
