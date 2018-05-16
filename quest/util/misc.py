@@ -1,39 +1,13 @@
 from geojson import LineString, Point, Polygon, Feature, FeatureCollection, MultiPolygon
-import shapely.geometry
-from jinja2 import Environment, FileSystemLoader
-from .config import get_settings
-from .. import get_pkg_data_path
-import os
-import pandas as pd
-import geopandas as gpd
-import re
-from ..util.log import logger
-
-from stevedore import extension, driver
-from past.builtins import basestring  # for python 2 compatibility
-try:
-    import simplejson as json
-except ImportError:
-    import json
-
-from uuid import uuid4, UUID
-import quest
-
-from geojson import LineString, Point, Polygon, Feature, FeatureCollection, MultiPolygon
 from jinja2 import Environment, FileSystemLoader
 from past.builtins import basestring  # for python 2 compatibility
 from .config import get_settings
 from .. import get_pkg_data_path
-from ..util.log import logger
 from uuid import uuid4, UUID
 
 import shapely.geometry
 import geopandas as gpd
 import pandas as pd
-import importlib
-import inspect
-import pkgutil
-import quest
 import os
 import re
 
