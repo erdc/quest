@@ -36,6 +36,7 @@ dependencies:
     - tornado
     - sortedcollections
     - pytest-cov
+    - coveralls
     - param
     - sphinx
     - sphinx_rtd_theme

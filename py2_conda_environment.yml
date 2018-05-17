@@ -36,6 +36,7 @@ dependencies:
     - pony
     - tornado
     - pytest-cov
+    - coveralls
     - param
     - sphinx_rtd_theme
     - hs_restclient
