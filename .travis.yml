@@ -23,7 +23,7 @@ matrix:
 
 cache:
   directories:
-    -$TRAVIS_BUILD_DIR/quest_test_cache
+    - $TRAVIS_BUILD_DIR/quest_test_cache
 
 # commands to install ulmo
 install:
@@ -63,6 +63,8 @@ script:
       pytest test --cov=quest -s -vv;
     fi
 
+before_cache:
+  - ls -lh $QUEST_CACHE_DIR
 
 # generate test coverage information
 after_success:
