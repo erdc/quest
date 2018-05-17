@@ -53,7 +53,6 @@ install:
   - source activate test-environment
   - python setup.py install
   - export QUEST_CACHE_DIR=$TRAVIS_BUILD_DIR/quest_test_cache
-  - echo $QUEST_CACHE_DIR
 
 # command to run tests
 script:
@@ -62,9 +61,6 @@ script:
     else
       pytest test --cov=quest -s -vv;
     fi
-
-before_cache:
-  - ls -lh $QUEST_CACHE_DIR
 
 # generate test coverage information
 after_success:
