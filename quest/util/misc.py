@@ -309,11 +309,7 @@ def parse_service_uri(uri):
         Three strings are returned from the parsed uri.
     """
     svc, feature = (uri.split('://')[-1].split('/', 1) + [None])[:2]
-    print("svc: ", svc)
-    print("feature: ", feature)
     provider, service = (svc.split(':') + [None])[:2]
-    print("provider: ", provider)
-    print("service: ", service)
 
     return provider, service, feature
 

@@ -130,7 +130,7 @@ def get_features(uris=None, expand=False, as_dataframe=False, as_geojson=False,
     if not any(grouped_uris):
         raise ValueError('At least one service, collection, or feature uri must be specified.')
 
-    services = grouped_uris.get('providers') or []
+    services = grouped_uris.get('services') or []
     collections = grouped_uris.get('collections') or []
     features = grouped_uris.get('features') or []
 
@@ -257,7 +257,7 @@ def get_tags(service_uris, update_cache=False, filter=None, as_count=False):
     """
     # group uris by type
     grouped_uris = util.classify_uris(service_uris, as_dataframe=False, exclude=['collections', 'features', 'datasets'])
-    services = grouped_uris.get('providers') or []
+    services = grouped_uris.get('services') or []
 
     tags = dict()
 
