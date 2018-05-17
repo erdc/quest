@@ -6,7 +6,7 @@ get/update metadata for projects/collections/datasets.
 import pandas as pd
 import geopandas as gpd
 import shapely.wkt
-from .services import get_publishers
+
 from .. import util
 from .. import plugins
 from quest.database.database import get_db, db_session, select_collections, select_features, select_datasets
