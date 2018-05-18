@@ -7,15 +7,10 @@ sudo: false
 notifications:
   email: false
 
-os:
-  - linux
-  - osx
-
 matrix:
   include:
     - os: osx
       osx_image: xcode9.2
-  exclude:
     - os: linux
 
 env:
@@ -38,7 +33,6 @@ install:
   # version is the same.
   - wget https://repo.continuum.io/miniconda/Miniconda3-latest-${OS_VERSION}-x86_64.sh -O miniconda.sh;
   - ENV_FILE=py"$PYTHON_VERSION"_conda_environment.yml;
-  -
   - bash miniconda.sh -b -p $HOME/miniconda
   - export PATH="$HOME/miniconda/bin:$PATH"
   - hash -r
