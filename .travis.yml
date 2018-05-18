@@ -28,6 +28,7 @@ cache:
 # commands to install ulmo
 install:
   - export QUEST_CACHE_DIR=$TRAVIS_BUILD_DIR/quest_test_cache
+  - ls -lahp $QUEST_CACHE_DIR
   - ls -lahp $QUEST_CACHE_DIR/noaa-ncdc
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
       OS_VERSION="Linux";
