@@ -1,12 +1,11 @@
 """QUEST wrapper for NCDC GHCN and GSOD Services."""
-import os
-
+from quest.plugins import ProviderBase, TimePeriodServiceBase, load_plugins
+from ulmo.ncdc import ghcn_daily, gsod
 import pandas as pd
 import param
-from ulmo.ncdc import ghcn_daily, gsod
+import os
 
-from quest.plugins import ProviderBase, TimePeriodServiceBase, load_plugins
-
+raise ValueError('This Plugin is disabled')
 # from ulmo.ncdc.ghcn_daily.core import _get_inventory as _get_ghcn_inventory
 
 BASE_PATH = 'ncdc'
