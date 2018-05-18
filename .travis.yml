@@ -27,6 +27,7 @@ cache:
 
 # commands to install ulmo
 install:
+  - export QUEST_CACHE_DIR=$TRAVIS_BUILD_DIR/quest_test_cache
   - ls -lahp $QUEST_CACHE_DIR/noaa-ncdc
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
       OS_VERSION="Linux";
@@ -53,7 +54,7 @@ install:
   - conda env create -q -n test-environment -f $ENV_FILE python=$PYTHON_VERSION
   - source activate test-environment
   - python setup.py install
-  - export QUEST_CACHE_DIR=$TRAVIS_BUILD_DIR/quest_test_cache
+  - python -c "import quest; print(quest.api.get_features('svc://noaa-ncdc:ghcn-daily'))"
 
 # command to run tests
 script:
