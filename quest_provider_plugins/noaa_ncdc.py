@@ -5,8 +5,8 @@ import pandas as pd
 import param
 from ulmo.ncdc import ghcn_daily, gsod
 
-from quest.plugins import ProviderBase, TimePeriodServiceBase
-from quest import util
+from quest.plugins import ProviderBase, TimePeriodServiceBase, load_plugins
+
 # from ulmo.ncdc.ghcn_daily.core import _get_inventory as _get_ghcn_inventory
 
 BASE_PATH = 'ncdc'
@@ -102,8 +102,7 @@ class NcdcServiceBase(TimePeriodServiceBase):
         }
 
         # save data to disk
-        io = util.load_entities('io', 'timeseries-hdf5')
-        io = io['timeseries-hdf5'].driver
+        io = load_plugins('io', 'timeseries-hdf5')['timeseries-hdf5']
         io.write(file_path, self.data, metadata)
         del metadata['service_id']
 

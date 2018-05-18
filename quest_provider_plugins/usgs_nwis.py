@@ -1,6 +1,6 @@
 """QUEST wrapper for USGS NWIS Services."""
 
-from quest.plugins import ProviderBase, TimePeriodServiceBase
+from quest.plugins import ProviderBase, TimePeriodServiceBase, load_plugins
 import concurrent.futures
 from functools import partial
 import pandas as pd
@@ -77,8 +77,7 @@ class NwisServiceBase(TimePeriodServiceBase):
         }
 
         # save data to disk
-        io = util.load_entities('io', 'timeseries-hdf5')
-        io = io['timeseries-hdf5'].driver
+        io = load_plugins('io', 'timeseries-hdf5')['timeseries-hdf5']
         io.write(file_path, df, metadata)
         del metadata['service_id']
 

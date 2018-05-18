@@ -11,8 +11,7 @@ from urllib.error import HTTPError
 from urllib.parse import quote, urlencode
 
 from quest.util.log import logger
-from quest.plugins import ProviderBase, TimePeriodServiceBase
-from quest import util
+from quest.plugins import ProviderBase, TimePeriodServiceBase, load_plugins
 
 
 class NoaaServiceBase(TimePeriodServiceBase):
@@ -102,8 +101,7 @@ class NoaaServiceBase(TimePeriodServiceBase):
             }
 
             # save data to disk
-            io = util.load_entities('io', 'timeseries-hdf5')
-            io = io['timeseries-hdf5'].driver
+            io = load_plugins('io', 'timeseries-hdf5')['timeseries-hdf5']
             io.write(file_path, data, metadata)
             del metadata['service_id']
 
