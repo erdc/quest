@@ -7,32 +7,26 @@ sudo: false
 notifications:
   email: false
 
-env:
-  - PYTHON_VERSION="2.7"
-  - PYTHON_VERSION="3.5"
-  - PYTHON_VERSION="3.6"
-
 matrix:
   include:
     - os: linux
       osx_image: xcode9.2
-      python: 2.7
+      env: PYTHON_VERSION="2.7"
     - os: linux
       osx_image: xcode9.2
-      python: 3.5
+      env: PYTHON_VERSION="3.5"
     - os: linux
       osx_image: xcode9.2
-      python: 3.6
+      env: PYTHON_VERSION="3.6"
     - os: osx
       osx_image: xcode9.2
-      python: 2.7
+      env: PYTHON_VERSION="2.7"
     - os: osx
       osx_image: xcode9.2
-      python: 3.5
+      env: PYTHON_VERSION="3.5"
     - os: osx
       osx_image: xcode9.2
-      python: 3.6
-
+      env: PYTHON_VERSION="3.6"
 
 cache:
   directories:
