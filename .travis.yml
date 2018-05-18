@@ -53,7 +53,7 @@ install:
   - source activate test-environment
   - python setup.py install
   - export QUEST_CACHE_DIR=$TRAVIS_BUILD_DIR/quest_test_cache
-  - ls -lahp $TRAVIS_BUILD_DIR/quest_test_cache/noaa-ncdc
+  - ls -lahp $QUEST_CACHE_DIR
 
 # command to run tests
 script:
