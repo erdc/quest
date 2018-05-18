@@ -5,7 +5,6 @@ import pandas as pd
 import param
 import os
 
-raise ValueError('This Plugin is disabled')
 # from ulmo.ncdc.ghcn_daily.core import _get_inventory as _get_ghcn_inventory
 
 BASE_PATH = 'ncdc'
