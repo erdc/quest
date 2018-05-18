@@ -23,7 +23,7 @@ matrix:
 
 cache:
   directories:
-    -$TRAVIS_BUILD_DIR/quest_test_cache
+    - $TRAVIS_BUILD_DIR/quest_test_cache
 
 # commands to install ulmo
 install:
