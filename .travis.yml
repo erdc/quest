@@ -9,7 +9,7 @@ notifications:
 
 os:
   - linux
-  - osx
+  - osx_image: xcode9.2
 
 env:
   - PYTHON_VERSION="2.7"
@@ -23,10 +23,14 @@ matrix:
 
 cache:
   directories:
-    -$TRAVIS_BUILD_DIR/quest_test_cache
+    - $TRAVIS_BUILD_DIR/quest_test_cache
 
 # commands to install ulmo
 install:
+  - export QUEST_CACHE_DIR=$TRAVIS_BUILD_DIR/quest_test_cache
+  - ls -lahp $QUEST_CACHE_DIR
+#   - ls -lahp $QUEST_CACHE_DIR/noaa-ncdc
+  - launchctl limit maxfiles
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
       OS_VERSION="Linux";
     else
@@ -52,17 +56,15 @@ install:
   - conda env create -q -n test-environment -f $ENV_FILE python=$PYTHON_VERSION
   - source activate test-environment
   - python setup.py install
-  - export QUEST_CACHE_DIR=$TRAVIS_BUILD_DIR/quest_test_cache
-  - echo $QUEST_CACHE_DIR
+  - python -c "import quest; print(quest.api.get_features('svc://noaa-ncdc:ghcn-daily'))"
 
 # command to run tests
 script:
   - if [[ "$TRAVIS_EVENT_TYPE" == "cron" ]]; then
-      pytest test --cov=quest -s -vv --update-cache --test-download;
+      pytest test --cov=quest -s --update-cache --test-download;
     else
-      pytest test --cov=quest -s -vv;
+      pytest test --cov=quest -s;
     fi
-
 
 # generate test coverage information
 after_success:
