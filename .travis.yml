@@ -53,13 +53,14 @@ install:
   - source activate test-environment
   - python setup.py install
   - export QUEST_CACHE_DIR=$TRAVIS_BUILD_DIR/quest_test_cache
+  - ls -lahp $TRAVIS_BUILD_DIR/quest_test_cache/noaa-ncdc
 
 # command to run tests
 script:
   - if [[ "$TRAVIS_EVENT_TYPE" == "cron" ]]; then
-      pytest test --cov=quest -s -vv --update-cache --test-download;
+      pytest test --cov=quest -s --update-cache --test-download;
     else
-      pytest test --cov=quest -s -vv;
+      pytest test --cov=quest -s;
     fi
 
 # generate test coverage information
