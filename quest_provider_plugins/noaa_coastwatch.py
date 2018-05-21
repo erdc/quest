@@ -1,19 +1,15 @@
 """QUEST wrapper for NCDC GHCN and GSOD Services."""
-import os
 
+from quest.plugins import ProviderBase, TimePeriodServiceBase, load_plugins
 # For python 2 compatibility
 from future.standard_library import install_aliases
-install_aliases()
-
+from urllib.parse import quote, urlencode
+from urllib.error import HTTPError
+from quest.util.log import logger
 import pandas as pd
 import param
-from urllib.error import HTTPError
-from urllib.parse import quote, urlencode
-
-from quest.util.log import logger
-from quest.plugins import ProviderBase, TimePeriodServiceBase
-from quest import util
-
+import os
+install_aliases()
 
 class NoaaServiceBase(TimePeriodServiceBase):
     BASE_URL = 'http://coastwatch.pfeg.noaa.gov/erddap/tabledap/'
@@ -102,8 +98,7 @@ class NoaaServiceBase(TimePeriodServiceBase):
             }
 
             # save data to disk
-            io = util.load_entities('io', 'timeseries-hdf5')
-            io = io['timeseries-hdf5'].driver
+            io = load_plugins('io', 'timeseries-hdf5')['timeseries-hdf5']
             io.write(file_path, data, metadata)
             del metadata['service_id']
 

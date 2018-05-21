@@ -46,11 +46,13 @@ def get_or_generate_test_cache(update=False, skip=False):
     logging.getLogger('ulmo').addHandler(logging.NullHandler())
 
     drivers = quest.plugins.load_providers()
+
     for name in CACHED_SERVICES:
         provider, service, feature = quest.util.parse_service_uri(name)
         if provider.startswith('user'):
             continue
         driver = drivers[provider]
+
         cache_file = os.path.join(quest.util.get_cache_dir(driver.name), service + '_features.p')
         if update or not os.path.exists(cache_file):
             try:

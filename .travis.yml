@@ -7,23 +7,27 @@ sudo: false
 notifications:
   email: false
 
-os:
-  - linux
-  - osx
-
-env:
-  - PYTHON_VERSION="2.7"
-  - PYTHON_VERSION="3.5"
-  - PYTHON_VERSION="3.6"
-
 matrix:
-  exclude:
-    - env: PYTHON_VERSION="2.7"
-      os: linux
+  include:
+    - os: linux
+      env: PYTHON_VERSION="2.7"
+    - os: linux
+      env: PYTHON_VERSION="3.5"
+    - os: linux
+      env: PYTHON_VERSION="3.6"
+    - os: osx
+      osx_image: xcode9.2
+      env: PYTHON_VERSION="2.7"
+    - os: osx
+      osx_image: xcode9.2
+      env: PYTHON_VERSION="3.5"
+    - os: osx
+      osx_image: xcode9.2
+      env: PYTHON_VERSION="3.6"
 
 cache:
   directories:
-    -$TRAVIS_BUILD_DIR/quest_test_cache
+    - $TRAVIS_BUILD_DIR/quest_test_cache
 
 # commands to install ulmo
 install:
@@ -34,13 +38,8 @@ install:
     fi
   # We do this conditionally because it saves us some downloading if the
   # version is the same.
-  - if [[ "$PYTHON_VERSION" == "2.7" ]]; then
-      wget https://repo.continuum.io/miniconda/Miniconda2-latest-${OS_VERSION}-x86_64.sh -O miniconda.sh;
-      ENV_FILE=py2_conda_environment.yml;
-    else
-      wget https://repo.continuum.io/miniconda/Miniconda3-latest-${OS_VERSION}-x86_64.sh -O miniconda.sh;
-      ENV_FILE=py3_conda_environment.yml;
-    fi
+  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-${OS_VERSION}-x86_64.sh -O miniconda.sh;
+  - ENV_FILE=py"$PYTHON_VERSION"_conda_environment.yml;
   - bash miniconda.sh -b -p $HOME/miniconda
   - export PATH="$HOME/miniconda/bin:$PATH"
   - hash -r
@@ -53,14 +52,14 @@ install:
   - source activate test-environment
   - python setup.py install
   - export QUEST_CACHE_DIR=$TRAVIS_BUILD_DIR/quest_test_cache
-  - echo $QUEST_CACHE_DIR
+  - export COVERAGE=$HOME/miniconda/envs/test-environment/lib/python$PYTHON_VERSION/site-packages/quest
 
 # command to run tests
 script:
   - if [[ "$TRAVIS_EVENT_TYPE" == "cron" ]]; then
-      pytest test --cov=quest -s -vv --update-cache --test-download;
+      pytest test --cov=$COVERAGE -s -vv --update-cache --test-download;
     else
-      pytest test --cov=quest -s -vv;
+      pytest test --cov=$COVERAGE -s -vv;
     fi
 
 

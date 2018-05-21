@@ -14,7 +14,7 @@ pytestmark = pytest.mark.usefixtures('reset_projects_dir', 'set_active_project')
 
 FEATURE_URIS = [
                 'svc://usgs-ned:19-arc-second/581d2561e4b08da350d5a3b2',
-                'svc://noaa-ncdc:gsod/028140-99999',
+                # 'svc://noaa-ncdc:gsod/028140-99999',
                 'svc://usgs-nwis:iv/01529950',
                 ]
 

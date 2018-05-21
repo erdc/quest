@@ -1,6 +1,6 @@
-# conda environment file for python 2, includes packages needed for testing
+# conda environment file for python 3, includes packages needed for testing
 # create a conda virtual env using:
-#   conda env create -n myenv --file py2_conda_environment.yml
+#   conda env create -n myenv --file py3_conda_environment.yml
 #   source activate myenv (use 'activate myenv' on windows)
 #   python setup.py develop
 #
@@ -15,8 +15,7 @@ channels:
     - defaults
 
 dependencies:
-    - python=2
-    - futures
+    - python=3.5
     - fiona
     - rasterio
     - gdal
@@ -35,8 +34,11 @@ dependencies:
     - pint
     - pony
     - tornado
+    - sortedcollections
     - pytest-cov
+    - coveralls
     - param
+    - sphinx
     - sphinx_rtd_theme
     - hs_restclient
     - jupyter
