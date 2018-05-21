@@ -15,11 +15,14 @@ channels:
     - defaults
 
 dependencies:
-    - python=3.5
+    - python=3
+
+    # core dependencies
     - fiona
     - rasterio
     - gdal
     - numpy
+    - futures
     - geojson
     - jinja2
     - ulmo>=0.8.3.2
@@ -30,18 +33,24 @@ dependencies:
     - peewee
     - geopandas
     - distributed>=1.18
+    - param
     - psutil
     - pint
     - pony
     - tornado
     - sortedcollections
+    - jupyter
+
+    # test dependencies
     - pytest-cov
     - coveralls
-    - param
+
+    # docs dependencies
     - sphinx
     - sphinx_rtd_theme
+
+    # plugin dependencies
     - hs_restclient
-    - jupyter
     - girder-client
     - terrapin
     - ncep_client

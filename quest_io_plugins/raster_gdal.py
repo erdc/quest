@@ -8,7 +8,7 @@ import rasterio
 
 class RasterGdal(IoBase):
     """IO for raster datasets using rasterio/gdal."""
-    name = 'RasterGdal'
+    name = 'raster-gdal'
 
     def register(self):
         "Register plugin by setting description and io type."

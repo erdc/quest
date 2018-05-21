@@ -7,13 +7,10 @@ environment:
   matrix:
     - PYTHON_VERSION: 2.7
       MINICONDA: C:\Miniconda
-      ENV_FILE: py2.7_conda_environment.yml
     - PYTHON_VERSION: 3.5
       MINICONDA: C:\Miniconda3
-      ENV_FILE: py3.5_conda_environment.yml
     - PYTHON_VERSION: 3.6
       MINICONDA: C:\Miniconda3
-      ENV_FILE: py3.6_conda_environment.yml
 
 init:
   - "ECHO %PYTHON_VERSION% %MINICONDA%"
@@ -25,11 +22,11 @@ install:
   - "set PATH=%MINICONDA%;%MINICONDA%\\Scripts;%PATH%"
   - "conda config --set always_yes yes --set changeps1 no"
 #  - "conda update -q conda"
-#  - "set PATH=%MINICONDA%;%MINICONDA%\\Scripts;%PATH%"
   - "conda info -a"
-  - "conda env create -q -n test-environment -f %ENV_FILE% python=%PYTHON_VERSION%"
+  - "(Get-Content conda_environment.yml).replace('python=3', 'python=%PYTHON_VERSION%') | Set-Content conda_environment.yml"
+  - "conda env create -q -n test-environment -f conda_environment.yml"
   - "activate test-environment"
   - "python setup.py install"
 
 test_script:
-  - "%CMD_IN_ENV% pytest test --update-cache -s -vv"
+  - "%CMD_IN_ENV% pytest test -s -vv"

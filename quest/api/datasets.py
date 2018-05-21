@@ -1,6 +1,7 @@
 """Datasets API functions."""
 
 from quest.database.database import get_db, db_session, select_datasets
+from quest.static import DatasetStatus
 from ..plugins import load_providers, load_plugins, list_plugins
 from ..util import logger, parse_service_uri, listify, uuid
 from .metadata import get_metadata, update_metadata
@@ -9,18 +10,6 @@ from .tasks import add_async
 
 import pandas as pd
 import os
-
-
-class DatasetStatus:
-    """
-    Enum of string constants representing dataset statuses.
-    """
-    NOT_STAGED = 'not staged'
-    STAGED = 'staged for download'
-    FAILED_DOWNLOAD = 'failed download'
-    DOWNLOADED = 'downloaded'
-    PENDING = 'pending'
-    FILTERED = 'filter applied'
 
 
 @add_async

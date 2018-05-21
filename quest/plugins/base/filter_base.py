@@ -1,9 +1,8 @@
 from builtins import object
 import abc
-
 import param
 from future.utils import with_metaclass
-
+from quest.static import DatasetStatus
 from quest.util import listify, format_json_options, build_smtk
 
 
@@ -64,7 +63,6 @@ class FilterBase(param.Parameterized):
 
     def apply_filter(self, **options):
         from quest.api.metadata import update_metadata
-        from quest.api.datasets import DatasetStatus
         """Function that applies filter"""
         options.pop('name', None)
         self.set_param(**options)
