@@ -1,6 +1,6 @@
 from quest.plugins import FilterBase
 from quest.api import get_metadata, new_dataset, update_metadata
-from quest.api.datasets import DatasetStatus
+from quest.static import DatasetStatus
 from quest import util
 import os
 

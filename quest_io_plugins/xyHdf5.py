@@ -9,7 +9,7 @@ from quest.util.log import logger
 
 
 class XYHdf5(IoBase):
-    name = 'xyHdf5'
+    name = 'xy-hdf5'
 
     def register(self):
         """Register plugin by setting description and io type."""
