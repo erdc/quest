@@ -45,15 +45,17 @@ def get_or_generate_test_cache(update=False, skip=False):
     # configure logger for ulmo
     logging.getLogger('ulmo').addHandler(logging.NullHandler())
 
-    drivers = quest.plugins.load_providers()
+    provider_plugins = quest.plugins.load_providers()
+    print(provider_plugins)
 
     for name in CACHED_SERVICES:
         provider, service, feature = quest.util.parse_service_uri(name)
+        print(provider)
         if provider.startswith('user'):
             continue
-        driver = drivers[provider]
+        provider_plugin = provider_plugins[provider]
 
-        cache_file = os.path.join(quest.util.get_cache_dir(driver.name), service + '_features.p')
+        cache_file = os.path.join(quest.util.get_cache_dir(provider_plugin.name), service + '_features.p')
         if update or not os.path.exists(cache_file):
             try:
                 print('Updating test cache for service: {0}'.format(name))
