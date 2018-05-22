@@ -58,7 +58,7 @@ install:
   - python setup.py install
   - export QUEST_CACHE_DIR=$TRAVIS_BUILD_DIR/quest_test_cache
   - export COVERAGE=$HOME/miniconda/envs/test-environment/lib/python$PYTHON_VERSION/site-packages/quest
-  - python -c "import quest_provider_plugins"
+  - python -c "import quest_provider_plugins, quest; print(quest.plugins.load_providers())"
 
 # command to run tests
 script:
