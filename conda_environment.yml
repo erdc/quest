@@ -16,13 +16,13 @@ channels:
 
 dependencies:
     - python=3
+    # - futures  # for python 2 compatibility
 
     # core dependencies
     - fiona
     - rasterio
     - gdal
     - numpy
-    - futures
     - geojson
     - jinja2
     - ulmo>=0.8.3.2
