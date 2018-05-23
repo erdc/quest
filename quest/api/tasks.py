@@ -34,8 +34,8 @@ def _get_client():
 def add_async(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
-        async = kwargs.pop('async', None)
-        if async:
+        async_tasks = kwargs.pop('async_tasks', None)
+        if async_tasks:
             client = _get_client()
             future = client.submit(f, *args, **kwargs)
             client.loop.add_callback(add_result_when_done, future)
