@@ -129,7 +129,10 @@ def update_metadata(uris, display_name=None, description=None,
             metadata at each uri keyed on uris
     """
     # group uris by type
-    grouped_uris = util.classify_uris(uris, as_dataframe=False, exclude=['services', 'publishers'], require_same_type=True)
+    grouped_uris = util.classify_uris(uris,
+                                      as_dataframe=False,
+                                      exclude=['services', 'publishers'],
+                                      require_same_type=True)
     resource = list(grouped_uris)[0]
     uris = grouped_uris[resource]
 
