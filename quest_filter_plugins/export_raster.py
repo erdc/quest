@@ -9,6 +9,7 @@ from quest.plugins import FilterBase
 import os
 from quest.util.log import logger
 
+
 class ExportRaster(FilterBase):
 
     def register(self):
@@ -26,7 +27,6 @@ class ExportRaster(FilterBase):
             },
             'produces': None,
         }
-
 
     def apply_filter(self, collection_name, service, location, parameter, export_path, filename, fmt='USGSDEM'):
 
@@ -48,14 +48,10 @@ class ExportRaster(FilterBase):
                 rasterio.copy(datafile, export_path, driver=fmt)
 
             logger.info('File exported to %s' % export_path)
-
-
         except:
             logger.errror('export failed')
 
-
         return collection
-
 
     def apply_filter_options(self, **kwargs):
         properties = {
