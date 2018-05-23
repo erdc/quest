@@ -153,7 +153,7 @@ class ExtractElevations(FilterBase):
         collection = api.add_to_collection(collection_name, 'local', new_locs, parameters='elevation')
         return collection
 
-    def apply_filter_options(self, **kwargs):
+    def get_filter_options(self, **kwargs):
         services = api.get_services(parameter='elevation', datatype='raster')
         services = [svc['display_name'] for svc in services]
         properties = {

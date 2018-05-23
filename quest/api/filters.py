@@ -67,7 +67,7 @@ def apply_filter(name, options=None, as_dataframe=None, expand=None, **kwargs):
         name (string,Required):
             name of filter
         options (dict, Required):
-            a dictionary of arguments to pass to the filter formatted as specified by `apply_filter_options`
+            a dictionary of arguments to pass to the filter formatted as specified by `get_filter_options`
         expand (bool, Optional, Default=False):
             include details of newly created dataset and format as a dict
         as_dataframe (bool, Optional, Default=False):
@@ -106,7 +106,7 @@ def apply_filter(name, options=None, as_dataframe=None, expand=None, **kwargs):
     return result
 
 
-def apply_filter_options(name, fmt='json', **kwargs):
+def get_filter_options(name, fmt='json', **kwargs):
     """Retrieve kwarg options for apply_filter.
 
     Args:
@@ -121,4 +121,4 @@ def apply_filter_options(name, fmt='json', **kwargs):
             filter options that can be applied when calling quest.api.apply_filter
     """
     plugin = load_plugins('filters', name)[name]
-    return plugin.apply_filter_options(fmt, **kwargs)
+    return plugin.get_filter_options(fmt, **kwargs)

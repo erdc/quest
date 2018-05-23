@@ -124,7 +124,7 @@ def download_datasets(datasets, raise_on_error=False):
     return status
 
 
-def download_options(uris, fmt='json'):
+def get_download_options(uris, fmt='json'):
     """List optional kwargs that can be specified when downloading a dataset.
 
    Args:
@@ -154,7 +154,7 @@ def download_options(uris, fmt='json'):
 
         provider, service, feature = parse_service_uri(service_uri)
         provider_plugin = load_providers()[provider]
-        options[uri] = provider_plugin.download_options(service, fmt)
+        options[uri] = provider_plugin.get_download_options(service, fmt)
 
     return options
 
@@ -432,7 +432,7 @@ def visualize_dataset(dataset, update_cache=False, **kwargs):
     return visualization_path
 
 
-def visualize_dataset_options(dataset, fmt='json'):
+def get_visualization_options(dataset, fmt='json'):
     """Return visualization available options for dataset.
 
     Args:
@@ -442,7 +442,7 @@ def visualize_dataset_options(dataset, fmt='json'):
             format in which to return options
 
     Returns:
-        visualize_dataset_options  (dict):
+        get_visualization_options  (dict):
             options that can be specified when calling
             quest.api.visualize_dataset
     """

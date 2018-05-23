@@ -275,12 +275,12 @@ class ProviderBase(with_metaclass(abc.ABCMeta, object)):
         """
         return self.services[service].download(feature, file_path, dataset, **kwargs)
 
-    def download_options(self, service, fmt):
+    def get_download_options(self, service, fmt):
         """
         needs to return dictionary
         eg. {'path': /path/to/dir/or/file, 'format': 'raster'}
         """
-        return self.services[service].download_options(fmt)
+        return self.services[service].get_download_options(fmt)
 
     def publish(self, publisher, **kwargs):
         return self.publishers[publisher].publish(**kwargs)

@@ -82,7 +82,7 @@ class FilterBase(param.Parameterized):
         """Function that applies filter"""
         pass
 
-    def apply_filter_options(self, fmt, **kwargs):
+    def get_filter_options(self, fmt, **kwargs):
         """Function that applies filter"""
         kwargs.pop('name', None)
         self.set_param(**kwargs)

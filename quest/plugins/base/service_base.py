@@ -74,7 +74,7 @@ class ServiceBase(param.Parameterized):
         """Default function that should be overridden if the features argument needs to be handled."""
         return self.parameters
 
-    def download_options(self, fmt):
+    def get_download_options(self, fmt):
         """
         needs to return dictionary
         eg. {'path': /path/to/dir/or/file, 'format': 'raster'}
