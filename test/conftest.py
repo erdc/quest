@@ -12,7 +12,7 @@ from data import CACHED_SERVICES
 
 base_path = os.path.dirname(os.path.abspath(__file__))
 FILES_DIR = os.path.join(base_path, 'files')
-warnings.simplefilter('ignore')
+warnings.simplefilter('ignore', UserWarning)
 
 def pytest_addoption(parser):
     parser.addoption('--update-cache', action='store_true')
