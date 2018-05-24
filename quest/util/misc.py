@@ -22,8 +22,8 @@ def _abs_path(path, mkdir=True):
     and will create a directory of that filename.
 
     Args:
-        param1 (string): A string that is a filename.
-        param2 (bool): A boolean if the user wants to create the directory.
+        path (string): A string that is a filename.
+        mkdir (bool): A boolean if the user wants to create the directory.
     Returns:
         A string of an absolute path with a file from somwhere with in the Quest directory.
     """
@@ -40,13 +40,13 @@ def bbox2poly(x1, y1, x2, y2, reverse_order=False, as_geojson=False, as_shapely=
     """Converts a bounding box to a polygon.
 
     Args:
-        param1 (int): An int for the first x coordinate.
-        param2 (int): An int for the first y coordinate.
-        param3 (int): An int for the second x coordinate.
-        param4 (int): An int for the second y coordinate.
-        param5 (bool): A boolean to switch the order of the x and y coordinates.
-        param6 (bool): A bool to convert the polygon to a geojson object.
-        param7 (bool): A bool to convert the polygon to a shapely object.
+        x1 (int): An int for the first x coordinate.
+        y1 (int): An int for the first y coordinate.
+        x2 (int): An int for the second x coordinate.
+        y2 (int): An int for the second y coordinate.
+        reverse_order (bool): A boolean to switch the order of the x and y coordinates.
+        as_geojson (bool): A bool to convert the polygon to a geojson object.
+        as_shapely (bool): A bool to convert the polygon to a shapely object.
 
     Returns:
         If the bool is false for both geojson and shapely then just a list is returned.
@@ -103,9 +103,9 @@ def build_smtk(smtk_subdir, smtk_filename, **kwargs):
     """Build smtk file from the template, kwargs, and stream as a string.
 
     Args:
-        param1 (string):
-        param2 (string):
-        param3 (kwargs):
+        smtk_subdir (string):
+        smtk_filename (string):
+        kwargs (kwargs):
 
     Returns:
 
@@ -121,11 +121,11 @@ def classify_uris(uris, grouped=True, as_dataframe=True, require_same_type=False
         Classified by resource type.
 
     Args:
-        param1 (?):
-        param2 (bool):
-        param3 (bool):
-        param4 (bool):
-        param5 (?):
+        uris (?):
+        grouped (bool):
+        as_dataframe (bool):
+        require_same_type (bool):
+        exclude (?):
 
     Returns:
         A pandas dataframe.
@@ -171,9 +171,9 @@ def construct_service_uri(provider, service, feature=None):
     """Builds a uri from the given parameters.
 
     Args:
-        param1 (string): A string of the provider.
-        param2 (string): A string of the service.
-        param3 (string): A string of the feature.
+        provider (string): A string of the provider.
+        service (string): A string of the service.
+        feature (string): A string of the feature.
 
     Returns:
         If there is no feature then the uri will just be the provider
@@ -191,7 +191,7 @@ def get_cache_dir(service=None):
     """Gets the absolute path of the cached directory.
 
     Args:
-        param1 (string): A string of the specific service the user wants.
+        service (string): A string of the specific service the user wants.
 
     Returns:
         A string of the path to the cached directory.
@@ -228,7 +228,7 @@ def is_remote_uri(path):
     """Checks if the incoming path is a remote uri.
 
     Args:
-        param1 (string): A string that is either a path or uri.
+        path (string): A string that is either a path or uri.
 
     Returns:
         If the path is a remote destination then true, false otherwise.
@@ -243,7 +243,7 @@ def is_uuid(uuid):
         source: https://gist.github.com/ShawnMilo/7777304
 
     Args:
-        param1 (int): A universal unique identifier.
+        uuid (int): A universal unique identifier.
 
     Returns:
         If the uuid is version 4 then true, else false otherwise.
@@ -264,8 +264,8 @@ def listify(liststr, delimiter=','):
     """Converts a string into a list.
 
     Args:
-        param1 (string): A string of words or etc.
-        param2 (char): A char that will be used as the delimiter identifier.
+        liststr (string): A string of words or etc.
+        delimiter (char): A char that will be used as the delimiter identifier.
 
     Returns:
         If a string then a string will be a list.
@@ -288,7 +288,7 @@ def mkdir_if_doesnt_exist(dir_path):
     """Creates a directory if not already exists.
 
     Args:
-        param (string): A string of an absolute path to a directory.
+        dir_path (string): A string of an absolute path to a directory.
     """
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
@@ -303,7 +303,7 @@ def parse_service_uri(uri):
         usgs-ned:1-arc-second
 
     Args:
-        param1 (string): A string that is a uri.
+        uri (string): A string that is a uri.
 
     Returns:
         Three strings are returned from the parsed uri.
@@ -318,7 +318,7 @@ def to_geodataframe(feature_collection):
     """Converts a dictionary to a GeoPandas Dataframe object.
 
     Args:
-        param1 (dictionary): A dictionary that contains features.
+        feature_collection (dictionary): A dictionary that contains features.
 
     Returns:
         A GeoPandas Dataframe.
@@ -339,7 +339,7 @@ def to_geojson(df):
     """Converts a dataframe to a geojson object.
 
     Args:
-        param1 (dataframe): A dataframe that is being converted to a geojson object.
+        df (dataframe): A dataframe that is being converted to a geojson object.
 
     Returns:
         A geojson object is what is being returned.
@@ -384,7 +384,7 @@ def to_json_default_handler(obj):
         This method is confusing and the name is confusing.
 
     Args:
-        param1 (object): An object of some nature.
+        obj (object): An object of some nature.
 
     Returns:
         If the object has an attribute isoformat, then return it.
@@ -401,7 +401,7 @@ def uuid(resource_type):
         for resource_type feature, dataset respectovely
 
     Args:
-        param1 (string): A string that is a type of resource i.e. 'feature' or 'dataset'.
+        resource_type (string): A string that is a type of resource i.e. 'feature' or 'dataset'.
 
     Returns:
         A new uuid from the resource type.
