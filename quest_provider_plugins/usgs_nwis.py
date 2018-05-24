@@ -55,9 +55,9 @@ class NwisServiceBase(TimePeriodServiceBase):
         df = df.set_index('datetime')
         df.value = df.value.astype(float)
         if statistic_code in ['00001', '00002', '00003']:
-            df.index = pd.to_pydatetime(df.index).to_period('D')
+            df.index = pd.to_datetime(df.index).to_period('D')
         else:
-            df.index = pd.to_pydatetime(df.index)  # this is in UTC
+            df.index = pd.to_datetime(df.index)  # this is in UTC
 
         df[df.values == -999999] = pd.np.nan
         df.rename(columns={'value': parameter}, inplace=True)

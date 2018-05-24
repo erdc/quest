@@ -64,8 +64,8 @@ class NoaaServiceBase(TimePeriodServiceBase):
     def download(self, feature, file_path, dataset, **kwargs):
         p = param.ParamOverrides(self, kwargs)
         self.parameter = p.parameter
-        self.end = pd.to_pydatetime(p.end)
-        self.start = pd.to_pydatetime(p.start)
+        self.end = pd.to_datetime(p.end)
+        self.start = pd.to_datetime(p.start)
         self._feature = feature
 
         if dataset is None:
@@ -83,7 +83,7 @@ class NoaaServiceBase(TimePeriodServiceBase):
             units = {x.split()[0]: x.split()[-1].strip('()').lower() for x in data.columns.tolist()}
             data.rename(columns=rename, inplace=True)
             data = data.set_index('time')
-            data.index = pd.to_pydatetime(data.index)
+            data.index = pd.to_datetime(data.index)
             data.rename(columns={self.parameter_code: self.parameter})
 
             file_path = os.path.join(file_path, self.BASE_PATH, self.service_name, dataset, '{0}.h5'.format(dataset))
