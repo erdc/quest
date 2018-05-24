@@ -21,7 +21,7 @@ class TsHdf5(XYHdf5):
             return dataframe
 
         # convert index to datetime in case it is a PeriodIndex
-        dataframe.index = dataframe.index.()
+        dataframe.index = dataframe.index.to_datetime()
         jstr = json.loads(dataframe.to_json(date_format='iso'))
         d = dict()
         d['data'] = {k: sorted(v.items()) for k, v in jstr.items()}
