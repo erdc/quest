@@ -12,7 +12,7 @@ from data import CACHED_SERVICES
 
 base_path = os.path.dirname(os.path.abspath(__file__))
 FILES_DIR = os.path.join(base_path, 'files')
-
+warnings.filterwarnings('ignore', "Pandas doesn't allow columns to be created via a new attribute name", UserWarning)
 
 def pytest_addoption(parser):
     parser.addoption('--update-cache', action='store_true')
