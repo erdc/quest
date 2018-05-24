@@ -74,8 +74,8 @@ class NcdcServiceBase(TimePeriodServiceBase):
     def download(self, feature, file_path, dataset, **kwargs):
         p = param.ParamOverrides(self, kwargs)
         self.parameter = p.parameter
-        self.end = pd.to_datetime(p.end)
-        self.start = pd.to_datetime(p.start)
+        self.end = pd.Timestamp.to_pydatetime(p.end)
+        self.start = pd.Timestamp.to_pydatetime(p.start)
         self._feature = feature
 
         if dataset is None:
@@ -85,7 +85,7 @@ class NcdcServiceBase(TimePeriodServiceBase):
         #     end = pd.datetime.now().strftime('%Y-%m-%d')
         #
         # if start is None:
-        #     start = pd.to_datetime(end) - pd.datetools.timedelta(days=30)
+        #     start = pd.to_pydatetime(end) - pd.datetools.timedelta(days=30)
         #     start = start.strftime('%Y-%m-%d')
 
         file_path = os.path.join(file_path, BASE_PATH, self.service_name, dataset, '{0}.h5'.format(dataset))

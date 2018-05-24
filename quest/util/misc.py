@@ -103,9 +103,9 @@ def build_smtk(smtk_subdir, smtk_filename, **kwargs):
     """Build smtk file from the template, kwargs, and stream as a string.
 
     Args:
-        smtk_subdir (string):
-        smtk_filename (string):
-        kwargs (kwargs):
+        smtk_subdir (string): Subdirectory where SMTK template is stored.
+        smtk_filename (string): Name of the SMTK template file.
+        kwargs (kwargs): Keyword arguments to render the SMTK template with.
 
     Returns:
 
@@ -121,11 +121,11 @@ def classify_uris(uris, grouped=True, as_dataframe=True, require_same_type=False
         Classified by resource type.
 
     Args:
-        uris (?):
-        grouped (bool):
-        as_dataframe (bool):
-        require_same_type (bool):
-        exclude (?):
+        uris (list or string): List of Quest uris to classify into the following types: 'collections', 'services', 'publishers', 'datasets', or 'features'.
+        grouped (bool): If True returns Pandas GroupBy object (see: https://pandas.pydata.org/pandas-docs/stable/groupby.html)
+        as_dataframe (bool): If True returns a Pandas DataFrame
+        require_same_type (bool): If True raises a `ValueError` if uris of more than one type are passed in.
+        exclude (list or string): List of uri types to not allow. If a uri of an excluded type is passed in then a `ValueError` will be raised.
 
     Returns:
         A pandas dataframe.
