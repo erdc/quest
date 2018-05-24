@@ -30,7 +30,6 @@ def pytest_generate_tests(metafunc):
 
 def get_or_generate_test_cache(update=False, skip=False):
     test_cache_dir = os.environ.get('QUEST_CACHE_DIR') or os.path.join(quest.util.get_quest_dir(), 'test_cache')
-    print(test_cache_dir)
     if skip:
         return test_cache_dir
     quest.api.update_settings({'CACHE_DIR': test_cache_dir})
@@ -46,11 +45,9 @@ def get_or_generate_test_cache(update=False, skip=False):
     logging.getLogger('ulmo').addHandler(logging.NullHandler())
 
     provider_plugins = quest.plugins.load_providers()
-    print(provider_plugins)
 
     for name in CACHED_SERVICES:
         provider, service, feature = quest.util.parse_service_uri(name)
-        print(provider)
         if provider.startswith('user'):
             continue
         provider_plugin = provider_plugins[provider]
