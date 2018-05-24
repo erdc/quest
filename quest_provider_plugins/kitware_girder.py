@@ -53,8 +53,8 @@ class GirderPublisher(PublishBase):
 
 
 class GirderProvider(ProviderBase):
-    service_base_class = None
-    publisher_base_class = GirderPublisher
+    service_list = None
+    publisher_list = [GirderPublisher]
     display_name = 'Girder Services'
     description = 'Services avaliable through the Live Girder Server.'
     organization_name = 'Kitware'

@@ -74,7 +74,7 @@ class UsgsNedService19ArcSec(UsgsNedServiceBase):
 
 
 class UsgsNedProvider(ProviderBase):
-    service_base_class = UsgsNedServiceBase
+    service_list = [UsgsNedServiceAlaska, UsgsNedService1ArcSec, UsgsNedService13ArcSec, UsgsNedService19ArcSec]
     display_name = 'USGS National Elevation Dataset'
     description = 'National Elevation Dataset at several resolutions'
     organization_name = 'United States Geological Survey'

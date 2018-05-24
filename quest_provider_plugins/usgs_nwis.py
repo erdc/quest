@@ -191,7 +191,7 @@ class NwisServiceDV(NwisServiceBase):
 
 
 class NwisProvider(ProviderBase):
-    service_base_class = NwisServiceBase
+    service_list = [NwisServiceIV, NwisServiceDV]
     display_name ='USGS NWIS Web Services'
     description = 'Services available through the USGS National Water Information System'
     organization_name = 'United States Geological Survey'

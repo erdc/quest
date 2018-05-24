@@ -82,7 +82,7 @@ class UsgsNlcdService2011(UsgsNlcdServiceBase):
 
 
 class UsgsNlcdProvider(ProviderBase):
-    service_base_class = UsgsNlcdServiceBase
+    service_list = [UsgsNlcdService2001, UsgsNlcdService2006, UsgsNlcdService2011]
     display_name = 'National Land Cover Database'
     description = 'The National Land Cover Database products are created through a cooperative project conducted by ' \
                   'the Multi-Resolution Land Characteristics (MRLC) Consortium. The MRLC Consortium is a partnership ' \

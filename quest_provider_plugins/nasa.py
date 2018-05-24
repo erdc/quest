@@ -133,7 +133,7 @@ class NasaServiceSrtm30ArcSec(NasaServiceBase):
 
 
 class NasaProvider(ProviderBase):
-    service_base_class = NasaServiceBase
+    service_list = [NasaServiceSrtm3ArcSec, NasaServiceSrtm30ArcSec]
     display_name = 'NASA Web Services'
     description = 'Services available through the NASA'
     organization_name = 'National Aeronautic and Space Administration'
