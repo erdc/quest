@@ -51,9 +51,9 @@ def wait_until_done(api):
 @skip_py2
 def test_launch_tasks(api, task_cleanup):
     test_tasks = [
-        api.long_process(1.011, 'first', async=True),
-        api.long_process(1.012, 'second', async=True),
-        api.long_process(1.013, 'third', async=True),
+        api.long_process(1.011, 'first', async_tasks=True),
+        api.long_process(1.012, 'second', async_tasks=True),
+        api.long_process(1.013, 'third', async_tasks=True),
         ]
 
     if isinstance(api, ModuleType):  # i.e. not using the RPC server
@@ -73,12 +73,12 @@ def test_launch_tasks(api, task_cleanup):
 @skip_py2
 def test_add_remove_tasks(api, task_cleanup):
     test_tasks = [
-        api.long_process(1.021, 'first', async=True),
-        api.long_process(1.022, 'second', async=True),
-        api.long_process(1.023, 'third', async=True),
+        api.long_process(1.021, 'first', async_tasks=True),
+        api.long_process(1.022, 'second', async_tasks=True),
+        api.long_process(1.023, 'third', async_tasks=True),
         ]
     assert len(api.get_tasks()) == 3
-    test_tasks.append(api.long_process(10, 'fourth', async=True))
+    test_tasks.append(api.long_process(10, 'fourth', async_tasks=True))
     assert len(api.get_tasks()) == 4
     api.cancel_tasks(test_tasks[3])
     sleep(.1)  # give status messages some time to update
@@ -88,7 +88,7 @@ def test_add_remove_tasks(api, task_cleanup):
     assert len(api.get_tasks()) == 3
 
     # test remove tasks by id
-    t = api.long_process_with_exception(.01, 'fifth', async=True)
+    t = api.long_process_with_exception(.01, 'fifth', async_tasks=True)
     assert len(api.get_tasks()) == 4
     wait_until_done(api)
     api.remove_tasks(task_ids=t)
@@ -97,8 +97,8 @@ def test_add_remove_tasks(api, task_cleanup):
     assert t not in tasks
 
     # test remove tasks by id and status
-    t1 = api.long_process_with_exception(.01, 'sixth', async=True)
-    t2 = api.long_process(10, 'seventh', async=True)
+    t1 = api.long_process_with_exception(.01, 'sixth', async_tasks=True)
+    t2 = api.long_process(10, 'seventh', async_tasks=True)
     api.cancel_tasks(t2)
     wait_until_done(api)
     assert len(api.get_tasks()) == 5
@@ -116,9 +116,9 @@ def test_add_remove_tasks(api, task_cleanup):
 @skip_py2
 def test_task_with_exception(api, task_cleanup):
     test_tasks = [
-        api.long_process(1.031, 'first', async=True),
-        api.long_process_with_exception(1.032, 'second', async=True),
-        api.long_process(1.033, 'third', async=True),
+        api.long_process(1.031, 'first', async_tasks=True),
+        api.long_process_with_exception(1.032, 'second', async_tasks=True),
+        api.long_process(1.033, 'third', async_tasks=True),
         ]
 
     tasks = api.get_tasks(as_dataframe=False)
@@ -130,9 +130,9 @@ def test_task_with_exception(api, task_cleanup):
 @skip_py2
 def test_get_tasks(api, task_cleanup):
     test_tasks = [
-        api.long_process(1.041, 'first', async=True),
-        api.long_process_with_exception(1.042, 'second', async=True),
-        api.long_process(1.043, 'third', async=True),
+        api.long_process(1.041, 'first', async_tasks=True),
+        api.long_process_with_exception(1.042, 'second', async_tasks=True),
+        api.long_process(1.043, 'third', async_tasks=True),
     ]
 
     tasks = api.get_tasks(filters={'task_ids': test_tasks[:2]})

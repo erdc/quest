@@ -1,13 +1,20 @@
 # Contributing
 
-When contributing to this repository, please fork the reposityor. Then discuss the change you wish to make via issue,
-email, or any other method with the owners of this repository before making a change. 
-
-Please note we have a code of conduct, please follow it in all your interactions with the project.
+When contributing to this repository, please fork the repository. Then discuss the change you wish to make via issue,
+email, or any other method with the owners of this repository before making a change.
 
 ## Pull Request Process
 
-1. Please fill out how the pull request process should be for this repository.
+1. Fork this repository.
+2. Make sure to set your upstream to point at this repo.
+3. When you have pushed changes to create a PR, use a basic title that is descriptive, and provide a good description of the PR.
+4. If the test don't pass:
+    a. Please fix the issues that were presented and re-commit / push the project again.
+    b. If you think that your code is right and it has something to do with the tests then @ either AaronV77 or sdc50.
+5. If the test do pass:
+    a. Then just wait for one of us to merge in your changes.
+
+Please note we have a code of conduct, please follow it in all your interactions with the project.
 
 ## Code of Conduct
 
