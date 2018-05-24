@@ -12,7 +12,7 @@ email, or any other method with the owners of this repository before making a ch
     a. Please fix the issues that were presented and re-commit / push the project again.
     b. If you think that your code is right and it has something to do with the tests then @ either AaronV77 or sdc50.
 5. If the test do pass:
-    a. Then just was for one of us to merge in your changes.
+    a. Then just wait for one of us to merge in your changes.
 
 Please note we have a code of conduct, please follow it in all your interactions with the project.
 
