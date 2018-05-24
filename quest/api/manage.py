@@ -42,7 +42,10 @@ def delete(uris):
         return True
 
     # group uris by type
-    grouped_uris = util.classify_uris(uris, as_dataframe=False, exclude=['providers'], require_same_type=True)
+    grouped_uris = util.classify_uris(uris,
+                                      as_dataframe=False,
+                                      exclude=['services', 'publishers'],
+                                      require_same_type=True)
     resource = list(grouped_uris)[0]
     uris = grouped_uris[resource]
 
@@ -88,7 +91,10 @@ def move(uris, destination_collection, as_dataframe=None, expand=None):
     if not uris:                                                                                                                        
         return {}                                                                                                                       
 
-    grouped_uris = util.classify_uris(uris, as_dataframe=False, exclude=['providers', 'collections'], require_same_type=True)
+    grouped_uris = util.classify_uris(uris,
+                                      as_dataframe=False,
+                                      exclude=['services', 'publishers', 'collections'],
+                                      require_same_type=True)
     resource = list(grouped_uris)[0]                                                                                                    
     uris = grouped_uris[resource]                                                                                                       
     project_path = _get_project_dir()                                                                                                   
@@ -137,7 +143,10 @@ def copy(uris, destination_collection, as_dataframe=None, expand=None):
     if not uris:                                                                                                                        
         return {}                                                                                                                       
 
-    grouped_uris = util.classify_uris(uris, as_dataframe=False, exclude=['providers', 'collections'], require_same_type=True)
+    grouped_uris = util.classify_uris(uris,
+                                      as_dataframe=False,
+                                      exclude=['services', 'publishers', 'collections'],
+                                      require_same_type=True)
     resource = list(grouped_uris)[0]                                                                                                    
     uris = grouped_uris[resource]                                                                                                       
     project_path = _get_project_dir()                                                                                                   
