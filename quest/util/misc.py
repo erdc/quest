@@ -121,11 +121,14 @@ def classify_uris(uris, grouped=True, as_dataframe=True, require_same_type=False
         Classified by resource type.
 
     Args:
-        uris (list or string): List of Quest uris to classify into the following types: 'collections', 'services', 'publishers', 'datasets', or 'features'.
-        grouped (bool): If True returns Pandas GroupBy object (see: https://pandas.pydata.org/pandas-docs/stable/groupby.html)
+        uris (list or string): List of Quest uris to classify into the following types: 'collections', 'services',
+        'publishers', 'datasets', or 'features'.
+        grouped (bool): If True returns
+        Pandas GroupBy object (see: https://pandas.pydata.org/pandas-docs/stable/groupby.html)
         as_dataframe (bool): If True returns a Pandas DataFrame
         require_same_type (bool): If True raises a `ValueError` if uris of more than one type are passed in.
-        exclude (list or string): List of uri types to not allow. If a uri of an excluded type is passed in then a `ValueError` will be raised.
+        exclude (list or string): List of uri types to not allow. If a uri of an excluded type is passed in
+        then a `ValueError` will be raised.
 
     Returns:
         A pandas dataframe.
