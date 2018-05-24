@@ -343,7 +343,7 @@ class NoaaServiceCoopsWater(NoaaServiceBase):
 
 
 class NoaaProvider(ProviderBase):
-    service_base_class = NoaaServiceBase
+    service_list = [NoaaServiceNDBC, NoaaServiceCoopsMet, NoaaServiceCoopsWater]
     display_name = 'NOAA Coastwatch ERDDAP Web Services'
     description = 'Services available from NOAA'
     organization_name = 'National Oceanic and Atmospheric Administration'

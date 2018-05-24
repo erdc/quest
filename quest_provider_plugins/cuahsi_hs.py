@@ -232,8 +232,8 @@ class HSPublisher(PublishBase):
 
 
 class HSProvider(ProviderBase):
-    service_base_class = HSServiceBase
-    publisher_base_class = HSPublisher
+    service_list = [HSGeoService, HSNormService]
+    publisher_list = [HSPublisher]
     display_name = 'HydroShare Provider'
     description = 'Services avaliable through the live HydroShare Server.'
     organization_name = 'Cuahsi'

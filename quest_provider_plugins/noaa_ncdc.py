@@ -212,7 +212,7 @@ class NcdcServiceGsod(NcdcServiceBase):
 
 
 class NcdcProvider(ProviderBase):
-    service_base_class = NcdcServiceBase
+    service_list = [NcdcServiceGhcnDaily, NcdcServiceGsod]
     display_name = 'NCDC Web Services'
     description = 'Services available through the NCDC'
     organization_name = 'National Climatic Data Center'

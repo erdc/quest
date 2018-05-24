@@ -38,8 +38,8 @@ reserved_feature_fields.extend(reserved_geometry_fields)
 class ProviderBase(with_metaclass(abc.ABCMeta, object)):
     """Base class for data provider plugins
     """
-    service_base_class = None
-    publisher_base_class = None
+    service_list = None
+    publisher_list = None
     display_name = None
     description = None
     organization_name = None
@@ -47,19 +47,19 @@ class ProviderBase(with_metaclass(abc.ABCMeta, object)):
 
     @property
     def services(self):
-        if self.service_base_class is None:
+        if self.service_list is None:
             return {}
         if self._services is None:
-            self._services = {s.service_name: s(name=s.service_name, provider=self) for s in self.service_base_class.__subclasses__()}
+            self._services = {s.service_name: s(name=s.service_name, provider=self) for s in self.service_list}
+
         return self._services
 
     @property
     def publishers(self):
-        if self.publisher_base_class is None:
+        if self.publisher_list is None:
             return {}
         if self._publishers is None:
-            publishers_list = self.publisher_base_class.__subclasses__() or [self.publisher_base_class]
-            self._publishers = {p.publisher_name: p(name=p.publisher_name, provider=self) for p in publishers_list}
+            self._publishers = {p.publisher_name: p(name=p.publisher_name, provider=self) for p in self.publisher_list}
 
         return self._publishers
 

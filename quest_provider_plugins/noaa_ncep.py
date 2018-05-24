@@ -122,7 +122,7 @@ class NCEP_NAM_Service(NCEPServiceBase):
 
 
 class NCEPProvider(ProviderBase):
-    service_base_class = NCEPServiceBase
+    service_list = [NCEP_GFS_Service, NCEP_NAM_Service]
     display_name = 'NCEP Provider'
     description = 'Services avaliable through the NOAA NCEP Server.'
     organization_name = 'National Centers for Environmental Prediction'
