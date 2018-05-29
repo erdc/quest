@@ -45,7 +45,7 @@ def get_services(expand=None, parameter=None, service_type=None):
             all available providers
 
     """
-    providers = load_providers() # load_entities('providers')
+    providers = load_providers()
     services = {}
     for provider_name, provider in providers.items():
         for service, svc_metadata in provider.get_services().items():

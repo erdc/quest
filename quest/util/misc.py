@@ -293,8 +293,16 @@ def mkdir_if_doesnt_exist(dir_path):
     Args:
         dir_path (string): A string of an absolute path to a directory.
     """
-    if not os.path.exists(dir_path):
-        os.makedirs(dir_path)
+    # TODO: when we drop Python 2 support then we can replace this whole function with
+    # direct calls to os.makedirs(dir_path, exist_ok=True)
+    try:
+        os.makedirs(dir_path, exist_ok=True)
+    except TypeError:  # for Python 2
+        try:
+            os.makedirs(dir_path)
+        except OSError as e:
+            if e.errno != os.errno.EEXIST:
+                raise
 
 
 def parse_service_uri(uri):

@@ -394,7 +394,7 @@ SERVICE = 'svc://usgs-nwis:iv'
 FEATURE = 'f92ad0e35d04402ab1b1d4621b48a636'
 DATASET = 'df5c3df3229441fa9c779443f03635e7'
 
-DATASET_METADATA =  {
+DATASET_METADATA = {
     'download_status': 'downloaded',
     'download_message': 'success',
     'name': 'df5c3df3229441fa9c779443f03635e7',

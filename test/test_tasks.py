@@ -3,12 +3,6 @@ from quest.api.tasks import add_async
 import pytest
 import quest
 from types import ModuleType
-import sys
-
-skip_py2 = pytest.mark.skipif(
-    sys.version_info.major == 2,
-    reason="async functions are not compatible with the RPC server on Python 2"
-)
 
 skip_tasks = pytest.mark.skipif(
     pytest.config.getoption("--skip-tasks"),
@@ -48,7 +42,6 @@ def wait_until_done(api):
     return
 
 
-@skip_py2
 def test_launch_tasks(api, task_cleanup):
     test_tasks = [
         api.long_process(1.011, 'first', async_tasks=True),
@@ -70,7 +63,6 @@ def test_launch_tasks(api, task_cleanup):
 
 
 @skip_tasks
-@skip_py2
 def test_add_remove_tasks(api, task_cleanup):
     test_tasks = [
         api.long_process(1.021, 'first', async_tasks=True),
@@ -113,7 +105,6 @@ def test_add_remove_tasks(api, task_cleanup):
 
 
 @skip_tasks
-@skip_py2
 def test_task_with_exception(api, task_cleanup):
     test_tasks = [
         api.long_process(1.031, 'first', async_tasks=True),
@@ -127,7 +118,6 @@ def test_task_with_exception(api, task_cleanup):
     assert len(api.get_tasks(filters={'status': 'error'})) == 1
 
 
-@skip_py2
 def test_get_tasks(api, task_cleanup):
     test_tasks = [
         api.long_process(1.041, 'first', async_tasks=True),

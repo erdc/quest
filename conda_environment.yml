@@ -15,7 +15,10 @@ channels:
     - defaults
 
 dependencies:
-    - python=3.5
+    - python=3
+    # - futures  # for python 2 compatibility
+
+    # core dependencies
     - fiona
     - rasterio
     - gdal
@@ -28,20 +31,27 @@ dependencies:
     - click
     - werkzeug
     - peewee
+    - pandas<=0.22.0
     - geopandas
     - distributed>=1.18
+    - param
     - psutil
     - pint
     - pony
     - tornado
     - sortedcollections
+    - jupyter
+
+    # test dependencies
     - pytest-cov
     - coveralls
-    - param
+
+    # docs dependencies
     - sphinx
     - sphinx_rtd_theme
+
+    # plugin dependencies
     - hs_restclient
-    - jupyter
     - girder-client
     - terrapin
     - ncep_client

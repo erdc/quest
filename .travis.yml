@@ -33,13 +33,14 @@ cache:
 install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
       OS_VERSION="Linux";
+      SED_OPTIONS="-i";
     else
       OS_VERSION="MacOSX";
+      SED_OPTIONS="-i ''";
     fi
   # We do this conditionally because it saves us some downloading if the
   # version is the same.
   - wget https://repo.continuum.io/miniconda/Miniconda3-latest-${OS_VERSION}-x86_64.sh -O miniconda.sh;
-  - ENV_FILE=py"$PYTHON_VERSION"_conda_environment.yml;
   - bash miniconda.sh -b -p $HOME/miniconda
   - export PATH="$HOME/miniconda/bin:$PATH"
   - hash -r
@@ -48,7 +49,11 @@ install:
   # Useful for debugging any issues with conda
   - conda info -a
   # Create quest conda env and install deps
-  - conda env create -q -n test-environment -f $ENV_FILE python=$PYTHON_VERSION
+  - sed $SED_OPTIONS "s/python=3/python=$PYTHON_VERSION/" conda_environment.yml
+  - if [[ "$PYTHON_VERSION" == "2.7" ]]; then
+      sed $SED_OPTIONS "s/# - futures/- futures/" conda_environment.yml;
+    fi
+  - conda env create -q -n test-environment -f conda_environment.yml
   - source activate test-environment
   - python setup.py install
   - export QUEST_CACHE_DIR=$TRAVIS_BUILD_DIR/quest_test_cache

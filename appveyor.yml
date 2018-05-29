@@ -4,19 +4,20 @@ environment:
     # /E:ON and /V:ON options are not enabled in the batch script intepreter
     # See: http://stackoverflow.com/a/13751649/163740
     CMD_IN_ENV: "cmd /E:ON /V:ON /C .\\.continuous-integration\\appveyor\\run_with_env.cmd"
+#    QUEST_CACHE_DIR: quest_test_cache
   matrix:
     - PYTHON_VERSION: 2.7
       MINICONDA: C:\Miniconda
-      ENV_FILE: py2.7_conda_environment.yml
     - PYTHON_VERSION: 3.5
       MINICONDA: C:\Miniconda3
-      ENV_FILE: py3.5_conda_environment.yml
     - PYTHON_VERSION: 3.6
       MINICONDA: C:\Miniconda3
-      ENV_FILE: py3.6_conda_environment.yml
 
 init:
   - "ECHO %PYTHON_VERSION% %MINICONDA%"
+
+cache:
+  - "%QUEST_CACHE_DIR%"
 
 build: false
 
@@ -25,11 +26,12 @@ install:
   - "set PATH=%MINICONDA%;%MINICONDA%\\Scripts;%PATH%"
   - "conda config --set always_yes yes --set changeps1 no"
 #  - "conda update -q conda"
-#  - "set PATH=%MINICONDA%;%MINICONDA%\\Scripts;%PATH%"
   - "conda info -a"
-  - "conda env create -q -n test-environment -f %ENV_FILE% python=%PYTHON_VERSION%"
+  - ps: "(Get-Content conda_environment.yml).replace('python=3', \"python=$env:PYTHON_VERSION\") | Set-Content conda_environment.yml"
+  - ps: "If ($env:PYTHON_VERSION -eq '2.7') {(Get-Content conda_environment.yml).replace('# - futures', '- futures') | Set-Content conda_environment.yml}"
+  - "conda env create -q -n test-environment -f conda_environment.yml"
   - "activate test-environment"
   - "python setup.py install"
 
 test_script:
-  - "%CMD_IN_ENV% pytest test --update-cache -s -vv"
+  - "%CMD_IN_ENV% pytest test -s -vv"
