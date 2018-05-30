@@ -54,7 +54,6 @@ periods = {
 
 class TsRemoveOutliers(TsBase):
     _name = 'ts-remove-outliers'
-    smtk_template = 'filter_timeseries_remove_outliers.sbt'
     sigma = param.Number(doc="values greater than (sigma * std deviation) from median will be filtered out")
 
     def _apply(self, df):
@@ -116,7 +115,6 @@ class TsRemoveOutliers(TsBase):
 
 class TsResample(TsBase):
     _name = 'ts-resample'
-    smtk_template = 'filter_timeseries_resample.sbt'
     period = param.ObjectSelector(doc="resample frequency",
                                   objects=['daily', 'weekly', 'monthly', 'annual'],
                                   default='daily',

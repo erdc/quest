@@ -3,14 +3,13 @@ import abc
 import param
 from future.utils import with_metaclass
 from quest.static import DatasetStatus
-from quest.util import listify, format_json_options, build_smtk
+from quest.util import listify, format_json_options
 
 
 class FilterBase(param.Parameterized):
     """Base class for data filters."""
     _name = None
     # name = param.String(default='Filter', precedence=-1)
-    smtk_template = None
 
     # metadata attributes
     group = None
@@ -90,12 +89,6 @@ class FilterBase(param.Parameterized):
 
         if fmt == 'param':
             schema = self
-
-        elif fmt == 'smtk':
-            if self.smtk_template is None:
-                return ''
-            schema = build_smtk('filter_options',
-                                self.smtk_template)
 
         elif fmt == 'json':
             schema = format_json_options(self)

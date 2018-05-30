@@ -99,21 +99,6 @@ def bbox2poly(x1, y1, x2, y2, reverse_order=False, as_geojson=False, as_shapely=
     return multi_polygon(polygons=[polygon(poly1), polygon(poly2)])
 
 
-def build_smtk(smtk_subdir, smtk_filename, **kwargs):
-    """Build smtk file from the template, kwargs, and stream as a string.
-
-    Args:
-        smtk_subdir (string): Subdirectory where SMTK template is stored.
-        smtk_filename (string): Name of the SMTK template file.
-        kwargs (kwargs): Keyword arguments to render the SMTK template with.
-
-    Returns:
-
-    """
-    env = Environment(loader=FileSystemLoader(os.path.join(get_pkg_data_path('smtk'), smtk_subdir)))
-    return env.get_template(smtk_filename).render(**kwargs)
-
-
 def classify_uris(uris, grouped=True, as_dataframe=True, require_same_type=False, exclude=None):
     """Converts a list of uris into a pandas dataframe.
 
