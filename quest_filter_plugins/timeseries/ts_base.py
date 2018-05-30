@@ -49,8 +49,7 @@ class TsBase(FilterBase):
 
         dataset = self.dataset
 
-        io = load_plugins('io', 'timeseries-hdf5')
-        io = io['timeseries-hdf5']
+        io = load_plugins('io', 'timeseries-hdf5')['timeseries-hdf5']
         orig_metadata = get_metadata(dataset)[dataset]
         if orig_metadata['file_path'] is None:
             raise IOError('No data file available for this dataset')

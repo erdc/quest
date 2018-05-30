@@ -29,7 +29,6 @@ class DatasetSelector(param.ObjectSelector):
     @property
     def datasets(self):
         datasets = quest.api.get_datasets(filters=self.filters, queries=self.queries, expand=True)
-
         return [NamedString(v['display_name'], k) for k, v in datasets.items()]
 
     def get_range(self):
