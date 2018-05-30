@@ -1,11 +1,11 @@
 """Datasets API functions."""
 
 from quest.database.database import get_db, db_session, select_datasets
-from quest.static import DatasetStatus
 from ..plugins import load_providers, load_plugins, list_plugins
 from ..util import logger, parse_service_uri, listify, uuid
 from .metadata import get_metadata, update_metadata
 from .projects import _get_project_dir
+from quest.static import DatasetStatus
 from .tasks import add_async
 
 import pandas as pd
@@ -43,17 +43,17 @@ def download(feature, file_path, dataset=None, **kwargs):
         pass
 
     provider, service, feature = parse_service_uri(service_uri)
-    driver = load_providers()[provider]
-    data = driver.download(service=service, feature=feature,
-                           file_path=file_path, dataset=dataset, **kwargs)
+    provider_plugin = load_providers()[provider]
+    data = provider_plugin.download(service=service, feature=feature,
+                                    file_path=file_path, dataset=dataset, **kwargs)
     return data
 
 
 @add_async
 def publish(publisher_uri, **kwargs):
     provider, publisher, feature = parse_service_uri(publisher_uri)
-    driver = load_providers()[provider]
-    data = driver.publish(publisher=publisher, **kwargs)
+    provider_plugin = load_providers()[provider]
+    data = provider_plugin.publish(publisher=publisher, **kwargs)
     return data
 
 @add_async
@@ -154,8 +154,8 @@ def download_options(uris, fmt='json'):
             service_uri = df
 
         provider, service, feature = parse_service_uri(service_uri)
-        driver = load_providers()[provider]
-        options[uri] = driver.download_options(service, fmt)
+        provider_plugin = load_providers()[provider]
+        options[uri] = provider_plugin.download_options(service, fmt)
 
     return options
 
@@ -166,8 +166,8 @@ def get_publish_options(publish_uri, fmt='json'):
     for uri in uris:
         publish_uri = uri
         provider, publisher, feature = parse_service_uri(publish_uri)
-        driver = load_providers()[provider]
-        options[uri] = driver.publish_options(publisher, fmt)
+        provider_plugin = load_providers()[provider]
+        options[uri] = provider_plugin.publish_options(publisher, fmt)
 
     return options
 
@@ -378,8 +378,7 @@ def open_dataset(dataset, fmt=None):
     if file_format not in list_plugins('io'):
         raise ValueError('No reader available for: %s' % file_format)
 
-    io = load_plugins('io', file_format)
-    io = io[file_format].driver
+    io = load_plugins('io', file_format)[file_format]
     return io.open(path, fmt=fmt)
 
 
@@ -418,8 +417,7 @@ def visualize_dataset(dataset, update_cache=False, **kwargs):
     if file_format not in list_plugins('io'):
             raise ValueError('No reader available for: %s' % file_format)
 
-    io = load_plugins('io', file_format)
-    io = io[file_format].driver
+    io = load_plugins('io', file_format)[file_format]
 
     title = m.get('display_name')
     if title is None:

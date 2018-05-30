@@ -179,7 +179,7 @@ class TsResample(TsBase):
 #             return
 #
 #         # hard coding to work only with ts_geojson for now
-#         io = util.load_entities('io', 'ts-geojson')['ts-geojson'].driver
+#         io = util.load_plugins('io', 'ts-geojson')['ts-geojson'].driver
 #         df = io.read(datafile)
 #
 #         if start_time:

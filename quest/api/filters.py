@@ -42,7 +42,9 @@ def get_filters(filters=None, expand=False, **kwargs):
                 kwargs['datatype'] = m.get('datatype')
                 kwargs['parameters'] = m.get('parameter')
                 feature = m.get('feature')
-                kwargs['geotype'] = get_metadata(feature).get(feature).get('geometry').geom_type
+                geometry = get_metadata(feature).get(feature).get('geometry')
+                if geometry is not None:
+                    kwargs['geotype'] = geometry.geom_type
                 return get_filters(filters=kwargs, expand=expand)
             elif k == 'group':
                 avail = [f for f in avail if v == f['group']]
@@ -85,8 +87,8 @@ def apply_filter(name, options=None, as_dataframe=None, expand=None, **kwargs):
     options = options or dict()
     options.update(kwargs)
 
-    driver = load_plugins('filters', name)[name].driver
-    result = driver.apply_filter(**options)
+    plugin = load_plugins('filters', name)[name]
+    result = plugin.apply_filter(**options)
 
     new_datasets = util.listify(result.get('datasets', []))
     new_features = util.listify(result.get('features', []))
@@ -118,5 +120,5 @@ def apply_filter_options(name, fmt='json', **kwargs):
         filter options (json scheme):
             filter options that can be applied when calling quest.api.apply_filter
     """
-    driver = load_plugins('filters', name)[name].driver
-    return driver.apply_filter_options(fmt, **kwargs)
+    plugin = load_plugins('filters', name)[name]
+    return plugin.apply_filter_options(fmt, **kwargs)

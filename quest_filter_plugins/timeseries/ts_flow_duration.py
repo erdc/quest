@@ -1,6 +1,7 @@
 from quest.plugins import FilterBase
 from quest.api import get_metadata, new_dataset, update_metadata
 from quest import util
+from quest.plugins import load_plugins
 import os
 
 
@@ -17,8 +18,7 @@ class TsFlowDuration(FilterBase):
 
         dataset = self.dataset
 
-        input = util.load_entities('io', 'timeseries-hdf5')
-        input = input['timeseries-hdf5'].driver
+        input = load_plugins('io', 'timeseries-hdf5')['timeseries-hdf5']
         orig_metadata = get_metadata(dataset)[dataset]
         if orig_metadata['file_path'] is None:
             raise IOError('No data file available for this dataset')
@@ -59,8 +59,7 @@ class TsFlowDuration(FilterBase):
         # save dataframe
         save_path = os.path.split(orig_metadata['file_path'])[0]
         save_path = os.path.join(save_path, new_dset)
-        output = util.load_entities('io', 'xyHdf5')
-        output = output['xyHdf5'].driver
+        output = load_plugins('io', 'xyHdf5')['xyHdf5']
         output.write(save_path, new_df, new_metadata)
 
         new_metadata.update({'file_path': save_path})

@@ -198,8 +198,8 @@ def authenticate_provider(uri, **kwargs):
 
 
     """
-    driver = load_providers()[uri]
-    driver.authenticate_me(**kwargs)
+    provider_plugin = load_providers()[uri]
+    provider_plugin.authenticate_me(**kwargs)
 
 
 def unauthenticate_provider(uri):

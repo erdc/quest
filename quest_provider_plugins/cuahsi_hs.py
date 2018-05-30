@@ -1,9 +1,10 @@
 from quest.plugins import ProviderBase, SingleFileServiceBase, PublishBase
 from hs_restclient import HydroShare, HydroShareAuthBasic
 from quest.database.database import get_db, db_session
-from shapely.geometry import Point, box
 from quest.api.metadata import get_metadata
 from quest.util import param_util, listify
+from shapely.geometry import Point, box
+from quest.static import ServiceType
 from getpass import getpass
 import pandas as pd
 import param
@@ -24,10 +25,10 @@ class HSGeoService(HSServiceBase):
     service_name = 'hs_geo'
     display_name = 'HydroShare Geo Service'
     description = 'HydroShare is a cuahsi repository fpr geo-discrete resources.'
-    service_type = 'geo-discrete'
+    service_type = ServiceType.GEO_DISCRETE
     unmapped_parameters_available = True
     geom_type = 'Point'
-    datatype = 'timeseries'
+    datatype = 'zip'
     geographical_areas = ['Worldwide']
     bounding_boxes = [
         [-180, -90, 180, 90],
@@ -85,7 +86,8 @@ class HSNormService(HSServiceBase):
     service_name = "hs_norm"
     display_name = "HydroShare Normal Service"
     description = 'HydroShare is a cuahsi repository for all recource types.'
-    service_type = "norm-discrete"
+    service_type = ServiceType.NON_GEO
+    datatype = 'zip'
     unmapped_parameters_available = True
     _parameter_map = {}
 

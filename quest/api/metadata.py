@@ -45,9 +45,9 @@ def get_metadata(uris, as_dataframe=False):
         for (provider, service), grp in svc_df.groupby(['provider', 'service']):
             # First process service uris (without the feature)
 
-            driver = plugins.load_providers()[provider]
+            provider_plugin = plugins.load_providers()[provider]
             if not grp.query('feature != feature').empty:
-                service_metadata = driver.get_services()[service]
+                service_metadata = provider_plugin.get_services()[service]
                 index = util.construct_service_uri(provider, service)
                 metadata.append(pd.DataFrame(service_metadata, index=[index]))
 
@@ -57,7 +57,7 @@ def get_metadata(uris, as_dataframe=False):
             selected_features = grp.query('feature == feature').uri.tolist()
             if selected_features:
                 # add selected service features if any
-                features = driver.get_features(service)
+                features = provider_plugin.get_features(service)
                 features = features.loc[selected_features]
                 metadata.append(features)
 
@@ -66,8 +66,8 @@ def get_metadata(uris, as_dataframe=False):
         svc_df[['provider', 'publish', 'feature']] = svc_df['uri'].apply(util.parse_service_uri).apply(pd.Series)
 
         for (provider, publisher), grp in svc_df.groupby(['provider', 'publish']):
-            driver = util.load_providers()[provider]
-            publisher_metadata = driver.get_publishers()[publisher]
+            provider_plugin = plugins.load_providers()[provider]
+            publisher_metadata = provider_plugin.get_publishers()[publisher]
             index = util.construct_service_uri(provider, publisher)
             metadata.append(pd.DataFrame(publisher_metadata, index=[index]))
 
@@ -86,8 +86,7 @@ def get_metadata(uris, as_dataframe=False):
         features = select_features(lambda c: c.name in tmp_df['uri'].tolist())
         features = gpd.GeoDataFrame(features)
         if not features.empty:
-            features['geometry'] = features['geometry'].apply(
-                                        lambda x: shapely.wkt.loads(x))
+            features['geometry'] = features['geometry'].apply(lambda x: x if x is None else shapely.wkt.loads(x))
             features.set_geometry('geometry')
             features.index = features['name']
         metadata.append(features)
