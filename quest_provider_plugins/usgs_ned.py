@@ -18,7 +18,6 @@ class UsgsNedServiceBase(SingleFileServiceBase):
     datatype = 'raster'
     geographical_areas = ['Alaska', 'USA', 'Hawaii']
     bounding_boxes = [[-180, -90, 180, 90]]
-    smtk_template = None
     _parameter_map = {
         'elevation': 'elevation'
     }

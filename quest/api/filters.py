@@ -111,11 +111,11 @@ def apply_filter_options(name, fmt='json', **kwargs):
         name (string, Required):
             name of filter
         fmt (string, Required, Default='json'):
-            format in which to return options. One of ['json', 'smtk', 'param']
+            format in which to return options. One of ['json', 'param']
         kwargs:
             keyword arguments of options to set and exclude from return value.
     Returns:
-        filter options (json or smtk scheme):
+        filter options (json scheme):
             filter options that can be applied when calling quest.api.apply_filter
     """
     driver = load_plugins('filters', name)[name].driver

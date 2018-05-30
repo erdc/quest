@@ -20,7 +20,6 @@ class ServiceBase(param.Parameterized):
     datatype = None
     geographical_areas = None
     bounding_boxes = None
-    smtk_template = None
     _parameter_map = None
 
     # name = param.String(default='Service', precedence=-1)
@@ -122,7 +121,6 @@ class ServiceBase(param.Parameterized):
 class TimePeriodServiceBase(ServiceBase):
     start = param.Date(default=None, precedence=2, doc='start date')
     end = param.Date(default=None, precedence=3, doc='end date')
-    smtk_template = 'start_end.sbt'
 
     @property
     def start_string(self):
