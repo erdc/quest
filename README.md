@@ -8,7 +8,7 @@
 Quest is a python library that provides an API the ability to search, publish and download data (both geographical and non-geographical) across multiple data sources including both local repositories and web based services. The library also allows provides tools in order to manipulate and manage the data that the user is working with. 
 
 ### Project Links
-- Here is a live link for the Quest Documentation: https://quest.erdc.dren.mil/Documentation/Quest/
+- Here is a live link for the Quest Documentation: https://quest.readthedocs.io/en/latest/
 
 ## Setup Dev Environment
 
