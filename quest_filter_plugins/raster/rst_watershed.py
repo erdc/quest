@@ -397,10 +397,10 @@ class RstSnapOutlet(FilterBase):
     # metadata attributes
     group = 'Feature'
     operates_on_datatype = None
-    operates_on_geotype = 'Point'
+    operates_on_geotype = ['Point']
     operates_on_parameters = None
     produces_datatype = None
-    produces_geotype = 'Point'
+    produces_geotype = ['Point']
     produces_parameters = None
 
     outlet_point = util.param.FeatureSelector(default=None,

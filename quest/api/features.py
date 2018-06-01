@@ -144,8 +144,8 @@ def get_features(uris=None, expand=False, as_dataframe=False, as_geojson=False,
     filters = filters or dict()
     for name in services:
         provider, service, feature = util.parse_service_uri(name)
-        driver = plugins.load_providers()[provider]
-        tmp_feats = driver.get_features(service, update_cache=update_cache, **filters)
+        provider_plugin = plugins.load_providers()[provider]
+        tmp_feats = provider_plugin.get_features(service, update_cache=update_cache, **filters)
         all_features.append(tmp_feats)
 
     # get metadata for features in collections
@@ -263,8 +263,8 @@ def get_tags(service_uris, update_cache=False, filter=None, as_count=False):
 
     for service in services:
         provider, service, feature = util.parse_service_uri(service)
-        driver = plugins.load_providers()[provider]
-        service_tags = driver.get_tags(service, update_cache=update_cache)
+        provider_plugin = plugins.load_providers()[provider]
+        service_tags = provider_plugin.get_tags(service, update_cache=update_cache)
         tags.update(service_tags)
 
     if filter:

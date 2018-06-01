@@ -2,6 +2,7 @@ from quest.plugins import FilterBase
 from quest.api import get_metadata, new_dataset, update_metadata
 from quest.static import DatasetStatus
 from quest import util
+from quest.plugins import load_plugins
 import os
 
 
@@ -48,8 +49,7 @@ class TsBase(FilterBase):
 
         dataset = self.dataset
 
-        io = util.load_entities('io', 'timeseries-hdf5')
-        io = io['timeseries-hdf5'].driver
+        io = load_plugins('io', 'timeseries-hdf5')['timeseries-hdf5']
         orig_metadata = get_metadata(dataset)[dataset]
         if orig_metadata['file_path'] is None:
             raise IOError('No data file available for this dataset')
