@@ -54,9 +54,9 @@ class BasemapServiceBase(SingleFileServiceBase):
         if number_of_y_tiles <= 0:
             number_of_y_tiles = 1
 
-        numbeer_of_x_tiles = convereted_long_tile_list[-1] - convereted_long_tile_list[0]
-        if numbeer_of_x_tiles <= 0:
-            numbeer_of_x_tiles = 1
+        number_of_x_tiles = convereted_long_tile_list[-1] - convereted_long_tile_list[0]
+        if number_of_x_tiles <= 0:
+            number_of_x_tiles = 1
 
         lat_range = range(convereted_lat_tile_list[0], (convereted_lat_tile_list[1] + 1))
         long_range = range(convereted_long_tile_list[0], (convereted_long_tile_list[1] + 1))
