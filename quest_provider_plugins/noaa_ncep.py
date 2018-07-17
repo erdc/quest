@@ -50,7 +50,6 @@ class NCEP_GFS_Service(NCEPServiceBase):
                                              product_date=p.date, resolution=p.res, cycle_runtime=p.cycle,
                                              forecast_start=p.start, forecast_end=p.end, product_format=p.format,
                                              name_of_product=p.product)
-        print(results)
         if len(results) > 0:
             ncep.download_data(file_path, results)
             metadata = {
