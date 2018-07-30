@@ -173,4 +173,4 @@ class BasemapProvider(ProviderBase):
     display_name = 'Basemap Provider'
     description = 'Services avaliable through the live Basemap Server.'
     organization_name = 'Basemap'
-    name = 'Basemap'
+    name = 'basemap'
