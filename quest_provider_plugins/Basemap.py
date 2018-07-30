@@ -10,7 +10,6 @@ import pandas as pd
 import numpy as np
 import requests
 import rasterio
-import warnings
 import param
 import math
 import os
@@ -68,14 +67,13 @@ class BasemapServiceBase(SingleFileServiceBase):
         # - tile and caculate the coordinates of its top left hand corner.
         # Why I am doing this is because we have to geo-reference the image and have the exact coordinates of the
         # - actual image that we will stitch together from these tiles.
-        first_lat = math.degrees(2*(math.atan(math.exp(math.pi-(converted_long_tile_list[0]*2*math.pi)
-                                                       /2**p.zoom_level))-math.pi/4))
-        second_lat = math.degrees(2*(math.atan(math.exp(math.pi-((converted_long_tile_list[-1] + 1)*2*math.pi)
-                                                        /2**p.zoom_level))-math.pi/4))
+        first_lat = math.degrees(2*(math.atan(math.exp(math.pi-(converted_long_tile_list[0]
+                                                                *2*math.pi)/2**p.zoom_level))-math.pi/4))
+        second_lat = math.degrees(2*(math.atan(math.exp(math.pi-((
+                                            converted_long_tile_list[-1] + 1)*2*math.pi)/2**p.zoom_level))-math.pi/4))
 
         first_long = math.degrees(converted_lat_tile_list[0]*2*math.pi/(2**p.zoom_level) - math.pi)
         second_long = math.degrees((converted_lat_tile_list[-1] + 1)*2*math.pi/(2**p.zoom_level) - math.pi)
-
 
         # Have to create a range item so that we can do a product on it later in the algorithm. So lets increment,
         # - the last element in either list to include up to the next number. If we didn't then it would stop short
@@ -113,7 +111,7 @@ class BasemapServiceBase(SingleFileServiceBase):
         loop_iterator = 0
         stitched_image = Image.new('RGB', (number_of_x_tiles * 256, number_of_y_tiles * 256))
         for x, y in product(long_range_list, lat_range_list):
-            key = {"Z": p.zoom_level, "z": p.zoom_level, "X": x, "x": x, "Y": y, "y": y}
+            # key = {"Z": p.zoom_level, "z": p.zoom_level, "X": x, "x": x, "Y": y, "y": y}
 
             internet_status = requests.Session()
             retries = Retry(total=10, backoff_factor=0.1, status_forcelist=[500, 502, 503, 504])
