@@ -39,7 +39,7 @@ class BasemapServiceBase(SingleFileServiceBase):
 
     url = param.ObjectSelector(default=None, doc="", precedence=1, objects=url_list)
     zoom_level = param.Integer(default=0, doc="", precedence=2)
-    bbox = param.String(default="-180, 90, 180, -90", doc="x-min, y-max, x-max, x-min", precedence=3)
+    bbox = param.String(default="-180, 90, 180, -90", doc="x-min, y-max, x-max, y-min", precedence=3)
 
     def get_features(self, **kwargs):
         the_feature = {"service_id": "WMTS", "display_name": "WMTS", "geometry": box(-180, -90, 180, 90)}
@@ -48,10 +48,14 @@ class BasemapServiceBase(SingleFileServiceBase):
 
     def download(self, feature, file_path, dataset, **kwargs):
         p = param.ParamOverrides(self, kwargs)
-        if ", " in p.bbox:
-            bbox = p.bbox.split(", ")
+        if not isinstance(p.bbox, (list,)):
+            if ", " in p.bbox:
+                bbox = p.bbox.split(", ")
+                bbox = [float(x) for x in bbox]
+            else:
+                print("There was an issue with the format of your boudning box.")
         else:
-            print("There was an issue with the format of your boudning box.")
+            bbox = p.bbox
 
         # Get the basemap tiles for the given coordinates.
         converted_lat_tile_list = [int(1 / (2 * math.pi) * 2 ** p.zoom_level * (math.pi - math.log(math.tan(math.pi
@@ -59,7 +63,6 @@ class BasemapServiceBase(SingleFileServiceBase):
         converted_long_tile_list = [int(2 ** (p.zoom_level - 1) * (x / 180 + 1)) for x in [bbox[0], bbox[2]]]
         converted_lat_tile_list.sort()
         converted_long_tile_list.sort()
-
         # Get the top left and bottom right hand corner coordinates of where the actual basemap tile starts.
         # The top left hand corner of the bbox will not have the coordinates as the basemap tile because of
         # - them never going to line up perfectly.
@@ -112,7 +115,6 @@ class BasemapServiceBase(SingleFileServiceBase):
         stitched_image = Image.new('RGB', (number_of_x_tiles * 256, number_of_y_tiles * 256))
         for x, y in product(long_range_list, lat_range_list):
             # key = {"Z": p.zoom_level, "z": p.zoom_level, "X": x, "x": x, "Y": y, "y": y}
-
             internet_status = requests.Session()
             retries = Retry(total=10, backoff_factor=0.1, status_forcelist=[500, 502, 503, 504])
             if 'https' in p.url:
@@ -152,7 +154,6 @@ class BasemapServiceBase(SingleFileServiceBase):
                            width=image_array.shape[2], count=image_array.shape[0], dtype=image_array.dtype,
                            crs='EPSG:3957', transform=transform) as dst:
             dst.write(image_array, indexes=[1, 2, 3])
-
         metadata = {
             'metadata': 'Image Downloaded',
             'file_path': file_path,
