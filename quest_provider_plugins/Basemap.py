@@ -58,11 +58,13 @@ class BasemapServiceBase(SingleFileServiceBase):
             bbox = p.bbox
 
         # Get the basemap tiles for the given coordinates.
-        converted_lat_tile_list = [int(1 / (2 * math.pi) * 2 ** p.zoom_level * (math.pi - math.log(math.tan(math.pi
-                                    / 4 + math.radians(y) / 2)))) for y in [bbox[3], bbox[1]]]
+        converted_lat_tile_list = [int(1 / (2 * math.pi) * 2 ** p.zoom_level *
+                                   (math.pi - math.log(math.tan(math.pi / 4 + math.radians(y) / 2))))
+                                   for y in [bbox[3], bbox[1]]]
         converted_long_tile_list = [int(2 ** (p.zoom_level - 1) * (x / 180 + 1)) for x in [bbox[0], bbox[2]]]
         converted_lat_tile_list.sort()
         converted_long_tile_list.sort()
+
         # Get the top left and bottom right hand corner coordinates of where the actual basemap tile starts.
         # The top left hand corner of the bbox will not have the coordinates as the basemap tile because of
         # - them never going to line up perfectly.
