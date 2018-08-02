@@ -1,7 +1,7 @@
 # Environmental Simulator Quest
 
-| Workflow | Build/Deploy | Test Coverage |
-| -------- | ------------ | ------------- |
+| Linux/Mac | Windows | Test Coverage |
+| --------- | ------- | ------------- |
 | [![Build Status](https://travis-ci.org/erdc/quest.svg?branch=master)](https://travis-ci.org/erdc/quest) | [![Build Status](https://ci.appveyor.com/api/projects/status/e20arxcfrcmb2ylm/branch/master?svg=true)](https://ci.appveyor.com/project/dharhas/quest) | [![Coverage Status](https://coveralls.io/repos/github/erdc/quest/badge.svg)](https://coveralls.io/github/erdc/quest) |
 
 ### Project Description
