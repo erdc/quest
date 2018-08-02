@@ -16,13 +16,13 @@ matrix:
     - os: linux
       env: PYTHON_VERSION="3.6"
     - os: osx
-      osx_image: xcode9.2
+      osx_image: xcode9.4
       env: PYTHON_VERSION="2.7"
     - os: osx
-      osx_image: xcode9.2
+      osx_image: xcode9.4
       env: PYTHON_VERSION="3.5"
     - os: osx
-      osx_image: xcode9.2
+      osx_image: xcode9.4
       env: PYTHON_VERSION="3.6"
 
 cache:

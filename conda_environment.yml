@@ -19,28 +19,29 @@ dependencies:
     # - futures  # for python 2 compatibility
 
     # core dependencies
-    - fiona
-    - rasterio
-    - gdal
-    - numpy
-    - geojson
-    - jinja2
-    - ulmo>=0.8.3.2
-    - pyyaml
-    - matplotlib
     - click
-    - werkzeug
+    - distributed>=1.18
+    - fiona
+    - gdal
+    - geojson
     - peewee
     - pandas<=0.22.0
     - geopandas
-    - distributed>=1.18
-    - param
-    - psutil
-    - pint
-    - pony
-    - tornado
-    - sortedcollections
+    - jinja2
     - jupyter
+    - matplotlib
+    - numpy
+    - param
+    - pint
+    - pony<=0.7.1
+    - psutil
+    - pyyaml
+    - rasterio
+    - requests
+    - sortedcollections
+    - tornado
+    - ulmo>=0.8.3.2
+    - werkzeug
 
     # test dependencies
     - pytest-cov
@@ -55,3 +56,4 @@ dependencies:
     - girder-client
     - terrapin
     - ncep_client
+    - pillow
