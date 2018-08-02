@@ -72,13 +72,21 @@ class BasemapServiceBase(SingleFileServiceBase):
         # - tile and caculate the coordinates of its top left hand corner.
         # Why I am doing this is because we have to geo-reference the image and have the exact coordinates of the
         # - actual image that we will stitch together from these tiles.
-        first_lat = math.degrees(2*(math.atan(math.exp(math.pi-(converted_long_tile_list[0]
-                                                                *2*math.pi)/2**p.zoom_level))-math.pi/4))
-        second_lat = math.degrees(2*(math.atan(math.exp(math.pi-((
-                                            converted_long_tile_list[-1] + 1)*2*math.pi)/2**p.zoom_level))-math.pi/4))
+        first_lat = math.degrees(
+            2 * (math.atan(math.exp(math.pi - (converted_long_tile_list[0] * 2 * math.pi) / 2**p.zoom_level)) -
+                 math.pi / 4)
+        )
+        second_lat = math.degrees(
+            2 * (math.atan(math.exp(math.pi - ((converted_long_tile_list[-1] + 1) * 2 * math.pi) / 2**p.zoom_level)) -
+                 math.pi / 4)
+        )
 
-        first_long = math.degrees(converted_lat_tile_list[0]*2*math.pi/(2**p.zoom_level) - math.pi)
-        second_long = math.degrees((converted_lat_tile_list[-1] + 1)*2*math.pi/(2**p.zoom_level) - math.pi)
+        first_long = math.degrees(
+            converted_lat_tile_list[0] * 2 * math.pi / (2**p.zoom_level) - math.pi
+        )
+        second_long = math.degrees(
+            (converted_lat_tile_list[-1] + 1) * 2 * math.pi / (2**p.zoom_level) - math.pi
+        )
 
         # Have to create a range item so that we can do a product on it later in the algorithm. So lets increment,
         # - the last element in either list to include up to the next number. If we didn't then it would stop short
