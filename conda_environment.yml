@@ -32,7 +32,6 @@ dependencies:
     - matplotlib
     - numpy
     - param
-    - pillow
     - pint
     - pony<=0.7.1
     - psutil
@@ -57,3 +56,4 @@ dependencies:
     - girder-client
     - terrapin
     - ncep_client
+    - pillow
