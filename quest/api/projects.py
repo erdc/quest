@@ -334,7 +334,6 @@ def _get_project_db(name):
     if not os.path.isabs(path):
         path = os.path.join(util.get_projects_dir(), path)
 
-    util.mkdir_if_doesnt_exist(path)
     return os.path.join(path, PROJECT_DB_FILE)
 
 

@@ -27,7 +27,6 @@ def get_metadata(uris, as_dataframe=False):
     """
     # group uris by type
     grouped_uris = util.classify_uris(uris)
-
     # handle case when no uris are passed in
     if not any(grouped_uris):
         metadata = pd.DataFrame()

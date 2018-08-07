@@ -8,6 +8,7 @@ from io import StringIO
 from quest import util
 import pandas as pd
 import requests
+import warnings
 import geojson
 import shutil
 import param
@@ -53,7 +54,7 @@ def get_user_service_base():
         def download(self, feature, file_path, dataset, **kwargs):
             if self.datasets_mapping is not None:
                 fnames = self.datasets_mapping
-                if isinstance(dict, self.datasets_mapping):
+                if isinstance(self.datasets_mapping, dict):
                     fnames = self.dataset_mapping[self.parameter]
                 fnames = [f.replace('<feature>', feature) for f in util.listify(fnames)]
             else:
@@ -62,15 +63,20 @@ def get_user_service_base():
             final_path = []
             for src, file_name in zip(self._get_paths(fnames), fnames):
                 dst = file_path
-                if self.dataset_save_folder is not None:
-                    dst = os.path.join(dst, self.dataset_save_folder, self.svc_folder)
+                if self.datasets_save_folder is not None:
+                    dst = os.path.join(dst, self.datasets_save_folder, self.service_folder)
 
                 dst = os.path.join(dst, file_name)
                 base, _ = os.path.split(dst)
                 util.mkdir_if_doesnt_exist(base)
                 final_path.append(dst)
                 if self.is_remote:
-                    r = requests.get(src, verify=False)
+                    with warnings.catch_warnings():
+                        warnings.filterwarnings(
+                            "ignore",
+                            category=requests.packages.urllib3.exceptions.InsecureRequestWarning
+                        )
+                        r = requests.get(src, verify=False)
                     if r.status_code == 200:  # only download if file exists
                         chunk_size = 64 * 1024
                         with open(dst, 'wb') as f:
@@ -102,6 +108,7 @@ def get_user_service_base():
             paths = self._get_paths(self.features_file)
 
             all_features = []
+
             for p in util.listify(paths):
                 with uri_open(p, self.is_remote) as f:
                     if fmt.lower() == 'geojson':
@@ -194,7 +201,7 @@ class UserProvider(ProviderBase):
         config_file = self._get_path('quest.yml')
         with uri_open(config_file, self.is_remote) as yml:
             provider_data = yaml.load(yml)
-        self.name = provider_data['name']
+        self.name = 'user-' + provider_data['name']
         self._metadata = provider_data['metadata']
         self._metadata['service_uri'] = self.uri
         self._services = {name: get_user_service_base().instance(service_name=name,
@@ -217,6 +224,11 @@ class UserProvider(ProviderBase):
 
 def uri_open(uri, is_remote):
     if is_remote:
-        return StringIO(requests.get(uri, verify=False).text)
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                "ignore",
+                category=requests.packages.urllib3.exceptions.InsecureRequestWarning
+            )
+            return StringIO(requests.get(uri, verify=False).text)
     else:
         return open(uri)

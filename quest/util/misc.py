@@ -1,5 +1,4 @@
 from geojson import LineString, Point, Polygon, Feature, FeatureCollection, MultiPolygon
-from jinja2 import Environment, FileSystemLoader
 from past.builtins import basestring  # for python 2 compatibility
 from .config import get_settings
 from uuid import uuid4, UUID
@@ -18,7 +17,7 @@ except ImportError:
 
 def _abs_path(path, mkdir=True):
     """Gets the absolute path for a file to be within the Quest directory,
-    and will create a directory of that filename.
+       and will create a directory of that filename.
 
     Args:
         path (string): A string that is a filename.
@@ -279,6 +278,7 @@ def mkdir_if_doesnt_exist(dir_path):
     """
     # TODO: when we drop Python 2 support then we can replace this whole function with
     # direct calls to os.makedirs(dir_path, exist_ok=True)
+
     try:
         os.makedirs(dir_path, exist_ok=True)
     except TypeError:  # for Python 2

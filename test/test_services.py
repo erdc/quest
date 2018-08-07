@@ -1,9 +1,8 @@
-import os
-import pytest
-
-from conftest import FILES_DIR
-
 from data import ALL_SERVICES, SERVICE_FEATURE_DOWNLOAD_OPTIONS
+from conftest import FILES_DIR
+import pytest
+import os
+
 
 test_download = pytest.mark.skipif(
     not pytest.config.getoption("--test-download"),

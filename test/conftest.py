@@ -1,14 +1,13 @@
-import pytest
-import os
-import shutil
-import tempfile
+from data import CACHED_SERVICES
 from time import time
 import warnings
+import tempfile
 import logging
-
+import pytest
+import shutil
 import quest
+import os
 
-from data import CACHED_SERVICES
 
 base_path = os.path.dirname(os.path.abspath(__file__))
 FILES_DIR = os.path.join(base_path, 'files')
@@ -29,7 +28,8 @@ def pytest_generate_tests(metafunc):
 
 
 def get_or_generate_test_cache(update=False, skip=False):
-    test_cache_dir = os.environ.get('QUEST_CACHE_DIR') or os.path.join(quest.util.get_quest_dir(), 'test_cache')
+    test_cache_dir = os.environ.get('QUEST_CACHE_DIR') or os.path.join(quest.util.get_quest_dir(),
+                                                                       '.cache', 'test_cache')
     if skip:
         return test_cache_dir
     quest.api.update_settings({'CACHE_DIR': test_cache_dir})
@@ -93,7 +93,6 @@ def get_base_dir(request, pytestconfig):
             capmanager.resumecapture()
 
     request.addfinalizer(cleanup)
-
     return base_dir
 
 

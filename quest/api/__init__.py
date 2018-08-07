@@ -63,9 +63,6 @@ __all__ = (
     'update_settings_from_file',
     'visualize_dataset',
     'visualize_dataset_options',
-    # 'update_parameter',
-    # 'delete_parameter',
-    # 'apply_filter_set', # apply a list of filters
 )
 
 from ..util import (
