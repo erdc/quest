@@ -59,7 +59,7 @@ class TsFlowDuration(FilterBase):
         # save dataframe
         save_path = os.path.split(orig_metadata['file_path'])[0]
         save_path = os.path.join(save_path, new_dset)
-        output = load_plugins('io', 'xyHdf5')['xyHdf5']
+        output = load_plugins('io', 'xy-hdf5')['xy-hdf5']
         output.write(save_path, new_df, new_metadata)
 
         new_metadata.update({'file_path': save_path})

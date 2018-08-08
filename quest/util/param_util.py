@@ -1,9 +1,5 @@
-import json
-
 import param
-
 import quest
-from .misc import to_json_default_handler
 
 
 class NamedString(object):
@@ -28,8 +24,12 @@ class DatasetSelector(param.ObjectSelector):
 
     @property
     def datasets(self):
-        datasets = quest.api.get_datasets(filters=self.filters, queries=self.queries, expand=True)
-        return [NamedString(v['display_name'], k) for k, v in datasets.items()]
+        datasets = quest.api.get_datasets(
+            filters=self.filters,
+            queries=self.queries,
+            expand=True
+        )
+        return [NamedString(k, v['display_name']) for k, v in datasets.items()]
 
     def get_range(self):
         self.objects = self.datasets
@@ -46,8 +46,13 @@ class FeatureSelector(param.ObjectSelector):
 
     @property
     def features(self):
-        features = quest.api.get_features(quest.api.get_collections(), filters=self.filters, queries=self.queries, expand=True)
-        return [NamedString(v['display_name'], k) for k, v in features.items()]
+        features = quest.api.get_features(
+            quest.api.get_collections(),
+            filters=self.filters,
+            queries=self.queries,
+            expand=True
+        )
+        return [NamedString(k, v['display_name']) for k, v in features.items()]
 
     def get_range(self):
         self.objects = self.features
@@ -64,8 +69,12 @@ class DatasetListSelector(param.ListSelector):
 
     @property
     def datasets(self):
-        datasets = quest.api.get_datasets(filters=self.filters, queries=self.queries, expand=True)
-        return [NamedString(v['display_name'], k) for k, v in datasets.items()]
+        datasets = quest.api.get_datasets(
+            filters=self.filters,
+            queries=self.queries,
+            expand=True
+        )
+        return [NamedString(k, v['display_name']) for k, v in datasets.items()]
 
     def get_range(self):
         self.objects = self.datasets
@@ -116,4 +125,4 @@ def format_json_options(pobj):
         "title": pobj.title,
         "properties": properties,
     }
-    return schema  # TODO Should this return JSON instead of a dict?
+    return schema
