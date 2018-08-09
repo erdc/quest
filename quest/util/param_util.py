@@ -3,9 +3,9 @@ import quest
 
 
 class NamedString(object):
-    def __init__(self, name, string):
-        self.name = name
+    def __init__(self, string, name):
         self.string = string
+        self.name = name
 
     def __str__(self):
         return self.string
