@@ -7,6 +7,8 @@ import logging
 import os
 import yaml
 
+from ..database import get_db
+
 log = logging.getLogger(__name__)
 
 settings = {}
@@ -53,8 +55,7 @@ def update_settings(config={}):
 
     Returns
     -------
-        True
-            Settings where updated successfully
+        Updated Settings
 
     Example
     -------
@@ -75,15 +76,11 @@ def update_settings(config={}):
     settings.setdefault('PROJECTS_DIR', 'projects')
     settings.setdefault('USER_SERVICES', [])
 
-    # initialize projects and reconnect to database in new BASE_DIR
-    if 'BASE_DIR' in config.keys():
-        from .. import init
-        init()
+    # reset connection to database in new PROJECT_DIR
+    if 'BASE_DIR' in config.keys() or 'PROJECTS_DIR' in config.keys():
+        get_db(reconnect=True)
 
-    from ..plugins import load_providers
-    load_providers(update_cache=True)
-
-    return True
+    return settings
 
 
 def update_settings_from_file(filename):
@@ -100,8 +97,7 @@ def update_settings_from_file(filename):
 
     Returns
     -------
-        True
-            Settings were updated successfully from file
+        Updated settings
 
     Example
     -------
@@ -124,7 +120,7 @@ def update_settings_from_file(filename):
 
     update_settings(config=config)
     log.info('Settings updated from file %s' % filename)
-    return True
+    return settings
 
 
 def save_settings(filename=None):

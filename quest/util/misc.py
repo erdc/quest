@@ -2,7 +2,6 @@ from geojson import LineString, Point, Polygon, Feature, FeatureCollection, Mult
 from jinja2 import Environment, FileSystemLoader
 from past.builtins import basestring  # for python 2 compatibility
 from .config import get_settings
-from .. import get_pkg_data_path
 from uuid import uuid4, UUID
 
 import shapely.geometry
