@@ -111,7 +111,7 @@ def delete_project(name):
 
     if name not in list(projects.keys()):
         logger.error('Project not found')
-        return projects
+        return list(projects.keys())
 
     folder = projects[name]['folder']
     if not os.path.isabs(folder):
@@ -205,7 +205,7 @@ def remove_project(name):
 
     if name not in list(projects.keys()):
         logger.error('Project not found')
-        return projects
+        return list(projects.keys())
 
     logger.info('removing %s from projects' % name)
     del projects[name]
@@ -273,6 +273,9 @@ def _new_project(name, display_name=None, description=None, metadata=None, folde
 
     util.mkdir_if_doesnt_exist(path)
     dbpath = os.path.join(path, PROJECT_DB_FILE)
+    if os.path.exists(dbpath):
+        raise ValueError('Project database {} already exists, '
+                         'please remove the database or use a different project folder.'.format(dbpath))
     db = init_db(dbpath)
     with db_session:
         db.Project(display_name=display_name,
@@ -301,7 +304,7 @@ def _load_project(name):
 
 
 def _load_projects():
-   # """load list of collections."""
+    """load list of collections."""
     path = _get_projects_index_file()
     projects = util.read_yaml(path).get('projects')
     if not projects:

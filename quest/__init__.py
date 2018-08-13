@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division,
 from builtins import *
 import pbr.version
 import logging
-from . import api
+from . import api  # NOQA: F401
 
 logging.getLogger('ulmo').propagate = False
 
