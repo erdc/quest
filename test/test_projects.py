@@ -184,20 +184,6 @@ def test_new_delete_project_with_absolute_path(api, reset_projects_dir):
     assert project_name not in c
 
 
-def test_delete_project_removes_collections(api, reset_projects_dir, set_active_project):
-    c = api.get_collections()
-    assert len(c) > 0
-    p = api.delete_project(ACTIVE_PROJECT)
-    assert len(p) == reset_projects_dir['NUMBER_OF_PROJECTS'] - 1
-    assert ACTIVE_PROJECT not in p
-
-    api.new_project(ACTIVE_PROJECT)
-    p = api.get_projects()
-    assert ACTIVE_PROJECT in p
-    c = api.get_collections()
-    assert len(c) == 0
-
-
 def test_remove_project(api, reset_projects_dir, test_project):
     projects = api.get_projects(expand=True)
     folder = projects[test_project]['folder']
