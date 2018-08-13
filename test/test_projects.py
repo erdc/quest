@@ -232,5 +232,3 @@ def test_set_active_project_non_existing(api):
 def test__load_project_non_existing(api):
     with pytest.raises(ValueError):
         api.projects._load_project('non_existing_project')
-
-
