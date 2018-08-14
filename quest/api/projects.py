@@ -80,33 +80,14 @@ def new_project(name, display_name=None, description=None, metadata=None,
     if name in projects.keys():
         raise ValueError('Project %s exists, please use a unique name' % name)
 
-    if display_name is None:
-        display_name = name
-
-    if description is None:
-        description = ''
-
-    if folder is None:
-        folder = name
-
-    if metadata is None:
-        metadata = {}
-
-    if not os.path.isabs(folder):
-        path = os.path.join(util.get_projects_dir(), folder)
-    else:
-        path = folder
-
-    util.mkdir_if_doesnt_exist(path)
-    dbpath = os.path.join(path, PROJECT_DB_FILE)
-    db = init_db(dbpath)
-    with db_session:
-        db.Project(display_name=display_name,
-                   description=description,
-                   metadata=metadata)
-    db.disconnect()
-    projects.update({name: {'folder': folder}})
-    _write_projects(projects)
+    _new_project(
+        name=name,
+        display_name=display_name,
+        description=description,
+        metadata=metadata,
+        folder=folder,
+        projects=projects,
+    )
 
     if activate:
         set_active_project(name)
@@ -130,7 +111,7 @@ def delete_project(name):
 
     if name not in list(projects.keys()):
         logger.error('Project not found')
-        return projects
+        return list(projects.keys())
 
     folder = projects[name]['folder']
     if not os.path.isabs(folder):
@@ -153,7 +134,17 @@ def get_active_project():
 
     """
     path = _get_projects_index_file()
-    return util.read_yaml(path).get('active_project', 'default')
+    contents = util.read_yaml(path)
+    default_project = contents.get('active_project')
+    if default_project is None:
+        projects = contents.get('projects') or _create_default_project()
+        default_project = list(projects.keys())[0]
+        contents.update({
+            'active_project': default_project,
+            'projects': projects
+        })
+        util.write_yaml(path, contents)
+    return default_project
 
 
 def get_projects(expand=False, as_dataframe=False):
@@ -214,7 +205,7 @@ def remove_project(name):
 
     if name not in list(projects.keys()):
         logger.error('Project not found')
-        return projects
+        return list(projects.keys())
 
     logger.info('removing %s from projects' % name)
     del projects[name]
@@ -229,7 +220,6 @@ def remove_project(name):
 
         if active is None:
             logger.info('All projects have been removed. Re-adding "default" project.')
-            new_project('default', activate=True)
             projects = get_projects()
         else:
             logger.info('changing active project from {} to {}'.format(name, active))
@@ -260,6 +250,49 @@ def set_active_project(name):
     return name
 
 
+def _new_project(name, display_name=None, description=None, metadata=None, folder=None, projects=None):
+
+    projects = projects or dict()
+
+    if display_name is None:
+        display_name = name
+
+    if description is None:
+        description = ''
+
+    if folder is None:
+        folder = name
+
+    if metadata is None:
+        metadata = {}
+
+    if not os.path.isabs(folder):
+        path = os.path.join(util.get_projects_dir(), folder)
+    else:
+        path = folder
+
+    util.mkdir_if_doesnt_exist(path)
+    dbpath = os.path.join(path, PROJECT_DB_FILE)
+    if os.path.exists(dbpath):
+        raise ValueError('Project database {} already exists, '
+                         'please remove the database or use a different project folder.'.format(dbpath))
+    db = init_db(dbpath)
+    with db_session:
+        db.Project(display_name=display_name,
+                   description=description,
+                   metadata=metadata)
+    db.disconnect()
+    projects.update({name: {'folder': folder}})
+    _write_projects(projects)
+
+    return projects
+
+
+def _create_default_project():
+    # create a default project if needed
+    return _new_project('default', 'Default Project', 'Created by QUEST')
+
+
 def _load_project(name):
     db = init_db(_get_project_db(name))
     with db_session:
@@ -271,17 +304,17 @@ def _load_project(name):
 
 
 def _load_projects():
-   # """load list of collections."""
+    """load list of collections."""
     path = _get_projects_index_file()
     projects = util.read_yaml(path).get('projects')
     if not projects:
-        projects = {}
+        projects = _create_default_project()
 
     return projects
 
 
 def _write_projects(projects):
-   # """write list of collections to file."""
+    """write list of collections to file."""
     path = _get_projects_index_file()
     contents = util.read_yaml(path)
     contents.update({'projects': projects})

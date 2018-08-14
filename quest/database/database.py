@@ -94,6 +94,10 @@ def get_db(dbpath=None, reconnect=False):
         else:
             _connection.disconnect()
 
+    if dbpath is None:
+        from ..api.projects import active_db
+        dbpath = active_db()
+
     _connection = init_db(dbpath)
 
     return _connection

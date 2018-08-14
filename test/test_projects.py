@@ -38,6 +38,19 @@ def test_get_projects(api, reset_projects_dir):
     assert len(c) == reset_projects_dir['NUMBER_OF_PROJECTS']
 
 
+def test_get_projects_with_expand(api, reset_projects_dir):
+    p = api.get_projects(expand=True)
+    assert isinstance(p, dict)
+    assert len(p) == reset_projects_dir['NUMBER_OF_PROJECTS']
+
+
+def test_get_projects_as_dataframe(api, reset_projects_dir):
+    import pandas
+    df = api.get_projects(as_dataframe=True)
+    assert isinstance(df, pandas.DataFrame)
+    assert df.shape[0] == reset_projects_dir['NUMBER_OF_PROJECTS']
+
+
 def test_default_project(api, ):
     c = api.get_projects()
     assert 'default' in c
@@ -50,12 +63,28 @@ def test_new_project(api, reset_projects_dir):
     assert 'test' in c
 
 
+def test_new_project_with_existing_name(api, reset_projects_dir, test_project):
+    with pytest.raises(ValueError):
+        api.new_project(test_project)
+
+
 def test_add_project(api, reset_projects_dir, init_project_to_add):
     added_project_name = 'added_test_project'
     api.add_project(added_project_name, init_project_to_add)
     c = api.get_projects()
     assert len(list(c)) == reset_projects_dir['NUMBER_OF_PROJECTS'] + 1
     assert added_project_name in c
+
+
+def test_add_project_with_existing_name(api, reset_projects_dir, init_project_to_add, test_project):
+    with pytest.raises(ValueError):
+        api.add_project(test_project, init_project_to_add)
+
+
+def test_add_project_with_nonexisting_path(api, reset_projects_dir):
+    added_project_name = 'added_test_project'
+    with pytest.raises(ValueError):
+        api.add_project(added_project_name, '/path/that/does/not/exist')
 
 
 def test_delete_project(api, reset_projects_dir, test_project):
@@ -133,13 +162,59 @@ def test_delete_active_project_without_default(api, reset_projects_dir, set_acti
     assert new_active_project in c
 
 
-def test_remove_project():
-    pass
-    # todo test remove project
-    # test case where project is removed and then re-added
+def test_delete_non_existing_project(api, reset_projects_dir):
+    projects = api.get_projects()
+
+    p = api.delete_project('non_existing_project')
+    assert projects == p
+
+
+def test_new_delete_project_with_absolute_path(api, reset_projects_dir):
+    project_name = 'test'
+    path = os.path.join(reset_projects_dir['BASE_DIR'], 'test_project')
+    api.new_project(
+        name=project_name,
+        folder=path,
+    )
+    p = api.get_projects()
+    assert len(p) == reset_projects_dir['NUMBER_OF_PROJECTS'] + 1
+    assert project_name in p
+    c = api.delete_project(project_name)
+    assert len(c) == reset_projects_dir['NUMBER_OF_PROJECTS']
+    assert project_name not in c
+
+
+def test_remove_project(api, reset_projects_dir, test_project):
+    projects = api.get_projects(expand=True)
+    folder = projects[test_project]['folder']
+
+    api.remove_project(test_project)
+    assert os.path.exists(folder)
+
+    with pytest.raises(ValueError):
+        api.new_project(test_project, folder)
+
+    api.add_project(test_project, folder)
+
+
+def test_remove_non_existing_project(api, reset_projects_dir):
+    projects = api.get_projects()
+
+    p = api.remove_project('non_existing_project')
+    assert projects == p
 
 
 def test_set_active_project(api, set_active_project):
     assert api.get_active_project() == 'project1'
     api.set_active_project('default')
     assert api.get_active_project() == 'default'
+
+
+def test_set_active_project_non_existing(api):
+    with pytest.raises(ValueError):
+        api.set_active_project('non_existing_project')
+
+
+def test__load_project_non_existing(api):
+    with pytest.raises(ValueError):
+        api.projects._load_project('non_existing_project')

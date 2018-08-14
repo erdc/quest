@@ -12,7 +12,6 @@ name: quest
 channels:
     - conda-forge
     - erdc
-    - defaults
 
 dependencies:
     - python=3
@@ -24,6 +23,7 @@ dependencies:
     - fiona
     - gdal
     - geojson
+    - libgdal  # to ensure it comes from conda-forge
     - peewee
     - pandas<=0.22.0
     - geopandas
