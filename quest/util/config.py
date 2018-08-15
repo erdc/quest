@@ -1,11 +1,9 @@
 """Module wide settings.
 
 """
-
-import appdirs
 import logging
-import os
 import yaml
+import os
 
 from ..database import get_db
 
@@ -17,19 +15,15 @@ settings = {}
 def get_settings():
     """Get the settings currently being used by QUEST.
 
-    Returns
-    -------
-        settings : dict
-            Dictionary of current settings
+    Returns:
+        A dictionary of the current settings.
 
-    Example
-    -------
-    >>> quest.api.get_settings()
-    {'BASE_DIR': '/Users/dharhas/Library/Application Support/quest',
-    'CACHE_DIR': 'cache',
-    'PROJECTS_DIR': 'projects',
-    'USER_SERVICES': [],
-    }
+    Example:
+        {'BASE_DIR': '/Users/dharhas/',
+        'CACHE_DIR': 'cache',
+        'PROJECTS_DIR': 'projects',
+        'USER_SERVICES': [],
+        }
     """
     global settings
     if not settings:
@@ -42,37 +36,33 @@ def get_settings():
 
 
 def update_settings(config={}):
-    """Update settings currently being used by QUEST
+    """Update the settings file that is being stored in the Quest
+       settings directory.
 
-    Only key/value pairs that are provided are updated,
-    any other existing pairs are left unchanged or defaults
-    are used.
+    Notes:
+        Only key/value pairs that are provided are updated,
+        any other existing pairs are left unchanged or defaults
+        are used.
 
-    Parameters
-    ----------
-        config : dict
-            key/value pairs of settings that are to be updated.
+    Args:
+        config (dict): Key/value pairs of settings that are to be updated.
 
-    Returns
-    -------
+    Returns:
         Updated Settings
 
-    Example
-    -------
-    >>> quest.api.update_settings({'BASE_DIR':'/Users/dharhas/myquestdir'})
-    {'BASE_DIR': '/Users/dharhas/myquestdir',
-     'CACHE_DIR': 'cache',
-     'PROJECTS_DIR': 'projects',
-     'USER_SERVICES': [],
-     }
+    Example:
+        {'BASE_DIR': '/Users/dharhas/',
+        'CACHE_DIR': 'cache',
+        'PROJECTS_DIR': 'projects',
+        'USER_SERVICES': [],
+        }
     """
-
     global settings
     if 'BASE_DIR' in config.keys() and not os.path.isabs(config['BASE_DIR']):
         config['BASE_DIR'] = os.path.join(os.getcwd(), config['BASE_DIR'])
     settings.update(config)
     settings.setdefault('BASE_DIR', _default_quest_dir())
-    settings.setdefault('CACHE_DIR', 'cache')
+    settings.setdefault('CACHE_DIR', os.path.join('.cache', 'user_cache'))
     settings.setdefault('PROJECTS_DIR', 'projects')
     settings.setdefault('USER_SERVICES', [])
 
@@ -84,29 +74,25 @@ def update_settings(config={}):
 
 
 def update_settings_from_file(filename):
-    """Update settings currently being used by QUEST from a yaml file
+    """Update the settings from a new yaml file.
 
-    Only key/value pairs that are provided are updated,
-    any other existing pairs are left unchanged or defaults
-    are used.
+    Notes:
+        Only key/value pairs that are provided are updated,
+        any other existing pairs are left unchanged or defaults
+        are used.
 
-    Parameters
-    ----------
-        filename : str
-            path to yaml file containing settings
+    Args:
+        filename (string): Path to the yaml file containing the new settings.
 
-    Returns
-    -------
+    Returns:
         Updated settings
 
-    Example
-    -------
-    >>> quest.api.update_settings_from_file('/Users/dharhas/myquestsettings.yml')
-    {'BASE_DIR': '/Users/dharhas/myquest2dir',
-     'CACHE_DIR': 'cache',
-     'PROJECTS_DIR': 'data',
-     'USER_SERVICES': [],
-     }
+    Example:
+        {'BASE_DIR': '/Users/dharhas/',
+        'CACHE_DIR': 'cache',
+        'PROJECTS_DIR': 'projects',
+        'USER_SERVICES': [],
+        }
     """
     with open(filename, 'r') as f:
         config = yaml.safe_load(f)
@@ -124,26 +110,22 @@ def update_settings_from_file(filename):
 
 
 def save_settings(filename=None):
-    """Save settings currently being used by QUEST to a yaml file
+    """Save settings currently being used by QUEST to a yaml file.
 
-    Parameters
-    ----------
+    Args:
+        filename (string): Path to the yaml file to save the settings.
 
-        filename : str
-            path to yaml file in which to save settings
+    Returns:
+        A true boolean if settings were saved successfully.
 
-    Returns
-    -------
-
-        True
-            Settings saved successfully
-
-    Example
-    -------
-    >>> quest.api.save_settings('/Users/dharhas/myquestsettings.yml')
     """
     if filename is None:
         filename = _default_config_file()
+
+    path = os.path.dirname(filename)
+    if path:
+        from . import misc
+        misc.mkdir_if_doesnt_exist(path)
 
     with open(filename, 'w') as f:
         f.write(yaml.safe_dump(settings, default_flow_style=False))
@@ -155,20 +137,42 @@ def save_settings(filename=None):
 
 
 def _default_config_file():
+    """Gives the absolute path of where the settings directiory is.
+
+    Returns:
+        A string that is an absolute path to the settings directory.
+
+    """
     base = get_settings()['BASE_DIR']
-    return os.path.join(base, 'quest_config.yml')
+    return os.path.join(base, '.settings', 'quest_config.yml')
 
 
 def _default_quest_dir():
+    """Gives the locations of the Quest directory.
+
+    Returns:
+        A string that is an absolute path to the Quest directory.
+
+    """
     quest_dir = os.environ.get('QUEST_DIR')
     if quest_dir is None:
-        quest_dir = appdirs.user_data_dir('quest', 'erdc')
+        quest_dir = os.path.join(os.path.expanduser("~"), 'Quest')
 
     return quest_dir
 
 
 def _expand_dirs(local_services):
-    "if any dir ends in * then walk the subdirectories looking for quest.yml"
+    """Gives a list of paths that have a quest yaml file in them.
+
+    Notes:
+        If any dir ends in * then walk the subdirectories looking for quest.yml
+    Args:
+        local_services (list): A list of avaliable paths.
+
+    Returns:
+        A list of avaliable paths to the quest yaml file.
+
+    """
     if local_services == []:
         return []
 

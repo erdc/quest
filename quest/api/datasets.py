@@ -7,7 +7,6 @@ from .metadata import get_metadata, update_metadata
 from .projects import _get_project_dir
 from quest.static import DatasetStatus
 from .tasks import add_async
-
 import pandas as pd
 import os
 

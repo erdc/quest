@@ -1,149 +1,1204 @@
 CHANGES
 =======
 
+* Removed all the changes from the publish notebook that accidently made its way into the PR
+* Fixed Stickler issues
+* Added comments to the plugins file, removed unnecessary imports from the misc.py file, added a settings creation directory in the update\_settings(), and removed un-wanted files in the Quest/\_\_init\_\_.py
+* The user plugins are now working correctly, and updated the warnings
+* The .settings directory was never being created to be able to save the quest settings file
+* Forgot the e in message on the fiterwarnings
+* Updated the README.md file with the Gitter connection
+* Fixed the Notebook name
+* Git changing a notebook back to the original name
+* Changing the files back to once they were
+* Fixed a testing issue that was getting the wrong absolute path to the settings folder
+* Removed the warnings because they were being caused by an old environment, and fixed some bugs with os.path.join
+* The quest directory changed to the user's home directory. The layout of the quest direcotry also got changed around. I ignored numpy and urllib3 warings within the quest init.py file. Lastly, cleaned up the notebooks
+* The quest directory changed to the user's home directory. The layout of the quest direcotry also got changed around. I ignored numpy and urllib3 warings within the quest init.py file. Lastly, cleaned up the notebooks
+
+2.6.0
+-----
+
+* Basemap Service Plugin (#86)
+* Update README.md (#88)
+
+2.5.0
+-----
+
+* Fixed how non-geo data is handled. (#83)
+* Update README.md (#84)
+* Removed all of smtk from within Quest. (#80)
+* Fix Plugin Names (#70)
+* API cleanup (#63)
+* Removed Pandas warnings (#77)
+* Async renaming & Misc (#72)
+* Updated the "base\_class" variables. (#76)
+* Updated the README.md file (#71)
+* Implementing Coveralls (#65)
+* Quest plugins WIP (#58)
+* Fix task tests (#57)
+* Adjust Tests (#44)
+* Updates for Quest Web (#43)
+* Ncep provider (#34)
+* Updated the authentication to work with QuestWeb, and added a method for getting the status of a providers authentication. (#41)
+* Nasa Provider Plugin (#40)
+* Minor updates (#38)
+* Provider update (#33)
+* Updated the docs for installation of quest and terrapin. (#31)
+
+2.4.1
+-----
+
+* fix tests (#26)
+* kitware girder update
+* Dataset display name fix (More readable)
+* Girder service plugin (#28)
+* Dataset display name fix (More readable)
+* Dataset display name fix (More readable). (#27)
+* Dataset display name fix (More readable)
+* Updates to the Girder Live Service Plugin
+* Updates to the Girder Live Service Plugin
+* Updates to the Girder Live Service Plugin
+* Updates to the Girder Live Service Plugin
+* updates to publishing in data\_depot and cuahsi\_hs and updated tests
+* Create readthedocs.yml
+* remove fixers
+* Publishing hydroshare (#25)
+* Update .stickler.yml
+* updates to publishing in data\_depot and cuahsi\_hs and updated tests
+* Publisher Updates
+* change setup.cfg to point to README.md
+* add publish notebook example
+* Allow there to be subclasses for the publish base
+* add publish notebook example
+* add publish notebook example
+* Create CONTRIBUTING.md
+* Update README.md
+* Delete README.rst
+* Update README.md
+* Update README.md
+* Update README.md
+* Create README.md
+* add publish notebook example
+* clean up publish demo (#17)
+* Publish api (#16)
+* add publish notebook example
+* working version of hydroshare publish plugin
+* rm gitlab ci config
+* add newline
+* add .stickler.yml back
+* rm .stickler.yml to see if we can use autogen version
+* try 2 space indents
+* add newline
+* try setting enable flags
+* fix linter config
+* set lint max-lin-lenght to 80 to test linter
+* add python linting
+* rm depreciated vitd filter
+* add run\_with\_env from https://github.com/rmcgibbo/python-appveyor-conda-example
+* set build: false in appveyor to avoid search for V.Studio
+* add travis & appveyor badges to Readme
+* change language from python to c to avoid issues with travis python
+* simplify install cmd
+* typo missing ;
+* add missing line
+* add travisci & appveyor ci
+* Create LICENSE
+* #73 Finish Publish API
+* #73 Finish Publish API
+* #73 Finish Publish API
+* #73 Finish Publish API
+* #73 Finish Publish API
+* #76 hs\_restclient should be installed via conda not pip
+* They HydroShare authentication updated
+* fixed environments and tests
+* removed RPC capabilities
+* Hydro Service Plugin and Authentication changes
+* Hydro Service Plugin and Authentication changes
+* Hydro Service Plugin and Authentication changes
+* Hydro Service Plugin and Authentication changes
+* Hydro Service Plugin and Authentication changes
+* Hydro Service Plugin and Authentication changes
+
+2.4.0
+-----
+
+* bug fixes
+* docs finished (for now) some test fixes
+* RTD theme and docs update
+* update installation docs
+* start revamping docs
+* python 2 compatibility fix
+* RTD theme and docs update
+* update installation docs
+* start revamping docs
+* Here is the edited files for the third party Sphinx Template that we both decided on yesterday
+* finish refactor to allow query parameters to pass through to features cleaned up servces' metadata to provide better support for tags changed format that features are cached for faster reading added arguments to get\_tags including caching ability updated tests
+* bugfix for python 2 compatibility
+* edits to reduce the files size of cached features
+* update feature counts in tests
+* centralize dataframe restructure add support for use\_cache and pass provider name through to plugins on instantiation
+* fix test
+* fix broken/failing tests
+* fix feature count in tests to match new number of features available
+* Change new search\_terms argument in get\_features to be part of the filters argument. This will prevent a need for an API change
+* fix a few things related to get\_features refactor
+* update usgs\_nlcd service to work with new url format
+* fixed bug with search\_terms logic in get\_features. added tests
+* #66 Enhance searching capabilities on services add tags working, and \`search\_terms\` argument added to \`get\_features\`
+* update installation docs
+* add 'param' as new \`fmt\` for \`apply\_filter\_options\` and \`download\_options\`. update doc strings
+* change fmt keyword from \`json-schema\` to \`json\` fix fmt=\`smtk\` support for \`ts-resample\` and \`ts-remove-outliers\` filters
+* start revamping docs
+* update gitlab runners yaml to run full test suite
+* removed Py2 support for RPC server fixed tests to not run RPC with Py2 added basic documentation for new options format renamed requirements.txt: fixes issue #67
+* fixed services that weren't downloading removed nasa (until authentication is supported) added download tests
+* bug fixes fix tests refactor services to use parameterized instead of parameterizedFucntion
+* Updated tests
+* add init file for units package
+
+2.3.0
+-----
+
+* Update api version to 2.3
+* filters and services refactored with param. Tests still need to be updates
+* add the add\_async decorator to several functions for datasets and features
+* Make return value with as\_dataframe for copy, move, and apply\_filters so it returns a dataframe not a dictionary of dataframes
+* Make as\_dataframe None by default in move
+* Update README.rst
+* Created a copy and move test, and fixed a bug with the paths not being accurate with the test database
+* The copy and move have new return values, along with the \_copy\_datasets has a new return value aswell
+* Fixes how metadata is stored in db so that it is retrieved as a dict rather than as a JSON string. Consolidates code for querying collections, features, and datasets from db. Ensures that all Pony TrackedDict objects are converted to normal Python dicts.0
+* Update smtk option templates to use smtk datetime attributes
+* Minor changes to be compatible with distributed 1.18
+* minor bug fixes to fix tests after MRs broke them
+* added "discrete-raster" to datatype list
+* add code to catch if service data is empty
+* switched reprojection method from rasterio to gdalwarp
+* updated apply filter options
+* updated filter to use gdal instead of rasterio
+* visualize with color and reproject if needed
+* update visualize\_dataset() to visualize based on rather the dataset is timeseries or raster
+* The expected features was too low for the ghcn service, so I raised the number up to the actual number of features that it was pulling
+* Minor bug fixes found during DataBrowser debugging
+* final fixes and edit jupyter notebooks
+* WIP: fixes to watershed delineation filters
+* Update notebook, all but gssha model creation
+* bugfix: raster merge bbox needs to be reprojected if raster is not latlon
+* tweaks and save with outputs for now
+* rename outlets/outlet
+* use bbox rather than hardcoding features
+* bugfix: use projected points in ws delineation
+* bugfix: order of bbox in raster merge not consistent with rest of quest api
+* WIP: example of create gssha with watershed delineation
+* bugfix: ensure conversion of .vrt file to .tif when not clipping by bbox
+* rework Watershed notebook to use snap points
+* modify watershed plugin to snap outlets and rework input/output of features
+* passthrough dislay\_name, description & metadata kwargs to filter plugins
+* add ability to filter features by display\_name & description
+* add watershed delineation example update quest filters that use terrapin
+* start watershed delineation notebook
+* Update example notebook to use absolute path instead of relative path
+* Fix error with expand=True on appy\_filter
+* changed deprecated pandas indexing calls
+* bugfix: merged raster bbox coords were transposed
+* gsshapy requires absolute path
+* add gsshapy jupyter notebook example
+* add install instructions, comments and remove hard paths
+* bugfix: set correct geometry for new feature when using raster-merge filter
+* bugfix: fix for feature geometry = None
+* added example for running gssha with gsshapy
+* added info for installing GSSHApy
+* update .gitlab-ci.yml: fix missing script variable
+* Fixed #56 Add option to remove\_tasks() to pass in list of task ids
+* Fixed #56 Add option to remove\_tasks() to pass in list of task ids
+* add port ranges option to windows runners command
+* fix exception handling for cross-platform compatibility
+* Update docs and fix how tests are invoked on runners. Fixes #58
+* fixes #48 Recreate default project if all projects are deleted
+* pep 8 and logger error fix
+* Add support for coverage (fixes #47) Fix RPC port conflict when running simultaneously (like on the runners)
+* Fix options field in test database
+* fixes #55 Standardize on dataset options field
+* fixes #57 Merge Filter
+* register reprojection filter
+* cleanup raster filter dependencies and extra print statements
+* #44 Ensure all services include extension as part of the file\_path fixes #44
+* change names for raster filters add installation instructions for terrapin
+* add apply filter options
+* add exceptions for handling hetergenous projection/band count for datasets
+* initial commit
+* re-fix for windows and Python2
+* Windows fixes for tests
+* fix for windows and Python2
+* init reproj
+* moved position of "description" keyword in filters
+* fix bug in async tests move slow tag to correct test update docs
+* cleanup
+* added test options and documentation added a seperate test\_cache for services' feature metadata fixes issue # 49 fixes issue # 50
+* pep 8 cleanup
+* async tasks fixed with rpc
+* task tests with rpc (broken)
+* pep 8 cleanup
+* async tasks fixed with rpc
+* task tests with rpc (broken)
+* Run all tests with Python and with the RPC server
+* added test options and documentation added a seperate test\_cache for services' feature metadata fixes issue # 49 fixes issue # 50
+* pep 8 cleanup
+* async tasks fixed with rpc
+* task tests with rpc (broken)
+* pep 8 cleanup
+* async tasks fixed with rpc
+* task tests with rpc (broken)
+* add delay to allow rpc server to start
+* Python 2 fixes
+* Run all tests with Python and with the RPC server
+* removed
+* update nasa ext
+* update file extension
+* added test options and documentation added a seperate test\_cache for services' feature metadata fixes issue # 49 fixes issue # 50
+* this closes #52
+* ensure \`options\` and \`status\` metadata fields are consistenly populated by filters
+* pep 8 cleanup
+* async tasks fixed with rpc
+* task tests with rpc (broken)
+* add delay to allow rpc server to start
+* Python 2 fixes
+* Run all tests with Python and with the RPC server
+* pep 8 cleanup
+* async tasks fixed with rpc
+* task tests with rpc (broken)
+* revised .gitlab-ci.yml stages and also added manual toolbox jobs
+* add delay to allow rpc server to start
+* Python 2 fixes
+* Run all tests with Python and with the RPC server
+* this closes #52
+* Fixed rebase change
+* update apply\_filter\_options
+* added projection information
+* updated commit
+* initial commit for watershed and flow accumulation filter
+* watershed init commit
+* initial commit
+* updated commit
+* Local Changes
+* initial commit for watershed and flow accumulation filter
+* watershed init commit
+* initial commit
+* added projection information
+* updated commit
+* initial commit for watershed and flow accumulation filter
+* watershed init commit
+* initial commit
+* added projection information
+* updated commit
+* updated commit
+* initial commit for watershed and flow accumulation filter
+* flow accumulation init commit
+* watershed init commit
+* init commit
+* initial commit
+* initial commit
+* added projection information
+* updated commit
+* updated commit
+* initial commit for watershed and flow accumulation filter
+* flow accumulation init commit
+* watershed init commit
+* init commit
+* initial commit
+* added projection information
+* updated commit
+* updated commit
+* changed download\_url to download url
+* initial commit for watershed and flow accumulation filter
+* flow accumulation init commit
+* watershed init commit
+* init commit
+* initial commit
+* initial commit
+* update apply\_filter\_options
+* added projection information
+* updated commit
+* updated commit
+* changed download\_url to download url
+* initial commit for watershed and flow accumulation filter
+* flow accumulation init commit
+* watershed init commit
+* update base file : init commit
+* init commit
+* initial commit
+* update filepath
+* update apply\_filter\_options
+* added projection information
+* updated commit
+* updated commit
+* changed download\_url to download url
+* initial commit for watershed and flow accumulation filter
+* flow accumulation init commit
+* watershed init commit
+* update base file : init commit
+* init commit
+* initial commit
+* initial commit
+* Python 2 fixes
+* Run all tests with Python and with the RPC server
+* update apply\_filter\_options
+* added projection information
+* fix .gitlab-ci.yml windows cleanup
+* update .gitlab-ci.yml
+* updated commit
+* updated commit
+* initial commit
+* upload project logo
+* add image directory
+* update filepath
+* make sure tasks are cleared before running next test
+* add tests, fix async bugs, add get\_pending\_tasks
+* remove parent\_datasets from database
+* filter bugfixes
+* add jobs for mac runner
+* update runner tags
+* Fix incorrect linux environment variable references
+* fix geometry filter in get\_filters
+* fix NaN values in features metadata
+* fix formatting on install docs
+* fix docs build
+* remove cd command in docs build
+* pin ulmo version
+* Handle case when no features are returned from service
+* PEP8
+* changing the rest of the CONDA\_PATH to MY\_CONDA\_PATH
+* More fixes to .gitlab-ci.yml to prevent environmental variable name conflicts
+* update .gitlab-ci.yml
+* fix file in test to prevent pickle protocol error. Fixes issue #51
+* convert markdown to rst for build status
+* add ci build status to readme file
+* Config GitLab CI
+* pin python to 3.5 and add distributed dependency: sortedcollections
+* changed download\_url to download url
+* Python 2 fixes
+* Run all tests with Python and with the RPC server
+* initial commit for watershed and flow accumulation filter
+* flow accumulation init commit
+* watershed init commit
+* update base file : init commit
+* init commit
+* initial commit
+* initial commit
+* added tests
+* fixed syntax error in bbox2poly and made parse\_service\_uri more robust
+* make sure tasks are cleared before running next test
+* add tests, fix async bugs, add get\_pending\_tasks
+* add jobs for mac runner
+* update runner tags
+* Fix incorrect linux environment variable references
+* remove parent\_datasets from database
+* filter bugfixes
+* fix geometry filter in get\_filters
+* fix NaN values in features metadata
+* fix formatting on install docs
+* fix docs build
+* remove cd command in docs build
+* pin ulmo version
+* Handle case when no features are returned from service
+* PEP8
+* changing the rest of the CONDA\_PATH to MY\_CONDA\_PATH
+* More fixes to .gitlab-ci.yml to prevent environmental variable name conflicts
+* update .gitlab-ci.yml
+* fix file in test to prevent pickle protocol error. Fixes issue #51
+* convert markdown to rst for build status
+* add ci build status to readme file
+* Config GitLab CI
+* update changelog
+
 2.2.0
 -----
 
-* the following api signatures were updated to match database field names
-
-    -def download(feature, save_path, dataset=None, **kwargs):
-    +def download(feature, file_path, dataset=None, **kwargs):
-
-    -def new_dataset(feature, dataset_type=None, display_name=None, description=None, save_path=None, metadata=None):
-    +def new_dataset(feature, source=None, display_name=None, description=None, file_path=None, metadata=None):
-
-    -def stage_for_download(uris, download_options=None):
-    +def stage_for_download(uris, options=None):
-
-    -def get_features(services=None, collections=None, features=None,
-    -                 expand=False, as_dataframe=False, as_geojson=False,
-    -                 update_cache=False, filters=None):
-    +def get_features(uris=None, expand=False, as_dataframe=False, as_geojson=False,
-    +                 update_cache=False, filters=None,
-    +                 services=None, collections=None, features=None):
-
-    -def new_feature(collection, display_name=None, geom_type=None, geom_coords=None, description=None, metadata=None):
-    +def new_feature(collection, display_name=None, geometry=None, geom_type=None, geom_coords=None, description=None, metadata=None):
-
-* bugfixes
-
+* bump api version to 2.2
+* update get\_features doc string
+* change new\_feature signature for geometry
+* bug fix and PEP8
+* get\_featrues uris parameter
+* update argument names
+* fix geometry bugs in usgs\_nlcd service
 
 2.1.0
 -----
 
-* rename to Quest
+* bump api version to 2.1
+* rename 'Data Services Library' to 'Quest'
+* change ENVSIM
+* missed some ENVSIM references
+* fix. change order of erdc and quest in appdirs
+* rename ENVSIM\_QUEST\_DIR to QUEST\_DIR, change default base dir to quest
+* rename config files in tests
+* rename dsl folder to quest
+* replace DSL with QUEST,  dsl with quest
 
 2.0.1
 -----
 
-* various bugbixes
-* finished porting all print statements to logging
-* updated documentation and doc strings
+* fix non ascii characters in docstrings
+* rename 'Data Services Library' to 'Quest'
+* change ENVSIM
+* missed some ENVSIM references
+* fix. change order of erdc and quest in appdirs
+* rename ENVSIM\_QUEST\_DIR to QUEST\_DIR, change default base dir to quest
+* rename config files in tests
+* rename dsl folder to quest
+* replace DSL with QUEST,  dsl with quest
+* add docs
+* add detail on features/datasets
+* WIP: update design docs to dsl 2.0
+* bufix: stage\_for\_download Fixes issue #43
+* Update for PEP8 standards
+* Fixed typo in tasks.py
+* Updated tasks.py docstrings
+* Initial commit
+* Update docstrings to current API
+* Fixed typo in tasks.py
+* Updated tasks.py docstrings
+* Initial commit
+* remove print statements
+* PEP8 cleanup
+* changed settings tests to only use temp directories
+* fix base\_dir when relative path
+* Updated logging file info
+* Added collections to project1
+* Updated tests to work with dbRefactor
+* Update tests to work with dbRefactor
+* Updated examples to work with new db
+* Updated examples to work with new db
+* Update docstrings to current API
+* Updated tests to work with dbRefactor
+* Update tests to work with dbRefactor
+* Updated examples to work with new db
+* Updated examples to work with new db
+* Updated to meet PEP8 standards
+* Updated to meet PEP8 standards
+* Updated to meet PEP8 standards
+* Added logger config file : log.py
+* Added logger config file : log.py
+* Adding log information initial commit
+* Updated to meet PEP8 standards
+* Updated to meet PEP8 standards
+* fixed geometry field for several services
+* fixed the source metadata field
+* Added collections to project1
+* Updated tests to work with dbRefactor
+* Update tests to work with dbRefactor
+* update database connection when changing the BASE\_DIR settings
+* typo: parameters/parameter
+* add parameter to staged dataset attributes
+* bugfix: make sure response results get updated
+* bugfix
+* revert 'only sanitize when dict'
+* add serialization for shapely objects and catch-all option for objects that have a to\_json method
+* bugfix: read features from db as GeoDataFrame nor vanilla DataFrame
+* Added logger config file : log.py
+* Added logger config file : log.py
+* Adding log information initial commit
+* bug fixes for geom\_type filter and add\_features
+* Updated examples to work with new db
+* rpc server sanitize function updated
+* Updated examples to work with new db
+* Adding log information initial commit
+* bbox fixes
+* bug fixes
+* add pint to dependencies
 
-2.0
----
+2.0.0
+-----
 
-* backend refactor to use sqlite database with schema through 'pony' ORM
-* remove reserved fields that started with underscore
-* switch to geopandas to hold geospatial info.
-* refactor more functionality into base classes to make writing plugins simpler
-* make api functions and resources consistent across codebase
-* replace 'metadata' kwarg with 'expand' kwarg across api
-* added api functions: move, copy
-* added beta async capability with api functions: get_tasks, get_task, cancel_tasks and remove_tasks
-* add new filters
-* add units to datasets
+* Add changelog and bump api version to 2.0
+* remove TODO async from docstring
+* remove redundant async keyword from fns
+* fix rebase error in requirements
+* bugfix: getting results was blocking main thread
+* make sure cluster shutdowns properly on interrupt
+* add distributed, psutil to requirements
+* add async to apply\_filters
+* finish implementing tasks api
+* add basic async capability based on dask distributed
+* bug fixes
+* merge changes from delete.py
+* updates to copy and move functions
+* move implemented
+* pep 8
+* Updated services to work with new db
+* bug fixes
+* Added flowDuration filter
+* modified raster filter class
+* updated timeseries plugin/filters
+* initial commit
+* bug fixes
+* fixed feature filters
+* rpc bug fixes
+* fixes to user\_service and misc
+* update datasets and metadata to work with new database
+* commit some local changes..
+* changed finished changing metadata to expand. Updated requirements files
+* Fix features api fn for new db structure
+* remove unused functions, these were superseded by generic update/delete functions
+* change return type of as\_geojson to dict to maintain compatibility with databrowser
+* WIP: convert features to new db format, no more reserved fields starting with underscore
+* add remove\_project to api, fix db usage bugs
+* rework collections api to use orm, remove unused fn and pep8
+* fix load\_project bug in db and pep8
+* add database models with pony orm and update projects api
 
 1.0.4
 -----
 
-* minor clean up
-* add noaa coops/ndbc services
+* minor clean up changes
+* updated metadata in coops to work with download\_datasets
+* Corrected typo in services
+* Hard coded datum download option
+* Initial commit
 
 1.0.3
 -----
 
-* add apply_to_collection flag that applies filter to all vitd files in collection
-* fix edge cases for converting geom_coords to json
-* bugfixes
+* make the nrmm output file lowercase
+* working geotiff writer for nrmm
+* fix for usgs\_nwis:dv
+* use matplotlib viz temporarily until raster saving is fixed
+* WIP: nrmm visualization
+* remove yes/no enum, boolean works now
+* bugfix: make sure filter chaining works
+* revert commit 10735d4ccd6afca9c769fd11076f5633bf5420c1, broke py2 and is no longer needed now that the other py3 fixes for iterables is in
+* add apply\_to\_collection flag that applies filter to all vitd files in collection
+* bugfix: vitd data may not have all themes so only copy/download if src file exists
+* fix edge cases for converting geom\_coords to json
+* bugfix: smc theme in vitd2raster filter
 
 1.0.2
 -----
 
+* py3 bugfix: returned collections should be a list
 * generalize vitd2raster for all themes
+* make sure filter name is set
 * add utility fn rpc2py so that we can run jsonrpc strings from databrowser for debugging
-* add raster clip filter.
-* implement new return signature for apply_filter
-* bugfixes
+* bugfix: fix bbox in vitd2raster-veg template
+* bugfix: fix bbox in vitd2raster-veg template
+* bugfix: handle case when empty uri list is passed to get\_metadata
+* bugfix:handle empty list case in util.listify fixes issue #37
+* py3 bugfix: zip return iterable instead of list
+* bugfix: set geoms correctly to fix broken clipping
+* fix json-schema for raster-clip
+* add raster clip filter. currently clipped raster is blank
+* forgot to return new feature for vitd filters
+* implement new return signature for apply\_filter
+* bugfix: handle case when empty uri list is passed to get\_metadata
+* bugfix:handle empty list case in util.listify fixes issue #37
+* py3 bugfix: zip return iterable instead of list
+* bugfix: file\_format should be raster-gdal
+* remove version pinning in conda env yml files since gdal etc are being fixed upstream
+* Fixed the Enums to be strings and set default to int instead of string
+* bugfix: missed a reference when renaming vizualize to visualize
+* py3 fix
+* add fmt keyword to user\_services download options
 
 1.0.1
 -----
 
-* Refactored tests to they run in temp directory rather
+* ignore .cache folder
+* correct visualize spelling, add fmt keyword to io.visualize\_options plugins
+* cannot use rel imports since conftest.py isn't part of package. rel import not needed anyway since its being used locally
+* Tests bug fix: import error on BASE\_DIR
+* Refactored tests to they run in temp directory rather than in within source tree
+* Modified the filters so that the enums return strings. Modified the services and the util/misc.py to use the download\_options and filter\_options directories in the smtk directory
+* Removed the files that I moved into the download\_options and filter\_options directories
+* Created directories for downloads and filters and moved the files accordingly. Modified the download files to match what dsl is expecting. Modified the timeseries so that enums return strings instead of ints
+* forgot to add timeseries filter smtk templat files
+* add smtk versions of download options using jinja2 to set param lists
+* add fmt option to filters
+* passthrough fmt parameter to option fns
 * add jinja2 renderer for smtk files
-* bugfixes
+* tweak readme to display better on gitlab
+* committed before saving
+* add development instructions
+* cleanup requirements.txt
 
 1.0.0
 -----
 
-* add ability to use smtk for window definitions
-* add vitd2raster and vitd2nrmm filters
-* add ability and examples to use VITD 'local' services
-* add raster visualization
-* add api calls: visualize_dataset, visualize_dataset_options
+* pin gdal, rasterio and fiona to last working version on default channel until conda-forge/default conflicts are fixed upstream. alos removed unneeded pins
+* Updated dependency list for Python3 on Linux
+* removed comment about broken test in python3
+* Added .gitkeep to cache directory in test
+* removed cache files from test directory
+* removed cache files from test directory
+* more python 3 fixes
+* Refactor test\_features
+* Python 3 fixes for visualize\_dataset\_options test
+* Tested examples in py3
+* Changed features being added to collection
+* Fixed assertion error
+* more Python 3 fixes
+* fix test, config contaminated by previous test
+* bugfix: download broken for user services
+* bugfix: download\_options wasn't working for user services
+* bugfix: user services not setting service\_id when added to a collection, caused by dataframe index not being set as service\_id
+* rename feature\_id/\_service\_id for vitd mbr readers
+* bugfix: make sure datetime stays sorted, change key from 'datasets' to 'data'
+* return list instead of dict for open\_dataset and move parameter data under 'datasets' key
+* remove unused/non-working io plugins
+* implement dsl.api.open\_dataset() api call
+* remove unused and non-conda packages from requirements
+* Switch from pyfilesystem to shutil and requests with verify ssl = False. Fixes #35
+* Python 3 fixes
+* fixes for python 3 compatibility
+* Bug fix to \_get\_parameters to work with user services
+* Fixes to api\_basics
+* Updated examples to work with api
+* search\_features\_examples updated to work with new API
+* change datatype to discrete-raster
+* add reader for isep-met local service in dsl-demo-data repo
+* by default only display geo-discrete services
+* add get\_tags to dsl api
+* correct smtk template to use correct path
+* Add depreciation comment, these don't currently work
+* fix: vitd2raster-veg filter now works, creates  a geotiff of veg attributes from vitd dataset
+* remove unused files
+* WIP: non working vitd to veg raster filter
+* WIP: extract vegetation raster as geotiff
+* working version of vitd2nrmm
+* bugfix: collection name is in dataset metadata now
+* forgot to add the filter file
+* WIP: vitd2nrmm filter
+* WIP: base datalibrary filter
+* geojson requires lists not tuples
+* make drop duplicates more robust; include collection name in dataset metadata
+* if save\_path is a list then convert to csv
+* allow multiple VITD themes to be treated as a single dataset, add example dsl.yml files to show how to setup user services for vitd data
+* WIP: datalibrary filters
+* add file\_format to user services
+* bugfix: remove duplicates and force index to unicode
+* allow get\_pkg\_data\_path to take a tuple of args to append to the pkg data path
+* fix packaging and finding of non .py data files
+* add multithreaded/multiprocess options to rpc server
+* bugfix: mbr-csv order is lat/lon not lon/lat
+* return sorted list for mapped\_parameters
+* add mbr-csv reader
+* rename add/delete\_service to add/delete\_provider also allow delete to take in provider or service uri
+* add pyfilesystem ('fs') to requirements and change conda channel from ioos to conda-forge
+* reimplement user ('local') service functionality should also work with datasets on http/ftp etc but not fully tested
+* rename user service file
+* bugfix: datatype not being set for SingleFileBase type dataset downloads
+* bugfix: updating metadata incorrectly
+* Removed unneeded fixture
+* Fixed bug in update\_settings, and fixed tests accordingly
+* Test configuration file needed for fixtures
+* fix for delete default project. All tests passing
+* fix delete default project. All tests passing
+* change datatype to discrete-raster
+* Bugfixes to test fixtures
+* Updated tests to work with fixtures. Two tests are failing because of changes that need to be made to the code: test\_delete\_project[default], test\_get\_cache\_data\_dir
+* Modified projects/service tests & updated tests  example dirs
+* Updated example base\_dir
+* Bugfixes to test fixtures
+* Updated tests to work with fixtures. Two tests are failing because of changes that need to be made to the code: test\_delete\_project[default], test\_get\_cache\_data\_dir
+* Updated active project
+* Modified projects/service tests & updated tests  example dirs
+* Updated example base\_dir
+* created test\_features module removed lastfailed file from repo
+* Updated example base\_dir
+* Fixed pre-existing test excluding rpc\_util\_config and added two new test files (services and features)
+* Made changes to test
+* add reader for isep-met local service in dsl-demo-data repo
+* by default only display geo-discrete services
+* add get\_tags to dsl api
+* Bugfixes to test fixtures
+* Updated tests to work with fixtures. Two tests are failing because of changes that need to be made to the code: test\_delete\_project[default], test\_get\_cache\_data\_dir
+* correct smtk template to use correct path
+* Add depreciation comment, these don't currently work
+* fix: vitd2raster-veg filter now works, creates  a geotiff of veg attributes from vitd dataset
+* Updated active project
+* Modified projects/service tests & updated tests  example dirs
+* remove unused files
+* WIP: non working vitd to veg raster filter
+* WIP: extract vegetation raster as geotiff
+* working version of vitd2nrmm
+* bugfix: collection name is in dataset metadata now
+* forgot to add the filter file
+* WIP: vitd2nrmm filter
+* WIP: base datalibrary filter
+* geojson requires lists not tuples
+* make drop duplicates more robust; include collection name in dataset metadata
+* if save\_path is a list then convert to csv
+* allow multiple VITD themes to be treated as a single dataset, add example dsl.yml files to show how to setup user services for vitd data
+* WIP: datalibrary filters
+* Updated example base\_dir
+* add file\_format to user services
+* bugfix: remove duplicates and force index to unicode
+* allow get\_pkg\_data\_path to take a tuple of args to append to the pkg data path
+* fix packaging and finding of non .py data files
+* add multithreaded/multiprocess options to rpc server
+* bugfix: mbr-csv order is lat/lon not lon/lat
+* return sorted list for mapped\_parameters
+* add mbr-csv reader
+* rename add/delete\_service to add/delete\_provider also allow delete to take in provider or service uri
+* add pyfilesystem ('fs') to requirements and change conda channel from ioos to conda-forge
+* reimplement user ('local') service functionality should also work with datasets on http/ftp etc but not fully tested
+* created test\_features module removed lastfailed file from repo
+* rename user service file
+* bugfix: datatype not being set for SingleFileBase type dataset downloads
+* Updated example base\_dir
+* bugfix: updating metadata incorrectly
+* Fixed pre-existing test excluding rpc\_util\_config and added two new test files (services and features)
+* removed conflicting code in usgs\_nwis get\_parameters. updated api\_basics to convert DF from get\_parameters to list. updated search\_features\_examples to promt and pprint json for features
+* removed conflicting code in usgs\_nwis get\_parameters. updated api\_basics to convert DF from get\_parameters to list. updated search\_features\_examples to promt and pprint json for features
+* Made changes to test
+* Fixed apply filter by setting inplace to True in rename
+* Fixed \_get\_parameters in usgs\_nwis to return a dictionary, similar to other services. Minor updates and PEP 8 fixes to the api\_basics example
+* Added in parameter options
+* Updated examples to work with api
+* search\_features\_examples updated with comments and geojson call was fixed
+* search\_features\_examples updated to work with new API
+* Fixed \_get\_parameters in usgs\_nwis to return a dictionary, similar to other services. Minor updates and PEP 8 fixes to the api\_basics example
+* Added in parameter options
+* Updated examples to work with api
+* search\_features\_examples updated with comments and geojson call was fixed
+* search\_features\_examples updated to work with new API
+* forgot to add raster-gdal io plugin
+* Fixed \_get\_parameters in usgs\_nwis to return a dictionary, similar to other services. Minor updates and PEP 8 fixes to the api\_basics example
+* Added in parameter options
+* bugfix: parameter being set incorrectly for usgs-nwis:iv
+* add raster visualization (as geotiff)
+* make options default strings instead of timestamps
+* explicitly close mpl figure
+* bugfix: read metadata correctly
+* fix imports after rename
+* spelling mistake in viz api fn names
+* implement visualize\_dataset and visualize\_dataset\_options. Currently works for timeseries datasets
+* bugfix: fix setting of display\_name/description
+* bugfix: setting metadata on derived datasets
+* Updated examples to work with api
+* search\_features\_examples updated with comments and geojson call was fixed
+* search\_features\_examples updated to work with new API
+* remove pyoos as a dependency. New NDBC/COOPS plugin doesn't need it and it is GPLv3
+* rework get\_filters and filter metadata, along with new docstrings and examples
+* search\_features\_examples updated with comments and geojson call was fixed
+* Updated examples to work with api
+* make sure filter inputs are either lists/dicts
+* modify listify to accept and return dicts unaltered
+* search\_features\_examples updated to work with new API
+* bugfix: ts filter breaks if passed a list of datasets
+* bugfixes in ts filters
+* bugfix: get\_features fails when there are no features in any collection in a project
+* fix parameter tag in json schema
+* bugfix: convert feature uid to svc uri correctly
+* add missing json rpc decorators
+* bugfix for metadata
+* WIP: bugfixes for metadata issues with derived datasets when filters are applied
+* bugfixes
+* rewrite timeseries filters to work with new api
+* download\_datasets should continue even if some downloads fail
+* cleanup abstract class for filters
+* bugfix: raise error on retrieving empty dataset
+* mv timeseries filters into their own folder
+* bugfix: dropped columns in wrong service
+* add noaa-coastwatch service with ndbc, coops is not yet functional, partially implements issue #27
+* implement downloads for ncdc closes #19
+* add .h5 to path if missing on read
+* Reimplement download capability for usgs-nwis, closes #18
+* bugfix: remove invoke\_kwds kwarg, don't remember why this was originally needed, think it was for local services. removing for now
+* fix get\_parameters
+* bugfix: need to convert properties from dataframe to dict
+* bugfix: update metadata
+* added delete and update\_metadata fn for resources
+* bugfix: missed a var rename
+* bugfix: parameter fields set incorrectly
+* bugfix: service\_id not set correctly
+* make returned metadata consistent across api i.e. remove underscores from reserved field names
+* make metadata and keyword arguments consistent across services and api calls. (reserved keywords start with \_)
+* bugfix: geojson coords can be tuples as well
+* bugfix: error deleting project folder
+* tweak gssha workflow to include nlcd landcover data
+* bugfix: rename lat/lon to \_latitude\_/\_longitude\_
+* bugfix: fix downloading for all raster services
 * add NLCD landcover service
+* sort service/providers when returned as list
+* bugfix: only last service metadata was being returned
+* bugfix: add feature if (service\_uri, collection) is unique. Before a feature couldn't be added if it existed in another collection
+* bugfix: fix geojson generation, nested dicts in metadata are a problem and geom\_coords needs to be a list
+* bugfix: fix new\_feature
+* bugfix: geojson construction
+* bugfix: db cannot handle fields containing '\_id' so replace with '\_uid'
+* bugfix: bbox search
+* bugfix: added metadata=True
+* bump dsl api version to 2.0beta
+* tweak gssha workflow example to work with 0.6.0 api, comment out non working section
+
+0.6.0
+-----
+
+* download\_options now takes list of uids (features or datasets) and returns a dict of options
+* bugfix: metadata return dict orient as index
+* add metadata kwarg to get\_providers, get\_services
+* bugfix: typo in nasa service
+* cleanup api \_\_init\_\_
+* bugfix: fix staging downloads with download options specified
+* add\_features now returns collection uids of added features
+* bugfix: type on SingleFileBase download
+* bugfix: service prefix is now svc://
+* add metadata kwarg to api get\_\* function calls. by default don't return metadata
+* added datasets api, usgs-ned downloads working
+* add general get\_metadata fn that works across services/collections/features/datasets
+* WIP: unify metadata calls across resources
+* fix nwis get\_parameters
+* fix services to use the \_blah\_ for notation for reserved column/field names (nwis still needs fixes)
+* adding features to collections now works with db
+* WIP: get features working with db
+* convert collections to use db
+* make sure default project is never \`None\`
+* move project metadata into database
+* move db.py into api folder to avoid potentially recursive imports
+* bugfix: todo not commented out
+* Work in Progress
+* rename uid -> name and tweak ability to save metadata
+* remove dataset from fn call names
+* fix merge conflict
 * tweak api
+* add parameter documentation to design doc
+* WIP: use 'peewee Dataset' as flat-file document database
+* add a non-working gssha workflow example script as a strawman for api design
+* WIP: cleanup of ncdc plugin towards making parameters work more robustly
+* bugfix - get\_parameters broken when non dataframe returned
+* bugfix for missing download links in SRTMGL30
+* allow new\_feature to take a list of lists as well as json string for geom\_coords
+* tweak readme to reflect correct config vars
+* move static files to data directory and tweak Manifest appropriately
+* bugfix: create geometry correctly when creating a new feature
+* add rpc dispatch decorators to new api functions
+* bugfix: display\_name was being ignored
+* ignore \_\_pycache\_\_
+* pep8ify and remove unused imports
+* Add new/delete/update feature from collection + pep8 cleanup
+* bugfix: wrong collections directory path
+* fixes to make rest of tests pass
+* fix collections api and tests
+* add some basic tests for projects api
+* WIP: working version of projects api
+* pep8
+* bugfix: comment out non functional parameter functionality
+* use yaml.safe\_dump to avoid unicode tags being written to yml files when curl is used with rpc-server
+* old changes
+* add update uri format examples
+* add example parameter yml file formats
+* rename collection path to folder, folders will always be relative to project data dir
+* working version of add\_features\_to\_collection, still need to work on parameters
+* add ability to filter on any feature metadata field
+* renamed some api fns
+* add stub docstrings to rest of api
+* remove unused files
+* start changing to google style docstrings, they are more legible in sourcecode
+* convert docs to numpy style format and start adding stubs for all api docs even unimplemented ones
+* add basic sphinx documentation to dsl
+* wip: start on a 'local' dsl service base class and example project/collections
+
+0.5.0
+-----
+
+* merge refactor branch
+* wip: new collections yml format
+* remove unused old style plugins
+* bugfix names -> uid
+* bugfix: nasa srtm 3 arc second was point to qa dataset and not elevation
+* fix function stubs in projects.py
+* rename section to design
+* make design goals more explicit
+* add note about 'default' project
+* add design goal to readme
+* add description of config and directory structure to README
+* modify example config file to include projects
+* WIP: add stubs for tag based search and seamless services
+* WIP: add stubs for projects api
+* add service\_type to services metadata and get\_services
+* fix conflicts and merge
+* WIP: add to collections api
+* working download\_dataset for usgs\_ned
+* move feature caching into from api function to service plugin base
+* WIP: multiple changes, implement collections api and download api
+* coerce Nasa bboxes to floats
+* add search\_features\_example.py and fix json output
+* add example of using new api
+* add parameter filter to get\_services and rename get\_common\_parameters to get\_mapped\_parameters
+* add nasa srtm-3-arc-second and srtm-30-arc-second
+* remove unused imports
+* add missing rpc decorators
+* add ncdc ghcn-daily and gsod services
+* return features as geojson by default
+* working version of get\_features with multiple filter options
+* add get\_dsl\_version and det\_api\_version to api
+* working versions of get\_providers and get\_services w/ usgs ned & nwis
+* uses simpler url for pmcodes
+* wip: reworking base classes (not working yet)
+
+0.3.0
+-----
+
+* version bump to 0.3.0
+* add rpc-server / remove jsonify decorator
+* bugfix: make services work again
+* use pbr for auto versioning based on git tags
+* use pbr in setup.py
+
+0.4.0
+-----
+
+* added site info harvestor
+* terminate multiprocessing pool
+* WIP: add features api, modifying nwis\_usgs to harvest metadata
+* put py 2/3 compat imports in \_\_init\_\_.py
+* convert base.py to submodule
+* bump version to 1.0.0-dev
+* clean up unused imports
+* clean up setup to use setup.cfg, move version into dsl/\_\_init\_\_.py
+* use setup.cfg instead of config.py
+* specify python version in conda yml files
+* rename conda yml
+* add werkzeug dependency for rpc
+* add jsonrpc-requests to requirements
+* add rpc tests for util config
+* add rpc server / remove jsonify decorator
+* add MANIFEST to make sure stuff gets packaged properly
+* python 2/3 compatibility using futurize
+* add tests and fix functionality for collections
+* util.py not being used
+* complete config functions + tests
+* wip: config functions + tests
+* wip: tests for settings
+* wip: tests for settings
+* remove unused init.py
+* rework settings to enable easier testing
+* WIP: stub out new api
+* add ioos channel to conda reqs
+* simplify conda requirements and use official gdal packages, bump ulmo to v0.7.8
+* added smtk template for usgs-nwis-dv/usgs-nwis-iv data download dialogs
+* cleanup help text for dsl-get-elevations
+* bugfix: windows paths cannot contain ':', use os.path.join rather than '/'
+* add click to requirements, it should already be installed by fiona and rasterio but add for completeness
+* add get-elevations cli script
+* take optional output\_file arg and also allow use of service code
+* Latest DataBrowser works without this fix. Causing problems with using click module for generating cli scripts, so removing. Original issue was: AttributeError: 'module' object has no attribute 'argv' when using DB and conda venv
+* remove extraneous test.json file
+* no need to add channels, they are now specified in the conda requirements file
+* bugfix: flipped height & width in output raster image of elevations along path
+* implemented basic delete\_from\_collection (only deletes reference not data)
+* add delete\_data option to delete\_collection
+* bugfix: replace src w/ raster in bilinear interp
+* add vizualization of extracted path as geotiff file
+* generalize filter to use any simple vector format supported by fiona. Polygon, LineString, MultiPoint should work
+* rm adh folder that was accidently included
+* bugfix: change filter metadata so it will show up in databrowser
+* bugfix: missing import
+* bugfix: return type of pandas to\_native\_types() changes from list to dataframe somewhere between v0.16 and v0.16.1, make ts\_geojson work with both
+* bugfix: use strings for location ids
+* bugfix: detecting datatype, add demo sleep option when vitd2nrmm c++ plugin missing
+* bugfix: ts\_geojson time does not need tolist()
+* correct bilinear math
+* add path json to examples folder
+* simplify polygon for debugging
+* bugfix: ned cache index
+* add collection level get\_elevations\_along\_path filter
+* add parameter and datatype filters to get\_services
+* bugfix: ned service get\_locations with bbox was being overwritten by cached locations
+* rm adh folder that was accidently included
+
+0.2.0
+-----
+
+* merge
+* bump dsl version number to 0.2.0
+* make generic service capable of serving vitd data. depreciate io/vitd.py, add ffd plugin
+* set schema = None in get\_data\_options for generic and vitd modified the enum in coops
+* bugfix: usgs-nwis get\_data should default to 1 year of data
+* bugfix: default for ts-resample filter options changed to daily
+* comment out ndbc sites
+* bugfix: keyerror when adding param to new location
 * bugfixes
-
-
-0.6
----
-
-* Switch backend from yaml to sqlite schemaless 'document' database
-* Unify metadata calls accross resources
+* add export-raster filter
+* added examples/lejeune\_demo.py to demo downloading data, applying filters and creating timeseries plots and converting raster to tif. Lots and lots of associated bugfixes all over dsl to make everything work
+* clean up figure generation to look nicer and deal with multiple parameters (i.e. wind speed & direction)
+* Fix missing comma
+* tweak conda requirements
+* bump gdal to 1.11.2
+* bump rasterio requirement to 0.23.0
+* bugfixes for vitd2nrmm plugin and download\_in\_collections
+* add view\_in\_collection to api, works for timeseries and raster datatypes
+* tweak TsREsample filter to be hardcoded to streamflow for now, add ts-2-adh csv exporter
+* wip: finish out timeseries resample filter
+* add matplotlib for plotting
+* wip: pushed w/o saving...
+* wip: timeseries filters..
+* bugfix: names param was being ignored in get\_services
+* save all timeseries datasets as ts\_geojson format so we can standarize downloads and store all the metadata we need
+* add no data warning to download all option
+* bugfix: ulmo (pytables) import fails with 'AttributeError: 'module' object has no attribute 'argv' when using DataBrowser and a conda virtual env. Not sure why but this fixes it
+* fix typo
+* bugfix: wrong path being written to collections for coops/ndbc
+* bugfix: coops/ndbc take extra kwargs for get\_data\_options
+* add an example of dsl\_config.yml file
+* walk directories recursively looking for dsl.yml if local service path ends in a '\*'
+* finish out basic local service functionality, lejeune and iraq demos are now just local services. ENVSIM\_DSL\_DEMO\_DIR environment variable no longer needed
+* Commented out some debug statements in ndbc\_pyoos.py
+* Modified DEFAULT\_TIMEOUT to 150 secs in coops\_pyoos.py
+* tweak ndbc and coops metadata to make them both show up as NOAA services
+* rename \*-pyoos service ids to noaa-\*
+* fix timeout issues with DEFAULT\_TIMEOUT=120 secs, save files in a sub directory, cleanup code a bit
+* warn if no data downloaded rather than crash with KeyError. Fixes issue #11
+* Another modification due to pep8 changes to coops and ndbc pyoos
+* Modified change due to earlier pep8 modifcation suggestion
+* Added pep8 changes to COOPS and NDBC PYOOS
+* warn if no data downloaded rather than crash with KeyError. Fixes issue #11
+* Merged config.py fixed conflict
+* make conda requirements way less specific so that dependency resolution works better cross platform
+* attempted cross platform conda build with instructions
+* update dsl to use ulmo v0.7.6 instead of development branch
+* add fiona and coops dependencies
+* save downloaded coops data into a coops sub directory
+* update coops\_pyoos to use new api, i.e. replace \_filters with \_options
+* fix merge conflict
+* remove fiona import from local service
+* temporarily remove fiona requirement since AGC lidar plugins are non functional anyway
+* Added parameter check to CO-OOPS dsl
+* add download\_in\_collection\_options and changes to make it work
+* listify names
+* pass options correctly
+* allow download of single service, location, parameter tuple in collection
+* remove unused entry points in config
+* remove unused/outdated service plugins
+* remove irag-vitd junk from local service, replace with stubs
+* WIP: add local services
+* use yaml config file to setup dsl dirs and available web and local services
+* Corrected dictionary[location][parameter] bug in get\_data for CO-OPS dsl
+* Cleaned up location bug in get\_data function
+* Cleaned up a few bugs (parameters in getData)
+* Cleaned up a few bugs (display\_name, \_getFeatures)
+* Cleaned up a few bugs (base class, metadata, CoopsSos(), locations) for CO-OOPS dsl
+* Cleaned up some on CO-OOPS dsl
+* Modified provider attribute of CO-OPS metadata attribute
+* Added a COOPS PYOOS module to dsl
+* s/Lejeune/lejeune/, fixes #1
+* added lejeune precip demo service as file system example of point data, requires update of dsl-demo-data repo and setting of env vars
+* add call to vitd2nrrm c++ command line plugin to vitd2nrrm.py
+* missed an Object/object correction
+* replace Object with object in json-schema to conform to rfc
+* fix bugs in jsonify wrapper function
+* add a iraq-srtm plugin that uses vitd boxes for locations and tif files cut out from the srtm elevation dataset for demo purposes
+* fix 2006/2001 type in eros plugin
+* kludgy fix for adding relative\_path to a dataset in a collection when adding a locations that already have data (i.e. after processing of a filter). Checks for the presence of 'relative\_path' in the feature properties
+* working vitd2nrmm filter with example script (doesn't call c++, just sleeps)
+* wip: filter functionality for iraq vitd to nrmm
+* add 'name' field to collections for convenience
+* wip: filter api/plugins
+* runserver no longer used
+* only return newly created collection on new\_collection call
+* make smaller default bbox (= travis county), do not add to collection if no locations were found
+* missed one
+* add fns to listify and stringify arguments and consistently use lists in plugins. Also use the more robust \`is None\` and 'is not None' to check for variable existence
+* add category ('cat') file reader for vitd data
+* make sure \*\*kwargs and @util.jsonify are present for all api functions
+* tweak setup to include ulmo requirement, still uses branch from git based on requirements.txt
+* add basic example on using the api
+* add daily streamflow min max back to nwis daily since it exists at some locations
+* bugfixes
+* make dsl pip installable and add dependency to feature/raster branch of ulmo
+* add get\_\*\_filters to api init and rename get\_location\_filters to get\_locations\_filter for consistency
+* convert tabs to spaces
+* add docstrings and remove unused \*\*kwargs from some fns
+* add docstrings for providers
+* add docstrings for collections
+* refactor iraq vitd demo plugin plus small tweaks to eros and ned plugins
+* update eros landcover plugin to work with refactor
+* remove non functional legacy rest\_api
+* add working usgs ned service plugin and tweak collections api to make everything work
+* remove legacy get\_datasets call
+* enhance collections, add ability to download data into collections, currently unable to specify download options
+* add a get\_parameters call to api
+* there is no longer a separate get\_feature\_locations call, get\_locations must optionally take a locations parameter
+* usually only daily mean streamflow is available
+* fix bug in generating statistic\_codes
+* fix get\_locations to work when locations are passed in
+* fully functional nwis plugin that saves using ts-geojson io plugin
+* first pass at writing get\_data function for nwis. doesn't deal with statistic codes very well
+* add io plugin to config
+* add basic geojson timeseries io plugin
+* tweak init file to include get\_data
+* change download to get\_data to be consistent
+* fill out stubs and make get\_locations more robust for nwis plugin
+* remove unused config file
+* get nwis working with get\_services call
+* cleanup install instructions on readme
+* first pass at new nwis plugin
+* rework setup.py to work with config.py
+* convert yaml to python dict
+* convert config from yaml to python dict. yaml is not part of the python standard library so using it in setup.py requires installation of pyyaml before setup.py can be run
+* added files
+* find and replace data\_services\_library with dsl
+* rename data\_services\_library to dsl
+* add DS\_STore as a pattern to gitignore
+* add stubs for service functions
+* make services imports more specific
+* add .DS\_Store to .gitignore
+* add stub for io plugins
+* cleanup and comments
+* finish refactor api into multiple files and using jsonify
+* jsonify more fns and rework get\_services to work with util fn
+* add get\_providers to module import
+* move get\_providers into its own file and fix util.load\_drivers
+* move driver loading into a util fn. ad a jsonify decorator that allows use of json and as\_json to supply args/get return as json string
+* rename create/retrieve to new/get and add api version and doc header
+* remove pyc file
+* fix namespace clash using relative import and also replace remaining references to DSL\_DEMO\_DIR with call to util fn
+* fix namespace clash on collections
+* remove commented out numpy dependency
+* add get\_datasets back to api since it is used in Data Browser demo
 * tweak api
-* add 'local' services
-* bugfixes
-
-0.5
----
-
-* refactor of api and backend
-* add collections and download api
-* add tag based search in features api
-* add ghcn, nasa services
-* bugfixes
-
-0.4
----
-
-* bad version tag, ignore
-
-
-0.3
----
-
-* Add RPC server
-* Python 2/3 compatible codebase
-* Switch to conda as primary method of installing dependencies
-* add features api
-* add tests
-* bugfixes
-
-
-0.2
----
-
-* basic API implemented
-* metadata stored in yaml files
-* add generic services for testing
-* implement services, filters, collections
-* rename data_services_library to dsl
-* add usgs, ned services
-* bugfixes
-
-
-0.1
----
-
-* Initial Release
+* add collections to REST api
+* add functionality to collections api
+* use utils to get demo dir + add ability to get locations by feature id
+* make collections a dict keyed by name rather than a list
+* get web services working again with api restructure
+* WIP: Add basic collections functionality and move api into separate python files in api dir
+* add basic usgs landcover service (only get\_locations so far). Depends on ulmo feature/raster branch, may not work if bounding box is not specified
+* add basic usgs NED service (only get\_locations so far). Depends on ulmo feature/raster branch
+* added download options for iraq-vitd. clunky but should work for demo
+* add feature id's to geojson responses
+* fix group by provider functionality
+* add chesapeake bay demo service. note need to place test\_chesapeake.vtk in dsl demo dir under a subfolder called chesapeake
+* add type info to enum
+* add fiona to requirements
+* add iraq demo vitd and lidar data service (bounding box only for now). requires data to be put in a demo data folder under the iraq subdirectory and env variable DSL\_DEMO\_DIR to be set
+* add providers endpoints to api description text
+* add v1 to services description text
+* make filters api consistent and update service descriptions page
+* add 'providers' service
+* change service\_name to provider, flatten 'services' response and allow filtering by provider and tunring grouping on/off through query string
+* use 'type' to group filters rather than 'geotype'
+* add filter plugin system based on geotype
+* to be more descriptive use uid rather than id for services
+* bugfix: uid should be id
+* merge
+* tweak api to be more REST like
+* read services from yaml file rather than hardcoding in setup.py
+* Fixed example-points and example-polys so that longitude was printed first
+* Added "example-vitd" to services.  This produces a collection of bounding rectangles, typical of tiled data locations
+* move rest api into a flask blueprint and make it versioned
+* add very simple flask app that creates web api for get\_services and get\_locations
+* rework example-points and example-polys to return valid geojson
+* missed a bbox typo
+* add geojson module dependency
+* rename bounding box to bbox to be consistent with geojson spec
+* rework get\_services to use self registered plugins. Start work on get\_locations
+* cleanup pyc files and add gitignore
+* add a working get\_locations call to usgs-nwis-iv plugin and this is a work in progress output is not in standardized/geojson format yet
+* add first pass at self registering service plugins using 'stevedore' module
+* add first pass at a global available services api call
+* add api stubs
+* add files required to make a python module
+* add api description to readme file
+* first commit

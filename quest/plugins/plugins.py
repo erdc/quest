@@ -1,9 +1,9 @@
+from .base import ProviderBase, IoBase, FilterBase
+from ..util import listify, get_settings
 import importlib
 import inspect
 import pkgutil
 import logging
-from .base import ProviderBase, IoBase, FilterBase
-from ..util import listify, get_settings
 logger = logging.getLogger('quest')
 
 plugin_instances = {
@@ -26,6 +26,15 @@ plugin_base_classes = {
 
 
 def list_plugins(namespace):
+    """Get a specific list of avaliable plugins.
+
+    Args:
+        namespace (str): Key for what type of plugins that you want.
+
+    Returns:
+        A list of plugin names.
+
+    """
     if plugin_instances[namespace] is None:
         load_plugins(namespace)
 
@@ -33,6 +42,21 @@ def list_plugins(namespace):
 
 
 def load_plugins(namespace, names=None):
+    """Loads a specific kind a of plugin.
+
+    Notes:
+        Only key/value pairs that are provided are updated,
+        any other existing pairs are left unchanged or defaults
+        are used.
+
+    Args:
+        namespace (str): Key for what type of plugins that you want.
+        names (list): A list of plugin names to load.
+
+    Returns:
+        A dictionary of plugins with the name as the key, and the object as the value.
+
+    """
     global plugin_instances
 
     names = listify(names)
@@ -58,6 +82,15 @@ def load_plugins(namespace, names=None):
 
 
 def load_providers(update_cache=False):
+    """Get the settings currently being used by QUEST.
+
+    Args:
+        update_cache (bool): A switch to update the plugins.
+
+    Returns:
+        A dictionary of plugins with the name as the key, and the object as the value.
+
+    """
     global plugin_instances
 
     settings = get_settings()
@@ -69,7 +102,7 @@ def load_providers(update_cache=False):
             for uri in settings.get('USER_SERVICES', []):
                 try:
                     plugin = user_provider.UserProvider(uri=uri)
-                    providers['user-' + plugin.name] = plugin
+                    providers[plugin.name] = plugin
                 except Exception as e:
                     logger.error('{} plugin, {} has failed to load, '
                                  'due to the following exception: \n\t{} {}.'

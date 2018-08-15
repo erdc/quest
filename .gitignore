@@ -1,9 +1,20 @@
+## Ignore Quest stuff
 quest.egg-info/
-*.pyc
 quest/.QUEST_Store
 .QUEST_Store
 docs/_build/
+
+## Ignore Mac OS Stuff
+.DS_Store
+
+## Python Stuff
 __pycache__
+.pyc
+.ipynb_checkpoints
+.egg/*
+.eggs/*
+.egg-info/
+
+## Random
 .cache/
 .idea/*
-.eggs/*

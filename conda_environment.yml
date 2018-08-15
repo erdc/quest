@@ -37,7 +37,6 @@ dependencies:
     - psutil
     - pyyaml
     - rasterio
-    - requests
     - sortedcollections
     - tornado
     - ulmo>=0.8.3.2
@@ -52,8 +51,9 @@ dependencies:
     - sphinx_rtd_theme
 
     # plugin dependencies
-    - hs_restclient
     - girder-client
-    - terrapin
+    - hs_restclient
     - ncep_client
     - pillow
+    - requests
+    - terrapin
