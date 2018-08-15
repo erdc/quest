@@ -104,7 +104,6 @@ def load_providers(update_cache=False):
                     plugin = user_provider.UserProvider(uri=uri)
                     providers[plugin.name] = plugin
                 except Exception as e:
-                    # raise e
                     logger.error('{} plugin, {} has failed to load, '
                                  'due to the following exception: \n\t{} {}.'
                                  .format('user', uri, e.__class__.__name__, str(e)))

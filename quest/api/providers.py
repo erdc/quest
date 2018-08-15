@@ -22,7 +22,7 @@ def get_providers(expand=None):
             list of all available providers
 
     """
-    providers = load_providers(update_cache=True)
+    providers = load_providers()
     p = {k: v.metadata for k, v in providers.items()}
     if not expand:
         p = sorted(p.keys())
