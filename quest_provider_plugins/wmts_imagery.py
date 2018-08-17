@@ -65,15 +65,15 @@ class WMTSImageryService(SingleFileServiceBase):
         p = param.ParamOverrides(self, kwargs)
         bbox = listify(p.bbox)
 
-        tile_indices = self._get_indices_from_bbox(*bbox, p.zoom_level)
-        pixel_indices = self._get_indices_from_bbox(*bbox, p.zoom_level, as_pixels=True)
+        tile_indices = self._get_indices_from_bbox(*bbox, zoom_level=p.zoom_level)
+        pixel_indices = self._get_indices_from_bbox(*bbox, zoom_level=p.zoom_level, as_pixels=True)
 
-        tile_bbox = self._get_bbox_from_indices(*tile_indices, p.zoom_level)
-        pixel_bbox = self._get_bbox_from_indices(*pixel_indices, p.zoom_level, from_pixels=True)
+        tile_bbox = self._get_bbox_from_indices(*tile_indices, zoom_level=p.zoom_level)
+        pixel_bbox = self._get_bbox_from_indices(*pixel_indices, zoom_level=p.zoom_level, from_pixels=True)
 
         if p.crop_to_bbox:
             upper_left_corner = tile_bbox[0], tile_bbox[3]
-            crop_bbox = self._get_crop_bbox(pixel_indices, *upper_left_corner, p.zoom_level)
+            crop_bbox = self._get_crop_bbox(pixel_indices, *upper_left_corner, zoom_level=p.zoom_level)
             adjusted_bbox = pixel_bbox
         else:
             crop_bbox = None
@@ -117,9 +117,9 @@ class WMTSImageryService(SingleFileServiceBase):
         x = int(m * 2 ** (zoom_level - 1) * (lon / 180 + 1))
         y = int(m / (2 * math.pi) * 2 ** zoom_level *
                 (math.pi - math.log(math.tan(math.pi / 4 + math.radians(lat) / 2))))
-        
+
         return x, y
-    
+
     @staticmethod
     def _get_coordinates_from_indices(x, y, zoom_level, from_pixels=False):
         """Get the lon/lat coordinates of the top-left corner of a tile/pixel given its indices and zoom level.
@@ -234,7 +234,6 @@ class WMTSImageryService(SingleFileServiceBase):
         xmin_pixel, xmax_pixel = [index - x_pixel_offset for index in pixel_indices[::2]]
         ymin_pixel, ymax_pixel = [index - y_pixel_offset for index in pixel_indices[1::2]]
         return xmin_pixel, ymin_pixel, xmax_pixel, ymax_pixel
-
 
     @staticmethod
     def _download_and_stitch_tiles(url, tile_indices, crop_bbox, zoom_level, max_tiles):
