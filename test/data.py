@@ -339,8 +339,10 @@ DOWNLOAD_OPTIONS_FROM_ALL_SERVICES = {
                   'NAM 181 AFWA Grid - Central America/Caribbean (12-km Resolution)'],
                  ['NAM 182 AFWA Grid - North Pacific  (12-km Resolution)',
                   'NAM 182 AFWA Grid - North Pacific  (12-km Resolution)'],
-                 ['NAM 190 Grid - CONUS (Staggered B-grid on rotated lat/lon grid using the 60 NAM hybrid levels(NAM 12km Domain))',
-                  'NAM 190 Grid - CONUS (Staggered B-grid on rotated lat/lon grid using the 60 NAM hybrid levels(NAM 12km Domain))'],
+                 ['NAM 190 Grid - CONUS (Staggered B-grid on rotated lat/lon grid using the 60 NAM hybrid levels'
+                  '(NAM 12km Domain))',
+                  'NAM 190 Grid - CONUS (Staggered B-grid on rotated lat/lon grid using the 60 NAM hybrid levels'
+                  '(NAM 12km Domain))'],
                  ['NAM 190 Grid - CONUS (Staggered B-grid on rotated latitude/longitude grid (NAM 12km Domain))',
                   'NAM 190 Grid - CONUS (Staggered B-grid on rotated latitude/longitude grid (NAM 12km Domain))'],
                  ['NAM 195 Grid over Puerto Rico (2.5-km Resolution) (NAM Smartinit for NDFD)',
@@ -359,8 +361,10 @@ DOWNLOAD_OPTIONS_FROM_ALL_SERVICES = {
                   'NAM 215 AWIPS Grid - CONUS (20-km Resolution)'],
                  ['NAM 216 AWIPS Grid - Regional - Alaska (45-km Resolution)',
                   'NAM 216 AWIPS Grid - Regional - Alaska (45-km Resolution)'],
-                 ['NAM 218 AWIPS Grid - CONUS (12-km Resolution; full complement of pressure level fields and some surface-based fields)',
-                  'NAM 218 AWIPS Grid - CONUS (12-km Resolution; full complement of pressure level fields and some surface-based fields)'],
+                 ['NAM 218 AWIPS Grid - CONUS (12-km Resolution; full complement of pressure level fields and some '
+                  'surface-based fields)',
+                  'NAM 218 AWIPS Grid - CONUS (12-km Resolution; full complement of pressure level fields and some '
+                  'surface-based fields)'],
                  ['NAM 218 AWIPS Grid - CONUS (12-km Resolution; full complement of surface-based fields)',
                   'NAM 218 AWIPS Grid - CONUS (12-km Resolution; full complement of surface-based fields)'],
                  ['NAM 218 AWIPS Grid - CONUS - (12-km Resolution) (GOES Simulated Brightness Temp.)',
@@ -369,8 +373,10 @@ DOWNLOAD_OPTIONS_FROM_ALL_SERVICES = {
                   'NAM 221 AWIPS Grid - High Resolution North American Master Grid (32-km Resolution)'],
                  ['NAM 221 AWIPS Grid - N. American Master (32-km Resolution) (GOES Simulated Brightness Temp.)',
                   'NAM 221 AWIPS Grid - N. American Master (32-km Resolution) (GOES Simulated Brightness Temp.)'],
-                 ['NAM 242 AWIPS Grid - Over Alaska (11.25 KM Resolution; full complement of pressure level fields and some surface-based fields)',
-                  'NAM 242 AWIPS Grid - Over Alaska (11.25 KM Resolution; full complement of pressure level fields and some surface-based fields)'],
+                 ['NAM 242 AWIPS Grid - Over Alaska (11.25 KM Resolution; full complement of pressure level fields and '
+                  'some surface-based fields)',
+                  'NAM 242 AWIPS Grid - Over Alaska (11.25 KM Resolution; full complement of pressure level fields and '
+                  'some surface-based fields)'],
                  ['NAM 242 AWIPS Grid - Over Alaska (11.25 KM Resolution; full complement of surface-based fields)',
                   'NAM 242 AWIPS Grid - Over Alaska (11.25 KM Resolution; full complement of surface-based fields)'],
                  ['NAM 243 AWIPS Grid - Eastern North Pacific (40-km Resolution) (GOES Simulated Brightness Temp.)',
@@ -400,8 +406,8 @@ DOWNLOAD_OPTIONS_FROM_ALL_SERVICES = {
              {'name': 'url',
               'type': 'ObjectSelector',
               'description': '',
-              'default':
-                  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{Z}/{Y}/{X}',
+              'default': 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/'
+                         '{Z}/{Y}/{X}',
               'range': [
                    ['http://c.tile.openstreetmap.org/{Z}/{X}/{Y}.png',
                     'http://c.tile.openstreetmap.org/{Z}/{X}/{Y}.png'],
