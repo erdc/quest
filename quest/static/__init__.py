@@ -12,7 +12,7 @@ class DatasetStatus:
 
 class ServiceType:
     GEO_DISCRETE = 'geo-discrete'
-    GEO_TYPICAL = 'geo-typical'
+    GEO_SEAMLESS = 'geo-seamless'
     NON_GEO = 'non-geo'
 
 
