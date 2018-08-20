@@ -315,7 +315,7 @@ def stage_for_download(uris, options=None):
         dataset_metadata = get_metadata(dataset_uri)[dataset_uri]
 
         parameter = kwargs.get('parameter') if kwargs else None
-        parameter_name = parameter or "no_paramter"
+        parameter_name = parameter or "no_parameter"
 
         if dataset_metadata['display_name'] == dataset_uri:
             dataset_feature = dataset_metadata['feature']

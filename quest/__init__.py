@@ -10,9 +10,10 @@ from builtins import *
 import pbr.version
 import warnings
 import logging
-from . import api  # NOQA: F401
 
 warnings.filterwarnings("ignore", message="numpy.dtype size changed")
+
+from . import api  # NOQA
 
 logging.getLogger('ulmo').propagate = False
 
