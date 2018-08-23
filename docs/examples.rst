@@ -251,7 +251,7 @@ Download USGS Streamflow Data
      'visualization_path': ''}}
 
 
-Applying Filters
+Applying Tools
 ----------------
 
 Continuing from previous example.
@@ -260,7 +260,7 @@ Continuing from previous example.
 
    In [16]: dataset = datasets[0]
 
-   In [17]: api.get_filters(filters={'dataset': dataset})
+   In [17]: api.get_tools(filters={'dataset': dataset})
    Out[17]: ['ts-flow-duration', 'ts-resample', 'ts-unit-conversion', 'ts-remove-outliers']
 
    In [18]: filter_name = 'ts-resample'

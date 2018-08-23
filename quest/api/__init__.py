@@ -12,8 +12,6 @@ __all__ = (
     'add_features',
     'add_project',
     'add_provider',  # add custom url or local folder as a service
-    'apply_filter',
-    'get_filter_options',
     'authenticate_provider',
     'cancel_tasks',
     'copy',
@@ -29,7 +27,6 @@ __all__ = (
     'get_collections',
     'get_datasets',
     'get_features',
-    'get_filters',
     'get_mapped_parameters',
     'get_metadata',
     'get_parameters',
@@ -43,6 +40,8 @@ __all__ = (
     'get_tags',
     'get_task',
     'get_tasks',
+    'get_tools',
+    'get_tool_options',
     'move',
     'new_collection',
     'new_dataset',
@@ -54,6 +53,7 @@ __all__ = (
     'get_publish_options',
     'remove_project',
     'remove_tasks',
+    'run_tool',
     'save_settings',
     'set_active_project',
     'stage_for_download',
@@ -109,10 +109,10 @@ from .features import (
     new_feature,
 )
 
-from .filters import (
-    get_filters,
-    apply_filter,
-    get_filter_options,
+from .tools import (
+    get_tools,
+    run_tool,
+    get_tool_options,
 )
 
 from .metadata import (
