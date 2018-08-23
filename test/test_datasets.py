@@ -38,7 +38,7 @@ def test_download_datasets():
 
 @pytest.mark.parametrize('service, options', [(k, v) for k, v in DOWNLOAD_OPTIONS_FROM_ALL_SERVICES.items()])
 def test_download_options_for_services(api, service, options):
-    actual = api.download_options(service)[service]
+    actual = api.get_download_options(service)[service]
     expected = options
     assert actual == expected
 
@@ -62,23 +62,23 @@ def test_download_options(api, reset_settings):
     """
     # test get download options from list of service uris
     services = api.get_services()
-    result = api.download_options(services)
+    result = api.get_download_options(services)
     actual = result
     expected = DOWNLOAD_OPTIONS_FROM_ALL_SERVICES
     assert actual == expected
 
     # test get download options from single service as string
-    actual = api.download_options(SERVICE)
+    actual = api.get_download_options(SERVICE)
     expected = {SERVICE: DOWNLOAD_OPTIONS_FROM_ALL_SERVICES[SERVICE]}
     assert actual == expected
 
     # test get download options from feature
-    actual = api.download_options(FEATURE)
+    actual = api.get_download_options(FEATURE)
     expected = {FEATURE: DOWNLOAD_OPTIONS_FROM_ALL_SERVICES[SERVICE]}
     assert actual == expected
 
     # test get download options from dataset
-    actual = api.download_options(DATASET)
+    actual = api.get_download_options(DATASET)
     expected = {DATASET: DOWNLOAD_OPTIONS_FROM_ALL_SERVICES[SERVICE]}
     assert actual == expected
 
@@ -244,5 +244,5 @@ def test_visualize_dataset_options(api, dataset_save_path):
                                },
                 'title': 'Timeseries Vizualization Options'
                 }
-    actual = api.visualize_dataset_options(DATASET)
+    actual = api.get_visualization_options(DATASET)
     assert actual == expected

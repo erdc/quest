@@ -53,7 +53,7 @@ class ExportRaster(FilterBase):
 
         return collection
 
-    def apply_filter_options(self, **kwargs):
+    def get_filter_options(self, **kwargs):
         properties = {
             "export_path": {
                 "type": "string",

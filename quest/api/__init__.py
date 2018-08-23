@@ -13,7 +13,7 @@ __all__ = (
     'add_project',
     'add_provider',  # add custom url or local folder as a service
     'apply_filter',
-    'apply_filter_options',
+    'get_filter_options',
     'authenticate_provider',
     'cancel_tasks',
     'copy',
@@ -22,7 +22,7 @@ __all__ = (
     'delete_provider',
     'download',
     'download_datasets',
-    'download_options',
+    'get_download_options',
     'get_active_project',
     'get_api_version',
     'get_auth_status',
@@ -62,7 +62,7 @@ __all__ = (
     'update_settings',
     'update_settings_from_file',
     'visualize_dataset',
-    'visualize_dataset_options',
+    'get_visualization_options',
 )
 
 from ..util import (
@@ -86,14 +86,14 @@ from .datasets import (
     download,
     publish,
     download_datasets,
-    download_options,
+    get_download_options,
     get_publish_options,
     get_datasets,
     new_dataset,
     open_dataset,
     stage_for_download,
     visualize_dataset,
-    visualize_dataset_options,
+    get_visualization_options,
 )
 
 from .manage import (
@@ -112,7 +112,7 @@ from .features import (
 from .filters import (
     get_filters,
     apply_filter,
-    apply_filter_options,
+    get_filter_options,
 )
 
 from .metadata import (
