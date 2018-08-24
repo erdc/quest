@@ -43,7 +43,7 @@ def extract(service, input_file, output_file, collection, method):
     """
     #create a temporary collection
     col = quest.api.new_collection(collection)
-    col = quest.api.apply_filter('get-elevations-along-path', collection_name=collection, method=method, service=service, input_file=input_file, output_file=output_file)
+    col = quest.api.run_tool('get-elevations-along-path', collection_name=collection, method=method, service=service, input_file=input_file, output_file=output_file)
     click.echo('\n Extracted elevations saved in %s \n' % output_file)
 
 

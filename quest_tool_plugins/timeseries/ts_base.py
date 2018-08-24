@@ -1,4 +1,4 @@
-from quest.plugins import FilterBase
+from quest.plugins import ToolBase
 from quest.api import get_metadata, new_dataset, update_metadata
 from quest.static import DatasetStatus
 from quest import util
@@ -6,7 +6,7 @@ from quest.plugins import load_plugins
 import os
 
 
-class TsBase(FilterBase):
+class TsBase(ToolBase):
     # metadata attributes
     group = 'Timeseries'
     operates_on_datatype = ['timeseries']
@@ -40,7 +40,7 @@ class TsBase(FilterBase):
             },
         }
 
-    def _apply_filter(self):
+    def _run_tool(self):
 
         # if len(datasets) > 1:
         #     raise NotImplementedError('This filter can only be applied to a single dataset')
@@ -66,7 +66,7 @@ class TsBase(FilterBase):
             'datatype': orig_metadata['datatype'],
             'file_format': orig_metadata['file_format'],
             'options': self.options,
-            'status': DatasetStatus.FILTERED,
+            'status': DatasetStatus.DERIVED,
             'message': 'TS Filter Applied'
         }
 

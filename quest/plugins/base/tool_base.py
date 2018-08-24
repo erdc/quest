@@ -69,7 +69,7 @@ class ToolBase(param.Parameterized):
         for dataset in datasets:
             update_metadata(dataset, quest_metadata={
                 'options': self.options,
-                'status': DatasetStatus.TOOLED
+                'status': DatasetStatus.DERIVED
             })
 
         return result

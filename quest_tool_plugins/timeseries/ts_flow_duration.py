@@ -1,11 +1,11 @@
-from quest.plugins import FilterBase
+from quest.plugins import ToolBase
 from quest.api import get_metadata, new_dataset, update_metadata
 from quest import util
 from quest.plugins import load_plugins
 import os
 
 
-class TsFlowDuration(FilterBase):
+class TsFlowDuration(ToolBase):
     _name = 'flow-duration'
     group = 'Timeseries'
 
@@ -14,7 +14,7 @@ class TsFlowDuration(FilterBase):
                                          filters={'datatype': 'timeseries'},
                                          )
 
-    def _apply_filter(self):
+    def _run_tool(self):
 
         dataset = self.dataset
 

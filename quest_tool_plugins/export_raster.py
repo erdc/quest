@@ -6,11 +6,11 @@ DEPRECIATED .... NOT CURRENTLY WORKING WITH NEW API
 from __future__ import print_function
 
 from quest.plugins import ToolBase
-import os
 from quest.util.log import logger
+from quest.api.collections import get_collections
+import os
 
-
-class ExportRaster(ToolBase):
+class ExportRaster(object):
 
     def register(self):
         """Register Timeseries
@@ -30,7 +30,7 @@ class ExportRaster(ToolBase):
 
     def run_tool(self, collection_name, service, location, parameter, export_path, filename, fmt='USGSDEM'):
 
-        collection = get_collection(collection_name)
+        collection = get_collections(collection_name)
         path = collection['path']
         dataset = collection['datasets'][service]['data']
         datafile = os.path.join(path, dataset[location][parameter]['relative_path'])

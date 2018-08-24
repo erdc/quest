@@ -15,7 +15,7 @@ plugin_instances = {
 plugin_namespaces = {
     'provider': 'quest_provider_plugins',
     'io': 'quest_io_plugins',
-    'filters': 'quest_tool_plugins',
+    'tool': 'quest_tool_plugins',
 }
 
 plugin_base_classes = {

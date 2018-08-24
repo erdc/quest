@@ -7,7 +7,7 @@ class DatasetStatus:
     FAILED_DOWNLOAD = 'failed download'
     DOWNLOADED = 'downloaded'
     PENDING = 'pending'
-    TOOLED = 'tool applied'
+    DERIVED = 'tool applied'
 
 
 class ServiceType:

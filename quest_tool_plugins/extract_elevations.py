@@ -22,7 +22,7 @@ import uuid
 from quest.util.log import logger
 
 
-class ExtractElevations(ToolBase):
+class ExtractElevations(object):
     def register(self):
         """Register FFD to NRMM Filter
 

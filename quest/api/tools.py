@@ -33,7 +33,7 @@ def get_tools(filters=None, expand=False, **kwargs):
             all available tools
 
     """
-    avail = [dict(name=k, **v.metadata) for k, v in load_plugins('filters').items()]
+    avail = [dict(name=k, **v.metadata) for k, v in load_plugins('tool').items()]
 
     if filters is not None:
         for k, v in filters.items():
@@ -87,8 +87,8 @@ def run_tool(name, options=None, as_dataframe=None, expand=None, **kwargs):
     options = options or dict()
     options.update(kwargs)
 
-    plugin = load_plugins('filters', name)[name]
-    result = plugin.apply_filter(**options)
+    plugin = load_plugins('tool', name)[name]
+    result = plugin.run_tool(**options)
 
     new_datasets = util.listify(result.get('datasets', []))
     new_features = util.listify(result.get('features', []))
@@ -120,5 +120,5 @@ def get_tool_options(name, fmt='json', **kwargs):
         tool options (json scheme):
             tool options that can be applied when calling quest.api.run_filter
     """
-    plugin = load_plugins('filters', name)[name]
+    plugin = load_plugins('tool', name)[name]
     return plugin.get_tool_options(fmt, **kwargs)

@@ -1,43 +1,50 @@
+"""Functions required run raster filters"""
 from quest.plugins import FilterBase
 from quest import util
+
 from quest.api import get_metadata, new_dataset, update_metadata, new_feature
 from quest.api.projects import active_db
+
 import os
 import rasterio
-import subprocess
-
-import param
 
 
-class RstReprojection(FilterBase):
-    _name = 'raster-reprojection'
-    operates_on_datatype = ['raster', 'discrete-raster']
+class RstBase(FilterBase):
+    # metadata attributes
+    group = 'raster'
+    operates_on_datatype = ['raster']
+    operates_on_geotype = None
+    operates_on_parameters = None
+    produces_datatype = ['raster']
+    produces_geotype = None
+    produces_parameters = None
 
     dataset = util.param.DatasetSelector(default=None,
                                          doc="""Dataset to apply filter to.""",
                                          filters={'datatype': 'raster'},
                                          )
-    new_crs = param.String(default=None,
-                           doc="""New coordinate reference system to project to""")
 
-    def _apply_filter(self):
+    def _run_tool(self):
 
         dataset = self.dataset
 
         # get metadata, path etc from first dataset, i.e. assume all datasets
         # are in same folder. This will break if you try and combine datasets
-        # from different providers
+        # from different service
 
         orig_metadata = get_metadata(dataset)[dataset]
         src_path = orig_metadata['file_path']
 
+        #run filter
+        with rasterio.open(src_path) as src:
+            out_image = self._apply(src, orig_metadata)
+            out_meta = src.profile
+        # save the resulting raster
+        out_meta.update({"dtype": out_image.dtype,
+                        "height": out_image.shape[0],
+                         "width": out_image.shape[1],
+                         "transform": None})
 
-        if self.new_crs is None:
-            raise ValueError("A new coordinated reference system MUST be provided")
-
-        dst_crs = self.new_crs
-
-        # # save the resulting raster
         cname = orig_metadata['collection']
         feature = new_feature(cname,
                               # display_name=self.display_name,
@@ -52,26 +59,20 @@ class RstReprojection(FilterBase):
         self.set_display_name(new_dset)
 
         prj = os.path.dirname(active_db())
-        dst = os.path.join(prj,  cname, new_dset)
+        dst = os.path.join(prj, cname, new_dset)
         util.mkdir_if_doesnt_exist(dst)
-        extension = os.path.splitext(src_path)[1]
-        dst = os.path.join(dst, new_dset + extension)
+        dst = os.path.join(dst, new_dset+'.tif')
 
-        # run filter
-        with rasterio.open(src_path) as src:
-            # write out tif file
-            subprocess.check_output(['gdalwarp', src_path, dst, '-s_srs', src.crs.to_string(), '-t_srs', dst_crs])
+        with rasterio.open(dst, "w", **out_meta) as dest:
+            dest.write(out_image)
 
         self.file_path = dst
-
-        with rasterio.open(dst) as f:
-            geometry = util.bbox2poly(f.bounds.left, f.bounds.bottom, f.bounds.right, f.bounds.top, as_shapely=True)
-        update_metadata(feature, quest_metadata={'geometry': geometry.to_wkt()})
 
         new_metadata = {
             'parameter': orig_metadata['parameter'],
             'datatype': orig_metadata['datatype'],
             'file_format': orig_metadata['file_format'],
+            'unit': orig_metadata['unit']
         }
 
         # update metadata
@@ -82,3 +83,6 @@ class RstReprojection(FilterBase):
         update_metadata(new_dset, quest_metadata=new_metadata)
 
         return {'datasets': new_dset, 'features': feature}
+
+    def _apply(self, df, orig_metadata):
+        raise NotImplementedError
