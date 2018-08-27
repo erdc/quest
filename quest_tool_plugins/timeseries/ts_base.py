@@ -57,7 +57,7 @@ class TsBase(ToolBase):
         df = io.read(orig_metadata['file_path'])
 
         # run filter
-        new_df = self._apply(df)
+        new_df = self._run(df)
 
         # setup new dataset
         new_metadata = {
@@ -65,9 +65,9 @@ class TsBase(ToolBase):
             'unit': new_df.metadata.get('unit'),
             'datatype': orig_metadata['datatype'],
             'file_format': orig_metadata['file_format'],
-            'options': self.options,
+            'options': self.set_options,
             'status': DatasetStatus.DERIVED,
-            'message': 'TS Filter Applied'
+            'message': 'TS Tool Run'
         }
 
         new_dset = new_dataset(orig_metadata['feature'],
@@ -93,5 +93,5 @@ class TsBase(ToolBase):
     #
     #     return schema
 
-    def _apply(self, df):
+    def _run(self, df):
         raise NotImplementedError

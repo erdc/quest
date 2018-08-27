@@ -28,7 +28,7 @@ class TsFlowDuration(ToolBase):
         # apply transformation
 
         # run filter
-        # new_df = self._apply(df, options)
+        # new_df = self._run(df, options)
         metadata = df.metadata
         if 'file_path' in metadata:
             del metadata['file_path']
@@ -44,7 +44,7 @@ class TsFlowDuration(ToolBase):
         new_metadata = {
             'parameter': new_df.metadata.get('parameter'),
             'datatype': orig_metadata['datatype'],
-            'options': self.options,
+            'options': self.set_options,
             'file_format': orig_metadata['file_format'],
             'unit': new_df.metadata.get('unit'),
         }

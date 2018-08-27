@@ -1,4 +1,4 @@
-"""Timeseries Filters
+"""Timeseries Tools
 
 """
 from __future__ import print_function
@@ -56,7 +56,7 @@ class TsRemoveOutliers(TsBase):
     _name = 'ts-remove-outliers'
     sigma = param.Number(doc="values greater than (sigma * std deviation) from median will be filtered out")
 
-    def _apply(self, df):
+    def _run(self, df):
         metadata = df.metadata
         if 'file_path' in metadata:
             del metadata['file_path']
@@ -88,7 +88,7 @@ class TsRemoveOutliers(TsBase):
 #                                     objects=unit_list()
 #                                     )
 #
-#     def _apply(self, df):
+#     def _run(self, df):
 #         if self.to_units is None:
 #             raise ValueError('To_units cannot be None')
 #
@@ -127,7 +127,7 @@ class TsResample(TsBase):
                                   allow_None=False,
                                   )
 
-    def _apply(self, df):
+    def _run(self, df):
         metadata = df.metadata
         if 'file_path' in metadata:
             del metadata['file_path']
@@ -166,7 +166,7 @@ class TsResample(TsBase):
 #
 #         TsBase.register(self, name=name)
 #
-#     def _apply_filter(self, collection_name, service, location, parameter, export_path, filename, start_time=None):
+#     def _run_tool(self, collection_name, service, location, parameter, export_path, filename, start_time=None):
 #
 #         collection = get_collection(collection_name)
 #         path = collection['path']

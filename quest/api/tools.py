@@ -2,8 +2,11 @@
 
 This will eventually hold filter related functionality
 """
+import param
+
 from .. import util
 from ..plugins.plugins import load_plugins
+from .datasets import open_dataset
 from .metadata import get_metadata
 from .tasks import add_async
 
@@ -60,7 +63,7 @@ def get_tools(filters=None, expand=False, **kwargs):
 
 
 @add_async
-def run_tool(name, options=None, as_dataframe=None, expand=None, **kwargs):
+def run_tool(name, options=None, as_dataframe=None, expand=None, as_open_datasets=None, **kwargs):
     """Apply Tool to dataset.
 
     Args:
@@ -72,6 +75,8 @@ def run_tool(name, options=None, as_dataframe=None, expand=None, **kwargs):
             include details of newly created dataset and format as a dict
         as_dataframe (bool, Optional, Default=False):
             include details of newly created dataset and format as a pandas dataframe
+        as_open_datasets (bool, Optional, Default=False):
+            returns datasets as Python data structures rather than Quest IDs
         async (bool,Optional):
             if True, run filter in the background
         kwargs:
@@ -84,14 +89,16 @@ def run_tool(name, options=None, as_dataframe=None, expand=None, **kwargs):
 
 
     """
+    if isinstance(options, param.Parameterized):
+        options = dict(options.get_param_values())
     options = options or dict()
     options.update(kwargs)
 
     plugin = load_plugins('tool', name)[name]
     result = plugin.run_tool(**options)
 
-    new_datasets = util.listify(result.get('datasets', []))
-    new_features = util.listify(result.get('features', []))
+    new_datasets = result.get('datasets', [])
+    new_features = result.get('features', [])
 
     if expand or as_dataframe:
         new_datasets = get_metadata(new_datasets, as_dataframe=True)
@@ -102,6 +109,10 @@ def run_tool(name, options=None, as_dataframe=None, expand=None, **kwargs):
             new_features = util.to_geojson(new_features)['features']
 
     result.update({'datasets': new_datasets, 'features': new_features})
+
+    if as_open_datasets:
+        result['datasets'] = [open_dataset(dataset) for dataset in result['datasets']]
+
 
     return result
 

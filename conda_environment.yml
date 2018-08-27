@@ -56,4 +56,4 @@ dependencies:
     - ncep_client
     - pillow
     - requests
-    - terrapin
+    - whitebox_tools

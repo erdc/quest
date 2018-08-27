@@ -81,6 +81,17 @@ class DatasetListSelector(param.ListSelector):
         return super(DatasetListSelector, self).get_range()
 
 
+class Service(param.Parameterized):
+    service = param.ObjectSelector(default=None, objects=[])
+
+    def __init__(self, parameter=None, service_type=None):
+        services = quest.api.get_services(parameter=parameter, service_type=service_type)
+        service_param = self.params()['service']
+        service_param.objects = services
+        service_param.default = services[0]
+        super().__init__(name='')
+
+
 # PARM to JSON functions
 
 

@@ -14,7 +14,7 @@ class RstReprojection(ToolBase):
     operates_on_datatype = ['raster', 'discrete-raster']
 
     dataset = util.param.DatasetSelector(default=None,
-                                         doc="""Dataset to apply filter to.""",
+                                         doc="""Dataset to run tool on.""",
                                          filters={'datatype': 'raster'},
                                          )
     new_crs = param.String(default=None,
@@ -76,7 +76,7 @@ class RstReprojection(ToolBase):
 
         # update metadata
         new_metadata.update({
-            'options': self.options,
+            'options': self.set_options,
             'file_path': self.file_path,
         })
         update_metadata(new_dset, quest_metadata=new_metadata)
