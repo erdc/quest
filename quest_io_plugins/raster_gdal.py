@@ -21,8 +21,8 @@ class RasterGdal(IoBase):
         "Open raster and return in requested format"
         raster_data = self.read(path)
 
-        if fmt == None or fmt.lower() == 'xarray':
-            xarr =  xr.open_rasterio(path, parse_coordinates=True).isel(band=0)
+        if fmt is None or fmt.lower() == 'xarray':
+            xarr = xr.open_rasterio(path, parse_coordinates=True).isel(band=0)
             if with_nodata:
                 nodata_attr = [k for k in xarr.attrs.keys() if k.lower().startswith('nodata')][0]
                 nodata = xarr.attrs[nodata_attr]

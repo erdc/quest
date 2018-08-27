@@ -5,7 +5,7 @@ import param
 
 from quest.plugins import ToolBase
 from quest import util
-from quest.api import get_metadata, new_dataset, update_metadata, new_feature, open_dataset
+from quest.api import get_metadata, new_dataset, update_metadata, open_dataset
 from quest.api.projects import active_db
 
 from .whitebox_utils import wbt, points_to_shp, raster_to_polygons

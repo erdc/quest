@@ -133,10 +133,10 @@ def get_required_outputs_with_defaults(tool):
     docs = {k: v.strip() for k, v in re.findall('^\s*(.*) -- (.*)', tool.__doc__, re.MULTILINE)}
 
     df = pd.DataFrame([
-                          {'tool': tool.__name__, 'arg_name': k, 'doc': v}
-                          for k, v in docs.items()
-                          if k in required_args and v.startswith('Output')]
-                      )
+        {'tool': tool.__name__, 'arg_name': k, 'doc': v}
+        for k, v in docs.items()
+        if k in required_args and v.startswith('Output')]
+    )
 
     df['output_type'] = df.doc.apply(classify_output)
     df['file_path'] = df.apply(get_output_path, axis=1)
