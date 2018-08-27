@@ -5,12 +5,12 @@ DEPRECIATED .... NOT CURRENTLY WORKING WITH NEW API
 """
 from __future__ import print_function
 
-from quest.plugins import FilterBase
-import os
+from quest.plugins import ToolBase
 from quest.util.log import logger
+from quest.api.collections import get_collections
+import os
 
-
-class ExportRaster(FilterBase):
+class ExportRaster(object):
 
     def register(self):
         """Register Timeseries
@@ -28,9 +28,9 @@ class ExportRaster(FilterBase):
             'produces': None,
         }
 
-    def apply_filter(self, collection_name, service, location, parameter, export_path, filename, fmt='USGSDEM'):
+    def run_tool(self, collection_name, service, location, parameter, export_path, filename, fmt='USGSDEM'):
 
-        collection = get_collection(collection_name)
+        collection = get_collections(collection_name)
         path = collection['path']
         dataset = collection['datasets'][service]['data']
         datafile = os.path.join(path, dataset[location][parameter]['relative_path'])
@@ -53,7 +53,7 @@ class ExportRaster(FilterBase):
 
         return collection
 
-    def get_filter_options(self, **kwargs):
+    def get_tool_options(self, **kwargs):
         properties = {
             "export_path": {
                 "type": "string",

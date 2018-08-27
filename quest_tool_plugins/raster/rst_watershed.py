@@ -1,4 +1,4 @@
-from quest.plugins import FilterBase
+from quest.plugins import ToolBase
 from quest import util
 from quest.api import get_metadata, new_dataset, update_metadata, new_feature
 from quest.api.projects import active_db
@@ -60,7 +60,7 @@ SNAP_ALGORITHMS = {'maximum_flow_accumulation': snap_points_max_flow_acc,
                    'jenson': snap_points_jenson}
 
 
-class RstWatershedDelineation(FilterBase):
+class RstWatershedDelineation(ToolBase):
     _name = 'watershed-delineation'
 
     # metadata attributes
@@ -80,7 +80,7 @@ class RstWatershedDelineation(FilterBase):
                                               filters={'geom_type': 'Point'},
                                               doc="""Watershed outlet points""")
 
-    def _apply_filter(self):
+    def _run_tool(self):
 
         dataset = self.dataset
 
@@ -204,14 +204,14 @@ class RstWatershedDelineation(FilterBase):
         return {'datasets': new_dset, 'features': {'watershed': feature, 'outlet': outlet_feature}}
 
 
-class RstFlowAccum(FilterBase):
+class RstFlowAccum(ToolBase):
     _name = 'flow-accumulation'
     dataset = util.param.DatasetSelector(default=None,
                                          doc="""Dataset to apply filter to.""",
                                          filters={'datatype': 'raster'},
                                          )
 
-    def _apply_filter(self):
+    def _run_tool(self):
 
         dataset = self.dataset
 
@@ -265,7 +265,7 @@ class RstFlowAccum(FilterBase):
         return {'datasets': new_dset}
 
 
-class RstFlowAccumulation(FilterBase):
+class RstFlowAccumulation(ToolBase):
     _name = 'flow-accumulation'
 
     # metadata attributes
@@ -286,7 +286,7 @@ class RstFlowAccumulation(FilterBase):
                                      objects=list(ACCUMULATION_ALGORITHMS.keys()),
                                      )
 
-    def _apply_filter(self):
+    def _run_tool(self):
 
         dataset = self.dataset
 
@@ -327,7 +327,7 @@ class RstFlowAccumulation(FilterBase):
         return {'datasets': new_dset}
 
 
-class RstFill(FilterBase):
+class RstFill(ToolBase):
     _name = 'fill'
 
     # metadata attributes
@@ -348,7 +348,7 @@ class RstFill(FilterBase):
                                      objects=list(FILL_ALGORITHMS.keys()),
                                      )
 
-    def _apply_filter(self):
+    def _run_tool(self):
 
         dataset = self.dataset
 
@@ -391,7 +391,7 @@ class RstFill(FilterBase):
         return {'datasets': new_dset}
 
 
-class RstSnapOutlet(FilterBase):
+class RstSnapOutlet(ToolBase):
     _name = 'watershed-snap-outlet'
 
     # metadata attributes
@@ -417,7 +417,7 @@ class RstSnapOutlet(FilterBase):
     stream_threshold_abs = param.Number(default=100,
                                          doc="""stream threshold specified as an absolute value""")
 
-    def _apply_filter(self):
+    def _run_tool(self):
 
         dataset = self.dataset
 

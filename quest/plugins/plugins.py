@@ -1,4 +1,4 @@
-from .base import ProviderBase, IoBase, FilterBase
+from .base import ProviderBase, IoBase, ToolBase
 from ..util import listify, get_settings
 import importlib
 import inspect
@@ -9,19 +9,19 @@ logger = logging.getLogger('quest')
 plugin_instances = {
     'provider': None,
     'io': None,
-    'filters': None,
+    'tool': None,
 }
 
 plugin_namespaces = {
     'provider': 'quest_provider_plugins',
     'io': 'quest_io_plugins',
-    'filters': 'quest_filter_plugins',
+    'tool': 'quest_tool_plugins',
 }
 
 plugin_base_classes = {
     'provider': ProviderBase,
     'io': IoBase,
-    'filters': FilterBase,
+    'tool': ToolBase,
 }
 
 

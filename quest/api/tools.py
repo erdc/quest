@@ -1,4 +1,4 @@
-"""API functions related to data Filters.
+"""API functions related to data Tools.
 
 This will eventually hold filter related functionality
 """
@@ -8,9 +8,9 @@ from .metadata import get_metadata
 from .tasks import add_async
 
 
-def get_filters(filters=None, expand=False, **kwargs):
+def get_tools(filters=None, expand=False, **kwargs):
 
-    """List available filter plugins
+    """List available tool plugins
 
     Args:
         filters (dict, Optional, Default=None):
@@ -29,11 +29,11 @@ def get_filters(filters=None, expand=False, **kwargs):
 
 
     Returns:
-        filters (list or dict, Default=list):
-            all available filters
+        tools (list or dict, Default=list):
+            all available tools
 
     """
-    avail = [dict(name=k, **v.metadata) for k, v in load_plugins('filters').items()]
+    avail = [dict(name=k, **v.metadata) for k, v in load_plugins('tool').items()]
 
     if filters is not None:
         for k, v in filters.items():
@@ -45,7 +45,7 @@ def get_filters(filters=None, expand=False, **kwargs):
                 geometry = get_metadata(feature).get(feature).get('geometry')
                 if geometry is not None:
                     kwargs['geotype'] = geometry.geom_type
-                return get_filters(filters=kwargs, expand=expand)
+                return get_tools(filters=kwargs, expand=expand)
             elif k == 'group':
                 avail = [f for f in avail if v == f['group']]
             else:
@@ -60,14 +60,14 @@ def get_filters(filters=None, expand=False, **kwargs):
 
 
 @add_async
-def apply_filter(name, options=None, as_dataframe=None, expand=None, **kwargs):
-    """Apply Filter to dataset.
+def run_tool(name, options=None, as_dataframe=None, expand=None, **kwargs):
+    """Apply Tool to dataset.
 
     Args:
         name (string,Required):
             name of filter
         options (dict, Required):
-            a dictionary of arguments to pass to the filter formatted as specified by `get_filter_options`
+            a dictionary of arguments to pass to the filter formatted as specified by `get_tool_options`
         expand (bool, Optional, Default=False):
             include details of newly created dataset and format as a dict
         as_dataframe (bool, Optional, Default=False):
@@ -87,8 +87,8 @@ def apply_filter(name, options=None, as_dataframe=None, expand=None, **kwargs):
     options = options or dict()
     options.update(kwargs)
 
-    plugin = load_plugins('filters', name)[name]
-    result = plugin.apply_filter(**options)
+    plugin = load_plugins('tool', name)[name]
+    result = plugin.run_tool(**options)
 
     new_datasets = util.listify(result.get('datasets', []))
     new_features = util.listify(result.get('features', []))
@@ -106,8 +106,8 @@ def apply_filter(name, options=None, as_dataframe=None, expand=None, **kwargs):
     return result
 
 
-def get_filter_options(name, fmt='json', **kwargs):
-    """Retrieve kwarg options for apply_filter.
+def get_tool_options(name, fmt='json', **kwargs):
+    """Retrieve kwarg options for run_tool.
 
     Args:
         name (string, Required):
@@ -117,8 +117,8 @@ def get_filter_options(name, fmt='json', **kwargs):
         kwargs:
             keyword arguments of options to set and exclude from return value.
     Returns:
-        filter options (json scheme):
-            filter options that can be applied when calling quest.api.apply_filter
+        tool options (json scheme):
+            tool options that can be applied when calling quest.api.run_filter
     """
-    plugin = load_plugins('filters', name)[name]
-    return plugin.get_filter_options(fmt, **kwargs)
+    plugin = load_plugins('tool', name)[name]
+    return plugin.get_tool_options(fmt, **kwargs)

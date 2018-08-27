@@ -1,4 +1,4 @@
-from quest.plugins import FilterBase
+from quest.plugins import ToolBase
 from quest import util
 from quest.api import get_metadata, new_dataset, update_metadata, new_feature
 from quest.api.projects import active_db
@@ -9,7 +9,7 @@ from pyproj import Proj
 import param
 
 
-class RstMerge(FilterBase):
+class RstMerge(ToolBase):
     _name = 'raster-merge'
     group = 'Multi-dataset'
     operates_on_datatype = ['raster','discrete-raster']
@@ -24,7 +24,7 @@ class RstMerge(FilterBase):
                       doc="""bounding box to clip the merged raster to in the form [xmin, ymin, xmax, ymax]""")
 
 
-    def _apply_filter(self):
+    def _run_tool(self):
 
         # if len(datasets) < 2:
         #     raise ValueError('There must be at LEAST two datasets for this filter')

@@ -1,15 +1,12 @@
-from builtins import object
 import abc
 import param
-from future.utils import with_metaclass
 from quest.static import DatasetStatus
 from quest.util import listify, format_json_options
 
 
-class FilterBase(param.Parameterized):
-    """Base class for data filters."""
+class ToolBase(param.Parameterized):
+    """Base class for data tools."""
     _name = None
-    # name = param.String(default='Filter', precedence=-1)
 
     # metadata attributes
     group = None
@@ -23,8 +20,8 @@ class FilterBase(param.Parameterized):
     def __init__(self, **params):
         params.update({'name': self._name})
         # self.register()
-        self._filter_options = None
-        super(FilterBase, self).__init__(**params)
+        self._tool_options = None
+        super(ToolBase, self).__init__(**params)
 
     @property
     def metadata(self):
@@ -48,11 +45,11 @@ class FilterBase(param.Parameterized):
 
     @property
     def description(self):
-        return 'Created by filter {}'.format(self.name)
+        return 'Created by tool {}'.format(self.name)
 
     @abc.abstractmethod
     def register(self):
-        """Register plugin by setting filter name, geotype and uid."""
+        """Register plugin by setting tool name, geotype and uid."""
         pass
 
     def set_display_name(self, dataset):
@@ -60,30 +57,30 @@ class FilterBase(param.Parameterized):
         display_name = '{}-{}'.format(self._name, dataset[:7])
         update_metadata(dataset, display_name=display_name)
 
-    def apply_filter(self, **options):
+    def run_tool(self, **options):
         from quest.api.metadata import update_metadata
-        """Function that applies filter"""
+        """Function that applies tools"""
         options.pop('name', None)
         self.set_param(**options)
 
-        self._filter_options = options or dict(self.get_param_values())
-        result = self._apply_filter()
+        self._tool_options = options or dict(self.get_param_values())
+        result = self._run_tool()
         datasets = listify(result.get('datasets', []))
         for dataset in datasets:
             update_metadata(dataset, quest_metadata={
                 'options': self.options,
-                'status': DatasetStatus.FILTERED
+                'status': DatasetStatus.DERIVED
             })
 
         return result
 
     @abc.abstractmethod
-    def _apply_filter(self, **options):
-        """Function that applies filter"""
+    def _run_tool(self, **options):
+        """Function that applies tools"""
         pass
 
-    def get_filter_options(self, fmt, **kwargs):
-        """Function that applies filter"""
+    def get_tool_options(self, fmt, **kwargs):
+        """Function that applies tools"""
         kwargs.pop('name', None)
         self.set_param(**kwargs)
 
@@ -100,6 +97,6 @@ class FilterBase(param.Parameterized):
 
     @property
     def options(self):
-        return {'filter_applied': self.name,
-                'filter_options': self._filter_options
+        return {'tool_applied': self.name,
+                'tool_options': self._tool_options
                 }

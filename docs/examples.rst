@@ -251,7 +251,7 @@ Download USGS Streamflow Data
      'visualization_path': ''}}
 
 
-Applying Filters
+Applying Tools
 ----------------
 
 Continuing from previous example.
@@ -260,7 +260,7 @@ Continuing from previous example.
 
    In [16]: dataset = datasets[0]
 
-   In [17]: api.get_filters(filters={'dataset': dataset})
+   In [17]: api.get_tools(filters={'dataset': dataset})
    Out[17]: ['ts-flow-duration', 'ts-resample', 'ts-unit-conversion', 'ts-remove-outliers']
 
    In [18]: filter_name = 'ts-resample'
@@ -279,7 +279,7 @@ Continuing from previous example.
 
    In [20]: options = {'method': 'max', 'period': 'daily'}
 
-   In [21]: api.apply_filter(filter_name, datasets=dataset, options=options)
+   In [21]: api.run_filter(filter_name, datasets=dataset, options=options)
    Out[21]: {'datasets': ['db98e371e7a64a02a773004c6ddc90ff'], 'features': []}
 
    In [22]: api.get_metadata('db98e371e7a64a02a773004c6ddc90ff')

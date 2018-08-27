@@ -10,7 +10,7 @@ from builtins import zip
 from past.utils import old_div
 
 from affine import Affine
-from quest.plugins import FilterBase
+from quest.plugins import ToolBase
 from quest import api
 from quest import util
 from geojson import Polygon, Feature, FeatureCollection
@@ -22,7 +22,7 @@ import uuid
 from quest.util.log import logger
 
 
-class ExtractElevations(FilterBase):
+class ExtractElevations(object):
     def register(self):
         """Register FFD to NRMM Filter
 
@@ -43,8 +43,7 @@ class ExtractElevations(FilterBase):
             },
         }
 
-
-    def apply_filter(self, collection_name, service=None, method='nearest', input_file=None, output_file=None, **kwargs):
+    def run_tool(self, collection_name, service=None, method='nearest', input_file=None, output_file=None, **kwargs):
         import rasterio.features
         import fiona
 
@@ -153,7 +152,7 @@ class ExtractElevations(FilterBase):
         collection = api.add_to_collection(collection_name, 'local', new_locs, parameters='elevation')
         return collection
 
-    def get_filter_options(self, **kwargs):
+    def get_tool_options(self, **kwargs):
         services = api.get_services(parameter='elevation', datatype='raster')
         services = [svc['display_name'] for svc in services]
         properties = {
