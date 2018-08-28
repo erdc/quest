@@ -7,9 +7,9 @@ environment:
 #    QUEST_CACHE_DIR: quest_test_cache
   matrix:
     - PYTHON_VERSION: 3.5
-      MINICONDA: C:\Miniconda3
+      MINICONDA: C:\Miniconda3-x64
     - PYTHON_VERSION: 3.6
-      MINICONDA: C:\Miniconda3
+      MINICONDA: C:\Miniconda3-x64
 
 init:
   - "ECHO %PYTHON_VERSION% %MINICONDA%"
