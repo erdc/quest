@@ -7,9 +7,11 @@ environment:
 #    QUEST_CACHE_DIR: quest_test_cache
   matrix:
     - PYTHON_VERSION: 3.5
+      PYTHON_BUILD: 35
       MINICONDA: C:\Miniconda3-x64
     - PYTHON_VERSION: 3.6
       MINICONDA: C:\Miniconda3-x64
+      PYTHON_BUILD: 36
 
 init:
   - "ECHO %PYTHON_VERSION% %MINICONDA%"
@@ -27,6 +29,8 @@ install:
   - "conda info -a"
   - ps: "(Get-Content conda_environment.yml).replace('python=3', \"python=$env:PYTHON_VERSION\") | Set-Content conda_environment.yml"
   - "conda env create -q -n test-environment -f conda_environment.yml"
+  # the following line installs a specific build of pytables. It will hopefully not be necessary on the next release
+  - "conda install -c conda-forge pytables=3.4.4=py%PYTHON_BUILD%h7e76658_1"
   - "activate test-environment"
   - "python setup.py install"
   - "conda list"

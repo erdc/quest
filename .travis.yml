@@ -48,6 +48,7 @@ install:
   - conda env create -q -n test-environment -f conda_environment.yml
   - source activate test-environment
   - python setup.py install
+  - conda list
   - export QUEST_CACHE_DIR=$TRAVIS_BUILD_DIR/quest_test_cache
   - export COVERAGE=$HOME/miniconda/envs/test-environment/lib/python$PYTHON_VERSION/site-packages/quest
 
