@@ -24,6 +24,12 @@ plugin_base_classes = {
     'tool': ToolBase,
 }
 
+plugin_instantiate_funcs = {
+    'provider': lambda x: x(),
+    'io': lambda x: x(),
+    'tool': lambda x: x.instance(),
+}
+
 
 def list_plugins(namespace):
     """Get a specific list of avaliable plugins.
@@ -62,13 +68,14 @@ def load_plugins(namespace, names=None):
     names = listify(names)
     plugin_dict = {}
     plugin_module = importlib.import_module(plugin_namespaces[namespace])
+    get_object = plugin_instantiate_funcs[namespace]
     for _, modname, ispkg in pkgutil.iter_modules(plugin_module.__path__):
         try:
             plugin_name = plugin_namespaces[namespace] + '.' + modname
             plugin_module = importlib.import_module(plugin_name)
             for name, cls in inspect.getmembers(plugin_module, inspect.isclass):
                 if issubclass(cls, plugin_base_classes[namespace]) and cls.__module__.startswith(plugin_name):
-                    obj = cls()
+                    obj = get_object(cls)
                     if names is None or obj.name in names:
                         plugin_dict[obj.name] = obj
         except Exception as e:

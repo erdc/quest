@@ -15,7 +15,6 @@ channels:
 
 dependencies:
     - python=3
-    # - futures  # for python 2 compatibility
 
     # core dependencies
     - click
@@ -56,4 +55,4 @@ dependencies:
     - ncep_client
     - pillow
     - requests
-    - terrapin
+    - whitebox_tools

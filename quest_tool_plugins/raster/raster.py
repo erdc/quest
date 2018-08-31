@@ -11,7 +11,7 @@ class RstUnitConversion(RstBase):
                                     objects=unit_list()
                                     )
 
-    def _apply(self, df, orig_metadata):
+    def _run(self, df, orig_metadata):
         if self.to_units is None:
             raise ValueError('to_units cannot be None')
 
@@ -41,7 +41,7 @@ class RstUnitConversion(RstBase):
 #         def register(self, name='raster-merge-datasets'):
 #             RstBase.register(self, name=name)
 #
-#         def _apply(self, df, options):
+#         def _run(self, df, options):
 #             df = df.read()
 #             unitsMap = {
 #                 "ft3/s": "cu_ft/s",
@@ -77,7 +77,7 @@ class RstUnitConversion(RstBase):
 #     def register(self, name='raster-clip-polygon'):
 #         RstBase.register(self, name=name)
 #
-#     def _apply(self, df, options):
+#     def _run(self, df, options):
 #         # the polygon GeoJSON geometry
 #         bbox = options.get('bbox')
 #         poly = [util.bbox2poly(*util.listify(bbox))]

@@ -4,8 +4,13 @@ from quest.api import get_metadata, new_dataset, update_metadata, new_feature
 from quest.api.projects import active_db
 import os
 import rasterio
+import rasterio.merge
+import rasterio.mask
 import subprocess
 from pyproj import Proj
+from shapely.geometry import box
+from fiona.crs import from_epsg
+import geopandas as gpd
 import param
 
 
@@ -15,7 +20,7 @@ class RstMerge(ToolBase):
     operates_on_datatype = ['raster','discrete-raster']
 
     datasets = util.param.DatasetListSelector(default=None,
-                                              doc="""Dataset to apply filter to.""",
+                                              doc="""Dataset to run tool on.""",
                                               queries=["datatype == 'raster' or datatype == 'discrete-raster'"],
                                               )
     bbox = param.List(default=None,
@@ -60,33 +65,34 @@ class RstMerge(ToolBase):
 
         self.file_path = dst
 
-        with rasterio.open(orig_metadata['file_path']) as first_dataset:
-            projection = first_dataset.crs
-            bands = first_dataset.count
-
-        for file in raster_files:
-            if rasterio.open(file).crs != projection:
-                raise ValueError('Projections for all datasets must be the same')
-            if rasterio.open(file).count != bands:
-                raise ValueError('Band count for all datasets must be the same')
-
-        output_vrt = os.path.splitext(dst)[0] + '.vrt'
-
-        subprocess.check_output(['gdalbuildvrt', '-overwrite', output_vrt] + raster_files)
+        open_datasets = [rasterio.open(d) for d in raster_files]
+        profile = open_datasets[0].profile
+        # hack to avoid nodata out of range of dtype error for NED datasets
+        profile['nodata'] = -9999 if profile['nodata'] == -3.4028234663853e+38 else profile['nodata']
+        new_data, transform = rasterio.merge.merge(open_datasets, nodata=profile['nodata'])
+        for d in open_datasets:
+            d.close()
+        profile.update(transform=transform, driver='GTiff')
+        with rasterio.open(dst, 'w', **profile) as output:
+            output.write(new_data.astype(profile['dtype']))
 
         bbox = self.bbox
 
         if bbox is not None:
-            xmin, ymin, xmax, ymax = bbox
-            p = Proj(projection)
-            if not p.is_latlong():
-                xmin, ymin = p(xmin, ymin)
-                xmax, ymax = p(xmax, ymax)
-            subprocess.check_output(
-                ['gdalwarp', '-overwrite', '-te', str(xmin), str(ymin), str(xmax), str(ymax), output_vrt, dst])
-        else:
-            subprocess.check_output(
-                ['gdal_translate', output_vrt, dst])
+            bbox = box(*bbox)
+            geo = gpd.GeoDataFrame({'geometry': bbox}, index=[0], crs=from_epsg(4326))
+            geo = geo.to_crs(crs=profile['crs'])
+            bbox = geo.geometry
+            print(bbox)
+            with rasterio.open(dst, 'r') as merged:
+                new_data, transform = rasterio.mask.mask(dataset=merged, shapes=bbox, all_touched=True, crop=True)
+
+            profile.update({'height': new_data.shape[1],
+                            'width': new_data.shape[2],
+                            'transform': transform,
+                            })
+            with rasterio.open(dst, 'w', **profile) as clipped:
+                clipped.write(new_data)
 
         new_metadata = {
             'parameter': orig_metadata['parameter'],
@@ -102,7 +108,7 @@ class RstMerge(ToolBase):
 
         # update dataset metadata
         new_metadata.update({
-            'options': self.options,
+            'options': self.set_options,
             'file_path': self.file_path,
         })
         update_metadata(new_dset, quest_metadata=new_metadata)

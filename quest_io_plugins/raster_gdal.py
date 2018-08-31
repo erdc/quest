@@ -4,22 +4,32 @@ from quest.plugins import IoBase
 import os
 import subprocess
 import rasterio
+import xarray as xr
+import numpy as np
 
 
 class RasterGdal(IoBase):
-    """IO for raster datasets using rasterio/gdal."""
+    """IO for raster datasets using xarray or rasterio/gdal."""
     name = 'raster-gdal'
 
     def register(self):
         "Register plugin by setting description and io type."
-        self.description = 'IO for raster datasets using rasterio/gdal.'
+        self.description = 'IO for raster datasets using xarray or rasterio/gdal.'
         self.iotype = 'raster'
 
-    def open(self, path, fmt):
+    def open(self, path, fmt, with_nodata=True):
         "Open raster and return in requested format"
         raster_data = self.read(path)
 
-        if fmt == None or fmt.lower() == 'rasterio':
+        if fmt is None or fmt.lower() == 'xarray':
+            xarr = xr.open_rasterio(path, parse_coordinates=True).isel(band=0)
+            if with_nodata:
+                nodata_attr = [k for k in xarr.attrs.keys() if k.lower().startswith('nodata')][0]
+                nodata = xarr.attrs[nodata_attr]
+                xarr.values[xarr.values == nodata] = np.nan
+            return xarr
+
+        if fmt.lower() == 'rasterio':
             return raster_data
 
         if fmt.lower() == 'array':

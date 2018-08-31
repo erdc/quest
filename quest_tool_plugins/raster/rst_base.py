@@ -1,5 +1,5 @@
 """Functions required run raster filters"""
-from quest.plugins import FilterBase
+from quest.plugins import ToolBase
 from quest import util
 
 from quest.api import get_metadata, new_dataset, update_metadata, new_feature
@@ -9,7 +9,7 @@ import os
 import rasterio
 
 
-class RstBase(FilterBase):
+class RstBase(ToolBase):
     # metadata attributes
     group = 'raster'
     operates_on_datatype = ['raster']
@@ -37,7 +37,7 @@ class RstBase(FilterBase):
 
         #run filter
         with rasterio.open(src_path) as src:
-            out_image = self._apply(src, orig_metadata)
+            out_image = self._run(src, orig_metadata)
             out_meta = src.profile
         # save the resulting raster
         out_meta.update({"dtype": out_image.dtype,
@@ -77,12 +77,12 @@ class RstBase(FilterBase):
 
         # update metadata
         new_metadata.update({
-            'options': self.options,
+            'options': self.set_options,
             'file_path': self.file_path,
         })
         update_metadata(new_dset, quest_metadata=new_metadata)
 
         return {'datasets': new_dset, 'features': feature}
 
-    def _apply(self, df, orig_metadata):
+    def _run(self, df, orig_metadata):
         raise NotImplementedError

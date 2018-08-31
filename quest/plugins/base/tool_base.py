@@ -4,7 +4,7 @@ from quest.static import DatasetStatus
 from quest.util import listify, format_json_options
 
 
-class ToolBase(param.Parameterized):
+class ToolBase(param.ParameterizedFunction):
     """Base class for data tools."""
     _name = None
 
@@ -17,11 +17,14 @@ class ToolBase(param.Parameterized):
     produces_geotype = None
     produces_parameters = None
 
-    def __init__(self, **params):
-        params.update({'name': self._name})
-        # self.register()
-        self._tool_options = None
-        super(ToolBase, self).__init__(**params)
+    @param.parameterized.bothmethod
+    def instance(self, **params):
+        inst = super(ToolBase, self).instance(name=self._name, **params)
+        self._set_options = None
+        return inst
+
+    def __call__(self, **kwargs):
+        return self.run_tool(**kwargs)
 
     @property
     def metadata(self):
@@ -47,6 +50,12 @@ class ToolBase(param.Parameterized):
     def description(self):
         return 'Created by tool {}'.format(self.name)
 
+    @property
+    def set_options(self):
+        return {'tool_applied': self.name,
+                'tool_options': self._set_options
+                }
+
     @abc.abstractmethod
     def register(self):
         """Register plugin by setting tool name, geotype and uid."""
@@ -63,14 +72,17 @@ class ToolBase(param.Parameterized):
         options.pop('name', None)
         self.set_param(**options)
 
-        self._tool_options = options or dict(self.get_param_values())
+        self._set_options = options or dict(self.get_param_values())
         result = self._run_tool()
         datasets = listify(result.get('datasets', []))
+        features = listify(result.get('features', []))
         for dataset in datasets:
             update_metadata(dataset, quest_metadata={
-                'options': self.options,
+                'options': self.set_options,
                 'status': DatasetStatus.DERIVED
             })
+
+        result.update(datasets=datasets, features=features)
 
         return result
 
@@ -94,9 +106,3 @@ class ToolBase(param.Parameterized):
             raise ValueError('{} is an unrecognized format.'.format(fmt))
 
         return schema
-
-    @property
-    def options(self):
-        return {'tool_applied': self.name,
-                'tool_options': self._tool_options
-                }
