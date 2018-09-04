@@ -1,0 +1,16 @@
+{
+  "test_catalog.py::test_add_datasets[python]": true,
+  "test_catalog.py::test_add_features[svc://noaa-ncdc:gsod/028140-99999-python]": true,
+  "test_catalog.py::test_add_features[svc://usgs-ned:19-arc-second/581d2561e4b08da350d5a3b2-python]": true,
+  "test_catalog.py::test_add_features[svc://usgs-nwis:iv/01529950-python]": true,
+  "test_catalog.py::test_new_feature[python]": true,
+  "test_util_config.py::test_update_settings[/var/folders/mp/n1lc1z5n7_lcc3xycfwrs_s8ktm6dh/T/tmp0kvtsuzz-python]": true,
+  "test_util_config.py::test_update_settings[/var/folders/mp/n1lc1z5n7_lcc3xycfwrs_s8ktm6dh/T/tmp1e2hzxqu-python]": true,
+  "test_util_config.py::test_update_settings[/var/folders/mp/n1lc1z5n7_lcc3xycfwrs_s8ktm6dh/T/tmp409yni4w-python]": true,
+  "test_util_config.py::test_update_settings[/var/folders/mp/n1lc1z5n7_lcc3xycfwrs_s8ktm6dh/T/tmp_cam5au0-python]": true,
+  "test_util_config.py::test_update_settings[/var/folders/mp/n1lc1z5n7_lcc3xycfwrs_s8ktm6dh/T/tmpib7b8zvl-python]": true,
+  "test_util_config.py::test_update_settings[/var/folders/mp/n1lc1z5n7_lcc3xycfwrs_s8ktm6dh/T/tmpk1kthina-python]": true,
+  "test_util_config.py::test_update_settings[/var/folders/mp/n1lc1z5n7_lcc3xycfwrs_s8ktm6dh/T/tmpmo70o3mk-python]": true,
+  "test_util_config.py::test_update_settings[/var/folders/mp/n1lc1z5n7_lcc3xycfwrs_s8ktm6dh/T/tmpp6ht73sm-python]": true,
+  "test_util_config.py::test_update_settings[/var/folders/mp/n1lc1z5n7_lcc3xycfwrs_s8ktm6dh/T/tmprbkyu6d1-python]": true
+}
