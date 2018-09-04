@@ -38,8 +38,8 @@ class NcdcServiceBase(TimePeriodServiceBase):
         pmap = self.parameter_map(invert=True)
         return pmap[self.parameter]
 
-    def get_features(self):
-        features = self._get_features()
+    def search_catalog(self):
+        features = self._search_catalog()
 
         # remove locations with invalid coordinates
         valid = pd.notnull(features.latitude) & pd.notnull(features.longitude)
@@ -155,7 +155,7 @@ class NcdcServiceGhcnDaily(NcdcServiceBase):
 
         return data
 
-    def _get_features(self, **kwargs):
+    def _search_catalog(self, **kwargs):
         return ghcn_daily.get_stations(as_dataframe=True)
 
 
@@ -205,7 +205,7 @@ class NcdcServiceGsod(NcdcServiceBase):
 
         return data
 
-    def _get_features(self, **kwargs):
+    def _search_catalog(self, **kwargs):
         features = gsod.get_stations()
         features = pd.DataFrame.from_dict(features, orient='index')
         return features

@@ -7,7 +7,7 @@ import param
 
 class NCEPServiceBase(ServiceBase):
 
-    def get_features(self, **kwargs):
+    def search_catalog(self, **kwargs):
         the_feature = {"service_id": "ncep", "display_name": "ncep", "geometry": box(-180, -90, 180, 90)}
         feature = pd.DataFrame(the_feature, index=[0])
         return feature

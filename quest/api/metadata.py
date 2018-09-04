@@ -56,7 +56,7 @@ def get_metadata(uris, as_dataframe=False):
             selected_features = grp.query('feature == feature').uri.tolist()
             if selected_features:
                 # add selected service features if any
-                features = provider_plugin.get_features(service)
+                features = provider_plugin.search_catalog(service)
                 features = features.loc[selected_features]
                 metadata.append(features)
 

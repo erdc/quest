@@ -56,7 +56,7 @@ class WMTSImageryService(SingleFileServiceBase):
         precedence=5
     )
 
-    def get_features(self, **kwargs):
+    def search_catalog(self, **kwargs):
         the_feature = {"service_id": "WMTS", "display_name": "WMTS", "geometry": box(-180, -90, 180, 90)}
         feature = pd.DataFrame(the_feature, index=[0])
         return feature

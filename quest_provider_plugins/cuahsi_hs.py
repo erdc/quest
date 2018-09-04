@@ -17,7 +17,7 @@ class HSServiceBase(SingleFileServiceBase):
     def hs(self):
         return self.provider.get_hs()
 
-    def get_features(self, **kwargs):
+    def search_catalog(self, **kwargs):
         raise NotImplementedError()
 
 
@@ -35,7 +35,7 @@ class HSGeoService(HSServiceBase):
     ]
     _parameter_map = {}
 
-    def get_features(self, **kwargs):
+    def search_catalog(self, **kwargs):
 
         results = list(self.hs.resources(coverage_type="box", north="90", south="-90", east="180", west="-180"))
 
@@ -91,7 +91,7 @@ class HSNormService(HSServiceBase):
     unmapped_parameters_available = True
     _parameter_map = {}
 
-    def get_features(self, **kwargs):
+    def search_catalog(self, **kwargs):
         results = list(self.hs.resources())
         features = pd.DataFrame(results)
         features['service_id'] = features['resource_id'].apply(str)

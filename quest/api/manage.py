@@ -9,7 +9,7 @@ import shutil
 from ..util.log import logger
 import pandas as pd
 
-from .features import get_features, add_features
+from .catalog import search_catalog, add_datasets
 from .datasets import get_datasets
 from quest.database.database import get_db, db_session
 from .projects import _get_project_dir
@@ -57,7 +57,7 @@ def delete(uris):
                 raise ValueError('Collection does not exists')
 
             # delete all datasets and all features and folder
-            features = get_features(collections=uri)
+            features = search_catalog(collections=uri)
             delete(features)
             with db_session:
                 db.Collection[uri].delete()
@@ -120,7 +120,7 @@ def move(uris, destination_collection, as_dataframe=None, expand=None):
             dataset_metadata = get_metadata(uri)[uri]                                                                                   
             collection_path = os.path.join(project_path, dataset_metadata['collection'])                                                
             feature = dataset_metadata['feature']                                                                                       
-            new_feature = add_features(destination_collection, feature)[0]                                                              
+            new_feature = add_datasets(destination_collection, feature)[0]                                                              
             new_features.append(new_feature)
             _move_dataset(dataset_metadata, collection_path, destination_collection_path, new_feature)           
             new_datasets.append(uri)
@@ -159,7 +159,7 @@ def copy(uris, destination_collection, as_dataframe=None, expand=None):
         if resource == 'features':                                                                                                      
             feature_metadata = get_metadata(uri)[uri]                                                                                   
             collection_path = os.path.join(project_path, feature_metadata['collection'])                                                
-            new_feature = add_features(destination_collection, uri)[0]                                                                  
+            new_feature = add_datasets(destination_collection, uri)[0]                                                                  
             datasets = get_datasets(expand=True, filters={'feature': uri})                                                              
 
             new_features.append(new_feature)
@@ -172,7 +172,7 @@ def copy(uris, destination_collection, as_dataframe=None, expand=None):
             dataset_metadata = get_metadata(uri)[uri]                                                                                   
             collection_path = os.path.join(project_path, dataset_metadata['collection'])                                                
             feature = dataset_metadata['feature']                                                                                       
-            new_feature = add_features(destination_collection, feature)[0]                                                              
+            new_feature = add_datasets(destination_collection, feature)[0]                                                              
 
             new_features.append(new_feature)
 

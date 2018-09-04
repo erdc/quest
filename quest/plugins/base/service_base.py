@@ -94,7 +94,7 @@ class ServiceBase(param.Parameterized):
     def download(self, feature, file_path, dataset, **kwargs):
         raise NotImplementedError()
 
-    def get_features(self, **kwargs):
+    def search_catalog(self, **kwargs):
         """
         should return a pandas dataframe or a python dictionary with
         indexed by feature uid and containing the following columns
@@ -138,7 +138,7 @@ class SingleFileServiceBase(ServiceBase):
     """
     def download(self, feature, file_path, dataset, **kwargs):
         feature_id = util.construct_service_uri(self.provider.name, self.name, feature)
-        feature = self.provider.get_features(self.name).loc[feature_id]
+        feature = self.provider.search_catalog(self.name).loc[feature_id]
         reserved = feature.get('reserved')
         download_url = reserved['download_url']
         fmt = reserved.get('extract_from_zip', '')

@@ -22,7 +22,7 @@ class UsgsNedServiceBase(SingleFileServiceBase):
         'elevation': 'elevation'
     }
 
-    def get_features(self, **kwargs):
+    def search_catalog(self, **kwargs):
         service = self._description
         features = util.to_geodataframe(
             ned.get_raster_availability(service, (-180, -90, 180, 90))

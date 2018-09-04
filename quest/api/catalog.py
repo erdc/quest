@@ -1,7 +1,3 @@
-"""API functions related to Features.
-
-Features are unique identifiers with a web service or collection.
-"""
 import json
 import itertools
 import pandas as pd
@@ -20,22 +16,15 @@ from .tasks import add_async
 
 
 @add_async
-def add_features(collection, features):
-    """Add features to a collection based on the passed in feature uris.
+def add_datasets(collection, datasets):
+    """
 
-    This does not download datasets, it just adds features to a collection.
-    When the features are added into a collection they are given a new
-    feature id.
-
-    If a feature from a service already exists, then it is not re-added instead the
-    uri of the existing feature is returned (i.e. Feature was originally from
-    usgs-nwis but is being copied from one collection to another) without
-    over writing external_uri.
+        *** This method is under a re-work.***
 
     Args:
         collection (string, Required):
             name of collection
-        features (string, comma separated strings,list of strings, or pandas DataFrame, Required):
+        datasets (string, comma separated strings,list of strings, or pandas DataFrame, Required):
             list of features to add to the collection.
 
     Returns:
@@ -46,8 +35,8 @@ def add_features(collection, features):
     if collection not in get_collections():
         raise ValueError('Collection {} does not exist'.format(collection))
 
-    if not isinstance(features, pd.DataFrame):
-        features = get_metadata(features, as_dataframe=True)
+    if not isinstance(datasets, pd.DataFrame):
+        features = get_metadata(datasets, as_dataframe=True)
 
     db = get_db()
     with db_session:
@@ -82,10 +71,10 @@ def add_features(collection, features):
 
 
 @add_async
-def get_features(uris=None, expand=False, as_dataframe=False, as_geojson=False,
+def search_catalog(uris=None, expand=False, as_dataframe=False, as_geojson=False,
                  update_cache=False, filters=None, queries=None,
                  services=None, collections=None, features=None):
-    """Retrieve list of features from resources.
+    """Retrieve list of catalog entries from resources.
 
     Args:
         uris (string or list, Required):
@@ -145,7 +134,7 @@ def get_features(uris=None, expand=False, as_dataframe=False, as_geojson=False,
     for name in services:
         provider, service, feature = util.parse_service_uri(name)
         provider_plugin = plugins.load_providers()[provider]
-        tmp_feats = provider_plugin.get_features(service, update_cache=update_cache, **filters)
+        tmp_feats = provider_plugin.search_catalog(service, update_cache=update_cache, **filters)
         all_features.append(tmp_feats)
 
     # get metadata for features in collections
@@ -223,7 +212,7 @@ def get_features(uris=None, expand=False, as_dataframe=False, as_geojson=False,
 
 
 def _multi_index(d, index):
-    """Helper function for `get_features` filters to index multi-index tags (see `get_tags`)
+    """Helper function for `search_catalog` filters to index multi-index tags (see `get_tags`)
     """
     if not isinstance(index, str):
         return d[index]
@@ -277,9 +266,9 @@ def get_tags(service_uris, update_cache=False, filter=None, as_count=False):
 
 
 @add_async
-def new_feature(collection, display_name=None, geometry=None, geom_type=None, geom_coords=None,
+def new_catalog_entry(collection, display_name=None, geometry=None, geom_type=None, geom_coords=None,
                 description=None, metadata=None):
-    """Add a new feature to a collection.
+    """Add a new entry to a collection.
 
     Args:
         collection (string, Required):

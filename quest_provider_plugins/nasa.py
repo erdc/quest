@@ -32,7 +32,7 @@ class NasaServiceBase(SingleFileServiceBase):
         except ValueError:
             return requests.get(granules_url % (short_name, page_num)).json()['feed']['entry']
 
-    def get_features(self, **kwargs):
+    def search_catalog(self, **kwargs):
 
         page_num = 0
         data = []
