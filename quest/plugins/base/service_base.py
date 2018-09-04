@@ -152,8 +152,8 @@ class SingleFileServiceBase(ServiceBase):
         }
 
     def _download_file(self, path, url, tile_fmt, filename, check_modified=False):
-        util.mkdir_if_doesnt_exist(path)
-        util.mkdir_if_doesnt_exist(os.path.join(path, 'zip'))
+        os.makedirs(path, exist_ok=True)
+        os.makedirs(os.path.join(path, 'zip'), exist_ok=True)
         tile_path = os.path.join(path, filename)
         logger.info('... downloading %s' % url)
 

@@ -4,7 +4,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from quest.plugins import IoBase
-from quest import util
 from quest.util.log import logger
 
 
@@ -29,7 +28,7 @@ class XYHdf5(IoBase):
         """"Write dataframe and metadata to HDF5 store."""
         base, fname = os.path.split(file_path)
 
-        util.mkdir_if_doesnt_exist(base)
+        os.makedirs(base, exist_ok=True)
         with pd.HDFStore(file_path) as h5store:
             h5store.put('dataframe', dataframe)
             h5store.get_storer('dataframe').attrs.metadata = metadata

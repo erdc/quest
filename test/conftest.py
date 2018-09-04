@@ -77,10 +77,7 @@ def get_base_dir(request, pytestconfig):
     skip_cache = request.config.getoption('--skip-slow')
     test_cache_dir = get_or_generate_test_cache(update_cache, skip_cache)
 
-    if hasattr(os, 'symlink'):
-        os.symlink(test_cache_dir, os.path.join(base_dir, 'cache'))
-    else:  # for Python 2 on Windows
-        shutil.copytree(test_cache_dir, os.path.join(base_dir, 'cache'))
+    os.symlink(test_cache_dir, os.path.join(base_dir, 'cache'))
 
     def cleanup():
         try:

@@ -45,14 +45,11 @@ def log_to_file(status=True, filename=default_log_file, log_level=None):
 
     if status:
 
-            from .misc import mkdir_if_doesnt_exist
-
-            mkdir_if_doesnt_exist(os.path.dirname(filename))
+            os.makedirs(os.path.dirname(filename), exist_ok=True)
 
             file_handler = logging.FileHandler(filename)
 
             logger.addHandler(file_handler)
-
 
             if log_level is not None:
                 logger.setLevel(log_level)

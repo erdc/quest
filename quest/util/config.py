@@ -124,8 +124,7 @@ def save_settings(filename=None):
 
     path = os.path.dirname(filename)
     if path:
-        from . import misc
-        misc.mkdir_if_doesnt_exist(path)
+        os.makedirs(path, exist_ok=True)
 
     with open(filename, 'w') as f:
         f.write(yaml.safe_dump(settings, default_flow_style=False))
