@@ -9,7 +9,7 @@ __version__ = '2.3'
 # __all__ needed for autodoc to work
 
 __all__ = (
-    'add_dataset',
+    'add_datasets',
     'add_project',
     'add_provider',  # add custom url or local folder as a service
     'authenticate_provider',

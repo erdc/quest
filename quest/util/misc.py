@@ -403,9 +403,6 @@ def uuid(resource_type):
     """
     uuid = uuid4().hex
 
-    if resource_type == 'feature':
-        uuid = 'f' + uuid[1:]
-
     if resource_type == 'dataset':
         uuid = 'd' + uuid[1:]
 
