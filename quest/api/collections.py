@@ -1,5 +1,4 @@
 """API functions related to Collections."""
-from __future__ import print_function
 from quest.database.database import get_db, db_session
 from .projects import _get_project_dir
 import pandas as pd

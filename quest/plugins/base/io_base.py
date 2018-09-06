@@ -2,7 +2,6 @@
 
 
 """
-from builtins import object
 import abc
 from future.utils import with_metaclass
 
