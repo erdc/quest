@@ -214,7 +214,7 @@ def _update_dataset_file_location(func, dataset_metadata, collection_path, desti
         new_file_path = os.path.normpath(os.path.join(destination_collection_path, rel_path))
         quest_metadata['file_path'] = new_file_path
 
-        util.mkdir_if_doesnt_exist(os.path.split(new_file_path)[0])
+        os.makedirs(os.path.split(new_file_path)[0], exist_ok=True)
         func(file_path, new_file_path)
 
     update_metadata(dataset_metadata['name'], quest_metadata=quest_metadata)

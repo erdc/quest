@@ -4,9 +4,6 @@
     A library for environmental data providers.
     Part of the Environmental Simulator project.
 """
-from __future__ import (absolute_import, division,
-                        print_function, unicode_literals)
-from builtins import *
 import pbr.version
 import warnings
 import logging

@@ -2,8 +2,6 @@
 
 Providers are inferred by aggregating information from service plugins.
 """
-from __future__ import absolute_import
-from __future__ import print_function
 from ..util import save_settings, get_settings, update_settings, parse_service_uri
 from quest.database.database import get_db, db_session
 from ..plugins import load_providers

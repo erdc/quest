@@ -7,7 +7,6 @@ import pandas as pd
 import os
 from ulmo.usgs import nwis
 from quest import util
-from builtins import range
 import param
 
 BASE_PATH = 'usgs-nwis'

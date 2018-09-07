@@ -1,6 +1,4 @@
-from builtins import object
 import abc
-from future.utils import with_metaclass
 from quest import util
 import os
 import pickle
@@ -35,7 +33,7 @@ reserved_geometry_fields = [
 reserved_feature_fields.extend(reserved_geometry_fields)
 
 
-class ProviderBase(with_metaclass(abc.ABCMeta, object)):
+class ProviderBase(metaclass=abc.ABCMeta):
     """Base class for data provider plugins
     """
     service_list = None
@@ -172,7 +170,7 @@ class ProviderBase(with_metaclass(abc.ABCMeta, object)):
 
         if self.use_cache:
             # write to cache_file
-            util.mkdir_if_doesnt_exist(os.path.split(cache_file)[0])
+            os.makedirs(os.path.split(cache_file)[0], exist_ok=True)
             features.to_pickle(cache_file)
 
         self._label_features(features, service)

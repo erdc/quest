@@ -271,7 +271,7 @@ def _new_project(name, display_name=None, description=None, metadata=None, folde
     else:
         path = folder
 
-    util.mkdir_if_doesnt_exist(path)
+    os.makedirs(path, exist_ok=True)
     dbpath = os.path.join(path, PROJECT_DB_FILE)
     if os.path.exists(dbpath):
         raise ValueError('Project database {} already exists, '

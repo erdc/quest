@@ -1,9 +1,7 @@
 """API functions related to Collections."""
-from __future__ import print_function
 from quest.database.database import get_db, db_session
 from .projects import _get_project_dir
 import pandas as pd
-from .. import util
 import os
 
 
@@ -70,7 +68,7 @@ def new_collection(name, display_name=None, description=None, metadata=None):
         metadata = {}
 
     path = os.path.join(_get_project_dir(), name)
-    util.mkdir_if_doesnt_exist(path)
+    os.makedirs(path, exist_ok=True)
 
     db = get_db()
     with db_session:

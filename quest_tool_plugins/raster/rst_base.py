@@ -60,7 +60,7 @@ class RstBase(ToolBase):
 
         prj = os.path.dirname(active_db())
         dst = os.path.join(prj, cname, new_dset)
-        util.mkdir_if_doesnt_exist(dst)
+        os.makedirs(dst, exist_ok=True)
         dst = os.path.join(dst, new_dset+'.tif')
 
         with rasterio.open(dst, "w", **out_meta) as dest:

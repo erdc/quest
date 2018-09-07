@@ -1,13 +1,7 @@
-"""Base Class for I/O plugins
-
-
-"""
-from builtins import object
 import abc
-from future.utils import with_metaclass
 
 
-class IoBase(with_metaclass(abc.ABCMeta, object)):
+class IoBase(metaclass=abc.ABCMeta):
     """Abstract Base class for I/O for different file formats."""
 
     def __init__(self):

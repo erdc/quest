@@ -46,7 +46,7 @@ class WBTFillDepressions(ToolBase):
         self.set_display_name(new_dset)
         prj = os.path.dirname(active_db())
         dst = os.path.join(prj, collection_name, new_dset)
-        util.mkdir_if_doesnt_exist(dst)
+        os.makedirs(dst, exist_ok=True)
         self.file_path = os.path.join(dst, new_dset + '.tiff')
 
         wbt.fill_depressions(elev_file, output=self.file_path)
@@ -222,7 +222,7 @@ class WBTWatershedDelineationWorkflow(ToolBase):
 
         prj = os.path.dirname(active_db())
         dst = os.path.join(prj, collection_name, new_dset)
-        util.mkdir_if_doesnt_exist(dst)
+        os.makedirs(dst, exist_ok=True)
         self.file_path = os.path.join(dst, new_dset + '.tiff')
 
         d8 = wbt.d8_pointer(elev_file)

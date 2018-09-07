@@ -68,7 +68,7 @@ def get_user_service_base():
 
                 dst = os.path.join(dst, file_name)
                 base, _ = os.path.split(dst)
-                util.mkdir_if_doesnt_exist(base)
+                os.makedirs(base, exist_ok=True)
                 final_path.append(dst)
                 if self.is_remote:
                     with warnings.catch_warnings():

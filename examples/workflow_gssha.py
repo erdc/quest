@@ -12,7 +12,6 @@
 8. Applies filter(s) to generate GSSHA input grids.
 9. User specifies parameters such as grid-cell size and precipitation in popup panel (standard filter arguments).
 """
-from __future__ import print_function
 import quest
 
 # bounding box for Camp Lejeune

@@ -1,7 +1,5 @@
-from __future__ import print_function
 import quest
 import geojson
-from builtins import input
 from pprint import pprint
 import json
 

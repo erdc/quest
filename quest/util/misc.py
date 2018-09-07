@@ -1,5 +1,4 @@
 from geojson import LineString, Point, Polygon, Feature, FeatureCollection, MultiPolygon
-from past.builtins import basestring  # for python 2 compatibility
 from .config import get_settings
 from uuid import uuid4, UUID
 
@@ -29,7 +28,7 @@ def _abs_path(path, mkdir=True):
         path = os.path.join(get_quest_dir(), path)
 
     if mkdir:
-        mkdir_if_doesnt_exist(path)
+        os.makedirs(path, exist_ok=True)
 
     return path
 
@@ -264,29 +263,8 @@ def listify(liststr, delimiter=','):
 
     if isinstance(liststr, dict) or isinstance(liststr, list):
         return liststr
-    elif isinstance(liststr, basestring):
-        return [s.strip() for s in liststr.split(delimiter)]
     else:
         return [liststr]
-
-
-def mkdir_if_doesnt_exist(dir_path):
-    """Creates a directory if not already exists.
-
-    Args:
-        dir_path (string): A string of an absolute path to a directory.
-    """
-    # TODO: when we drop Python 2 support then we can replace this whole function with
-    # direct calls to os.makedirs(dir_path, exist_ok=True)
-
-    try:
-        os.makedirs(dir_path, exist_ok=True)
-    except TypeError:  # for Python 2
-        try:
-            os.makedirs(dir_path)
-        except OSError as e:
-            if e.errno != os.errno.EEXIST:
-                raise
 
 
 def parse_service_uri(uri):

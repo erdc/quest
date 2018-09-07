@@ -1,7 +1,6 @@
 """io utilities."""
 import os
 import yaml
-from .misc import mkdir_if_doesnt_exist
 
 
 def read_yaml(path):
@@ -14,6 +13,7 @@ def read_yaml(path):
 
 def write_yaml(path, payload):
     folder, _ = os.path.split(path)
-    mkdir_if_doesnt_exist(folder)
+    os.makedirs(folder, exist_ok=True)
+
     with open(path, 'w') as f:
         yaml.safe_dump(payload, f, default_flow_style=False)
