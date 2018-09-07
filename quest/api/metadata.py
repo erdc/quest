@@ -4,8 +4,6 @@ get/update metadata for projects/collections/datasets.
 """
 
 import pandas as pd
-import geopandas as gpd
-import shapely.wkt
 
 from .. import util
 from .. import plugins
@@ -39,11 +37,9 @@ def get_metadata(uris, as_dataframe=False):
 
     # get metadata for service type uris
     if 'services' in grouped_uris.groups.keys():
-        print("HERE")
         svc_df = grouped_uris.get_group('services')
-        print("1: ", svc_df)
         svc_df[['provider', 'service', 'feature']] = svc_df['uri'].apply(util.parse_service_uri).apply(pd.Series)
-        print("2: ", svc_df)
+
         for (provider, service), grp in svc_df.groupby(['provider', 'service']):
             # First process service uris (without the feature)
 
@@ -51,7 +47,6 @@ def get_metadata(uris, as_dataframe=False):
 
             # select rows where feature field is is None (nan)
             if not grp.query('feature != feature').empty:
-                print("In here")
                 service_metadata = provider_plugin.get_services()[service]
                 index = util.construct_service_uri(provider, service)
                 metadata.append(pd.DataFrame(service_metadata, index=[index]))
@@ -63,9 +58,7 @@ def get_metadata(uris, as_dataframe=False):
             if selected_features:
                 # add selected service features if any
                 features = provider_plugin.search_catalog(service)
-                print("3: ", features)
                 features = features.loc[selected_features]
-                print("4: ", features)
                 metadata.append(features)
 
     if 'publishers' in grouped_uris.groups.keys():
@@ -88,15 +81,10 @@ def get_metadata(uris, as_dataframe=False):
         metadata.append(collections)
 
     if 'datasets' in grouped_uris.groups.keys():
-        # get metadata for datasets
         tmp_df = grouped_uris.get_group('datasets')
         datasets = select_datasets(lambda c: c.name in tmp_df['uri'].tolist())
-        # Need to add the geometry to the list above.
-        datasets = gpd.GeoDataFrame(datasets)
-        if not datasets.empty:
-            datasets['geometry'] = datasets['geometry'].apply(lambda x: x if x is None else shapely.wkt.loads(x))
-            datasets.set_geometry('geometry')
-            datasets.index = datasets['name']
+        datasets = pd.DataFrame(datasets)
+        datasets.set_index('name', inplace=True, drop=False)
         metadata.append(datasets)
 
     metadata = pd.concat(metadata)
@@ -174,8 +162,6 @@ def update_metadata(uris, display_name=None, description=None,
         with db_session:
             if resource == 'collections':
                 entity = db.Collection[uri]
-            elif resource == 'features':
-                entity = db.Feature[uri]
             elif resource == 'datasets':
                 entity = db.Dataset[uri]
 

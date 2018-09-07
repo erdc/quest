@@ -2,10 +2,11 @@
 
 from quest.database.database import get_db, db_session, select_datasets
 from ..plugins import load_providers, load_plugins, list_plugins
-from ..util import logger, parse_service_uri, listify, uuid
+from ..util import logger, parse_service_uri, listify, uuid, classify_uris
+from .collections import get_collections
 from .metadata import get_metadata, update_metadata
 from .projects import _get_project_dir
-from quest.static import DatasetStatus
+from quest.static import DatasetStatus, DatasetSource
 from .tasks import add_async
 import pandas as pd
 import os
@@ -74,25 +75,18 @@ def download_datasets(datasets, raise_on_error=False):
     datasets = get_metadata(datasets, as_dataframe=True)
 
     # filter out non download datasets
-    datasets = datasets[datasets['source'] == 'download']
-    features = datasets['feature'].tolist()
-    features = get_metadata(features, as_dataframe=True)
-    datasets = datasets.join(features[[
-                                'service',
-                                'service_id',
-                             ]],
-                             on='feature')
+    datasets = datasets[datasets['source'] == DatasetSource.WEB_SERVICE]
 
     db = get_db()
     project_path = _get_project_dir()
     status = {}
     for idx, dataset in datasets.iterrows():
         collection_path = os.path.join(project_path, dataset['collection'])
-        feature_uri = dataset['service'] + '/' + dataset['service_id']
+        catalog_entry = dataset["catalog_entry"]
         try:
             update_metadata(idx, quest_metadata={'status': DatasetStatus.PENDING})
             kwargs = dataset['options'] or dict()
-            all_metadata = download(feature_uri,
+            all_metadata = download(catalog_entry,
                                     file_path=collection_path,
                                     dataset=idx, **kwargs)
 
@@ -140,19 +134,17 @@ def get_download_options(uris, fmt='json'):
             quest.api.stage_for_download or quest.api.download
     """
     uris = listify(uris)
+    grouped_uris = classify_uris(uris, as_dataframe=False, exclude=['collections'])
+
+    services = grouped_uris.get('services') or []
+    datasets = grouped_uris.get('datasets') or []
+
+    service_uris = {s: s for s in services}
+    service_uris.update({dataset: get_metadata(dataset)[dataset]['catalog_entry'] for dataset in datasets})
+
     options = {}
-    for uri in uris:
-        service_uri = uri
-        if not service_uri.startswith('svc://'):
-            feature = uri
-            if feature.startswith('d'):
-                feature = get_metadata(uri)[uri]['feature']
-
-            df = get_metadata(feature, as_dataframe=True).iloc[0]
-            df = df['service'] + '/' + df['service_id']
-            service_uri = df
-
-        provider, service, feature = parse_service_uri(service_uri)
+    for uri, service_uri in service_uris.items():
+        provider, service, _ = parse_service_uri(service_uri)
         provider_plugin = load_providers()[provider]
         options[uri] = provider_plugin.get_download_options(service, fmt)
 
@@ -222,7 +214,7 @@ def get_datasets(expand=None, filters=None, queries=None, as_dataframe=None):
 
 
 @add_async
-def new_dataset(feature, source=None, display_name=None,
+def new_dataset(catalog_entry, collection, source=None, display_name=None,
                 description=None, file_path=None, metadata=None):
     """Create a new dataset at a feature.
 
@@ -244,16 +236,20 @@ def new_dataset(feature, source=None, display_name=None,
         uri (string):
             uid of dataset
     """
-    # check if feature exists
-    db = get_db()
-    with db_session:
-        f = db.Feature[feature]
-        if f is None:
-            raise ValueError('feature {} does not exist'.format(feature))
+
+    if collection not in get_collections():
+        raise ValueError("Collection {} does not exist".format(collection))
+
+    if not isinstance(catalog_entry, pd.DataFrame):
+        catalog_entry = get_metadata(catalog_entry, as_dataframe=True)
+    try:
+        catalog_entry = catalog_entry['name'][0]
+    except IndexError:
+        raise ValueError('Entry {} dose not exist'.format(catalog_entry))
 
     name = uuid('dataset')
     if source is None:
-        source = 'user_created'
+        source = DatasetSource.USER
 
     if display_name is None:
         display_name = name
@@ -263,16 +259,18 @@ def new_dataset(feature, source=None, display_name=None,
 
     quest_metadata = {
         'name': name,
-        'feature': feature,
+        'collection': collection,
+        'catalog_entry': catalog_entry,
         'source': source,
         'display_name': display_name,
         'description': description,
         'file_path': file_path,
         'metadata': metadata,
     }
-    if source == 'download':
+    if source == DatasetSource.WEB_SERVICE:
         quest_metadata.update({'status': DatasetStatus.NOT_STAGED})
 
+    db = get_db()
     with db_session:
         db.Dataset(**quest_metadata)
 
@@ -308,9 +306,8 @@ def stage_for_download(uris, options=None):
 
     for uri, kwargs in zip(uris, options):
         # if uid is a feature, create new dataset
+
         dataset_uri = uri
-        if uri.startswith('f'):
-            dataset_uri = new_dataset(uri, source='download')
 
         dataset_metadata = get_metadata(dataset_uri)[dataset_uri]
 
@@ -318,10 +315,8 @@ def stage_for_download(uris, options=None):
         parameter_name = parameter or "no_parameter"
 
         if dataset_metadata['display_name'] == dataset_uri:
-            dataset_feature = dataset_metadata['feature']
-            feature_metadata = get_metadata(dataset_feature)[dataset_feature]
-            service = feature_metadata['service']
-            provider, service, _ = parse_service_uri(service)
+            catalog_entry = dataset_metadata['catalog_entry']
+            provider, service, _ = parse_service_uri(catalog_entry)
             display_name = '{0}-{1}-{2}'.format(provider, parameter_name, dataset_uri[:7])
 
         quest_metadata = {

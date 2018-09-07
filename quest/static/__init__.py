@@ -29,3 +29,7 @@ class DataType:
 
 class FilterGroup:
     pass
+
+class DatasetSource:
+    WEB_SERVICE = 'download'
+    USER = 'user-created'

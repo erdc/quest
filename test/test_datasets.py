@@ -4,8 +4,9 @@ from types import ModuleType
 
 from pandas import DataFrame
 
-from data import DOWNLOAD_OPTIONS_FROM_ALL_SERVICES, SERVICE, FEATURE, DATASET, DATASET_METADATA
+from data import DOWNLOAD_OPTIONS_FROM_ALL_SERVICES, SERVICE, CATALOG_ENTRY, DATASET, DATASET_METADATA
 
+from quest.static import DatasetStatus
 
 ACTIVE_PROJECT = 'test_data'
 
@@ -72,11 +73,6 @@ def test_download_options(api, reset_settings):
     expected = {SERVICE: DOWNLOAD_OPTIONS_FROM_ALL_SERVICES[SERVICE]}
     assert actual == expected
 
-    # test get download options from feature
-    actual = api.get_download_options(FEATURE)
-    expected = {FEATURE: DOWNLOAD_OPTIONS_FROM_ALL_SERVICES[SERVICE]}
-    assert actual == expected
-
     # test get download options from dataset
     actual = api.get_download_options(DATASET)
     expected = {DATASET: DOWNLOAD_OPTIONS_FROM_ALL_SERVICES[SERVICE]}
@@ -96,7 +92,7 @@ def test_get_datasets(api, dataset_save_path):
     actual = api.get_datasets(expand=True)
     expected = {DATASET: DATASET_METADATA}
     expected[DATASET].update({'file_path': dataset_save_path})
-    assert expected[DATASET]['feature'] == actual[DATASET]['feature']
+    assert expected[DATASET]['catalog_entry'] == actual[DATASET]['catalog_entry']
     assert expected[DATASET]['name'] == actual[DATASET]['name']
     # assert actual == expected
     if isinstance(api, ModuleType):  # i.e. not using the RPC server
@@ -116,9 +112,6 @@ def test_get_datasets_with_query(api):
     expected = 1
     assert len(datasets) == expected
 
-    # datasets = api.get_datasets(queries=['file_path != None'])
-    # assert len(datasets) == expected
-
 
 def test_new_dataset(api):
     """Create a new dataset at a feature.
@@ -129,7 +122,7 @@ def test_new_dataset(api):
     Returns:
         uid of dataset
     """
-    new_dataset = api.new_dataset(FEATURE)
+    new_dataset = api.new_dataset(CATALOG_ENTRY, 'col1')
     datasets = api.get_datasets()
     try:
         # test number of datasets
@@ -157,38 +150,31 @@ def test_stage_for_download(api):
     """
 
     # test stage new dataset
-    new_dataset = api.new_dataset(FEATURE)
+    new_dataset = api.new_dataset(CATALOG_ENTRY, 'col1')
     try:
         api.stage_for_download(new_dataset)
         metadata = api.get_metadata(uris=new_dataset)
-        assert metadata[new_dataset]['status'] == 'staged for download'
+        assert metadata[new_dataset]['status'] == DatasetStatus.STAGED
 
         # test set download_options
         download_options = {'parameter': 'streamflow'}
         api.stage_for_download(new_dataset, options=download_options)
         metadata = api.get_metadata(uris=new_dataset)
         assert metadata[new_dataset]['options'] == download_options
-        assert metadata[new_dataset]['status'] == 'staged for download'
+        assert metadata[new_dataset]['status'] == DatasetStatus.STAGED
     finally:
         api.delete(new_dataset)
 
-    # test stage new dataset from feature
-    new_dataset = api.stage_for_download(FEATURE)[0]
-    try:
-        metadata = api.get_metadata(uris=new_dataset)
-        assert metadata[new_dataset]['status'] == 'staged for download'
-    finally:
-        api.delete(new_dataset)
-
-    # test stage list of datasets/features
+    # test stage list of datasets
     download_options = {'parameter': 'streamflow'}
-    new_dataset = api.new_dataset(FEATURE)
-    new_datasets = api.stage_for_download([FEATURE, new_dataset], options=download_options)
+    new_dataset = api.new_dataset(CATALOG_ENTRY, 'col1')
+    new_dataset2 = api.new_dataset(CATALOG_ENTRY, 'col1')
+    new_datasets = api.stage_for_download([new_dataset, new_dataset2], options=download_options)
     try:
         metadata = api.get_metadata(uris=new_datasets)
         for dataset, metadata in metadata.items():
             assert metadata['options'] == download_options
-            assert metadata['status'] == 'staged for download'
+            assert metadata['status'] == DatasetStatus.STAGED
 
         # test different download options
         download_options = [{'parameter': 'streamflow'}, {'parameter': 'water_temperature:daily:mean'}]
@@ -196,7 +182,7 @@ def test_stage_for_download(api):
         metadata = api.get_metadata(uris=new_datasets)
         for i, dataset in enumerate(new_datasets):
             assert metadata[dataset]['options'] == download_options[i]
-            assert metadata[dataset]['status'] == 'staged for download'
+            assert metadata[dataset]['status'] == DatasetStatus.STAGED
     finally:
         api.delete(new_datasets)
 

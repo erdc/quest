@@ -30,12 +30,11 @@ def define_models(db):
         display_name = orm.Optional(str)
         description = orm.Optional(str, nullable=True)
         created_at = orm.Required(datetime, default=datetime.now())
-        geometry = orm.Optional(orm.Json)
         metadata = orm.Optional(orm.Json)
         updated_at = orm.Optional(datetime)
 
         # dataset - metadata
-        parameters = orm.Optional(orm.Json)
+        parameter = orm.Optional(orm.Json)
         unit = orm.Optional(str)
         datatype = orm.Optional(str)
         file_format = orm.Optional(str)
@@ -49,7 +48,6 @@ def define_models(db):
         # setup relationships
         collection = orm.Required(Collection)
         catalog_entry = orm.Required(str)
-        entry_service = orm.Required(str)
         # TODO for now this will just be the service uri with id but will be orm.Required(Catalog)
 
     class Providers(db.Entity):

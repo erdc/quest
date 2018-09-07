@@ -314,22 +314,22 @@ CACHED_SERVICES = [s[0] for s in SERVICES_FEATURE_COUNT]
 ALL_SERVICES = sorted(DOWNLOAD_OPTIONS_FROM_ALL_SERVICES.keys())
 
 SERVICE = 'svc://usgs-nwis:iv'
-FEATURE = 'f92ad0e35d04402ab1b1d4621b48a636'
-DATASET = 'df5c3df3229441fa9c779443f03635e7'
+CATALOG_ENTRY = 'svc://usgs-nwis:iv/01516350'
+DATASET = 'd43d503dc792475bb322ef71ffb885bd'
 
 DATASET_METADATA = {
     'download_status': 'downloaded',
     'download_message': 'success',
-    'name': 'df5c3df3229441fa9c779443f03635e7',
+    'name': 'd43d503dc792475bb322ef71ffb885bd',
     'file_format': 'timeseries-hdf5',
     'datatype': 'timeseries',
-    'feature': 'f92ad0e35d04402ab1b1d4621b48a636',
+    'catalog_entry': 'svc://usgs-nwis:iv/01516350',
     'collection': 'test_data',
     'download_options': '{"parameter": "streamflow"}',
     'dataset_type': 'download',
     'timezone': 'utc',
     'unit': 'ft3/s',
-    'display_name': 'df5c3df3229441fa9c779443f03635e7',
+    'display_name': 'd43d503dc792475bb322ef71ffb885bd',
     'parameter': 'streamflow',
     'metadata': {}
 }

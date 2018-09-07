@@ -10,13 +10,15 @@ from shapely.geometry import shape
 from .. import util
 from .. import plugins
 from quest.database.database import get_db, db_session, select_datasets
+from .datasets import new_dataset
 from .collections import get_collections
 from .metadata import get_metadata
 from .tasks import add_async
+from ..static import DatasetSource
 
 
 @add_async
-def add_datasets(collection, datasets):
+def add_datasets(collection, catalog_entries):
     """
 
     Args:
@@ -29,54 +31,25 @@ def add_datasets(collection, datasets):
         uris (list):
             uris of ?
     """
+    if not isinstance(catalog_entries, pd.DataFrame):
+        entries = get_metadata(catalog_entries, as_dataframe=True)
 
-    if collection not in get_collections():
-        raise ValueError('Collection {} does not exist'.format(collection))
-
-    if not isinstance(datasets, pd.DataFrame):
-        datasets = get_metadata(datasets, as_dataframe=True)
-
-    db = get_db()
-    with db_session:
-        uris = []  # dataset uris inside collection
-        for _, data in datasets.iterrows():
-            data = data.to_dict()
-            row = db.Dataset.select(lambda c:
-                                    c.entry_service == data['service'] and
-                                    c.catalog_entry == data['service_id'] and
-                                    c.collection.name == collection
-                                    ).first()
-            if row is not None:
-                uris.append(row.name)
-                continue
-
-            uri = util.uuid('dataset')
-            geometry = data['geometry']
-            if hasattr(geometry, 'wkt'):
-                geometry = geometry.wkt
-            data.update({
-                    'name': uri,
-                    'collection': collection,
-                    'geometry': geometry,
-                    })
-
-            # ensure dates are serialized before loading into database
-            data = json.loads(json.dumps(data, default=util.to_json_default_handler))
-            db.Dataset(**data)
-            uris.append(uri)
+    uris = []
+    for _, data in entries.iterrows():
+        uri = new_dataset(collection=collection, catalog_entry=data.to_frame().transpose(), source=DatasetSource.WEB_SERVICE)
+        uris.append(uri)
 
     return uris
 
 
 @add_async
 def search_catalog(uris=None, expand=False, as_dataframe=False, as_geojson=False,
-                 update_cache=False, filters=None, queries=None,
-                 services=None, collections=None, datasets=None):
+                 update_cache=False, filters=None, queries=None):
     """Retrieve list of catalog entries from resources.
 
     Args:
         uris (string or list, Required):
-            uris of providers, collections, or ?
+            uris of service_uris
         as_dataframe (bool, Optional, Default=False):
            include feature details and format as a pandas DataFrame indexed by feature uris
         as_geojson (bool, Optional, Default=False):
@@ -94,39 +67,20 @@ def search_catalog(uris=None, expand=False, as_dataframe=False, as_geojson=False
             ? can also be filtered by any other metadata fields
         queries(list, Optional, Default=None):
             list of string arguments to pass to pandas.DataFrame.query to filter the ?
-        services (comma separated strings, or list of strings, Deprecated):
-            list of providers to search in for ?
-        collections (comma separated strings or list of strings, Deprecated):
-            list of collections to search in for ?
-        datasets (comma separated strings or list of strings, Deprecated):
-            list of ? to include in search
 
     Returns:
         datasets (list, geo-json dict or pandas.DataFrame, Default=list):
              datasets of specified service(s), collection(s) or feature(s)
 
     """
-    uris = list(itertools.chain(util.listify(uris) or [],
-                                util.listify(services) or [],
-                                util.listify(collections) or [],
-                                util.listify(datasets) or []))
+    uris = list(itertools.chain(util.listify(uris) or []))
 
     # group uris by type
-    # This might cause some problems.
-    grouped_uris = util.classify_uris(uris, as_dataframe=False, exclude=['datasets'])
-
-    if not any(grouped_uris):
-        raise ValueError('At least one service, collection, or feature uri must be specified.')
+    grouped_uris = util.classify_uris(uris, as_dataframe=False, exclude=['datasets', 'collections'])
 
     services = grouped_uris.get('services') or []
-    collections = grouped_uris.get('collections') or []
-    features = grouped_uris.get('datasets') or []
 
     all_datasets = []
-
-    # get metadata for directly specified ?
-    if features is not None:
-        all_datasets.append(get_metadata(datasets, as_dataframe=True))
 
     # get metadata for ? in providers
     filters = filters or dict()
@@ -137,15 +91,14 @@ def search_catalog(uris=None, expand=False, as_dataframe=False, as_geojson=False
         all_datasets.append(tmp_datasets)
 
     # get metadata for datasets in collections
-        tmp_datasets = select_datasets(lambda c: c.collection.name in collections)
-        tmp_datasets = gpd.GeoDataFrame(tmp_datasets)
+    tmp_datasets = select_datasets(lambda c: c.collection.name in collections)
+    tmp_datasets = gpd.GeoDataFrame(tmp_datasets)
 
     if not tmp_datasets.empty:
-        tmp_datasets['geometry'] = tmp_datasets['geometry'].apply(
-                                    lambda x: x if x is None else shapely.wkt.loads(x))
+        tmp_datasets['geometry'] = tmp_datasets['geometry'].apply(lambda x: x if x is None else shapely.wkt.loads(x))
         tmp_datasets.set_geometry('geometry')
-
         tmp_datasets.index = tmp_datasets['name']
+
     all_datasets.append(tmp_datasets)
 
     # drop duplicates fails when some columns have nested list/tuples like
@@ -158,29 +111,29 @@ def search_catalog(uris=None, expand=False, as_dataframe=False, as_geojson=False
     # apply any specified filters
     # features = features.dropna(axis=1)  # can't index if NaN values exist
     for k, v in filters.items():
-        if features.empty:
+        if datasets.empty:
             break  # if dataframe is empty then doesn't try filtering any further
         else:
             if k == 'bbox':
                 bbox = util.bbox2poly(*[float(x) for x in util.listify(v)], as_shapely=True)
-                idx = features.intersects(bbox)  # http://geopandas.org/reference.html#GeoSeries.intersects
+                idx = datasets.intersects(bbox)  # http://geopandas.org/reference.html#GeoSeries.intersects
                 datasets = datasets[idx]
 
             elif k == 'geom_type':
-                idx = features.geom_type.str.contains(v).fillna(value=False)  # will not work if features is empty
+                idx = datasets.geom_type.str.contains(v).fillna(value=False)  # will not work if features is empty
                 datasets = datasets[idx]
 
             elif k == 'parameter':
-                idx = features.parameters.str.contains(v)
+                idx = datasets.parameters.str.contains(v)
                 datasets = datasets[idx]
 
             elif k == 'display_name':
-                idx = features.display_name.str.contains(v)
+                idx = datasets.display_name.str.contains(v)
                 datasets = datasets[idx]
 
             elif k == 'description':
                 idx = datasets.display_name.str.contains(v)
-                features = datasets[idx]
+                datasets = datasets[idx]
 
             elif k == 'search_terms':
                 idx = np.column_stack([datasets[col].apply(str).str.contains(search_term, na=False)
@@ -267,7 +220,7 @@ def get_tags(service_uris, update_cache=False, filter=None, as_count=False):
 @add_async
 def new_catalog_entry(collection, display_name=None, geometry=None, geom_type=None, geom_coords=None,
                 description=None, metadata=None):
-    """Add a new entry to a collection.
+    """Add a new entry to a catalog either a quest local catalog (table) or file.
 
     Args:
         collection (string, Required):

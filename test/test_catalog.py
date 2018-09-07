@@ -18,8 +18,6 @@ FEATURE_URIS = [
                 'svc://usgs-nwis:iv/01529950',
                 ]
 
-COL2_FEATURES = ['f0cedc0e2652404cb40d03109252961c', 'f623d290dcf54d858905e15a098bf300']
-
 
 @pytest.fixture(params=FEATURE_URIS)
 def catalog(request):
@@ -32,13 +30,6 @@ def test_add_datasets(api, catalog):
     c = api.search_catalog(collections='col1')
     assert len(list(c)) == 1
     assert b == c
-
-
-def test_search_catalog_from_collection(api):
-    c = api.search_catalog(collections='col2')
-    assert len(list(c)) == 2
-    for feature in COL2_FEATURES:
-        assert feature in c
 
 
 @slow
@@ -74,30 +65,21 @@ def test_search_catalog_with_query(api):
     assert abs(len(features) - expected) < tolerance
 
 
-def test_new_catalog_entry(api):
-
-    c = api.new_catalog_entry(collection='col3', display_name='NewFeat', geom_type='Point', geom_coords=[-94.2, 23.4])
-    assert api.get_metadata(c)[c]['display_name'] == 'NewFeat'
-    d = api.search_catalog(collections='col3')
-    assert c in d
-
-
-def test_update_feature(api):
-    metadata = {'new_field': 'test'}
-
-    c = api.update_metadata(COL2_FEATURES, display_name=['New Name', 'New Name'], metadata=metadata)
-    for feature in COL2_FEATURES:
-        assert c[feature]['display_name'] == 'New Name'
-        assert c[feature]['metadata']['new_field'] == 'test'
+# def test_new_catalog_entry(api):
+#
+#     c = api.new_catalog_entry(collection='col3', display_name='NewFeat', geom_type='Point', geom_coords=[-94.2, 23.4])
+#     assert api.get_metadata(c)[c]['display_name'] == 'NewFeat'
+#     d = api.search_catalog(collections='col3')
+#     assert c in d
 
 
-def test_delete_features(api):
-    c = api.new_catalog_entry(collection='col1', display_name='New', geom_type='Point', geom_coords=[-93.2, 21.4])
-    d = api.new_catalog_entry(collection='col1', display_name='AnotherFeat', geom_type='Point',geom_coords=[-84.2, 22.4])
-    api.delete(c)
-    assert len(api.search_catalog(collections='col1')) == 1
-    assert len(api.search_catalog(collections='col1')) == 1
-    assert d in api.search_catalog(collections='col1')
+# def test_delete_features(api):
+#     c = api.new_catalog_entry(collection='col1', display_name='New', geom_type='Point', geom_coords=[-93.2, 21.4])
+#     d = api.new_catalog_entry(collection='col1', display_name='AnotherFeat', geom_type='Point',geom_coords=[-84.2, 22.4])
+#     api.delete(c)
+#     assert len(api.search_catalog(collections='col1')) == 1
+#     assert len(api.search_catalog(collections='col1')) == 1
+#     assert d in api.search_catalog(collections='col1')
 
 
 @slow

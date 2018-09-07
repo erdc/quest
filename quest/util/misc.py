@@ -96,7 +96,7 @@ def bbox2poly(x1, y1, x2, y2, reverse_order=False, as_geojson=False, as_shapely=
     return multi_polygon(polygons=[polygon(poly1), polygon(poly2)])
 
 
-def classify_uris(uris, grouped=True, as_dataframe=True, require_same_type=False, exclude=None):
+def classify_uris(uris, grouped=True, as_dataframe=True, require_same_type=False, exclude=None, raise_if_empty=True):
     """Converts a list of uris into a pandas dataframe.
 
     Notes:
@@ -133,6 +133,10 @@ def classify_uris(uris, grouped=True, as_dataframe=True, require_same_type=False
     df.set_index('uri', drop=False, inplace=True)
 
     grouped_df = df.groupby('type')
+
+    if raise_if_empty:
+        if df.empty:
+            raise ValueError('At least one uri must be specified.')
 
     if exclude is not None:
         for uri_type in exclude:

@@ -11,7 +11,7 @@ import pandas as pd
 
 from .catalog import search_catalog, add_datasets
 from .datasets import get_datasets
-from quest.database.database import get_db, db_session
+from quest.database.database import get_db, db_session, select_datasets
 from .projects import _get_project_dir
 from .collections import get_collections
 from .metadata import get_metadata, update_metadata
@@ -24,13 +24,12 @@ def delete(uris):
     """Delete metadata for resource(s)
 
     WARNING:
-        deleting a feature deletes all associated datasets
-        deleting a collection deletes all associated features and datasets
+        deleting a collection deletes all associated datasets
         TODO deleting dataset files/folders
 
     Args:
         uris (string, comma separated string or list of strings, Required):
-            uri(s) of collection, feature, and/or service to delete
+            uri(s) of collection, and/or dataset to delete
 
     Returns:
         status (bool):
@@ -56,10 +55,10 @@ def delete(uris):
                 logger.error('Collection does not exist: %s', uri)
                 raise ValueError('Collection does not exists')
 
-            # delete all datasets and all features and folder
-            features = search_catalog(collections=uri)
-            delete(features)
             with db_session:
+                datasets = db.Dataset.select(lambda d: d.collection.name == uri)
+                if datasets.count() > 0:
+                    datasets.delete()
                 db.Collection[uri].delete()
 
             path = _get_project_dir()
@@ -68,19 +67,15 @@ def delete(uris):
                 logger.info('deleting all data under path: %s' % path)
                 shutil.rmtree(path)
 
-        if resource == 'features':
-            # delete feature and associated datasets
-            datasets = get_datasets(filters={'feature': uri})
-            delete(datasets)
-
-            with db_session:
-                db.Feature[uri].delete()
-
         if resource == 'datasets':
             # delete dataset and associated dataset files
             with db_session:
-                db.Dataset[uri].delete()
-            # TODO delete data files/folders
+                dataset = db.Dataset[uri]
+                try:
+                    os.remove(dataset.file_path)
+                except (OSError, TypeError):
+                    pass
+                dataset.delete()
 
     return True
 
@@ -101,40 +96,22 @@ def move(uris, destination_collection, as_dataframe=None, expand=None):
     destination_collection_path = os.path.join(project_path, destination_collection)                                                    
 
     new_datasets = []
-    new_features = []
 
-    for uri in uris:                                                                                                                    
-        if resource == 'features':                                                                                                      
-            feature_metadata = get_metadata(uri)[uri]                                                                                   
-            collection_path = os.path.join(project_path, feature_metadata['collection'])                                                
-            datasets = get_datasets(expand=True, filters={'feature': uri})                                                              
-
-            new_features.append(uri)
-
-            for dataset_name, dataset_metadata in datasets.items():                                                                     
-                _move_dataset(dataset_metadata, collection_path, destination_collection_path, uri)                        
-                new_datasets.append(dataset_name)
-            update_metadata(uri, quest_metadata={'collection': destination_collection})                                                 
-
+    for uri in uris:
         if resource == 'datasets':                                                                                                      
             dataset_metadata = get_metadata(uri)[uri]                                                                                   
-            collection_path = os.path.join(project_path, dataset_metadata['collection'])                                                
-            feature = dataset_metadata['feature']                                                                                       
-            new_feature = add_datasets(destination_collection, feature)[0]                                                              
-            new_features.append(new_feature)
-            _move_dataset(dataset_metadata, collection_path, destination_collection_path, new_feature)           
+            collection_path = os.path.join(project_path, dataset_metadata['collection'])
+            _move_dataset(dataset_metadata, collection_path, destination_collection_path)
             new_datasets.append(uri)
 
     if expand or as_dataframe:
         new_datasets = get_metadata(new_datasets, as_dataframe=as_dataframe)
-        new_features = get_metadata(new_features, as_dataframe=as_dataframe)
 
         if as_dataframe:
             new_datasets['quest_type'] = 'dataset'
-            new_features['quest_type'] = 'feature'
-            return pd.concat((new_datasets, new_features))
+            return new_datasets
 
-    return {'features': new_features, 'datasets': new_datasets}
+    return new_datasets
 
 
 @add_async
@@ -153,61 +130,42 @@ def copy(uris, destination_collection, as_dataframe=None, expand=None):
     destination_collection_path = os.path.join(project_path, destination_collection)                                                    
 
     new_datasets = []
-    new_features = []
 
-    for uri in uris:                                                                                                                    
-        if resource == 'features':                                                                                                      
-            feature_metadata = get_metadata(uri)[uri]                                                                                   
-            collection_path = os.path.join(project_path, feature_metadata['collection'])                                                
-            new_feature = add_datasets(destination_collection, uri)[0]                                                                  
-            datasets = get_datasets(expand=True, filters={'feature': uri})                                                              
-
-            new_features.append(new_feature)
-
-            for dataset_name, dataset_metadata in datasets.items():                                                                     
-                new_dataset = _copy_dataset(dataset_metadata, collection_path, destination_collection_path, new_feature)                
-                new_datasets.append(new_dataset)
-
+    for uri in uris:
         if resource == 'datasets':                                                                                                      
             dataset_metadata = get_metadata(uri)[uri]                                                                                   
-            collection_path = os.path.join(project_path, dataset_metadata['collection'])                                                
-            feature = dataset_metadata['feature']                                                                                       
-            new_feature = add_datasets(destination_collection, feature)[0]                                                              
+            collection_path = os.path.join(project_path, dataset_metadata['collection'])
 
-            new_features.append(new_feature)
-
-            new_datasets.append(_copy_dataset(dataset_metadata, collection_path, destination_collection_path, new_feature))
+            new_datasets.append(_copy_dataset(dataset_metadata, collection_path, destination_collection_path))
 
     if expand or as_dataframe:
         new_datasets = get_metadata(new_datasets, as_dataframe=as_dataframe)
-        new_features = get_metadata(new_features, as_dataframe=as_dataframe)
 
         if as_dataframe:
             new_datasets['quest_type'] = 'dataset'
-            new_features['quest_type'] = 'feature'
-            return pd.concat((new_datasets, new_features))
+            return new_datasets
 
-    return {'features': new_features, 'datasets': new_datasets}
+    return new_datasets
 
 
-def _copy_dataset(dataset_metadata, collection_path, destination_collection_path, feature):
+def _copy_dataset(dataset_metadata, collection_path, destination_collection_path):
     new_name = util.uuid('dataset')
     db = get_db()
     with db_session:
         db_metadata = db.Dataset[dataset_metadata['name']].to_dict()
-        db_metadata.update(feature=feature, name=new_name)
+        db_metadata.update(name=new_name)
         db.Dataset(**db_metadata)
     
-    _update_dataset_file_location(shutil.copy2, db_metadata, collection_path, destination_collection_path, feature)
+    _update_dataset_file_location(shutil.copy2, db_metadata, collection_path, destination_collection_path)
     return new_name
 
 
-def _move_dataset(dataset_metadata, collection_path, destination_collection_path, feature):
-    _update_dataset_file_location(shutil.move, dataset_metadata, collection_path, destination_collection_path, feature)
+def _move_dataset(dataset_metadata, collection_path, destination_collection_path):
+    _update_dataset_file_location(shutil.move, dataset_metadata, collection_path, destination_collection_path)
 
 
-def _update_dataset_file_location(func, dataset_metadata, collection_path, destination_collection_path, feature):
-    quest_metadata = {'feature': feature}
+def _update_dataset_file_location(func, dataset_metadata, collection_path, destination_collection_path):
+    quest_metadata = {}
     file_path = dataset_metadata['file_path']
     if file_path is not None:
         rel_path = os.path.relpath(file_path, collection_path)
