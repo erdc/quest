@@ -22,20 +22,20 @@ COL2_FEATURES = ['f0cedc0e2652404cb40d03109252961c', 'f623d290dcf54d858905e15a09
 
 
 @pytest.fixture(params=FEATURE_URIS)
-def feature(request):
+def catalog(request):
     return request.param
 
 
 @slow
-def test_add_features(api, feature):
-    b = api.add_features('col1', feature)
-    c = api.get_features(collections='col1')
+def test_add_datasets(api, catalog):
+    b = api.add_datasets('col1', catalog)
+    c = api.search_catalog(collections='col1')
     assert len(list(c)) == 1
     assert b == c
 
 
-def test_get_features_from_collection(api):
-    c = api.get_features(collections='col2')
+def test_search_catalog_from_collection(api):
+    c = api.search_catalog(collections='col2')
     assert len(list(c)) == 2
     for feature in COL2_FEATURES:
         assert feature in c
@@ -43,42 +43,42 @@ def test_get_features_from_collection(api):
 
 @slow
 @pytest.mark.parametrize("service, expected, tolerance", SERVICES_FEATURE_COUNT)
-def test_get_features_from_service(api, service, expected, tolerance):
-    features = api.get_features(service)
+def test_search_catalog_from_service(api, service, expected, tolerance):
+    features = api.search_catalog(service)
     # assert number of features is within tolerance of expected
     assert abs(len(features) - expected) < tolerance
 
 
 @slow
-def test_get_features_with_search_term(api):
-    features = api.get_features('svc://noaa-ncdc:ghcn-daily', filters={'search_terms': ['ZI']})
+def test_search_catalog_with_search_term(api):
+    features = api.search_catalog('svc://noaa-ncdc:ghcn-daily', filters={'search_terms': ['ZI']})
     expected = 270
     tolerance = 10
     assert abs(len(features) - expected) < tolerance
 
 
 @slow
-def test_get_features_with_tag(api):
-    features = api.get_features('svc://noaa-ncdc:ghcn-daily', filters={'country': 'ZI'})
+def test_search_catalog_with_tag(api):
+    features = api.search_catalog('svc://noaa-ncdc:ghcn-daily', filters={'country': 'ZI'})
     expected = 20
     tolerance = 5
     assert abs(len(features) - expected) < tolerance
 
 
 @slow
-def test_get_features_with_query(api):
-    features = api.get_features('svc://noaa-ncdc:ghcn-daily',
+def test_search_catalog_with_query(api):
+    features = api.search_catalog('svc://noaa-ncdc:ghcn-daily',
                                 queries=["display_name == 'DALGARANGA' or display_name == 'TARDIE STATION'"])
     expected = 2
     tolerance = 1
     assert abs(len(features) - expected) < tolerance
 
 
-def test_new_feature(api):
+def test_new_catalog_entry(api):
 
-    c = api.new_feature(collection='col3', display_name='NewFeat', geom_type='Point', geom_coords=[-94.2, 23.4])
+    c = api.new_catalog_entry(collection='col3', display_name='NewFeat', geom_type='Point', geom_coords=[-94.2, 23.4])
     assert api.get_metadata(c)[c]['display_name'] == 'NewFeat'
-    d = api.get_features(collections='col3')
+    d = api.search_catalog(collections='col3')
     assert c in d
 
 
@@ -92,11 +92,12 @@ def test_update_feature(api):
 
 
 def test_delete_features(api):
-    c = api.new_feature(collection='col1', display_name='New', geom_type='Point', geom_coords=[-93.2, 21.4])
-    d = api.new_feature(collection='col1', display_name='AnotherFeat', geom_type='Point',geom_coords=[-84.2, 22.4])
+    c = api.new_catalog_entry(collection='col1', display_name='New', geom_type='Point', geom_coords=[-93.2, 21.4])
+    d = api.new_catalog_entry(collection='col1', display_name='AnotherFeat', geom_type='Point',geom_coords=[-84.2, 22.4])
     api.delete(c)
-    assert len(api.get_features(collections='col1')) == 1
-    assert d in api.get_features(collections='col1')
+    assert len(api.search_catalog(collections='col1')) == 1
+    assert len(api.search_catalog(collections='col1')) == 1
+    assert d in api.search_catalog(collections='col1')
 
 
 @slow

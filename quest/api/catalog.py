@@ -1,7 +1,3 @@
-"""API functions related to Features.
-
-Features are unique identifiers with a web service or collection.
-"""
 import json
 import itertools
 import pandas as pd
@@ -13,57 +9,48 @@ from shapely.geometry import shape
 
 from .. import util
 from .. import plugins
-from quest.database.database import get_db, db_session, select_features
+from quest.database.database import get_db, db_session, select_datasets
 from .collections import get_collections
 from .metadata import get_metadata
 from .tasks import add_async
 
 
 @add_async
-def add_features(collection, features):
-    """Add features to a collection based on the passed in feature uris.
-
-    This does not download datasets, it just adds features to a collection.
-    When the features are added into a collection they are given a new
-    feature id.
-
-    If a feature from a service already exists, then it is not re-added instead the
-    uri of the existing feature is returned (i.e. Feature was originally from
-    usgs-nwis but is being copied from one collection to another) without
-    over writing external_uri.
+def add_datasets(collection, datasets):
+    """
 
     Args:
         collection (string, Required):
             name of collection
-        features (string, comma separated strings,list of strings, or pandas DataFrame, Required):
-            list of features to add to the collection.
+        datasets (string, comma separated strings,list of strings, or pandas DataFrame, Required):
+            list of ? to add to the collection.
 
     Returns:
         uris (list):
-            uris of features
+            uris of ?
     """
 
     if collection not in get_collections():
         raise ValueError('Collection {} does not exist'.format(collection))
 
-    if not isinstance(features, pd.DataFrame):
-        features = get_metadata(features, as_dataframe=True)
+    if not isinstance(datasets, pd.DataFrame):
+        datasets = get_metadata(datasets, as_dataframe=True)
 
     db = get_db()
     with db_session:
-        uris = []  # feature uris inside collection
-        for _, data in features.iterrows():
+        uris = []  # dataset uris inside collection
+        for _, data in datasets.iterrows():
             data = data.to_dict()
-            row = db.Feature.select(lambda c:
-                                    c.service == data['service'] and
-                                    c.service_id == data['service_id'] and
+            row = db.Dataset.select(lambda c:
+                                    c.entry_service == data['service'] and
+                                    c.catalog_entry == data['service_id'] and
                                     c.collection.name == collection
                                     ).first()
             if row is not None:
                 uris.append(row.name)
                 continue
 
-            uri = util.uuid('feature')
+            uri = util.uuid('dataset')
             geometry = data['geometry']
             if hasattr(geometry, 'wkt'):
                 geometry = geometry.wkt
@@ -75,21 +62,21 @@ def add_features(collection, features):
 
             # ensure dates are serialized before loading into database
             data = json.loads(json.dumps(data, default=util.to_json_default_handler))
-            db.Feature(**data)
+            db.Dataset(**data)
             uris.append(uri)
 
     return uris
 
 
 @add_async
-def get_features(uris=None, expand=False, as_dataframe=False, as_geojson=False,
+def search_catalog(uris=None, expand=False, as_dataframe=False, as_geojson=False,
                  update_cache=False, filters=None, queries=None,
-                 services=None, collections=None, features=None):
-    """Retrieve list of features from resources.
+                 services=None, collections=None, datasets=None):
+    """Retrieve list of catalog entries from resources.
 
     Args:
         uris (string or list, Required):
-            uris of providers, collections, or features
+            uris of providers, collections, or ?
         as_dataframe (bool, Optional, Default=False):
            include feature details and format as a pandas DataFrame indexed by feature uris
         as_geojson (bool, Optional, Default=False):
@@ -97,34 +84,35 @@ def get_features(uris=None, expand=False, as_dataframe=False, as_geojson=False,
         update_cache (bool, Optional,Default=False):
             if True, update metadata cache
         filters (dict, Optional, Default=None):
-            filter features by one or more of the available filters
+            filter ? by one or more of the available filters
                 available filters:
-                    geom_type (string, optional): filter features by geom_type,
+                    geom_type (string, optional): filter ? by geom_type,
                         i.e. point/line/polygon
-                    parameter (string, optional): filter features by parameter
-                    bbox (string, optional): filter features by bounding box
+                    parameter (string, optional): filter ? by parameter
+                    bbox (string, optional): filter ? by bounding box
 
-            Features can also be filtered by any other metadata fields
+            ? can also be filtered by any other metadata fields
         queries(list, Optional, Default=None):
-            list of string arguments to pass to pandas.DataFrame.query to filter the features
+            list of string arguments to pass to pandas.DataFrame.query to filter the ?
         services (comma separated strings, or list of strings, Deprecated):
-            list of providers to search in for features
+            list of providers to search in for ?
         collections (comma separated strings or list of strings, Deprecated):
-            list of collections to search in for features
-        features (comma separated strings or list of strings, Deprecated):
-            list of features to include in search
+            list of collections to search in for ?
+        datasets (comma separated strings or list of strings, Deprecated):
+            list of ? to include in search
 
     Returns:
-        features (list, geo-json dict or pandas.DataFrame, Default=list):
-             features of specified service(s), collection(s) or feature(s)
+        datasets (list, geo-json dict or pandas.DataFrame, Default=list):
+             datasets of specified service(s), collection(s) or feature(s)
 
     """
     uris = list(itertools.chain(util.listify(uris) or [],
                                 util.listify(services) or [],
                                 util.listify(collections) or [],
-                                util.listify(features) or []))
+                                util.listify(datasets) or []))
 
     # group uris by type
+    # This might cause some problems.
     grouped_uris = util.classify_uris(uris, as_dataframe=False, exclude=['datasets'])
 
     if not any(grouped_uris):
@@ -132,40 +120,40 @@ def get_features(uris=None, expand=False, as_dataframe=False, as_geojson=False,
 
     services = grouped_uris.get('services') or []
     collections = grouped_uris.get('collections') or []
-    features = grouped_uris.get('features') or []
+    features = grouped_uris.get('datasets') or []
 
-    all_features = []
+    all_datasets = []
 
-    # get metadata for directly specified features
+    # get metadata for directly specified ?
     if features is not None:
-        all_features.append(get_metadata(features, as_dataframe=True))
+        all_datasets.append(get_metadata(datasets, as_dataframe=True))
 
-    # get metadata for features in providers
+    # get metadata for ? in providers
     filters = filters or dict()
     for name in services:
         provider, service, feature = util.parse_service_uri(name)
         provider_plugin = plugins.load_providers()[provider]
-        tmp_feats = provider_plugin.get_features(service, update_cache=update_cache, **filters)
-        all_features.append(tmp_feats)
+        tmp_datasets = provider_plugin.search_catalog(service, update_cache=update_cache, **filters)
+        all_datasets.append(tmp_datasets)
 
-    # get metadata for features in collections
-    tmp_feats = select_features(lambda c: c.collection.name in collections)
-    tmp_feats = gpd.GeoDataFrame(tmp_feats)
+    # get metadata for datasets in collections
+        tmp_datasets = select_datasets(lambda c: c.collection.name in collections)
+        tmp_datasets = gpd.GeoDataFrame(tmp_datasets)
 
-    if not tmp_feats.empty:
-        tmp_feats['geometry'] = tmp_feats['geometry'].apply(
+    if not tmp_datasets.empty:
+        tmp_datasets['geometry'] = tmp_datasets['geometry'].apply(
                                     lambda x: x if x is None else shapely.wkt.loads(x))
-        tmp_feats.set_geometry('geometry')
+        tmp_datasets.set_geometry('geometry')
 
-        tmp_feats.index = tmp_feats['name']
-    all_features.append(tmp_feats)
+        tmp_datasets.index = tmp_datasets['name']
+    all_datasets.append(tmp_datasets)
 
     # drop duplicates fails when some columns have nested list/tuples like
     # _geom_coords. so drop based on index
-    features = pd.concat(all_features)
-    features['index'] = features.index
-    features = features.drop_duplicates(subset='index')
-    features = features.set_index('index').sort_index()
+    datasets = pd.concat(all_datasets)
+    datasets['index'] = datasets.index
+    datasets = datasets.drop_duplicates(subset='index')
+    datasets = datasets.set_index('index').sort_index()
 
     # apply any specified filters
     # features = features.dropna(axis=1)  # can't index if NaN values exist
@@ -176,54 +164,54 @@ def get_features(uris=None, expand=False, as_dataframe=False, as_geojson=False,
             if k == 'bbox':
                 bbox = util.bbox2poly(*[float(x) for x in util.listify(v)], as_shapely=True)
                 idx = features.intersects(bbox)  # http://geopandas.org/reference.html#GeoSeries.intersects
-                features = features[idx]
+                datasets = datasets[idx]
 
             elif k == 'geom_type':
                 idx = features.geom_type.str.contains(v).fillna(value=False)  # will not work if features is empty
-                features = features[idx]
+                datasets = datasets[idx]
 
             elif k == 'parameter':
                 idx = features.parameters.str.contains(v)
-                features = features[idx]
+                datasets = datasets[idx]
 
             elif k == 'display_name':
                 idx = features.display_name.str.contains(v)
-                features = features[idx]
+                datasets = datasets[idx]
 
             elif k == 'description':
-                idx = features.display_name.str.contains(v)
-                features = features[idx]
+                idx = datasets.display_name.str.contains(v)
+                features = datasets[idx]
 
             elif k == 'search_terms':
-                idx = np.column_stack([features[col].apply(str).str.contains(search_term, na=False)
-                                       for col, search_term in itertools.product(features.columns, v)]).any(axis=1)
-                features = features[idx]
+                idx = np.column_stack([datasets[col].apply(str).str.contains(search_term, na=False)
+                                       for col, search_term in itertools.product(datasets.columns, v)]).any(axis=1)
+                datasets = datasets[idx]
 
             else:
-                idx = features.metadata.map(lambda x: _multi_index(x, k) == v)
-                features = features[idx]
+                idx = datasets.metadata.map(lambda x: _multi_index(x, k) == v)
+                datasets = datasets[idx]
 
     if queries is not None:
         for query in queries:
-            features = features.query(query)
+            datasets = datasets.query(query)
 
     if not (expand or as_dataframe or as_geojson):
-        return features.index.astype('unicode').tolist()
+        return datasets.index.astype('unicode').tolist()
 
     if as_geojson:
-        if features.empty:
+        if datasets.empty:
             return geojson.FeatureCollection([])
         else:
-            return json.loads(features.to_json(default=util.to_json_default_handler))
+            return json.loads(datasets.to_json(default=util.to_json_default_handler))
 
     if not as_dataframe:
-        features = features.to_dict(orient='index')
+        datasets = datasets.to_dict(orient='index')
 
-    return features
+    return datasets
 
 
 def _multi_index(d, index):
-    """Helper function for `get_features` filters to index multi-index tags (see `get_tags`)
+    """Helper function for `search_catalog` filters to index multi-index tags (see `get_tags`)
     """
     if not isinstance(index, str):
         return d[index]
@@ -277,9 +265,9 @@ def get_tags(service_uris, update_cache=False, filter=None, as_count=False):
 
 
 @add_async
-def new_feature(collection, display_name=None, geometry=None, geom_type=None, geom_coords=None,
+def new_catalog_entry(collection, display_name=None, geometry=None, geom_type=None, geom_coords=None,
                 description=None, metadata=None):
-    """Add a new feature to a collection.
+    """Add a new entry to a collection.
 
     Args:
         collection (string, Required):
@@ -303,7 +291,7 @@ def new_feature(collection, display_name=None, geometry=None, geom_type=None, ge
     Returns
     -------
         uri (string):
-            uri of newly created feature
+            uri of newly created entry
 
     """
     if collection not in get_collections():

@@ -92,7 +92,7 @@ class ProviderBase(metaclass=abc.ABCMeta):
         self._publishers = None
         self._credentials = None
 
-    def get_features(self, service, update_cache=False, **kwargs):
+    def search_catalog(self, service, update_cache=False, **kwargs):
         """Get Features associated with service.
 
         Take a series of query parameters and return a list of
@@ -113,7 +113,7 @@ class ProviderBase(metaclass=abc.ABCMeta):
                 logger.info('updating cache')
 
         # get features from service
-        features = self.services[service].get_features(**kwargs)
+        features = self.services[service].search_catalog(**kwargs)
 
         # convert geometry into shapely objects
         if 'bbox' in features.columns:
@@ -198,7 +198,7 @@ class ProviderBase(metaclass=abc.ABCMeta):
             except:
                 logger.info('updating tag cache')
 
-        features = self.get_features(service=service, update_cache=update_cache)
+        features = self.search_catalog(service=service, update_cache=update_cache)
         metadata = pd.DataFrame(list(features.metadata))
 
         # drop metadata fields that are unusable as tag fields

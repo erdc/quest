@@ -9,7 +9,7 @@ __version__ = '2.3'
 # __all__ needed for autodoc to work
 
 __all__ = (
-    'add_features',
+    'add_datasets',
     'add_project',
     'add_provider',  # add custom url or local folder as a service
     'authenticate_provider',
@@ -26,7 +26,6 @@ __all__ = (
     'get_auth_status',
     'get_collections',
     'get_datasets',
-    'get_features',
     'get_mapped_parameters',
     'get_metadata',
     'get_parameters',
@@ -43,9 +42,9 @@ __all__ = (
     'get_tools',
     'get_tool_options',
     'move',
+    'new_catalog_entry',
     'new_collection',
     'new_dataset',
-    'new_feature',
     'new_parameter',
     'new_project',
     'open_dataset',
@@ -56,6 +55,7 @@ __all__ = (
     'run_tool',
     'save_settings',
     'set_active_project',
+    'search_catalog',
     'stage_for_download',
     'unauthenticate_provider',
     'update_metadata',  # replaces update_collection, update_feature, update_dataset
@@ -102,11 +102,11 @@ from .manage import (
     copy,
 )
 
-from .features import (
-    add_features,
-    get_features,
+from .catalog import (
+    add_datasets,
+    search_catalog,
     get_tags,
-    new_feature,
+    new_catalog_entry,
 )
 
 from .tools import (

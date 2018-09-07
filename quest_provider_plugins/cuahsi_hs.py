@@ -17,7 +17,7 @@ class HSServiceBase(SingleFileServiceBase):
     def hs(self):
         return self.provider.get_hs()
 
-    def get_features(self, **kwargs):
+    def search_catalog(self, **kwargs):
         raise NotImplementedError()
 
 
@@ -35,7 +35,7 @@ class HSGeoService(HSServiceBase):
     ]
     _parameter_map = {}
 
-    def get_features(self, **kwargs):
+    def search_catalog(self, **kwargs):
 
         results = list(self.hs.resources(coverage_type="box", north="90", south="-90", east="180", west="-180"))
 
@@ -47,25 +47,25 @@ class HSGeoService(HSServiceBase):
         if len(results2) == 0:
             raise ValueError("There is no resources with coverages in HydroShare Repository.")
 
-        features = pd.DataFrame(results2)
-        idx = features['coverages'].apply(lambda x: len([c for c in x if c['type'] != 'period']) > 0)
-        features = features[idx]
+        datasets = pd.DataFrame(results2)
+        idx = datasets['coverages'].apply(lambda x: len([c for c in x if c['type'] != 'period']) > 0)
+        features = datasets[idx]
 
-        features['geometry'] = features['coverages'].apply(self.parse_coverages)
-        features['service_id'] = features['resource_id'].apply(str)
-        features.index = features['service_id']
-        features.rename(columns={
+        datasets['geometry'] = datasets['coverages'].apply(self.parse_coverages)
+        datasets['service_id'] = datasets['resource_id'].apply(str)
+        datasets.index = features['service_id']
+        datasets.rename(columns={
             'resource_title': 'display_name',
             'bag_url': 'download url'
         }, inplace=True)
-        features['filename'] = features['download url'].apply(lambda x: x.split('/')[-1])
-        features['reserved'] = features.apply(
+        datasets['filename'] = datasets['download url'].apply(lambda x: x.split('/')[-1])
+        datasets['reserved'] = datasets.apply(
             lambda x: {'download_url': x['download url'],
                        'filename': x['filename'],
                        'file_format': 'zip',
                        }, axis=1)
 
-        return features
+        return datasets
 
     def parse_coverages(self, resource_row):
         geometry = None
@@ -91,23 +91,23 @@ class HSNormService(HSServiceBase):
     unmapped_parameters_available = True
     _parameter_map = {}
 
-    def get_features(self, **kwargs):
+    def search_catalog(self, **kwargs):
         results = list(self.hs.resources())
-        features = pd.DataFrame(results)
-        features['service_id'] = features['resource_id'].apply(str)
-        features.index = features['service_id']
-        features.rename(columns={
+        datasets = pd.DataFrame(results)
+        datasets['service_id'] = datasets['resource_id'].apply(str)
+        datasets.index = datasets['service_id']
+        datasets.rename(columns={
             'resource_title': 'display_name',
             'bag_url': 'download url'
         }, inplace=True)
-        features['filename'] = features['download url'].apply(lambda x: x.split('/')[-1])
-        features['reserved'] = features.apply(
+        datasets['filename'] = datasets['download url'].apply(lambda x: x.split('/')[-1])
+        datasets['reserved'] = datasets.apply(
             lambda x: {'download_url': x['download url'],
                        'filename': x['filename'],
                        'file_format': 'zip',
                        }, axis=1)
 
-        return features
+        return datasets
 
 
 class HSPublisher(PublishBase):
