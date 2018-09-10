@@ -72,22 +72,17 @@ def get_or_generate_test_cache(update=False, skip=False):
 
 @pytest.fixture(scope='session')
 def get_base_dir(request, pytestconfig):
-    base_dir = tempfile.mkdtemp()
+    base_dir_obj = tempfile.TemporaryDirectory()
+    print("7-Aaron Valoroso: ", base_dir_obj.name)
+    base_dir = base_dir_obj.name
     update_cache = request.config.getoption('--update-cache')
     skip_cache = request.config.getoption('--skip-slow')
     test_cache_dir = get_or_generate_test_cache(update_cache, skip_cache)
-
-    os.symlink(test_cache_dir, os.path.join(base_dir, 'cache'))
+    os.mkdir(os.path.join(base_dir, '.cache'))
+    os.symlink(test_cache_dir, os.path.join(base_dir, '.cache', 'test_cache'))
 
     def cleanup():
-        try:
-            shutil.rmtree(base_dir)
-        except Exception as e:
-            capmanager = pytestconfig.pluginmanager.getplugin('capturemanager')
-            capmanager.suspendcapture()
-            warnings.warn('\nFailed to remove temporary directory {0} due to the following error:\n{1}'
-                          .format(base_dir, str(e)))
-            capmanager.resumecapture()
+        base_dir_obj.cleanup()
 
     request.addfinalizer(cleanup)
     return base_dir
@@ -102,7 +97,7 @@ def api(request, get_base_dir):
 @pytest.fixture
 def reset_settings(api, get_base_dir):
     test_settings = {'BASE_DIR': get_base_dir,
-                     'CACHE_DIR': 'cache',
+                     'CACHE_DIR': os.path.join('.cache', 'test_cache'),
                      'PROJECTS_DIR': 'projects',
                      'USER_SERVICES': []
                      }
