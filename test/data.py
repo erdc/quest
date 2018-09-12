@@ -225,6 +225,7 @@ DOWNLOAD_OPTIONS_FROM_ALL_SERVICES = {
              'type': 'String'}
         ],
             'title': 'NWIS Instantaneous Values Service Download Options'},
+    'svc://quest:quest': {},
     'svc://cuahsi-hydroshare:hs_geo': {},
     'svc://cuahsi-hydroshare:hs_norm': {},
     'svc://wmts:seamless_imagery':

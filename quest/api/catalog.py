@@ -2,17 +2,15 @@ import json
 import itertools
 import pandas as pd
 import numpy as np
-import geopandas as gpd
 import geojson
-import shapely.wkt
 from shapely.geometry import shape
 
 from .. import util
 from .. import plugins
-from quest.database.database import get_db, db_session, select_datasets
+from quest.database.database import get_db, db_session
 from .datasets import new_dataset
-from .collections import get_collections
 from .metadata import get_metadata
+from ..util import construct_service_uri
 from .tasks import add_async
 from ..static import DatasetSource
 
@@ -51,53 +49,42 @@ def search_catalog(uris=None, expand=False, as_dataframe=False, as_geojson=False
         uris (string or list, Required):
             uris of service_uris
         as_dataframe (bool, Optional, Default=False):
-           include feature details and format as a pandas DataFrame indexed by feature uris
+           include catalog_entry details and format as a pandas DataFrame indexed by catalog_entry uris
         as_geojson (bool, Optional, Default=False):
-            include feature details and format as a geojson scheme indexed by feature uris
+            include catalog_entry details and format as a geojson scheme indexed by catalog_entry uris
         update_cache (bool, Optional,Default=False):
             if True, update metadata cache
         filters (dict, Optional, Default=None):
-            filter ? by one or more of the available filters
+            filter catalog_entries by one or more of the available filters
                 available filters:
-                    geom_type (string, optional): filter ? by geom_type,
+                    geom_type (string, optional): filter catalog_entries by geom_type,
                         i.e. point/line/polygon
-                    parameter (string, optional): filter ? by parameter
-                    bbox (string, optional): filter ? by bounding box
+                    parameter (string, optional): filter catalog_entries by parameter
+                    bbox (string, optional): filter catalog_entries by bounding box
 
-            ? can also be filtered by any other metadata fields
+            catalog_entries can also be filtered by any other metadata fields
         queries(list, Optional, Default=None):
-            list of string arguments to pass to pandas.DataFrame.query to filter the ?
+            list of string arguments to pass to pandas.DataFrame.query to filter the catalog_entries
 
     Returns:
         datasets (list, geo-json dict or pandas.DataFrame, Default=list):
-             datasets of specified service(s), collection(s) or feature(s)
+             datasets of specified service(s), collection(s) or catalog_entry(s)
 
     """
     uris = list(itertools.chain(util.listify(uris) or []))
 
-    # group uris by type
     grouped_uris = util.classify_uris(uris, as_dataframe=False, exclude=['datasets', 'collections'])
 
     services = grouped_uris.get('services') or []
 
     all_datasets = []
 
-    # get metadata for ? in providers
     filters = filters or dict()
     for name in services:
-        provider, service, feature = util.parse_service_uri(name)
+        provider, service, _ = util.parse_service_uri(name)
         provider_plugin = plugins.load_providers()[provider]
         tmp_datasets = provider_plugin.search_catalog(service, update_cache=update_cache, **filters)
         all_datasets.append(tmp_datasets)
-
-    # get metadata for datasets in collections
-    tmp_datasets = select_datasets(lambda c: c.collection.name in collections)
-    tmp_datasets = gpd.GeoDataFrame(tmp_datasets)
-
-    if not tmp_datasets.empty:
-        tmp_datasets['geometry'] = tmp_datasets['geometry'].apply(lambda x: x if x is None else shapely.wkt.loads(x))
-        tmp_datasets.set_geometry('geometry')
-        tmp_datasets.index = tmp_datasets['name']
 
     all_datasets.append(tmp_datasets)
 
@@ -109,7 +96,6 @@ def search_catalog(uris=None, expand=False, as_dataframe=False, as_geojson=False
     datasets = datasets.set_index('index').sort_index()
 
     # apply any specified filters
-    # features = features.dropna(axis=1)  # can't index if NaN values exist
     for k, v in filters.items():
         if datasets.empty:
             break  # if dataframe is empty then doesn't try filtering any further
@@ -120,7 +106,7 @@ def search_catalog(uris=None, expand=False, as_dataframe=False, as_geojson=False
                 datasets = datasets[idx]
 
             elif k == 'geom_type':
-                idx = datasets.geom_type.str.contains(v).fillna(value=False)  # will not work if features is empty
+                idx = datasets.geom_type.str.contains(v).fillna(value=False)
                 datasets = datasets[idx]
 
             elif k == 'parameter':
@@ -197,13 +183,13 @@ def get_tags(service_uris, update_cache=False, filter=None, as_count=False):
          Note: nested dicts are parsed out as a multi-index tag where keys for nested dicts are joined with ':'.
     """
     # group uris by type
-    grouped_uris = util.classify_uris(service_uris, as_dataframe=False, exclude=['collections', 'features', 'datasets'])
+    grouped_uris = util.classify_uris(service_uris, as_dataframe=False, exclude=['collections', 'catalog_entries', 'datasets'])
     services = grouped_uris.get('services') or []
 
     tags = dict()
 
     for service in services:
-        provider, service, feature = util.parse_service_uri(service)
+        provider, service, _ = util.parse_service_uri(service)
         provider_plugin = plugins.load_providers()[provider]
         service_tags = provider_plugin.get_tags(service, update_cache=update_cache)
         tags.update(service_tags)
@@ -218,28 +204,21 @@ def get_tags(service_uris, update_cache=False, filter=None, as_count=False):
 
 
 @add_async
-def new_catalog_entry(collection, display_name=None, geometry=None, geom_type=None, geom_coords=None,
-                description=None, metadata=None):
+def new_catalog_entry(geometry=None, geom_type=None, geom_coords=None, metadata=None):
     """Add a new entry to a catalog either a quest local catalog (table) or file.
 
     Args:
-        collection (string, Required):
-            name of collection
-        display_name (string, Optional, Default=None):
-            display name of feature
         geometry (string or Shapely.geometry.shape, optional, Default=None):
-            well-known-text or Shapely shape representing the geometry of the feature. Alternatively `geom_type` and `geom_coords` can be passed.
+            well-known-text or Shapely shape representing the geometry of the catalog_entry. Alternatively `geom_type` and `geom_coords` can be passed.
         geom_type (string, Optional, Default=None):
-             geometry type of feature (i.e. point/line/polygon)
+             geometry type of catalog_entry (i.e. point/line/polygon)
         geom_coords (string or list, Optional, Default=None):
             geometric coordinates specified as valid geojson coordinates (i.e. a list of lists i.e.
             '[[-94.0, 23.2], [-94.2, 23.4] ...]'
             --------- OR ---------
             [[-94.0, 23.2], [-94.2, 23.4] ...] etc)
-        description (string, Optional, Default=None):
-            description of feature
         metadata (dict, Optional, Default=None):
-            optional metadata at the new feature
+            optional metadata at the new catalog_entry
 
     Returns
     -------
@@ -247,8 +226,6 @@ def new_catalog_entry(collection, display_name=None, geometry=None, geom_type=No
             uri of newly created entry
 
     """
-    if collection not in get_collections():
-        raise ValueError('Collection {} not found'.format(collection))
 
     if geometry is None and geom_coords is not None and geom_type is not None:
         if isinstance(geom_coords, str):
@@ -259,24 +236,16 @@ def new_catalog_entry(collection, display_name=None, geometry=None, geom_type=No
     if hasattr(geometry, 'wkt'):
         geometry = geometry.wkt
 
-    uri = util.uuid('feature')
-    if display_name is None:
-        display_name = uri
-
-    if description is None:
-        description = uri
+    catalog_id = util.uuid('catalog_entry')
 
     data = {
-            'name': uri,
-            'display_name': display_name,
-            'description': description,
-            'collection': collection,
+            'service_id': catalog_id,
             'geometry': geometry,
             'metadata': metadata,
             }
 
     db = get_db()
     with db_session:
-        db.Feature(**data)
+        db.QuestCatalog(**data)
 
-    return uri
+    return construct_service_uri('quest', 'quest', catalog_id)

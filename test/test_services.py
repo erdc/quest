@@ -20,7 +20,7 @@ def test_add_and_remove_provider(api):
     assert 'svc://user-test-service:test' in api.get_services()
 
     api.delete_provider(user_provider_path)
-    assert 'user-test-service' not in api.get_providers()
+    assert 'user-test-service'  not in api.get_providers()
     assert 'svc://user-test-service:test' not in api.get_services()
 
 

@@ -37,7 +37,7 @@ class NcdcServiceBase(TimePeriodServiceBase):
         pmap = self.parameter_map(invert=True)
         return pmap[self.parameter]
 
-    def search_catalog(self):
+    def search_catalog(self, **kwargs):
         catalog_entries = self._search_catalog()
 
         # remove locations with invalid coordinates

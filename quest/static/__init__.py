@@ -30,6 +30,8 @@ class DataType:
 class FilterGroup:
     pass
 
+
 class DatasetSource:
+    DERIVED = 'derived'
     WEB_SERVICE = 'download'
     USER = 'user-created'

@@ -1,6 +1,6 @@
 from quest.plugins import ToolBase
 from quest import util
-from quest.api import get_metadata, new_dataset, update_metadata, new_feature
+from quest.api import get_metadata, new_dataset, update_metadata, new_catalog_entry
 from quest.api.projects import active_db
 import os
 import rasterio
@@ -39,12 +39,12 @@ class RstReprojection(ToolBase):
 
         # # save the resulting raster
         cname = orig_metadata['collection']
-        feature = new_feature(cname,
+        catalog_entries = new_catalog_entry(cname,
                               # display_name=self.display_name,
                               geom_type='Polygon',
                               geom_coords=None)
 
-        new_dset = new_dataset(feature,
+        new_dset = new_dataset(catalog_entries,
                                source='derived',
                                # display_name=self.display_name,
                                description=self.description)
@@ -66,7 +66,7 @@ class RstReprojection(ToolBase):
 
         with rasterio.open(dst) as f:
             geometry = util.bbox2poly(f.bounds.left, f.bounds.bottom, f.bounds.right, f.bounds.top, as_shapely=True)
-        update_metadata(feature, quest_metadata={'geometry': geometry.to_wkt()})
+        update_metadata(catalog_entries, quest_metadata={'geometry': geometry.to_wkt()})
 
         new_metadata = {
             'parameter': orig_metadata['parameter'],
@@ -81,4 +81,4 @@ class RstReprojection(ToolBase):
         })
         update_metadata(new_dset, quest_metadata=new_metadata)
 
-        return {'datasets': new_dset, 'features': feature}
+        return {'datasets': new_dset, 'catalog_entries': catalog_entries}

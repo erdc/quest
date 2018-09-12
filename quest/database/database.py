@@ -1,6 +1,7 @@
 from datetime import datetime
 from pony import orm
 from pony.orm import db_session
+import shapely.wkt
 
 _connection = None  # global var to hold persistant db connection
 
@@ -54,6 +55,13 @@ def define_models(db):
         provider = orm.PrimaryKey(str)
         username = orm.Required(str)
         password = orm.Required(str)
+
+    class QuestCatalog(db.Entity):
+        service_id = orm.PrimaryKey(str)
+        created_at = orm.Required(datetime, default=datetime.now())
+        updated_at = orm.Optional(datetime)
+        metadata = orm.Optional(orm.Json)
+        geometry = orm.Optional(orm.Json)
 
 
 def get_db(dbpath=None, reconnect=False):
@@ -135,6 +143,24 @@ def select_datasets(select_func=None):
                                      'metadata': _convert_to_dict(d.metadata),
                                      }
                      ) for d in datasets]
+
+
+def select_catalog_entries(select_func=None):
+    """
+    Args:
+    Returns:
+    """
+    db = get_db()
+    with db_session:
+        if select_func is None:
+            catalog_entries = db.QuestCatalog.select()
+        else:
+            catalog_entries = db.QuestCatalog.select(select_func)
+
+        return [dict(e.to_dict(), **{'geometry': None if e.geometry is None else shapely.wkt.loads(e.geometry),
+                                     'metadata': _convert_to_dict(e.metadata),
+                                     }
+                     ) for e in catalog_entries]
 
 
 def _convert_to_dict(tracked_dict):

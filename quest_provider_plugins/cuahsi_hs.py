@@ -47,25 +47,25 @@ class HSGeoService(HSServiceBase):
         if len(results2) == 0:
             raise ValueError("There is no resources with coverages in HydroShare Repository.")
 
-        datasets = pd.DataFrame(results2)
-        idx = datasets['coverages'].apply(lambda x: len([c for c in x if c['type'] != 'period']) > 0)
-        features = datasets[idx]
+        catalog_entries = pd.DataFrame(results2)
+        idx = catalog_entries['coverages'].apply(lambda x: len([c for c in x if c['type'] != 'period']) > 0)
+        catalog_entries = catalog_entries[idx]
 
-        datasets['geometry'] = datasets['coverages'].apply(self.parse_coverages)
-        datasets['service_id'] = datasets['resource_id'].apply(str)
-        datasets.index = features['service_id']
-        datasets.rename(columns={
+        catalog_entries['geometry'] = catalog_entries['coverages'].apply(self.parse_coverages)
+        catalog_entries['service_id'] = catalog_entries['resource_id'].apply(str)
+        catalog_entries.index = catalog_entries['service_id']
+        catalog_entries.rename(columns={
             'resource_title': 'display_name',
             'bag_url': 'download url'
         }, inplace=True)
-        datasets['filename'] = datasets['download url'].apply(lambda x: x.split('/')[-1])
-        datasets['reserved'] = datasets.apply(
+        catalog_entries['filename'] = catalog_entries['download url'].apply(lambda x: x.split('/')[-1])
+        catalog_entries['reserved'] = catalog_entries.apply(
             lambda x: {'download_url': x['download url'],
                        'filename': x['filename'],
                        'file_format': 'zip',
                        }, axis=1)
 
-        return datasets
+        return catalog_entries
 
     def parse_coverages(self, resource_row):
         geometry = None
@@ -93,21 +93,21 @@ class HSNormService(HSServiceBase):
 
     def search_catalog(self, **kwargs):
         results = list(self.hs.resources())
-        datasets = pd.DataFrame(results)
-        datasets['service_id'] = datasets['resource_id'].apply(str)
-        datasets.index = datasets['service_id']
-        datasets.rename(columns={
+        catalog_entries = pd.DataFrame(results)
+        catalog_entries['service_id'] = catalog_entries['resource_id'].apply(str)
+        catalog_entries.index = catalog_entries['service_id']
+        catalog_entries.rename(columns={
             'resource_title': 'display_name',
             'bag_url': 'download url'
         }, inplace=True)
-        datasets['filename'] = datasets['download url'].apply(lambda x: x.split('/')[-1])
-        datasets['reserved'] = datasets.apply(
+        catalog_entries['filename'] = catalog_entries['download url'].apply(lambda x: x.split('/')[-1])
+        catalog_entries['reserved'] = catalog_entries.apply(
             lambda x: {'download_url': x['download url'],
                        'filename': x['filename'],
                        'file_format': 'zip',
                        }, axis=1)
 
-        return datasets
+        return catalog_entries
 
 
 class HSPublisher(PublishBase):

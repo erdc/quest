@@ -310,9 +310,6 @@ class WMTSImageryService(SingleFileServiceBase):
         """
         image_array = np.moveaxis(array, -1, 0)  # move the bands from the last axis to the first.
         count, height, width = image_array.shape
-        print("Count: ", count)
-        print("Height: ", height)
-        print("Width: ", width)
         transform = rasterio.transform.from_bounds(*bbox, width=width, height=height)
         crs = rasterio.crs.CRS.from_epsg(WMTS_EPSG)
         with rasterio.open(file_path, 'w', driver='GTiff', height=height,

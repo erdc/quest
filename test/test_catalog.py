@@ -1,7 +1,7 @@
 import pytest
 
 from data import SERVICES_FEATURE_COUNT, CACHED_SERVICES
-
+from quest.static import DatasetStatus
 
 slow = pytest.mark.skipif(
     pytest.config.getoption("--skip-slow"),
@@ -12,22 +12,22 @@ ACTIVE_PROJECT = 'project1'
 
 pytestmark = pytest.mark.usefixtures('reset_projects_dir', 'set_active_project')
 
-FEATURE_URIS = [
+SERVICE_URIS = [
                 'svc://usgs-ned:19-arc-second/581d2561e4b08da350d5a3b2',
                 'svc://noaa-ncdc:gsod/028140-99999',
                 'svc://usgs-nwis:iv/01529950',
                 ]
 
 
-@pytest.fixture(params=FEATURE_URIS)
-def catalog(request):
+@pytest.fixture(params=SERVICE_URIS)
+def catalog_entry(request):
     return request.param
 
 
 @slow
-def test_add_datasets(api, catalog):
-    b = api.add_datasets('col1', catalog)
-    c = api.search_catalog(collections='col1')
+def test_add_datasets(api, catalog_entry):
+    b = api.add_datasets('col1', catalog_entry)
+    c = api.get_datasets(filters={'collection': 'col1'})
     assert len(list(c)) == 1
     assert b == c
 
@@ -65,21 +65,26 @@ def test_search_catalog_with_query(api):
     assert abs(len(features) - expected) < tolerance
 
 
-# def test_new_catalog_entry(api):
-#
-#     c = api.new_catalog_entry(collection='col3', display_name='NewFeat', geom_type='Point', geom_coords=[-94.2, 23.4])
-#     assert api.get_metadata(c)[c]['display_name'] == 'NewFeat'
-#     d = api.search_catalog(collections='col3')
-#     assert c in d
+def test_new_catalog_entry(api):
+    c = api.new_catalog_entry(geom_type='Point', geom_coords=[-94.2, 23.4])
+    assert c in api.get_metadata(c)
 
 
-# def test_delete_features(api):
-#     c = api.new_catalog_entry(collection='col1', display_name='New', geom_type='Point', geom_coords=[-93.2, 21.4])
-#     d = api.new_catalog_entry(collection='col1', display_name='AnotherFeat', geom_type='Point',geom_coords=[-84.2, 22.4])
-#     api.delete(c)
-#     assert len(api.search_catalog(collections='col1')) == 1
-#     assert len(api.search_catalog(collections='col1')) == 1
-#     assert d in api.search_catalog(collections='col1')
+def test_delete_catalog_entry(api):
+    c = api.new_catalog_entry(geom_type='Point', geom_coords=[-94.2, 23.4])
+    d = api.new_dataset(collection='col1', catalog_entry=c, source='derived')
+    api.delete(d)
+    assert d not in api.get_datasets()
+    with pytest.raises(KeyError):
+        api.get_metadata(c)
+
+
+def test_delete_derived_dataset(api):
+    c = api.new_catalog_entry(geom_type='Point', geom_coords=[-94.2, 23.4])
+    d = api.add_datasets(collection='col1', catalog_entries=[c, c])
+    api.delete(d[0])
+    assert d[0] not in api.get_datasets()
+    assert c in api.get_metadata(c)
 
 
 @slow

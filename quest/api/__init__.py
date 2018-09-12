@@ -11,11 +11,11 @@ __version__ = '2.3'
 __all__ = (
     'add_datasets',
     'add_project',
-    'add_provider',  # add custom url or local folder as a service
+    'add_provider',
     'authenticate_provider',
     'cancel_tasks',
     'copy',
-    'delete',  # replaces delete_dataset, delete_collection, delete_feature
+    'delete',
     'delete_project',
     'delete_provider',
     'download',
@@ -58,7 +58,7 @@ __all__ = (
     'search_catalog',
     'stage_for_download',
     'unauthenticate_provider',
-    'update_metadata',  # replaces update_collection, update_feature, update_dataset
+    'update_metadata',
     'update_settings',
     'update_settings_from_file',
     'visualize_dataset',

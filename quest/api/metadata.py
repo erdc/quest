@@ -38,32 +38,26 @@ def get_metadata(uris, as_dataframe=False):
     # get metadata for service type uris
     if 'services' in grouped_uris.groups.keys():
         svc_df = grouped_uris.get_group('services')
-        svc_df[['provider', 'service', 'feature']] = svc_df['uri'].apply(util.parse_service_uri).apply(pd.Series)
+        svc_df[['provider', 'service', 'catalog_id']] = svc_df['uri'].apply(util.parse_service_uri).apply(pd.Series)
 
         for (provider, service), grp in svc_df.groupby(['provider', 'service']):
-            # First process service uris (without the feature)
 
             provider_plugin = plugins.load_providers()[provider]
 
-            # select rows where feature field is is None (nan)
-            if not grp.query('feature != feature').empty:
+            if not grp.query('catalog_id != catalog_id').empty:
                 service_metadata = provider_plugin.get_services()[service]
                 index = util.construct_service_uri(provider, service)
                 metadata.append(pd.DataFrame(service_metadata, index=[index]))
 
-            # Next process service features
-
-            # select rows where feature is not None (nan)
-            selected_features = grp.query('feature == feature').uri.tolist()
-            if selected_features:
-                # add selected service features if any
-                features = provider_plugin.search_catalog(service)
-                features = features.loc[selected_features]
-                metadata.append(features)
+            selected_catalog_entries = grp.query('catalog_id == catalog_id').uri.tolist()
+            if selected_catalog_entries:
+                catalog_entries = provider_plugin.search_catalog(service)
+                catalog_entries = catalog_entries.loc[selected_catalog_entries]
+                metadata.append(catalog_entries)
 
     if 'publishers' in grouped_uris.groups.keys():
         svc_df = grouped_uris.get_group('publishers')
-        svc_df[['provider', 'publish', 'feature']] = svc_df['uri'].apply(util.parse_service_uri).apply(pd.Series)
+        svc_df[['provider', 'publish', 'catalog_id']] = svc_df['uri'].apply(util.parse_service_uri).apply(pd.Series)
 
         for (provider, publisher), grp in svc_df.groupby(['provider', 'publish']):
             provider_plugin = plugins.load_providers()[provider]

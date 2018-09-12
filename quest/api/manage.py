@@ -1,17 +1,8 @@
-"""API functions related to deleting resources.
-
-delete, move, and copy fn for collections/features/datasets
-"""
-
-
 import os
 import shutil
 from ..util.log import logger
-import pandas as pd
-
-from .catalog import search_catalog, add_datasets
-from .datasets import get_datasets
 from quest.database.database import get_db, db_session, select_datasets
+from ..static import DatasetStatus
 from .projects import _get_project_dir
 from .collections import get_collections
 from .metadata import get_metadata, update_metadata
@@ -68,13 +59,21 @@ def delete(uris):
                 shutil.rmtree(path)
 
         if resource == 'datasets':
-            # delete dataset and associated dataset files
             with db_session:
                 dataset = db.Dataset[uri]
+
+                if dataset.source == 'derived':
+                    catalog_entry_datasets = select_datasets(lambda d: d.catalog_entry == dataset.catalog_entry)
+
+                    if len(catalog_entry_datasets) == 1:
+                        _, _, catalog_id = util.parse_service_uri(dataset.catalog_entry)
+                        db.QuestCatalog[catalog_id].delete()
+
                 try:
                     os.remove(dataset.file_path)
                 except (OSError, TypeError):
                     pass
+
                 dataset.delete()
 
     return True

@@ -37,7 +37,7 @@ class WBTFillDepressions(ToolBase):
         elev_file = orig_metadata['file_path']
 
         new_dset = new_dataset(
-            feature=orig_metadata['feature'],
+            catalog_entry=orig_metadata['catalog_entry'],
             source='derived',
             # display_name=self.display_name,
             description=self.description
@@ -119,7 +119,7 @@ class WBTExtractStreamsWorkflow(ToolBase):
         elev_file = orig_metadata['file_path']
 
         new_dset = new_dataset(
-            feature=orig_metadata['feature'],
+            catalog_entry=orig_metadata['catalog_entry'],
             source='derived',
             # display_name=self.display_name,
             description=self.description
@@ -212,7 +212,7 @@ class WBTWatershedDelineationWorkflow(ToolBase):
             original_outlets = self.outlet_features
 
         new_dset = new_dataset(
-            feature=orig_metadata['feature'],
+            catalog_entry=orig_metadata['catalog_entry'],
             source='derived',
             # display_name=self.display_name,
             description=self.description
@@ -261,7 +261,7 @@ class WBTWatershedDelineationWorkflow(ToolBase):
             output=self.file_path,
         )
 
-        new_features = raster_to_polygons(self.file_path)
+        new_catalog_entries = raster_to_polygons(self.file_path)
 
         quest_metadata = {
             'parameter': 'streams',
@@ -272,4 +272,4 @@ class WBTWatershedDelineationWorkflow(ToolBase):
 
         update_metadata(new_dset, quest_metadata=quest_metadata)
 
-        return {'datasets': new_dset, 'features': [new_features, snapped_outlets]}
+        return {'datasets': new_dset, 'catalog_entries': [new_catalog_entries, snapped_outlets]}
