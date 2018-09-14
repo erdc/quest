@@ -7,8 +7,8 @@ import pandas as pd
 
 from .. import util
 from .. import plugins
-
-from quest.database.database import get_db, db_session, select_collections, select_datasets
+from ..static import UriType
+from ..database import get_db, db_session, select_collections, select_datasets
 
 
 def get_metadata(uris, as_dataframe=False):
@@ -108,14 +108,28 @@ def update_metadata(uris, display_name=None, description=None,
         metadata (dict):
             metadata at each uri keyed on uris
     """
+    db = get_db()
+    get_db_entity_funcs = {
+        UriType.COLLECTION: lambda x: db.Collection[x],
+        UriType.DATASET: lambda x: db.Dataset[x],
+        UriType.SERVICE: lambda x: db.QuestCatalog[x.split('/')[-1]],
+    }
+
     # group uris by type
     grouped_uris = util.classify_uris(uris,
-                                      as_dataframe=False,
-                                      exclude=['services', 'publishers'],
+                                      as_dataframe=True,
+                                      exclude=[UriType.PUBLISHER],
                                       require_same_type=True)
-    resource = list(grouped_uris)[0]
-    uris = grouped_uris[resource]
+    resource = list(grouped_uris.groups.keys())[0]
+    uris = grouped_uris.get_group(resource)
+    get_db_entity = get_db_entity_funcs[resource]
 
+    if resource == UriType.SERVICE:
+        # then make sure there are only quest catalog entries
+        if not uris.uri.apply(lambda x: 'quest' in x).all():
+            raise ValueError('Metadata on service catalog entries cannot be changed.')
+
+    uris = uris.uri.tolist()
     n = len(uris)
     if n > 1:
         if display_name is None:
@@ -152,13 +166,8 @@ def update_metadata(uris, display_name=None, description=None,
         if meta:
             quest_meta.update({'metadata': meta})
 
-        db = get_db()
         with db_session:
-            if resource == 'collections':
-                entity = db.Collection[uri]
-            elif resource == 'datasets':
-                entity = db.Dataset[uri]
-
+            entity = get_db_entity(uri)
             entity.set(**quest_meta)
 
     return get_metadata(uris)

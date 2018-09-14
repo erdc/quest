@@ -1,4 +1,4 @@
-from data import ALL_SERVICES, SERVICE_FEATURE_DOWNLOAD_OPTIONS
+from data import ALL_SERVICES, SERVICE_DOWNLOAD_OPTIONS
 from conftest import FILES_DIR
 import pytest
 import os
@@ -14,12 +14,12 @@ pytestmark = pytest.mark.usefixtures('reset_projects_dir')
 
 def test_add_and_remove_provider(api):
     user_provider_path = os.path.join(FILES_DIR, 'user_provider')
-    api.add_provider(user_provider_path)
+    api.add_user_provider(user_provider_path)
     providers = api.get_providers()
     assert 'user-test-service' in providers
     assert 'svc://user-test-service:test' in api.get_services()
 
-    api.delete_provider(user_provider_path)
+    api.delete_user_provider(user_provider_path)
     assert 'user-test-service'  not in api.get_providers()
     assert 'svc://user-test-service:test' not in api.get_services()
 
@@ -32,11 +32,12 @@ def test_get_providers(api):
 def test_get_services(api):
     assert sorted(api.get_services()) == ALL_SERVICES
 
+
 @test_download
-@pytest.mark.parametrize('feature, options', SERVICE_FEATURE_DOWNLOAD_OPTIONS)
-def test_download(api, feature, options):
+@pytest.mark.parametrize('catalog_entry, options', SERVICE_DOWNLOAD_OPTIONS)
+def test_download(api, catalog_entry, options):
     api.new_collection('test')
-    collection_feature = api.add_datasets('test', feature)
-    d = api.stage_for_download(collection_feature, options=options)[0]
+    d = api.add_datasets('test', catalog_entry)
+    api.stage_for_download(d, options=options)[0]
     result = api.download_datasets(d, raise_on_error=True)
     assert result[d] == 'downloaded'

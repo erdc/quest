@@ -7,14 +7,12 @@
 import pbr.version
 import warnings
 import logging
-from . import tools
 
+logging.getLogger('ulmo').propagate = False
 warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 
 from . import api  # NOQA
-
-
-logging.getLogger('ulmo').propagate = False
+from . import tools  # NOQA
 
 # set version number
 __version__ = pbr.version.VersionInfo('quest').version_string_with_vcs()

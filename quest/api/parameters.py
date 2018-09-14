@@ -38,14 +38,14 @@ def get_parameters(service_uri, update_cache=False):
     provider, service, catalog_id = util.parse_service_uri(service_uri)
     parameters = _read_cached_parameters(provider, service, update_cache=update_cache)
 
-    if isinstance(parameters,pd.DataFrame) and catalog_id:
+    if isinstance(parameters, pd.DataFrame) and catalog_id:
         idx = parameters['service_id'] == catalog_id
         parameters = parameters[idx]
 
     return parameters
 
 
-def new_parameter(uri, parameter_name, ):
+def new_parameter(uri, parameter_name):
     """Add new parameter to collection."""
     pass
 

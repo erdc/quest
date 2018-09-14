@@ -34,6 +34,7 @@ install:
 # the following line installs a specific build of pytables. It will hopefully not be necessary on the next release
   - "conda install -y -c conda-forge pytables=3.4.4=py%PYTHON_BUILD%h7e76658_1"
   - "conda list"
+  - "python -c \"import quest; quest.api.update_settings(dict(CACHE_DIR='%QUEST_CACHE_DIR%')); quest.api.save_settings()\""
 
 test_script:
-  - "%CMD_IN_ENV% pytest test -s -vv"
+  - "%CMD_IN_ENV% pytest -vv"

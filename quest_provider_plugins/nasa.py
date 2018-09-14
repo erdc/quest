@@ -53,9 +53,9 @@ class NasaServiceBase(SingleFileServiceBase):
         catalog_entries = catalog_entries.loc[~catalog_entries.download_url.isnull()]
         catalog_entries['reserved'] = catalog_entries['download_url'].apply(lambda x: {'download_url': x, 'file_format': 'raster-gdal','extract_from_zip': '.DEM'})
 
-        # features['_filename'] = features._download_url.apply(lambda x: x.split('/')[-1])
-        # features['_extract_from_zip'] = '.DEM'
-        # features['_file_format'] = 'raster-gdal'
+        # catalog_entries['_filename'] = catalog_entries._download_url.apply(lambda x: x.split('/')[-1])
+        # catalog_entries['_extract_from_zip'] = '.DEM'
+        # catalog_entries['_file_format'] = 'raster-gdal'
         del catalog_entries['download_url']
         del catalog_entries['links']
         del catalog_entries['boxes']

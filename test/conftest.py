@@ -33,6 +33,7 @@ def get_or_generate_test_cache(update=False, skip=False):
     test_cache_dir = os.environ.get('QUEST_CACHE_DIR') or os.path.join(quest.util.get_quest_dir(),
                                                                        '.cache', 'test_cache')
     if skip:
+        # TODO with features refactor there are some tests that access cache that are not skipped.
         return test_cache_dir
     quest.api.update_settings({'CACHE_DIR': test_cache_dir})
     start = None

@@ -2,16 +2,11 @@ import param
 import quest
 
 
-class NamedString(object):
-    def __init__(self, string, name):
-        self.string = string
+class NamedString(str):
+    def __new__(cls, string, name):
+        self = str.__new__(cls, string)
         self.name = name
-
-    def __str__(self):
-        return self.string
-
-    def __repr__(self):
-        return self.string
+        return self
 
 
 class DatasetSelector(param.ObjectSelector):
@@ -81,14 +76,25 @@ class DatasetListSelector(param.ListSelector):
         return super(DatasetListSelector, self).get_range()
 
 
-class Service(param.Parameterized):
+class ServiceSelector(param.Parameterized):
     service = param.ObjectSelector(default=None, objects=[])
 
-    def __init__(self, parameter=None, service_type=None):
+    def __init__(self, parameter=None, service_type=None, default=None):
         services = quest.api.get_services(parameter=parameter, service_type=service_type)
         service_param = self.params()['service']
         service_param.objects = services
-        service_param.default = services[0]
+        service_param.default = default or services[0]
+        super().__init__(name='')
+
+
+class PublisherSelector(param.Parameterized):
+    publisher = param.ObjectSelector(default=None, objects=[])
+
+    def __init__(self, default=None):
+        publishers = quest.api.get_publishers()
+        publisher_param = self.params()['publisher']
+        publisher_param.objects = publishers
+        publisher_param.default = default or publishers[0]
         super().__init__(name='')
 
 

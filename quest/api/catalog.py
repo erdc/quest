@@ -12,7 +12,7 @@ from .datasets import new_dataset
 from .metadata import get_metadata
 from ..util import construct_service_uri
 from .tasks import add_async
-from ..static import DatasetSource
+from ..static import DatasetSource, UriType
 
 
 @add_async
@@ -22,7 +22,7 @@ def add_datasets(collection, catalog_entries):
     Args:
         collection (string, Required):
             name of collection
-        datasets (string, comma separated strings,list of strings, or pandas DataFrame, Required):
+        catalog_entries (string, comma separated strings,list of strings, or pandas DataFrame, Required):
             list of ? to add to the collection.
 
     Returns:
@@ -45,12 +45,14 @@ def add_datasets(collection, catalog_entries):
 
 @add_async
 def search_catalog(uris=None, expand=False, as_dataframe=False, as_geojson=False,
-                 update_cache=False, filters=None, queries=None):
+                   update_cache=False, filters=None, queries=None):
     """Retrieve list of catalog entries from resources.
 
     Args:
         uris (string or list, Required):
             uris of service_uris
+        expand (bool, Optional, Default=False):
+            if true then return metadata along with catalog entries
         as_dataframe (bool, Optional, Default=False):
            include catalog_entry details and format as a pandas DataFrame indexed by catalog_entry uris
         as_geojson (bool, Optional, Default=False):
@@ -79,7 +81,7 @@ def search_catalog(uris=None, expand=False, as_dataframe=False, as_geojson=False
     """
     uris = list(itertools.chain(util.listify(uris) or []))
 
-    grouped_uris = util.classify_uris(uris, as_dataframe=False, exclude=['datasets', 'collections'])
+    grouped_uris = util.classify_uris(uris, as_dataframe=False, exclude=[UriType.DATASET, UriType.COLLECTION])
 
     services = grouped_uris.get('services') or []
 
@@ -189,8 +191,12 @@ def get_tags(service_uris, update_cache=False, filter=None, as_count=False):
          Note: nested dicts are parsed out as a multi-index tag where keys for nested dicts are joined with ':'.
     """
     # group uris by type
-    grouped_uris = util.classify_uris(service_uris, as_dataframe=False, exclude=['collections', 'catalog_entries', 'datasets'])
-    services = grouped_uris.get('services') or []
+    grouped_uris = util.classify_uris(
+        service_uris,
+        as_dataframe=False,
+        exclude=[UriType.COLLECTION, UriType.DATASET]
+    )
+    services = grouped_uris.get(UriType.SERVICE) or []
 
     tags = dict()
 
@@ -215,7 +221,8 @@ def new_catalog_entry(geometry=None, geom_type=None, geom_coords=None, metadata=
 
     Args:
         geometry (string or Shapely.geometry.shape, optional, Default=None):
-            well-known-text or Shapely shape representing the geometry of the catalog_entry. Alternatively `geom_type` and `geom_coords` can be passed.
+            well-known-text or Shapely shape representing the geometry of the catalog_entry.
+            Alternatively `geom_type` and `geom_coords` can be passed.
         geom_type (string, Optional, Default=None):
              geometry type of catalog_entry (i.e. point/line/polygon)
         geom_coords (string or list, Optional, Default=None):
@@ -245,10 +252,10 @@ def new_catalog_entry(geometry=None, geom_type=None, geom_coords=None, metadata=
     catalog_id = util.uuid('catalog_entry')
 
     data = {
-            'service_id': catalog_id,
-            'geometry': geometry,
-            'metadata': metadata,
-            }
+        'service_id': catalog_id,
+        'geometry': geometry,
+        'metadata': metadata,
+    }
 
     db = get_db()
     with db_session:

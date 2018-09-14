@@ -13,12 +13,14 @@ import pandas as pd
 import geopandas as gpd
 from shapely.geometry import Point, shape
 
-from quest.util import listify
+from quest.util import listify, convert_nodata_to_nans
 
 whitebox_log = logging.getLogger('whitebox')
 whitebox_log.addHandler(logging.NullHandler())
-whitebox_log.propagate = False
-whitebox_temp_dir = os.path.expanduser('~/.whitebox_tools_tempdir')
+whitebox_log.propagate = True
+whitebox_temp_dir = os.environ.get('WHITEBOX_TOOLS_DIR') or os.path.expanduser('~/.whitebox_tools_tempdir')
+os.makedirs(whitebox_temp_dir, exist_ok=True)
+whitebox_log.addHandler(logging.FileHandler(os.path.join(whitebox_temp_dir, 'whitebox.log')))
 
 
 def data_array_to_rasterio(xr_data, output_file=None, tag=None, fmt='GTiff', metadata=None):
@@ -61,11 +63,8 @@ def tif_to_data_array(path, with_nans=True):
     """Read in a tif file to an xarray DataArray and replace nodata values with Nan
     """
     output = xr.open_rasterio(path, parse_coordinates=True).isel(band=0)
-    nodata = output.attrs.get('nodatavals')
-    if with_nans and nodata:
-        if str(output.dtype).startswith('int'):
-            output.values = output.values.astype(np.float32)
-        output.values[output.values == nodata] = np.nan
+    if with_nans:
+        output = convert_nodata_to_nans(output)
     return output
 
 

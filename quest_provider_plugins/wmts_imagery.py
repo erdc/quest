@@ -61,7 +61,7 @@ class WMTSImageryService(SingleFileServiceBase):
         catalog = pd.DataFrame(catalog_entry_data, index=[0])
         return catalog
 
-    def download(self, feature, file_path, dataset, **kwargs):
+    def download(self, catalog_id, file_path, dataset, **kwargs):
         p = param.ParamOverrides(self, kwargs)
         bbox = listify(p.bbox)
 
@@ -151,7 +151,8 @@ class WMTSImageryService(SingleFileServiceBase):
 
         return lon, lat
 
-    def _get_indices_from_bbox(self, lon_min, lat_min, lon_max, lat_max, zoom_level, as_pixels=False):
+    @classmethod
+    def _get_indices_from_bbox(cls, lon_min, lat_min, lon_max, lat_max, zoom_level, as_pixels=False):
         """Get tile/pixel indices that contain a bounding box at the given zoom level.
 
          Note:
@@ -174,11 +175,12 @@ class WMTSImageryService(SingleFileServiceBase):
         Returns:
             a tuple of tile/pixel indices in the form (xmin, ymin, xmax, ymax).
         """
-        xmin, ymin = self._get_indices_from_coordinates(lon_min, lat_max, zoom_level, as_pixels=as_pixels)
-        xmax, ymax = self._get_indices_from_coordinates(lon_max, lat_min, zoom_level, as_pixels=as_pixels)
+        xmin, ymin = cls._get_indices_from_coordinates(lon_min, lat_max, zoom_level, as_pixels=as_pixels)
+        xmax, ymax = cls._get_indices_from_coordinates(lon_max, lat_min, zoom_level, as_pixels=as_pixels)
         return xmin, ymin, xmax, ymax
 
-    def _get_bbox_from_indices(self, xmin, ymin, xmax, ymax, zoom_level, from_pixels=False):
+    @classmethod
+    def _get_bbox_from_indices(cls, xmin, ymin, xmax, ymax, zoom_level, from_pixels=False):
         """Get lon/lat bounding box that completely encompasses a range of tile/pixel indices at a given zoom level.
 
         Note:
@@ -202,12 +204,13 @@ class WMTSImageryService(SingleFileServiceBase):
         Returns:
             a tuple of lon/lat coordinates forming a bounding box in the form (lon_min, lat_min, lon_max, lat_max).
         """
-        lon_min, lat_max = self._get_coordinates_from_indices(xmin, ymin, zoom_level, from_pixels=from_pixels)
+        lon_min, lat_max = cls._get_coordinates_from_indices(xmin, ymin, zoom_level, from_pixels=from_pixels)
         # to get the coordinates at the bottom-right corner xmax and ymax are incremented
-        lon_max, lat_min = self._get_coordinates_from_indices(xmax + 1, ymax + 1, zoom_level, from_pixels=from_pixels)
+        lon_max, lat_min = cls._get_coordinates_from_indices(xmax + 1, ymax + 1, zoom_level, from_pixels=from_pixels)
         return lon_min, lat_min, lon_max, lat_max
 
-    def _get_crop_bbox(self, pixel_indices, lon_min, lat_max, zoom_level):
+    @classmethod
+    def _get_crop_bbox(cls, pixel_indices, lon_min, lat_max, zoom_level):
         """Get the relative pixel indices of a bounding box given the coordinates of a new origin.
 
         Note:
@@ -227,7 +230,7 @@ class WMTSImageryService(SingleFileServiceBase):
         """
 
         # calculate the offset by finding the pixel indices of the top-right corner
-        x_pixel_offset, y_pixel_offset = self._get_indices_from_coordinates(lon_min, lat_max,
+        x_pixel_offset, y_pixel_offset = cls._get_indices_from_coordinates(lon_min, lat_max,
                                                                             zoom_level, as_pixels=True)
 
         # calculate the crop bbox in pixel indices relative to the new image from stitched tiles

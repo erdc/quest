@@ -1,12 +1,13 @@
 from quest.database.database import get_db, db_session, select_datasets
 from ..plugins import load_providers, load_plugins, list_plugins
-from ..util import logger, parse_service_uri, listify, uuid, classify_uris
+from ..util import logger, parse_service_uri, listify, uuid, is_uuid, classify_uris
 from .collections import get_collections
 from .metadata import get_metadata, update_metadata
 from .projects import _get_project_dir
 from quest.static import DatasetStatus, DatasetSource
 from .tasks import add_async
 import pandas as pd
+import param
 import os
 
 
@@ -44,10 +45,14 @@ def download(catalog_entry, file_path, dataset=None, **kwargs):
 
 
 @add_async
-def publish(publisher_uri, **kwargs):
+def publish(publisher_uri, options=None, **kwargs):
+    if isinstance(options, param.Parameterized):
+        options = dict(options.get_param_values())
+    options = options or dict()
+    options.update(kwargs)
     provider, publisher, _ = parse_service_uri(publisher_uri)
     provider_plugin = load_providers()[provider]
-    data = provider_plugin.publish(publisher=publisher, **kwargs)
+    data = provider_plugin.publish(publisher=publisher, **options)
     return data
 
 @add_async
@@ -67,6 +72,9 @@ def download_datasets(datasets, raise_on_error=False):
             download status of datasets
     """
     datasets = get_metadata(datasets, as_dataframe=True)
+
+    if datasets.empty:
+        return
 
     # filter out non download datasets
     datasets = datasets[datasets['source'] == DatasetSource.WEB_SERVICE]
@@ -209,12 +217,14 @@ def get_datasets(expand=None, filters=None, queries=None, as_dataframe=None):
 
 @add_async
 def new_dataset(catalog_entry, collection, source=None, display_name=None,
-                description=None, file_path=None, metadata=None):
+                description=None, file_path=None, metadata=None, name=None):
     """Create a new dataset in a collection.
 
     Args:
         catalog_entry (string, Required):
             catalog_entry uri
+        collection (string, Required):
+            name of collection to create dataset in
         source (string, Optional, Default=None):
             type of the dataset such as timeseries or raster
         display_name (string, Optional, Default=None):
@@ -225,6 +235,8 @@ def new_dataset(catalog_entry, collection, source=None, display_name=None,
             path location to save new dataset's data
         metadata (dict, Optional, Default=None):
             user defined metadata
+        name (dict, Optional, Default=None):
+            optionally pass in a UUID starting with d as name, otherwise it will be generated
 
     Returns:
         uri (string):
@@ -241,7 +253,9 @@ def new_dataset(catalog_entry, collection, source=None, display_name=None,
     except IndexError:
         raise ValueError('Entry {} dose not exist'.format(catalog_entry))
 
-    name = uuid('dataset')
+    name = name or uuid('dataset')
+    assert name.startswith('d') and is_uuid(name)
+
     if source is None:
         source = DatasetSource.USER
 
@@ -291,19 +305,21 @@ def stage_for_download(uris, options=None):
     display_name = None
     datasets = []
 
+    # TODO classify uris and ensure only datasets
+
     if not isinstance(options, list):
         options = [options] * len(uris)
 
     db = get_db()
 
-    for uri, kwargs in zip(uris, options):
-
-        dataset_uri = uri
+    for dataset_uri, kwargs in zip(uris, options):
+        if isinstance(kwargs, param.Parameterized):
+            kwargs = dict(kwargs.get_param_values())
 
         dataset_metadata = get_metadata(dataset_uri)[dataset_uri]
 
         parameter = kwargs.get('parameter') if kwargs else None
-        parameter_name = parameter or "no_parameter"
+        parameter_name = parameter or 'no_parameter'
 
         if dataset_metadata['display_name'] == dataset_uri:
             catalog_entry = dataset_metadata['catalog_entry']
@@ -338,7 +354,7 @@ def describe_dataset():
     pass
 
 
-def open_dataset(dataset, fmt=None):
+def open_dataset(dataset, fmt=None, **kwargs):
     """Open the dataset and return in format specified by fmt
 
     Args:
@@ -364,7 +380,7 @@ def open_dataset(dataset, fmt=None):
         raise ValueError('No reader available for: %s' % file_format)
 
     io = load_plugins('io', file_format)[file_format]
-    return io.open(path, fmt=fmt)
+    return io.open(path, fmt=fmt, **kwargs)
 
 
 @add_async

@@ -13,17 +13,6 @@ pytestmark = pytest.mark.usefixtures('reset_projects_dir', 'set_active_project')
 
 
 def test_download_datasets():
-    """download staged datasets.
-
-    TODO: ASYNC NOT IMPLEMENTED
-
-    Download datasets that have been staged with stage_for_download
-    args:
-        datasets (string, list): list of datasets to download
-
-    return:
-        status (dict): download status of datasets
-    """
     pass
     # TODO
 
@@ -36,22 +25,6 @@ def test_download_options_for_services(api, service, options):
 
 
 def test_download_options(api, reset_settings):
-    """List optional kwargs that can be specified when downloading a dataset
-
-    Parameters
-    ----------
-        uris (string or list):
-            uris of features or datasets
-
-    Return
-    ------
-        download_options: dict
-            download options that can be specified when calling
-            api.stage_for_download or api.download
-
-    Examples:
-        TODO add examples
-    """
     # test get download options from list of service uris
     services = api.get_services()
     result = api.get_download_options(services)
@@ -71,9 +44,6 @@ def test_download_options(api, reset_settings):
 
 
 def test_get_datasets(api, dataset_save_path):
-    """
-    metadata=None, filters=None, as_dataframe=None
-    """
     # test generic get datasets
 
     actual = api.get_datasets()
@@ -107,14 +77,6 @@ def test_get_datasets_with_query(api):
 
 
 def test_new_dataset(api):
-    """Create a new dataset at a feature.
-
-    Args:
-        feature (string): uid of feature
-
-    Returns:
-        uid of dataset
-    """
     new_dataset = api.new_dataset(CATALOG_ENTRY, 'col1')
     datasets = api.get_datasets()
     try:
@@ -129,19 +91,6 @@ def test_new_dataset(api):
 
 
 def test_stage_for_download(api):
-    """
-    args:
-        uris (string or list): uris of features/datasets to stage for download,
-            if uri is a feature a new dataset will be created.
-        download_kwargs (dict or list of dicts): kwargs to be passed to the
-            download function specified for each dataset. if dict then apply
-            same kwargs to all datasets, else each dict in list is used for
-            respective dataset
-
-    return:
-        uris (list): staged dataset uids
-    """
-
     # test stage new dataset
     new_dataset = api.new_dataset(CATALOG_ENTRY, 'col1')
     try:
@@ -181,36 +130,18 @@ def test_stage_for_download(api):
 
 
 def test_describe_dataset(api):
-    """Show metadata associated with downloaded dataset.
-
-    This metadata includes as well as the quest function and kwargs used to
-    generate the dataset.
-
-    NOTIMPLEMENTED
-
-    """
     pass
 
 
 def test_open_dataset(api):
-    """Open the dataset as a python/VTK object. Not sure this is needed.
-
-    NOTIMPLEMENTED
-    """
     pass
 
 
 def test_visualize_dataset(api):
-    """Visualize the dataset as a matplotlib/bokeh plot.
-
-    Check for existence of dataset on disk and call appropriate file format
-    driver.
-    """
     pass
 
 
 def test_visualize_dataset_options(api, dataset_save_path):
-    """Return visualization available options for dataset."""
     expected = {'type': 'object',
                 'properties': {'end': {'default': '2018-09-15 16:00:00',
                                        'type': 'string',

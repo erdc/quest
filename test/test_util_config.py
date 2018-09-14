@@ -47,7 +47,6 @@ def base_dir(request):
 
 
 def test_set_base_path_with_env_var(set_environ):
-    # Can't be tested with the RPC because environmental variable can't be set.
     settings = quest.api.get_settings()
     del settings['BASE_DIR']
     quest.api.update_settings()
@@ -62,8 +61,6 @@ def test_set_base_path_with_env_var(set_environ):
 
 def test_update_settings(base_dir):
     """Basic test that paths are set correctly and defaults are used
-
-        Can't be tested with RPC because CWD is not the same.
     """
 
     with TempCWD():

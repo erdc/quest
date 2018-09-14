@@ -70,6 +70,11 @@ def update_settings(config={}):
     if 'BASE_DIR' in config.keys() or 'PROJECTS_DIR' in config.keys():
         get_db(reconnect=True)
 
+    # reload providers
+    if 'USER_SERVICES' in config.keys():
+        from ..plugins.plugins import load_providers
+        load_providers(update_cache=True)
+
     return settings
 
 

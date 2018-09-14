@@ -27,22 +27,22 @@ def test_get_project_dir(reset_projects_dir):
 
 def test_parse_service_uri():
     uri = 'svc://provider:service'
-    provider, service, feature = quest.util.parse_service_uri(uri)
+    provider, service, catalog_id = quest.util.parse_service_uri(uri)
     assert provider == 'provider'
     assert service == 'service'
-    assert feature is None
+    assert catalog_id is None
 
-    uri = 'svc://provider:service/feature'
-    provider, service, feature = quest.util.parse_service_uri(uri)
+    uri = 'svc://provider:service/catalog_id'
+    provider, service, catalog_id = quest.util.parse_service_uri(uri)
     assert provider == 'provider'
     assert service == 'service'
-    assert feature == 'feature'
+    assert catalog_id == 'catalog_id'
 
-    uri = 'svc://provider:service/feature/with/slashes'
-    provider, service, feature = quest.util.parse_service_uri(uri)
+    uri = 'svc://provider:service/catalog_id/with/slashes'
+    provider, service, catalog_id = quest.util.parse_service_uri(uri)
     assert provider == 'provider'
     assert service == 'service'
-    assert feature == 'feature/with/slashes'
+    assert catalog_id == 'catalog_id/with/slashes'
 
 
 def test_bbox2poly():
@@ -119,3 +119,27 @@ def test_bbox2poly():
                     [200.0, 20.0],
                     [200.0, -20.0],
                     [160.0, -20.0]]
+
+
+def test_lisitfy():
+    bbox = [-180, -90, 180, 90]
+
+    expected = bbox
+    actual = quest.util.listify(bbox)
+    assert expected == actual
+
+    bbox_str = ','.join([str(i) for i in bbox])
+    actual = [float(x) for x in quest.util.listify(bbox_str)]
+    assert expected == actual
+
+    expected = set(bbox)
+    actual = quest.util.listify(expected)
+    assert expected == actual
+
+    expected = tuple(bbox)
+    actual = quest.util.listify(expected)
+    assert expected == actual
+
+    expected = [180]
+    actual = quest.util.listify(expected[0])
+    assert expected == actual

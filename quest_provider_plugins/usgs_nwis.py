@@ -65,6 +65,7 @@ class NwisServiceBase(TimePeriodServiceBase):
         del data['values']
 
         metadata = {
+            'name': dataset,
             'metadata': data,
             'file_path': file_path,
             'file_format': 'timeseries-hdf5',
