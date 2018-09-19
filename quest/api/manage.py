@@ -16,7 +16,6 @@ def delete(uris):
 
     WARNING:
         deleting a collection deletes all associated datasets
-        TODO deleting dataset files/folders
 
     Args:
         uris (string, comma separated string or list of strings, Required):

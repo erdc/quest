@@ -56,7 +56,6 @@ def get_or_generate_test_cache(update=False, skip=False):
 
         cache_file = os.path.join(quest.util.get_cache_dir(provider_plugin.name), service + '_catalog.p')
         if update or not os.path.exists(cache_file):
-            import pdb; pdb.set_trace()
             try:
                 print('Updating test cache for service: {0}'.format(name))
                 quest.api.get_tags(name, update_cache=update)

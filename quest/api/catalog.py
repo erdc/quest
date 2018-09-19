@@ -34,7 +34,10 @@ def add_datasets(collection, catalog_entries):
 
     uris = []
     for _, data in entries.iterrows():
-        uri = new_dataset(collection=collection, catalog_entry=data.to_frame().transpose(), source=DatasetSource.WEB_SERVICE)
+        source = DatasetSource.WEB_SERVICE
+        if 'quest' in data['service']:
+            source = DatasetSource.DERIVED
+        uri = new_dataset(collection=collection, catalog_entry=data.to_frame().transpose(), source=source)
         uris.append(uri)
 
     return uris
@@ -57,10 +60,13 @@ def search_catalog(uris=None, expand=False, as_dataframe=False, as_geojson=False
         filters (dict, Optional, Default=None):
             filter catalog_entries by one or more of the available filters
                 available filters:
+                    bbox (string, optional): filter catalog_entries by bounding box
                     geom_type (string, optional): filter catalog_entries by geom_type,
                         i.e. point/line/polygon
                     parameter (string, optional): filter catalog_entries by parameter
-                    bbox (string, optional): filter catalog_entries by bounding box
+                    display_name (string, optional):  filter catalog_entries by display_name
+                    description (string, optional): filter catalog_entries by description
+                    search_terms (list, optional): filter catalog_entries by search_terms
 
             catalog_entries can also be filtered by any other metadata fields
         queries(list, Optional, Default=None):
