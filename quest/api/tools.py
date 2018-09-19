@@ -85,7 +85,7 @@ def run_tool(name, options=None, as_dataframe=None, expand=None, as_open_dataset
 
     Returns:
         dataset/catalog_entry uris (dict or pandas dataframe, Default=dict):
-             resulting datasets and/or catalog_eentries
+             resulting datasets and/or catalog_entries
 
 
     """

@@ -32,17 +32,13 @@ def download(catalog_entry, file_path, dataset=None, **kwargs):
 
     """
     service_uri = catalog_entry
-    if not service_uri.startswith('svc://'):
-        df = get_metadata(catalog_entry, as_dataframe=True)[0]
-        df = df['service'] + '/' + df['service_id']
-        service_uri = df.tolist()[0]
 
     if file_path is None:
         pass
 
-    provider, service, catalog_entry = parse_service_uri(service_uri)
+    provider, service, catalog_id = parse_service_uri(service_uri)
     provider_plugin = load_providers()[provider]
-    data = provider_plugin.download(service=service, catalog_entry=catalog_entry,
+    data = provider_plugin.download(service=service, catalog_id=catalog_id,
                                     file_path=file_path, dataset=dataset, **kwargs)
     return data
 
@@ -214,11 +210,11 @@ def get_datasets(expand=None, filters=None, queries=None, as_dataframe=None):
 @add_async
 def new_dataset(catalog_entry, collection, source=None, display_name=None,
                 description=None, file_path=None, metadata=None):
-    """Create a new dataset at a collection.
+    """Create a new dataset in a collection.
 
     Args:
         catalog_entry (string, Required):
-            uid of a catalog_entry
+            catalog_entry uri
         source (string, Optional, Default=None):
             type of the dataset such as timeseries or raster
         display_name (string, Optional, Default=None):
@@ -279,9 +275,7 @@ def stage_for_download(uris, options=None):
     """Apply download options before downloading
     Args:
         uris (string or list, Required):
-            uris of catalog_entries or datasets to stage for download
-
-            If uri is a catalog_entry, a new dataset will be created
+            uris of datasets to stage for download
 
         options (dict or list of dicts, Optional, Default=None):
             options to be passed to quest.api.download function specified for each dataset

@@ -98,7 +98,7 @@ class ProviderBase(metaclass=abc.ABCMeta):
         Take a series of query parameters and return a list of
         locations as a geojson python dictionary
         """
-        cache_file = os.path.join(util.get_cache_dir(self.name), service + '_catalog_entries.p')
+        cache_file = os.path.join(util.get_cache_dir(self.name), service + '_catalog.p')
         if self.use_cache and not update_cache:
             try:
                 catalog_entries = pd.read_pickle(cache_file)
@@ -157,7 +157,7 @@ class ProviderBase(metaclass=abc.ABCMeta):
         columns = list(set(catalog_entries.columns.tolist()).intersection(reserved_geometry_fields))
         catalog_entries.drop(columns, axis=1, inplace=True)
 
-        params = self.get_parameters(service=service, catalog_entries=catalog_entries)
+        params = self.get_parameters(service=service, catalog_ids=catalog_entries)
         if isinstance(params, pd.DataFrame):
             groups = params.groupby('service_id').groups
             catalog_entries['parameters'] = catalog_entries.index.map(lambda x: ','.join(filter(None, params.loc[groups[x]]['parameter'].tolist())) if x in groups.keys() else '')
@@ -259,15 +259,15 @@ class ProviderBase(metaclass=abc.ABCMeta):
     def get_publishers(self):
         return {k: v.metadata for k, v in self.publishers.items()}
 
-    def get_parameters(self, service, catalog_entries=None):
-        return self.services[service].get_parameters(catalog_entries=catalog_entries)
+    def get_parameters(self, service, catalog_ids=None):
+        return self.services[service].get_parameters(catalog_ids=catalog_ids)
 
-    def download(self, service, catalog_entry, file_path, dataset, **kwargs):
+    def download(self, service, catalog_id, file_path, dataset, **kwargs):
         """
         needs to return dictionary
         eg. {'path': /path/to/dir/or/file, 'format': 'raster'}
         """
-        return self.services[service].download(catalog_entry, file_path, dataset, **kwargs)
+        return self.services[service].download(catalog_id, file_path, dataset, **kwargs)
 
     def get_download_options(self, service, fmt):
         """

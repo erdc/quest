@@ -104,7 +104,7 @@ def classify_uris(uris, grouped=True, as_dataframe=True, require_same_type=False
 
     Args:
         uris (list or string): List of Quest uris to classify into the following types: 'collections', 'services',
-        'publishers', 'datasets', or 'catalog_ids*'.
+        'publishers', or 'datasets'.
         grouped (bool): If True returns
         Pandas GroupBy object (see: https://pandas.pydata.org/pandas-docs/stable/groupby.html)
         as_dataframe (bool): If True returns a Pandas DataFrame
@@ -372,8 +372,7 @@ def uuid(resource_type):
     """Generate a new uuid.
 
     Notes:
-        First character of uuid is replaced with 'f' or 'd' respectively
-        for resource_type catalog_id, dataset respectovely
+        First character of uuid is replaced with 'd' for resource_type dataset.
 
     Args:
         resource_type (string): A string that is a type of resource i.e. 'dataset'.

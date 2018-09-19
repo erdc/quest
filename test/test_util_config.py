@@ -18,7 +18,6 @@ class TempCWD():
     def __init__(self):
         self.cwd = os.getcwd()
         self.folder_obj = tempfile.TemporaryDirectory()
-        print("3-Aaron Valoroso: ", self.folder_obj.name)
         self.temp_dir = self.folder_obj.name
 
     def __enter__(self):
@@ -31,7 +30,6 @@ class TempCWD():
 @pytest.fixture
 def set_environ(request):
     folder_obj = tempfile.TemporaryDirectory()
-    print("4-Aaron Valoroso: ", folder_obj.name)
     os.environ['QUEST_DIR'] = folder_obj.name
 
     def clear_environ():
@@ -41,7 +39,7 @@ def set_environ(request):
 
 
 folder_obj = tempfile.TemporaryDirectory()
-print("5-Aaron Valoroso: ", folder_obj.name)
+
 
 @pytest.fixture(params=[folder_obj.name, 'quest'])
 def base_dir(request):
@@ -93,7 +91,6 @@ def test_save_settings(api):
         api.update_settings(config={'BASE_DIR': 'quest', 'USER_SERVICES': []})
         settings = api.get_settings()
         folder_obj = tempfile.TemporaryDirectory()
-        print("6-Aaron Valoroso: ", folder_obj.name)
         filename = os.path.join(folder_obj.name, 'quest_config.yml')
         api.save_settings(filename)
         api.update_settings_from_file(filename)

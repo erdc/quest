@@ -1,4 +1,3 @@
-import os
 import pytest
 from types import ModuleType
 
@@ -11,14 +10,6 @@ from quest.static import DatasetStatus
 ACTIVE_PROJECT = 'test_data'
 
 pytestmark = pytest.mark.usefixtures('reset_projects_dir', 'set_active_project')
-
-
-@pytest.fixture
-def dataset_save_path(api, reset_projects_dir):
-    save_path = os.path.join(reset_projects_dir['BASE_DIR'], 'projects/test_data/col1/usgs-nwis/iv/d43d503dc792475bb322ef71ffb885bd/d43d503dc792475bb322ef71ffb885bd.h5')
-    api.update_metadata(uris=DATASET, quest_metadata={'file_path': save_path})
-
-    return save_path
 
 
 def test_download_datasets():
@@ -108,7 +99,9 @@ def test_get_datasets(api, dataset_save_path):
 
 
 def test_get_datasets_with_query(api):
-    datasets = api.get_datasets(queries=['status == "downloaded" or status == "filter applied"'])
+    datasets = api.get_datasets(
+        queries=['status == "{}" or status == "{}"'.format(DatasetStatus.DOWNLOADED, DatasetStatus.DERIVED)]
+    )
     expected = 1
     assert len(datasets) == expected
 
@@ -219,11 +212,11 @@ def test_visualize_dataset(api):
 def test_visualize_dataset_options(api, dataset_save_path):
     """Return visualization available options for dataset."""
     expected = {'type': 'object',
-                'properties': {'end': {'default': '2018-09-07 20:00:00',
+                'properties': {'end': {'default': '2018-09-15 16:00:00',
                                        'type': 'string',
                                        'description': 'end date'
                                        },
-                               'start': {'default': '2017-09-07 21:00:00',
+                               'start': {'default': '2018-08-15 16:00:00',
                                          'type': 'string',
                                          'description': 'start date'
                                          }

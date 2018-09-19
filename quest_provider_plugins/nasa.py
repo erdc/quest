@@ -1,4 +1,5 @@
 from quest.database.database import get_db, db_session
+from quest.util import log
 from getpass import getpass
 import pandas as pd
 import requests
@@ -165,6 +166,6 @@ class NasaProvider(ProviderBase):
             return True
 
         except:
-            print("Either credentials invalid or unable to connect to HydroShare.")
+            log.error("Either credentials invalid or unable to connect to HydroShare.")
 
         return False

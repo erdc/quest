@@ -70,15 +70,15 @@ class NcdcServiceBase(TimePeriodServiceBase):
 
         return pmap
 
-    def download(self, catalog_entry, file_path, dataset, **kwargs):
+    def download(self, catalog_id, file_path, dataset, **kwargs):
         p = param.ParamOverrides(self, kwargs)
         self.parameter = p.parameter
         self.end = pd.to_datetime(p.end)
         self.start = pd.to_datetime(p.start)
-        self._catalog_entry = catalog_entry
+        self._catalog_entry = catalog_id
 
         if dataset is None:
-            dataset = 'station-' + catalog_entry
+            dataset = 'station-' + catalog_id
 
         # if end is None:
         #     end = pd.datetime.now().strftime('%Y-%m-%d')
@@ -95,7 +95,7 @@ class NcdcServiceBase(TimePeriodServiceBase):
             'datatype': 'timeseries',
             'parameter': self.parameter,
             'unit': self._unit_map[self.parameter],
-            'service_id': 'svc://ncdc:{}/{}'.format(self.service_name, catalog_entry)
+            'service_id': 'svc://ncdc:{}/{}'.format(self.service_name, catalog_id)
         }
 
         # save data to disk

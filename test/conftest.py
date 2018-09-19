@@ -1,17 +1,19 @@
-from data import CACHED_SERVICES
-from time import time
-import warnings
-import tempfile
 import logging
-import pytest
-import shutil
-import quest
 import os
+import shutil
+import tempfile
+import warnings
+from time import time
 
+import pytest
+import quest
+
+from data import CACHED_SERVICES, DATASET
 
 base_path = os.path.dirname(os.path.abspath(__file__))
 FILES_DIR = os.path.join(base_path, 'files')
 warnings.filterwarnings('ignore', "Pandas doesn't allow columns to be created via a new attribute name", UserWarning)
+
 
 def pytest_addoption(parser):
     parser.addoption('--update-cache', action='store_true')
@@ -47,13 +49,14 @@ def get_or_generate_test_cache(update=False, skip=False):
     provider_plugins = quest.plugins.load_providers()
 
     for name in CACHED_SERVICES:
-        provider, service, feature = quest.util.parse_service_uri(name)
+        provider, service, _ = quest.util.parse_service_uri(name)
         if provider.startswith('user'):
             continue
         provider_plugin = provider_plugins[provider]
 
-        cache_file = os.path.join(quest.util.get_cache_dir(provider_plugin.name), service + '_features.p')
+        cache_file = os.path.join(quest.util.get_cache_dir(provider_plugin.name), service + '_catalog.p')
         if update or not os.path.exists(cache_file):
+            import pdb; pdb.set_trace()
             try:
                 print('Updating test cache for service: {0}'.format(name))
                 quest.api.get_tags(name, update_cache=update)
@@ -73,7 +76,6 @@ def get_or_generate_test_cache(update=False, skip=False):
 @pytest.fixture(scope='session')
 def get_base_dir(request, pytestconfig):
     base_dir_obj = tempfile.TemporaryDirectory()
-    print("7-Aaron Valoroso: ", base_dir_obj.name)
     base_dir = base_dir_obj.name
     update_cache = request.config.getoption('--update-cache')
     skip_cache = request.config.getoption('--skip-slow')
@@ -130,3 +132,12 @@ def reset_projects_dir(reset_settings, request):
 def set_active_project(api, reset_settings, request):
     tests_active_project = getattr(request.module, 'ACTIVE_PROJECT', 'default')
     api.set_active_project(tests_active_project)
+
+
+@pytest.fixture
+def dataset_save_path(api, reset_projects_dir):
+    save_path = os.path.join(reset_projects_dir['BASE_DIR'], 'projects', 'test_data', 'col1', 'usgs-nwis', 'iv',
+                             DATASET, '{}.h5'.format(DATASET))
+    api.update_metadata(uris=DATASET, quest_metadata={'file_path': save_path})
+
+    return save_path

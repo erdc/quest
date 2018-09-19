@@ -316,12 +316,12 @@ ALL_SERVICES = sorted(DOWNLOAD_OPTIONS_FROM_ALL_SERVICES.keys())
 
 SERVICE = 'svc://usgs-nwis:iv'
 CATALOG_ENTRY = 'svc://usgs-nwis:iv/01516350'
-DATASET = 'd43d503dc792475bb322ef71ffb885bd'
+DATASET = 'd56fa10348894ba594dfc43f238d3b6d'
 
 DATASET_METADATA = {
     'download_status': 'downloaded',
     'download_message': 'success',
-    'name': 'd43d503dc792475bb322ef71ffb885bd',
+    'name': DATASET,
     'file_format': 'timeseries-hdf5',
     'datatype': 'timeseries',
     'catalog_entry': 'svc://usgs-nwis:iv/01516350',
@@ -330,7 +330,7 @@ DATASET_METADATA = {
     'dataset_type': 'download',
     'timezone': 'utc',
     'unit': 'ft3/s',
-    'display_name': 'd43d503dc792475bb322ef71ffb885bd',
+    'display_name': DATASET,
     'parameter': 'streamflow',
     'metadata': {}
 }

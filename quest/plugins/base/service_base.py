@@ -69,8 +69,8 @@ class ServiceBase(param.Parameterized):
 
         return pmap
 
-    def get_parameters(self, catalog_entries=None):
-        """Default function that should be overridden if the catalog_entries argument needs to be handled."""
+    def get_parameters(self, catalog_ids=None):
+        """Default function that should be overridden if the catalog_ids argument needs to be handled."""
         return self.parameters
 
     def get_download_options(self, fmt):
@@ -90,7 +90,7 @@ class ServiceBase(param.Parameterized):
 
         return schema
 
-    def download(self, catalog_entry, file_path, dataset, **kwargs):
+    def download(self, catalog_id, file_path, dataset, **kwargs):
         raise NotImplementedError()
 
     def search_catalog(self, **kwargs):
@@ -135,10 +135,10 @@ class SingleFileServiceBase(ServiceBase):
     """Base file for datasets that are a single file download
     eg elevation raster etc
     """
-    def download(self, catalog_entry, file_path, dataset, **kwargs):
-        catalog_entry_id = util.construct_service_uri(self.provider.name, self.name, catalog_entry)
-        catalog_entry = self.provider.search_catalog(self.name).loc[catalog_entry_id]
-        reserved = catalog_entry.get('reserved')
+    def download(self, catalog_id, file_path, dataset, **kwargs):
+        service_uri = util.construct_service_uri(self.provider.name, self.name, catalog_id)
+        catalog_id = self.provider.search_catalog(self.name).loc[service_uri]
+        reserved = catalog_id.get('reserved')
         download_url = reserved['download_url']
         fmt = reserved.get('extract_from_zip', '')
         filename = reserved.get('filename', util.uuid('dataset'))
@@ -146,7 +146,7 @@ class SingleFileServiceBase(ServiceBase):
         return {
             'file_path': file_path,
             'file_format': reserved.get('file_format'),
-            'parameter': catalog_entry.get('parameters'),
+            'parameter': catalog_id.get('parameters'),
             'datatype': self.datatype,
         }
 

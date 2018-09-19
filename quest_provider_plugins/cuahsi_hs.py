@@ -2,7 +2,7 @@ from quest.plugins import ProviderBase, SingleFileServiceBase, PublishBase
 from hs_restclient import HydroShare, HydroShareAuthBasic
 from quest.database.database import get_db, db_session
 from quest.api.metadata import get_metadata
-from quest.util import param_util, listify
+from quest.util import param_util, listify, log
 from shapely.geometry import Point, box
 from quest.static import ServiceType
 from getpass import getpass
@@ -293,7 +293,7 @@ class HSProvider(ProviderBase):
             return True
 
         except:
-            print("Either credentials invalid or unable to connect to {}.".format(self.name))
+            log.error("Either credentials invalid or unable to connect to {}.".format(self.name))
 
         return False
 

@@ -39,22 +39,22 @@ def get_user_service_base():
                 raise ValueError()  # Now only supporting one service folder
             else:
                 self.service_folder = self.service_folder[0]
-            self.catalog_entry_file = service_data['features']['file']
-            self.catalog_entry_format = service_data['features']['format']
+            self.catalog_file = service_data['features']['file']
+            self.catalog_file_format = service_data['features']['format']
             self.datasets_mapping = service_data['datasets']['mapping']
             self.datasets_save_folder = service_data['datasets']['save_folder']
             self.datasets_metadata = service_data['datasets'].get('metadata', None)
 
             return self
 
-        def download(self, catalog_entry, file_path, dataset, **kwargs):
+        def download(self, catalog_id, file_path, dataset, **kwargs):
             if self.datasets_mapping is not None:
                 fnames = self.datasets_mapping
                 if isinstance(self.datasets_mapping, dict):
                     fnames = self.dataset_mapping[self.parameter]
-                fnames = [f.replace('<catalog_entry>', catalog_entry) for f in util.listify(fnames)]
+                fnames = [f.replace('<feature>', catalog_id) for f in util.listify(fnames)]
             else:
-                fnames = self.catalog_entries.loc[catalog_entry]['_download_url']
+                fnames = self.catalog_entries.loc[catalog_id]['_download_url']  # TODO where does self.catalog_entries get initialized?
 
             final_path = []
             for src, file_name in zip(self._get_paths(fnames), fnames):
@@ -100,8 +100,8 @@ def get_user_service_base():
             return metadata
 
         def search_catalog(self, **kwargs):
-            fmt = self.catalog_entries_format
-            paths = self._get_paths(self.catalog_entries_file)
+            fmt = self.catalog_file_format
+            paths = self._get_paths(self.catalog_file)
 
             all_catalog_entries = []
 
@@ -118,9 +118,9 @@ def get_user_service_base():
                         # skip first line which is a bunding polygon
                         f.readline()
                         for line in f:
-                            catalog_entry_id, x1, y1, x2, y2 = line.split()
+                            catalog_id, x1, y1, x2, y2 = line.split()
                             properties = {}
-                            polys.append(Feature(geometry=util.bbox2poly(x1, y1, x2, y2, as_geojson=True), properties=properties, id=catalog_entry_id))
+                            polys.append(Feature(geometry=util.bbox2poly(x1, y1, x2, y2, as_geojson=True), properties=properties, id=catalog_id))
                         catalog_entries = FeatureCollection(polys)
                         catalog_entries = util.to_geodataframe(catalog_entries)
 
@@ -130,10 +130,10 @@ def get_user_service_base():
                         # mbr fromat in quest-demo-data
                         polys = []
                         for line in f:
-                            catalog_entry_id, y1, x1, y2, x2 = line.split(',')
-                            catalog_entry_id = catalog_entry_id.split('.')[0]
+                            catalog_id, y1, x1, y2, x2 = line.split(',')
+                            catalog_id = catalog_id.split('.')[0]
                             properties = {}
-                            polys.append(Feature(geometry=util.bbox2poly(x1, y1, x2, y2, as_geojson=True), properties=properties, id=catalog_entry_id))
+                            polys.append(Feature(geometry=util.bbox2poly(x1, y1, x2, y2, as_geojson=True), properties=properties, id=catalog_id))
                         catalog_entries = FeatureCollection(polys)
                         catalog_entries = util.to_geodataframe(catalog_entries)
 

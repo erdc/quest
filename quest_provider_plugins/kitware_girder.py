@@ -1,7 +1,7 @@
 from quest.plugins import ProviderBase, PublishBase
 from quest.database.database import get_db, db_session
 from quest.api.metadata import get_metadata
-from quest.util import param_util
+from quest.util import param_util, log
 import girder_client
 import param
 
@@ -100,6 +100,6 @@ class GirderProvider(ProviderBase):
 
             return True
         except:
-            print("Either credentials invalid or unable to connect to the Girder live server.")
+            log.error("Either credentials invalid or unable to connect to the Girder live server.")
 
         return False

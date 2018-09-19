@@ -49,7 +49,6 @@ def define_models(db):
         # setup relationships
         collection = orm.Required(Collection)
         catalog_entry = orm.Required(str)
-        # TODO for now this will just be the service uri with id but will be orm.Required(Catalog)
 
     class Providers(db.Entity):
         provider = orm.PrimaryKey(str)
