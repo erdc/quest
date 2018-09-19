@@ -1,8 +1,10 @@
 from datetime import datetime
 from pony import orm
 from pony.orm import db_session
+import shapely.wkt
 
 _connection = None  # global var to hold persistant db connection
+
 
 def define_models(db):
 
@@ -22,24 +24,6 @@ def define_models(db):
         metadata = orm.Optional(orm.Json)
 
         # setup relationships
-        features = orm.Set('Feature')
-
-    class Feature(db.Entity):
-        name = orm.PrimaryKey(str)
-        display_name = orm.Optional(str)
-        description = orm.Optional(str)
-        created_at = orm.Required(datetime, default=datetime.now())
-        updated_at = orm.Optional(datetime)
-        geometry = orm.Optional(orm.Json)
-
-        metadata = orm.Optional(orm.Json)
-        service = orm.Optional(str)
-        service_id = orm.Optional(str)
-        reserved = orm.Optional(orm.Json)
-        parameters = orm.Optional(orm.Json)
-
-        # setup relationships
-        collection = orm.Required(Collection)
         datasets = orm.Set('Dataset')
 
     class Dataset(db.Entity):
@@ -47,10 +31,10 @@ def define_models(db):
         display_name = orm.Optional(str)
         description = orm.Optional(str, nullable=True)
         created_at = orm.Required(datetime, default=datetime.now())
-        updated_at = orm.Optional(datetime)
         metadata = orm.Optional(orm.Json)
+        updated_at = orm.Optional(datetime)
 
-        # dataset require metadata
+        # dataset - metadata
         parameter = orm.Optional(orm.Json)
         unit = orm.Optional(str)
         datatype = orm.Optional(str)
@@ -63,12 +47,20 @@ def define_models(db):
         visualization_path = orm.Optional(str)
 
         # setup relationships
-        feature = orm.Required(Feature)
+        collection = orm.Required(Collection)
+        catalog_entry = orm.Required(str)
 
     class Providers(db.Entity):
         provider = orm.PrimaryKey(str)
         username = orm.Required(str)
         password = orm.Required(str)
+
+    class QuestCatalog(db.Entity):
+        service_id = orm.PrimaryKey(str)
+        created_at = orm.Required(datetime, default=datetime.now())
+        updated_at = orm.Optional(datetime)
+        metadata = orm.Optional(orm.Json)
+        geometry = orm.Optional(orm.Json)
 
 
 def get_db(dbpath=None, reconnect=False):
@@ -104,6 +96,10 @@ def get_db(dbpath=None, reconnect=False):
 
 
 def init_db(dbpath):
+    """
+    Args:
+    Returns:
+    """
     db = orm.Database()  # create new database object
     define_models(db)  # define entities for this database
     db.bind('sqlite', dbpath, create_db=True)  # bind this database
@@ -113,6 +109,10 @@ def init_db(dbpath):
 
 
 def select_collections(select_func=None):
+    """
+    Args:
+    Returns:
+    """
     db = get_db()
     with db_session:
         if select_func is None:
@@ -125,21 +125,11 @@ def select_collections(select_func=None):
                      ) for c in collections]
 
 
-def select_features(select_func=None):
-    db = get_db()
-    with db_session:
-        if select_func is None:
-            features = db.Feature.select()
-        else:
-            features = db.Feature.select(select_func)
-
-        return [dict(f.to_dict(), **{'metadata': _convert_to_dict(f.metadata),
-                                     'reserved': _convert_to_dict(f.reserved),
-                                     }
-                     ) for f in features]
-
-
 def select_datasets(select_func=None):
+    """
+    Args:
+    Returns:
+    """
     db = get_db()
     with db_session:
         if select_func is None:
@@ -147,11 +137,29 @@ def select_datasets(select_func=None):
         else:
             datasets = db.Dataset.select(select_func)
 
-        return [dict(d.to_dict(), **{'collection': d.feature.collection.name,
+        return [dict(d.to_dict(), **{'collection': d.collection.name,
                                      'options': _convert_to_dict(d.options),
                                      'metadata': _convert_to_dict(d.metadata),
                                      }
                      ) for d in datasets]
+
+
+def select_catalog_entries(select_func=None):
+    """
+    Args:
+    Returns:
+    """
+    db = get_db()
+    with db_session:
+        if select_func is None:
+            catalog_entries = db.QuestCatalog.select()
+        else:
+            catalog_entries = db.QuestCatalog.select(select_func)
+
+        return [dict(e.to_dict(), **{'geometry': None if e.geometry is None else shapely.wkt.loads(e.geometry),
+                                     'metadata': _convert_to_dict(e.metadata),
+                                     }
+                     ) for e in catalog_entries]
 
 
 def _convert_to_dict(tracked_dict):

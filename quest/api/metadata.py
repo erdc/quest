@@ -4,12 +4,11 @@ get/update metadata for projects/collections/datasets.
 """
 
 import pandas as pd
-import geopandas as gpd
-import shapely.wkt
 
 from .. import util
 from .. import plugins
-from quest.database.database import get_db, db_session, select_collections, select_features, select_datasets
+
+from quest.database.database import get_db, db_session, select_collections, select_datasets
 
 
 def get_metadata(uris, as_dataframe=False):
@@ -39,30 +38,26 @@ def get_metadata(uris, as_dataframe=False):
     # get metadata for service type uris
     if 'services' in grouped_uris.groups.keys():
         svc_df = grouped_uris.get_group('services')
-        svc_df[['provider', 'service', 'feature']] = svc_df['uri'].apply(util.parse_service_uri).apply(pd.Series)
+        svc_df[['provider', 'service', 'catalog_id']] = svc_df['uri'].apply(util.parse_service_uri).apply(pd.Series)
 
         for (provider, service), grp in svc_df.groupby(['provider', 'service']):
-            # First process service uris (without the feature)
 
             provider_plugin = plugins.load_providers()[provider]
-            if not grp.query('feature != feature').empty:
+
+            if not grp.query('catalog_id != catalog_id').empty:
                 service_metadata = provider_plugin.get_services()[service]
                 index = util.construct_service_uri(provider, service)
                 metadata.append(pd.DataFrame(service_metadata, index=[index]))
 
-            # Next process service features
-
-            # select rows where feature is not None (nan)
-            selected_features = grp.query('feature == feature').uri.tolist()
-            if selected_features:
-                # add selected service features if any
-                features = provider_plugin.get_features(service)
-                features = features.loc[selected_features]
-                metadata.append(features)
+            selected_catalog_entries = grp.query('catalog_id == catalog_id').uri.tolist()
+            if selected_catalog_entries:
+                catalog_entries = provider_plugin.search_catalog(service)
+                catalog_entries = catalog_entries.loc[selected_catalog_entries]
+                metadata.append(catalog_entries)
 
     if 'publishers' in grouped_uris.groups.keys():
         svc_df = grouped_uris.get_group('publishers')
-        svc_df[['provider', 'publish', 'feature']] = svc_df['uri'].apply(util.parse_service_uri).apply(pd.Series)
+        svc_df[['provider', 'publish', 'catalog_id']] = svc_df['uri'].apply(util.parse_service_uri).apply(pd.Series)
 
         for (provider, publisher), grp in svc_df.groupby(['provider', 'publish']):
             provider_plugin = plugins.load_providers()[provider]
@@ -79,24 +74,11 @@ def get_metadata(uris, as_dataframe=False):
 
         metadata.append(collections)
 
-    if 'features' in grouped_uris.groups.keys():
-        # get metadata for features
-        tmp_df = grouped_uris.get_group('features')
-        features = select_features(lambda c: c.name in tmp_df['uri'].tolist())
-        features = gpd.GeoDataFrame(features)
-        if not features.empty:
-            features['geometry'] = features['geometry'].apply(lambda x: x if x is None else shapely.wkt.loads(x))
-            features.set_geometry('geometry')
-            features.index = features['name']
-        metadata.append(features)
-
     if 'datasets' in grouped_uris.groups.keys():
-        # get metadata for datasets
         tmp_df = grouped_uris.get_group('datasets')
         datasets = select_datasets(lambda c: c.name in tmp_df['uri'].tolist())
         datasets = pd.DataFrame(datasets)
         datasets.set_index('name', inplace=True, drop=False)
-
         metadata.append(datasets)
 
     metadata = pd.concat(metadata)
@@ -174,8 +156,6 @@ def update_metadata(uris, display_name=None, description=None,
         with db_session:
             if resource == 'collections':
                 entity = db.Collection[uri]
-            elif resource == 'features':
-                entity = db.Feature[uri]
             elif resource == 'datasets':
                 entity = db.Dataset[uri]
 

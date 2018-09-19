@@ -1,7 +1,5 @@
-"""QUEST wrapper for USGS NWIS Services
-
-"""
 from quest.database.database import get_db, db_session
+from quest.util import log
 from getpass import getpass
 import pandas as pd
 import requests
@@ -11,6 +9,7 @@ collections_url = 'https://cmr.earthdata.nasa.gov/search/collections.json?short_
 granules_url = 'https://cmr.earthdata.nasa.gov/search/granules.json?short_name=%s&page_size=1000&page_num=%s'
 
 raise ValueError('This Plugin is disabled')
+
 
 class NasaServiceBase(SingleFileServiceBase):
     service_type = 'geo-discrete'
@@ -32,7 +31,7 @@ class NasaServiceBase(SingleFileServiceBase):
         except ValueError:
             return requests.get(granules_url % (short_name, page_num)).json()['feed']['entry']
 
-    def get_features(self, **kwargs):
+    def search_catalog(self, **kwargs):
 
         page_num = 0
         data = []
@@ -44,24 +43,24 @@ class NasaServiceBase(SingleFileServiceBase):
 
             data += granules
 
-        features = pd.DataFrame(data)
-        features.set_index('id', inplace=True)
-        features['bbox'] = features['boxes'].apply(lambda x: x[0].split())
-        features['bbox'] = features['bbox'].apply(lambda x: [x[i] for i in [1, 0, 3, 2]])
-        features['download_url'] = features['links'].apply(
+        catalog_entries = pd.DataFrame(data)
+        catalog_entries.set_index('id', inplace=True)
+        catalog_entries['bbox'] = catalog_entries['boxes'].apply(lambda x: x[0].split())
+        catalog_entries['bbox'] = catalog_entries['bbox'].apply(lambda x: [x[i] for i in [1, 0, 3, 2]])
+        catalog_entries['download_url'] = catalog_entries['links'].apply(
             lambda x: next(iter([link['href'] for link in x if link.get('type') == 'application/zip']), None))
 
-        features = features.loc[~features.download_url.isnull()]
-        features['reserved'] = features['download_url'].apply(lambda x: {'download_url': x, 'file_format': 'raster-gdal','extract_from_zip': '.DEM'})
+        catalog_entries = catalog_entries.loc[~catalog_entries.download_url.isnull()]
+        catalog_entries['reserved'] = catalog_entries['download_url'].apply(lambda x: {'download_url': x, 'file_format': 'raster-gdal','extract_from_zip': '.DEM'})
 
         # features['_filename'] = features._download_url.apply(lambda x: x.split('/')[-1])
         # features['_extract_from_zip'] = '.DEM'
         # features['_file_format'] = 'raster-gdal'
-        del features['download_url']
-        del features['links']
-        del features['boxes']
+        del catalog_entries['download_url']
+        del catalog_entries['links']
+        del catalog_entries['boxes']
 
-        return features
+        return catalog_entries
 
 
 class NasaServiceSrtm3ArcSec(NasaServiceBase):
@@ -167,6 +166,6 @@ class NasaProvider(ProviderBase):
             return True
 
         except:
-            print("Either credentials invalid or unable to connect to HydroShare.")
+            log.error("Either credentials invalid or unable to connect to HydroShare.")
 
         return False

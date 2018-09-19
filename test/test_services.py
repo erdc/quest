@@ -20,7 +20,7 @@ def test_add_and_remove_provider(api):
     assert 'svc://user-test-service:test' in api.get_services()
 
     api.delete_provider(user_provider_path)
-    assert 'user-test-service' not in api.get_providers()
+    assert 'user-test-service'  not in api.get_providers()
     assert 'svc://user-test-service:test' not in api.get_services()
 
 
@@ -36,7 +36,7 @@ def test_get_services(api):
 @pytest.mark.parametrize('feature, options', SERVICE_FEATURE_DOWNLOAD_OPTIONS)
 def test_download(api, feature, options):
     api.new_collection('test')
-    collection_feature = api.add_features('test', feature)
+    collection_feature = api.add_datasets('test', feature)
     d = api.stage_for_download(collection_feature, options=options)[0]
     result = api.download_datasets(d, raise_on_error=True)
     assert result[d] == 'downloaded'

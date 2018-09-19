@@ -15,7 +15,7 @@ BASE_PATH = 'usgs-nwis'
 class NwisServiceBase(TimePeriodServiceBase):
     period = param.String(default='P365D', precedence=4, doc='time period (e.g. P365D = 365 days or P4W = 4 weeks)')
 
-    def download(self, feature, file_path, dataset, **kwargs):
+    def download(self, catalog_id, file_path, dataset, **kwargs):
         p = param.ParamOverrides(self, kwargs)
 
         parameter = p.parameter
@@ -24,7 +24,7 @@ class NwisServiceBase(TimePeriodServiceBase):
         period = p.period
 
         if dataset is None:
-            dataset = 'station-' + feature
+            dataset = 'station-' + catalog_id
 
         if start and end:
             period = None
@@ -32,7 +32,7 @@ class NwisServiceBase(TimePeriodServiceBase):
         pmap = self.parameter_map(invert=True)
         parameter_code, statistic_code = (pmap[parameter].split(':') + [None])[:2]
 
-        data = nwis.get_site_data(feature,
+        data = nwis.get_site_data(catalog_id,
                                   parameter_code=parameter_code,
                                   statistic_code=statistic_code,
                                   start=start, end=end, period=period,
@@ -71,7 +71,7 @@ class NwisServiceBase(TimePeriodServiceBase):
             'datatype': 'timeseries',
             'parameter': parameter,
             'unit': data['variable']['units']['code'],
-            'service_id': 'svc://usgs-nwis:{}/{}'.format(self.service_name, feature)
+            'service_id': 'svc://usgs-nwis:{}/{}'.format(self.service_name, catalog_id)
         }
 
         # save data to disk
@@ -81,8 +81,8 @@ class NwisServiceBase(TimePeriodServiceBase):
 
         return metadata
 
-    def get_features(self, **kwargs):
-        func = partial(_nwis_features, service=self.service_name)
+    def search_catalog(self, **kwargs):
+        func = partial(_nwis_catalog_entries, service=self.service_name)
         with concurrent.futures.ProcessPoolExecutor() as executor:
             sites = executor.map(func, _states())
 
@@ -101,8 +101,8 @@ class NwisServiceBase(TimePeriodServiceBase):
         # df['_geom_coords'] = list(zip(df['_longitude'], df['_latitude']))
         return df
 
-    def get_parameters(self, features=None):
-        df = self.get_features()
+    def get_parameters(self, catalog_ids=None):
+        df = self.search_catalog()
 
         chunks = list(_chunks(df.index.tolist()))
         func = partial(_site_info, service=self.service_name)
@@ -203,7 +203,7 @@ def _chunks(l, n=100):
         yield l[i:i+n]
 
 
-def _nwis_features(state, service):
+def _nwis_catalog_entries(state, service):
     return nwis.get_sites(state_code=state, service=service)
 
 

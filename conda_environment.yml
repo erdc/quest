@@ -11,7 +11,6 @@ name: quest
 
 channels:
     - conda-forge
-    - erdc
 
 dependencies:
     - python=3
@@ -52,7 +51,6 @@ dependencies:
     # plugin dependencies
     - girder-client
     - hs_restclient
-    - ncep_client
     - pillow
     - requests
     - whitebox_tools

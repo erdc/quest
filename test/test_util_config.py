@@ -7,7 +7,7 @@ import shutil
 
 test_settings = {
     'BASE_DIR': 'quest',
-    'CACHE_DIR': 'cache',
+    'CACHE_DIR': os.path.join('.cache', 'test_cache'),
     'PROJECTS_DIR': 'projects',
     'USER_SERVICES': [],
 }
@@ -17,19 +17,20 @@ class TempCWD():
 
     def __init__(self):
         self.cwd = os.getcwd()
-        self.temp_dir = tempfile.mkdtemp()
+        self.folder_obj = tempfile.TemporaryDirectory()
+        self.temp_dir = self.folder_obj.name
 
     def __enter__(self):
         os.chdir(self.temp_dir)
 
     def __exit__(self, *args):
         os.chdir(self.cwd)
-        shutil.rmtree(self.temp_dir)
 
 
 @pytest.fixture
 def set_environ(request):
-    os.environ['QUEST_DIR'] = tempfile.mkdtemp()
+    folder_obj = tempfile.TemporaryDirectory()
+    os.environ['QUEST_DIR'] = folder_obj.name
 
     def clear_environ():
         del os.environ['QUEST_DIR']
@@ -37,7 +38,10 @@ def set_environ(request):
     request.addfinalizer(clear_environ)
 
 
-@pytest.fixture(params=[tempfile.mkdtemp(), 'quest'])
+folder_obj = tempfile.TemporaryDirectory()
+
+
+@pytest.fixture(params=[folder_obj.name, 'quest'])
 def base_dir(request):
     return request.param
 
@@ -50,7 +54,7 @@ def test_set_base_path_with_env_var(set_environ):
 
     assert quest.api.get_settings() == {
                 'BASE_DIR': os.environ['QUEST_DIR'],
-                'CACHE_DIR': 'cache',
+                'CACHE_DIR': os.path.join('.cache', 'test_cache'),
                 'PROJECTS_DIR': 'projects',
                 'USER_SERVICES': [],
                 }
@@ -86,7 +90,8 @@ def test_save_settings(api):
     with TempCWD():
         api.update_settings(config={'BASE_DIR': 'quest', 'USER_SERVICES': []})
         settings = api.get_settings()
-        filename = os.path.join(tempfile.gettempdir(), 'quest_config.yml')
+        folder_obj = tempfile.TemporaryDirectory()
+        filename = os.path.join(folder_obj.name, 'quest_config.yml')
         api.save_settings(filename)
         api.update_settings_from_file(filename)
 

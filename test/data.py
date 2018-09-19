@@ -225,6 +225,7 @@ DOWNLOAD_OPTIONS_FROM_ALL_SERVICES = {
              'type': 'String'}
         ],
             'title': 'NWIS Instantaneous Values Service Download Options'},
+    'svc://quest:quest': {},
     'svc://cuahsi-hydroshare:hs_geo': {},
     'svc://cuahsi-hydroshare:hs_norm': {},
     'svc://wmts:seamless_imagery':
@@ -314,22 +315,22 @@ CACHED_SERVICES = [s[0] for s in SERVICES_FEATURE_COUNT]
 ALL_SERVICES = sorted(DOWNLOAD_OPTIONS_FROM_ALL_SERVICES.keys())
 
 SERVICE = 'svc://usgs-nwis:iv'
-FEATURE = 'f92ad0e35d04402ab1b1d4621b48a636'
-DATASET = 'df5c3df3229441fa9c779443f03635e7'
+CATALOG_ENTRY = 'svc://usgs-nwis:iv/01516350'
+DATASET = 'd56fa10348894ba594dfc43f238d3b6d'
 
 DATASET_METADATA = {
     'download_status': 'downloaded',
     'download_message': 'success',
-    'name': 'df5c3df3229441fa9c779443f03635e7',
+    'name': DATASET,
     'file_format': 'timeseries-hdf5',
     'datatype': 'timeseries',
-    'feature': 'f92ad0e35d04402ab1b1d4621b48a636',
+    'catalog_entry': 'svc://usgs-nwis:iv/01516350',
     'collection': 'test_data',
     'download_options': '{"parameter": "streamflow"}',
     'dataset_type': 'download',
     'timezone': 'utc',
     'unit': 'ft3/s',
-    'display_name': 'df5c3df3229441fa9c779443f03635e7',
+    'display_name': DATASET,
     'parameter': 'streamflow',
     'metadata': {}
 }

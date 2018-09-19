@@ -30,10 +30,10 @@ def test_delete(api):
     api.new_collection('test3')
 
     api.delete('test2')
-    assert len(list(api.get_collections())) == 5
+    assert 5 == len(list(api.get_collections()))
 
     api.delete('test3')
-    assert len(list(api.get_collections())) == 4
+    assert 4 == len(list(api.get_collections()))
 
 
 def test_update_collection(api):

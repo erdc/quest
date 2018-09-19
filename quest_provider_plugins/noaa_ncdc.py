@@ -1,4 +1,3 @@
-"""QUEST wrapper for NCDC GHCN and GSOD Services."""
 from quest.plugins import ProviderBase, TimePeriodServiceBase, load_plugins
 from ulmo.ncdc import ghcn_daily, gsod
 import pandas as pd
@@ -38,26 +37,26 @@ class NcdcServiceBase(TimePeriodServiceBase):
         pmap = self.parameter_map(invert=True)
         return pmap[self.parameter]
 
-    def get_features(self):
-        features = self._get_features()
+    def search_catalog(self, **kwargs):
+        catalog_entries = self._search_catalog()
 
         # remove locations with invalid coordinates
-        valid = pd.notnull(features.latitude) & pd.notnull(features.longitude)
-        features = features[valid]
-        features.rename(columns={
+        valid = pd.notnull(catalog_entries.latitude) & pd.notnull(catalog_entries.longitude)
+        catalog_entries = catalog_entries[valid]
+        catalog_entries.rename(columns={
             'name': 'display_name',
             'longitude': 'longitude',
             'latitude': 'latitude'
         }, inplace=True)
 
         # drop columns that just duplicate information already in the service_id
-        features.drop(labels=['id', 'network_id', 'WBAN', 'USAF'], axis=1, inplace=True, errors='ignore')
+        catalog_entries.drop(labels=['id', 'network_id', 'WBAN', 'USAF'], axis=1, inplace=True, errors='ignore')
 
-        return features
+        return catalog_entries
 
     @property
-    def feature(self):
-        return self._feature
+    def catalog_entry(self):
+        return self._catalog_entry
 
     @property
     def data(self):
@@ -71,15 +70,15 @@ class NcdcServiceBase(TimePeriodServiceBase):
 
         return pmap
 
-    def download(self, feature, file_path, dataset, **kwargs):
+    def download(self, catalog_id, file_path, dataset, **kwargs):
         p = param.ParamOverrides(self, kwargs)
         self.parameter = p.parameter
         self.end = pd.to_datetime(p.end)
         self.start = pd.to_datetime(p.start)
-        self._feature = feature
+        self._catalog_entry = catalog_id
 
         if dataset is None:
-            dataset = 'station-' + feature
+            dataset = 'station-' + catalog_id
 
         # if end is None:
         #     end = pd.datetime.now().strftime('%Y-%m-%d')
@@ -96,7 +95,7 @@ class NcdcServiceBase(TimePeriodServiceBase):
             'datatype': 'timeseries',
             'parameter': self.parameter,
             'unit': self._unit_map[self.parameter],
-            'service_id': 'svc://ncdc:{}/{}'.format(self.service_name, feature)
+            'service_id': 'svc://ncdc:{}/{}'.format(self.service_name, catalog_id)
         }
 
         # save data to disk
@@ -140,7 +139,7 @@ class NcdcServiceGhcnDaily(NcdcServiceBase):
 
     @property
     def data(self):
-        data = ghcn_daily.get_data(self.feature,
+        data = ghcn_daily.get_data(self.catalog_entry,
                                    elements=self.parameter_code,
                                    as_dataframe=True)  # [parameter_code]
         if not data or data[self.parameter_code].empty:
@@ -155,7 +154,7 @@ class NcdcServiceGhcnDaily(NcdcServiceBase):
 
         return data
 
-    def _get_features(self, **kwargs):
+    def _search_catalog(self, **kwargs):
         return ghcn_daily.get_stations(as_dataframe=True)
 
 
@@ -188,13 +187,13 @@ class NcdcServiceGsod(NcdcServiceBase):
 
     @property
     def data(self):
-        data = gsod.get_data(self.feature, start=self.start, end=self.end,
-                             parameters=self.parameter_code)  # [feature]
+        data = gsod.get_data(self.catalog_entry, start=self.start, end=self.end,
+                             parameters=self.parameter_code)
 
-        if not data or not data[self.feature]:
+        if not data or not data[self.catalog_entry]:
             raise ValueError('No Data Available')
 
-        data = data[self.feature]
+        data = data[self.catalog_entry]
         data = pd.DataFrame(data)
         if data.empty:
             raise ValueError('No Data Available')
@@ -205,10 +204,10 @@ class NcdcServiceGsod(NcdcServiceBase):
 
         return data
 
-    def _get_features(self, **kwargs):
-        features = gsod.get_stations()
-        features = pd.DataFrame.from_dict(features, orient='index')
-        return features
+    def _search_catalog(self, **kwargs):
+        catalog_entries = gsod.get_stations()
+        catalog_entries = pd.DataFrame.from_dict(catalog_entries, orient='index')
+        return catalog_entries
 
 
 class NcdcProvider(ProviderBase):

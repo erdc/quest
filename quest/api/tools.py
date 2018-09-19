@@ -44,8 +44,8 @@ def get_tools(filters=None, expand=False, **kwargs):
                 m = get_metadata(v).get(v)
                 kwargs['datatype'] = m.get('datatype')
                 kwargs['parameters'] = m.get('parameter')
-                feature = m.get('feature')
-                geometry = get_metadata(feature).get(feature).get('geometry')
+                catalog_entry = m.get('catalog_entry')
+                geometry = get_metadata(catalog_entry).get(catalog_entry).get('geometry')
                 if geometry is not None:
                     kwargs['geotype'] = geometry.geom_type
                 return get_tools(filters=kwargs, expand=expand)
@@ -84,8 +84,8 @@ def run_tool(name, options=None, as_dataframe=None, expand=None, as_open_dataset
 
 
     Returns:
-        dataset/feature uris (dict or pandas dataframe, Default=dict):
-             resulting datasets and/or features
+        dataset/catalog_entry uris (dict or pandas dataframe, Default=dict):
+             resulting datasets and/or catalog_entries
 
 
     """
@@ -98,21 +98,20 @@ def run_tool(name, options=None, as_dataframe=None, expand=None, as_open_dataset
     result = plugin.run_tool(**options)
 
     new_datasets = result.get('datasets', [])
-    new_features = result.get('features', [])
+    new_catalog_entries = result.get('catalog_entries', [])
 
     if expand or as_dataframe:
         new_datasets = get_metadata(new_datasets, as_dataframe=True)
-        new_features = get_metadata(new_features, as_dataframe=True)
+        new_catalog_entries = get_metadata(new_catalog_entries, as_dataframe=True)
 
         if expand:
             new_datasets = list(new_datasets.to_dict(orient='index').values())
-            new_features = util.to_geojson(new_features)['features']
+            new_catalog_entries = util.to_geojson(new_catalog_entries)['catalog_entries']
 
-    result.update({'datasets': new_datasets, 'features': new_features})
+    result.update({'datasets': new_datasets, 'catalog_entries': new_catalog_entries})
 
     if as_open_datasets:
         result['datasets'] = [open_dataset(dataset) for dataset in result['datasets']]
-
 
     return result
 

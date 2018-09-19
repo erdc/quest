@@ -96,7 +96,7 @@ def bbox2poly(x1, y1, x2, y2, reverse_order=False, as_geojson=False, as_shapely=
     return multi_polygon(polygons=[polygon(poly1), polygon(poly2)])
 
 
-def classify_uris(uris, grouped=True, as_dataframe=True, require_same_type=False, exclude=None):
+def classify_uris(uris, grouped=True, as_dataframe=True, require_same_type=False, exclude=None, raise_if_empty=True):
     """Converts a list of uris into a pandas dataframe.
 
     Notes:
@@ -104,7 +104,7 @@ def classify_uris(uris, grouped=True, as_dataframe=True, require_same_type=False
 
     Args:
         uris (list or string): List of Quest uris to classify into the following types: 'collections', 'services',
-        'publishers', 'datasets', or 'features'.
+        'publishers', or 'datasets'.
         grouped (bool): If True returns
         Pandas GroupBy object (see: https://pandas.pydata.org/pandas-docs/stable/groupby.html)
         as_dataframe (bool): If True returns a Pandas DataFrame
@@ -123,16 +123,18 @@ def classify_uris(uris, grouped=True, as_dataframe=True, require_same_type=False
     uuid_idx = df['uri'].apply(is_uuid)
     service_idx = df['uri'].str.startswith('svc://')
     publish_idx = df['uri'].str.startswith('pub://')
-    feature_idx = uuid_idx & df['uri'].str.startswith('f')
     dataset_idx = uuid_idx & df['uri'].str.startswith('d')
 
     df['type'][service_idx] = 'services'
     df['type'][publish_idx] = 'publishers'
-    df['type'][feature_idx] = 'features'
     df['type'][dataset_idx] = 'datasets'
     df.set_index('uri', drop=False, inplace=True)
 
     grouped_df = df.groupby('type')
+
+    if raise_if_empty:
+        if df.empty:
+            raise ValueError('At least one uri must be specified.')
 
     if exclude is not None:
         for uri_type in exclude:
@@ -152,22 +154,22 @@ def classify_uris(uris, grouped=True, as_dataframe=True, require_same_type=False
     return df
 
 
-def construct_service_uri(provider, service, feature=None):
+def construct_service_uri(provider, service, catalog_id=None):
     """Builds a uri from the given parameters.
 
     Args:
         provider (string): A string of the provider.
         service (string): A string of the service.
-        feature (string): A string of the feature.
+        catalog_id (string): A string of the catalog_id.
 
     Returns:
-        If there is no feature then the uri will just be the provider
-        and service, else the feature will be appended to the end of the
+        If there is no catalog_id then the uri will just be the provider
+        and service, else the catalog_id will be appended to the end of the
         uri.
     """
     uri = 'svc://{}:{}'.format(provider, service)
-    if feature is not None:
-        uri = '{}/{}'.format(uri, feature)
+    if catalog_id is not None:
+        uri = '{}/{}'.format(uri, catalog_id)
 
     return uri
 
@@ -268,7 +270,7 @@ def listify(liststr, delimiter=','):
 
 
 def parse_service_uri(uri):
-    """Parses a service uri into separate provider, service, and feature strings.
+    """Parses a service uri into separate provider, service, and catalog_id strings.
 
     Examples:
         usgs-nwis:dv/0800345522
@@ -281,10 +283,10 @@ def parse_service_uri(uri):
     Returns:
         Three strings are returned from the parsed uri.
     """
-    svc, feature = (uri.split('://')[-1].split('/', 1) + [None])[:2]
+    svc, catalog_id = (uri.split('://')[-1].split('/', 1) + [None])[:2]
     provider, service = (svc.split(':') + [None])[:2]
 
-    return provider, service, feature
+    return provider, service, catalog_id
 
 
 def to_geodataframe(feature_collection):
@@ -370,19 +372,15 @@ def uuid(resource_type):
     """Generate a new uuid.
 
     Notes:
-        First character of uuid is replaced with 'f' or 'd' respectively
-        for resource_type feature, dataset respectovely
+        First character of uuid is replaced with 'd' for resource_type dataset.
 
     Args:
-        resource_type (string): A string that is a type of resource i.e. 'feature' or 'dataset'.
+        resource_type (string): A string that is a type of resource i.e. 'dataset'.
 
     Returns:
         A new uuid from the resource type.
     """
     uuid = uuid4().hex
-
-    if resource_type == 'feature':
-        uuid = 'f' + uuid[1:]
 
     if resource_type == 'dataset':
         uuid = 'd' + uuid[1:]

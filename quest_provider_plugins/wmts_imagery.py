@@ -56,10 +56,10 @@ class WMTSImageryService(SingleFileServiceBase):
         precedence=5
     )
 
-    def get_features(self, **kwargs):
-        the_feature = {"service_id": "WMTS", "display_name": "WMTS", "geometry": box(-180, -90, 180, 90)}
-        feature = pd.DataFrame(the_feature, index=[0])
-        return feature
+    def search_catalog(self, **kwargs):
+        catalog_entry_data = {"service_id": "WMTS", "display_name": "WMTS", "geometry": box(-180, -90, 180, 90)}
+        catalog = pd.DataFrame(catalog_entry_data, index=[0])
+        return catalog
 
     def download(self, feature, file_path, dataset, **kwargs):
         p = param.ParamOverrides(self, kwargs)

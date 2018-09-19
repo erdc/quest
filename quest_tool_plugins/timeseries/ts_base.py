@@ -70,7 +70,7 @@ class TsBase(ToolBase):
             'message': 'TS Tool Run'
         }
 
-        new_dset = new_dataset(orig_metadata['feature'],
+        new_dset = new_dataset(orig_metadata['catalog_entry'],
                                source='derived',
                                # display_name=self.display_name,
                                description=self.description,

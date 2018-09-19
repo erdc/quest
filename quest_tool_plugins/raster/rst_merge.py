@@ -1,6 +1,6 @@
 from quest.plugins import ToolBase
 from quest import util
-from quest.api import get_metadata, new_dataset, update_metadata, new_feature
+from quest.api import get_metadata, new_dataset, update_metadata, new_catalog_entry
 from quest.api.projects import active_db
 import os
 import rasterio
@@ -46,12 +46,12 @@ class RstMerge(ToolBase):
                 raise ValueError('Units must match for all datasets')
 
         cname = orig_metadata['collection']
-        feature = new_feature(cname,
+        catalog_entry = new_catalog_entry(cname,
                               # display_name=self.display_name,
                               geom_type='Polygon',
                               geom_coords=None)
 
-        new_dset = new_dataset(feature,
+        new_dset = new_dataset(catalog_entry,
                                source='derived',
                                # display_name=self.display_name,
                                description=self.description)
@@ -104,7 +104,7 @@ class RstMerge(ToolBase):
         # update feature geometry metadata
         with rasterio.open(dst) as f:
             geometry = util.bbox2poly(f.bounds.left, f.bounds.bottom, f.bounds.right, f.bounds.top, as_shapely=True)
-        update_metadata(feature, quest_metadata={'geometry': geometry.to_wkt()})
+        update_metadata(catalog_entry, quest_metadata={'geometry': geometry.to_wkt()})
 
         # update dataset metadata
         new_metadata.update({
@@ -113,4 +113,4 @@ class RstMerge(ToolBase):
         })
         update_metadata(new_dset, quest_metadata=new_metadata)
 
-        return {'datasets': new_dset, 'features': feature}
+        return {'datasets': new_dset, 'catalog_entries': catalog_entry}

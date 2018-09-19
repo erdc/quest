@@ -1,7 +1,3 @@
-"""Plugin to create service from data in local/network folder
-
-"""
-
 from geojson import Feature, FeatureCollection, Polygon
 from quest.plugins.base import ProviderBase, ServiceBase
 from io import StringIO
@@ -43,22 +39,22 @@ def get_user_service_base():
                 raise ValueError()  # Now only supporting one service folder
             else:
                 self.service_folder = self.service_folder[0]
-            self.features_file = service_data['features']['file']
-            self.features_format = service_data['features']['format']
+            self.catalog_file = service_data['features']['file']
+            self.catalog_file_format = service_data['features']['format']
             self.datasets_mapping = service_data['datasets']['mapping']
             self.datasets_save_folder = service_data['datasets']['save_folder']
             self.datasets_metadata = service_data['datasets'].get('metadata', None)
 
             return self
 
-        def download(self, feature, file_path, dataset, **kwargs):
+        def download(self, catalog_id, file_path, dataset, **kwargs):
             if self.datasets_mapping is not None:
                 fnames = self.datasets_mapping
                 if isinstance(self.datasets_mapping, dict):
                     fnames = self.dataset_mapping[self.parameter]
-                fnames = [f.replace('<feature>', feature) for f in util.listify(fnames)]
+                fnames = [f.replace('<feature>', catalog_id) for f in util.listify(fnames)]
             else:
-                fnames = self.features.loc[feature]['_download_url']
+                fnames = self.catalog_entries.loc[catalog_id]['_download_url']  # TODO where does self.catalog_entries get initialized?
 
             final_path = []
             for src, file_name in zip(self._get_paths(fnames), fnames):
@@ -103,17 +99,17 @@ def get_user_service_base():
                 metadata.update(self.datasets_metadata)
             return metadata
 
-        def get_features(self, **kwargs):
-            fmt = self.features_format
-            paths = self._get_paths(self.features_file)
+        def search_catalog(self, **kwargs):
+            fmt = self.catalog_file_format
+            paths = self._get_paths(self.catalog_file)
 
-            all_features = []
+            all_catalog_entries = []
 
             for p in util.listify(paths):
                 with uri_open(p, self.is_remote) as f:
                     if fmt.lower() == 'geojson':
-                        features = geojson.load(f)
-                        features = util.to_geodataframe(features)
+                        catalog_entries = geojson.load(f)
+                        catalog_entries = util.to_geodataframe(catalog_entries)
 
                     if fmt.lower() == 'mbr':
                         # TODO creating FeatureCollection not needed anymore
@@ -122,11 +118,11 @@ def get_user_service_base():
                         # skip first line which is a bunding polygon
                         f.readline()
                         for line in f:
-                            feature_id, x1, y1, x2, y2 = line.split()
-                            properties = {}  # '_service_id': feature_id}
-                            polys.append(Feature(geometry=util.bbox2poly(x1, y1, x2, y2, as_geojson=True), properties=properties, id=feature_id))
-                        features = FeatureCollection(polys)
-                        features = util.to_geodataframe(features)
+                            catalog_id, x1, y1, x2, y2 = line.split()
+                            properties = {}
+                            polys.append(Feature(geometry=util.bbox2poly(x1, y1, x2, y2, as_geojson=True), properties=properties, id=catalog_id))
+                        catalog_entries = FeatureCollection(polys)
+                        catalog_entries = util.to_geodataframe(catalog_entries)
 
                     if fmt.lower() == 'mbr-csv':
                         # TODO merge this with the above,
@@ -134,32 +130,32 @@ def get_user_service_base():
                         # mbr fromat in quest-demo-data
                         polys = []
                         for line in f:
-                            feature_id, y1, x1, y2, x2 = line.split(',')
-                            feature_id = feature_id.split('.')[0]
-                            properties = {}  # '_service_id': feature_id}
-                            polys.append(Feature(geometry=util.bbox2poly(x1, y1, x2, y2, as_geojson=True), properties=properties, id=feature_id))
-                        features = FeatureCollection(polys)
-                        features = util.to_geodataframe(features)
+                            catalog_id, y1, x1, y2, x2 = line.split(',')
+                            catalog_id = catalog_id.split('.')[0]
+                            properties = {}
+                            polys.append(Feature(geometry=util.bbox2poly(x1, y1, x2, y2, as_geojson=True), properties=properties, id=catalog_id))
+                        catalog_entries = FeatureCollection(polys)
+                        catalog_entries = util.to_geodataframe(catalog_entries)
 
                     if fmt.lower() == 'isep-json':
                         # uses exported json file from ISEP DataBase
                         # assuming ISEP if a geotypical service for now.
-                        features = pd.read_json(p)
-                        features.rename(columns={'_id': 'service_id'}, inplace=True)
-                        features['download_url'] = features['files'].apply(lambda x: os.path.join(x[0].get('file location'), x[0].get('file name')))
+                        catalog_entries = pd.read_json(p)
+                        catalog_entries.rename(columns={'_id': 'service_id'}, inplace=True)
+                        catalog_entries['download_url'] = catalog_entries['files'].apply(lambda x: os.path.join(x[0].get('file location'), x[0].get('file name')))
                         # remove leading slash from file path
-                        features['download_url'] = features['download_url'].str.lstrip('/')
-                        features['parameters'] = 'met'
+                        catalog_entries['download_url'] = catalog_entries['download_url'].str.lstrip('/')
+                        catalog_entries['parameters'] = 'met'
 
-                all_features.append(features)
+                all_catalog_entries.append(catalog_entries)
 
             # drop duplicates fails when some columns have nested list/tuples like
             # _geom_coords. so drop based on _service_id
-            features = pd.concat(all_features)
-            features = features.drop_duplicates(subset='service_id')
-            features.index = features['service_id']
-            features.sort_index(inplace=True)
-            return features
+            catalog_entries = pd.concat(all_catalog_entries)
+            catalog_entries = catalog_entries.drop_duplicates(subset='service_id')
+            catalog_entries.index = catalog_entries['service_id']
+            catalog_entries.sort_index(inplace=True)
+            return catalog_entries
 
         def _get_paths(self, filenames):
             folder = self.service_folder

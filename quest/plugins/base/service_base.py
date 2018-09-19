@@ -6,7 +6,6 @@ from quest.util.param_util import format_json_options
 import param
 
 
-# base class for providers
 # TODO can I make this an abc and have it be a Paramitarized?
 class ServiceBase(param.Parameterized):
     """Base class for data providers
@@ -70,8 +69,8 @@ class ServiceBase(param.Parameterized):
 
         return pmap
 
-    def get_parameters(self, features=None):
-        """Default function that should be overridden if the features argument needs to be handled."""
+    def get_parameters(self, catalog_ids=None):
+        """Default function that should be overridden if the catalog_ids argument needs to be handled."""
         return self.parameters
 
     def get_download_options(self, fmt):
@@ -91,13 +90,13 @@ class ServiceBase(param.Parameterized):
 
         return schema
 
-    def download(self, feature, file_path, dataset, **kwargs):
+    def download(self, catalog_id, file_path, dataset, **kwargs):
         raise NotImplementedError()
 
-    def get_features(self, **kwargs):
+    def search_catalog(self, **kwargs):
         """
         should return a pandas dataframe or a python dictionary with
-        indexed by feature uid and containing the following columns
+        indexed by catalog_entry uid and containing the following columns
 
         reserved column/field names
             display_name -> will be set to uid if not provided
@@ -136,10 +135,10 @@ class SingleFileServiceBase(ServiceBase):
     """Base file for datasets that are a single file download
     eg elevation raster etc
     """
-    def download(self, feature, file_path, dataset, **kwargs):
-        feature_id = util.construct_service_uri(self.provider.name, self.name, feature)
-        feature = self.provider.get_features(self.name).loc[feature_id]
-        reserved = feature.get('reserved')
+    def download(self, catalog_id, file_path, dataset, **kwargs):
+        service_uri = util.construct_service_uri(self.provider.name, self.name, catalog_id)
+        catalog_id = self.provider.search_catalog(self.name).loc[service_uri]
+        reserved = catalog_id.get('reserved')
         download_url = reserved['download_url']
         fmt = reserved.get('extract_from_zip', '')
         filename = reserved.get('filename', util.uuid('dataset'))
@@ -147,7 +146,7 @@ class SingleFileServiceBase(ServiceBase):
         return {
             'file_path': file_path,
             'file_format': reserved.get('file_format'),
-            'parameter': feature.get('parameters'),
+            'parameter': catalog_id.get('parameters'),
             'datatype': self.datatype,
         }
 

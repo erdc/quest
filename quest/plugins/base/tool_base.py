@@ -75,14 +75,14 @@ class ToolBase(param.ParameterizedFunction):
         self._set_options = options or dict(self.get_param_values())
         result = self._run_tool()
         datasets = listify(result.get('datasets', []))
-        features = listify(result.get('features', []))
+        catalog_entries = listify(result.get('catalog_entries', []))
         for dataset in datasets:
             update_metadata(dataset, quest_metadata={
                 'options': self.set_options,
                 'status': DatasetStatus.DERIVED
             })
 
-        result.update(datasets=datasets, features=features)
+        result.update(datasets=datasets, catalog_entries=catalog_entries)
 
         return result
 

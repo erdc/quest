@@ -36,27 +36,27 @@ class DatasetSelector(param.ObjectSelector):
         return super(DatasetSelector, self).get_range()
 
 
-class FeatureSelector(param.ObjectSelector):
+class CatalogEntrySelector(param.ObjectSelector):
     __slots__ = ['filters', 'queries']
 
     def __init__(self, filters=None, queries=None, **params):
         self.filters = filters
         self.queries = queries
-        super(FeatureSelector, self).__init__(**params)
+        super(CatalogEntrySelector, self).__init__(**params)
 
     @property
-    def features(self):
-        features = quest.api.get_features(
+    def catalog_entries(self):
+        catalog_entries = quest.api.search_catalog(
             quest.api.get_collections(),
             filters=self.filters,
             queries=self.queries,
             expand=True
         )
-        return [NamedString(k, v['display_name']) for k, v in features.items()]
+        return [NamedString(k, v['display_name']) for k, v in catalog_entries.items()]
 
     def get_range(self):
-        self.objects = self.features
-        return super(FeatureSelector, self).get_range()
+        self.objects = self.catalog_entries
+        return super(CatalogEntrySelector, self).get_range()
 
 
 class DatasetListSelector(param.ListSelector):

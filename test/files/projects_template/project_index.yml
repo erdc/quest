@@ -1,4 +1,4 @@
-active_project: project1
+active_project: test_data
 projects:
   default:
     folder: default

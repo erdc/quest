@@ -35,13 +35,11 @@ def get_parameters(service_uri, update_cache=False):
 
 
     """
-    provider, service, feature = util.parse_service_uri(service_uri)
-    parameters = _read_cached_parameters(provider, service,
-                                         update_cache=update_cache)
+    provider, service, catalog_id = util.parse_service_uri(service_uri)
+    parameters = _read_cached_parameters(provider, service, update_cache=update_cache)
 
-
-    if isinstance(parameters,pd.DataFrame) and feature:
-        idx = parameters['service_id'] == feature
+    if isinstance(parameters,pd.DataFrame) and catalog_id:
+        idx = parameters['service_id'] == catalog_id
         parameters = parameters[idx]
 
     return parameters
@@ -63,8 +61,8 @@ def delete_parameter():
 
 
 def _read_cached_parameters(provider, service, update_cache=False):
-    """read cached features."""
-    cache_file = os.path.join(util.get_cache_dir(), provider, service+'_parameters.h5')
+    """read cached parameters."""
+    cache_file = os.path.join(util.get_cache_dir(), provider, service + '_parameters.h5')
     if update_cache:
         return _get_parameters(provider, service, cache_file)
 

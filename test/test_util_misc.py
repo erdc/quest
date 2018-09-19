@@ -1,7 +1,6 @@
 import os
 import tempfile
 import quest
-import pytest
 
 
 def test_get_quest_dir(reset_projects_dir):
@@ -9,12 +8,20 @@ def test_get_quest_dir(reset_projects_dir):
 
 
 def test_get_cache_data_dir(reset_projects_dir):
-    assert quest.util.get_cache_dir() == os.path.join(reset_projects_dir['BASE_DIR'], 'cache')
+    assert quest.util.get_cache_dir() == os.path.join(reset_projects_dir['BASE_DIR'], os.path.join('.cache', 'test_cache'))
+
+    folder_obj = tempfile.TemporaryDirectory()
+    folder = folder_obj.name
+    quest.api.update_settings(config={'CACHE_DIR': folder})
+    assert quest.util.get_cache_dir() == folder
+
+
+def test_get_project_dir(reset_projects_dir):
     assert quest.util.get_projects_dir() == os.path.join(reset_projects_dir['BASE_DIR'], 'projects')
 
-    folder = tempfile.gettempdir()
-    quest.api.update_settings(config={'CACHE_DIR': folder, 'PROJECTS_DIR': folder})
-    assert quest.util.get_cache_dir() == folder
+    folder_obj = tempfile.TemporaryDirectory()
+    folder = folder_obj.name
+    quest.api.update_settings(config={'PROJECTS_DIR': folder})
     assert quest.util.get_projects_dir() == folder
 
 

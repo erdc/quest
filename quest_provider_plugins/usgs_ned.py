@@ -1,7 +1,3 @@
-"""
-Example Services
-"""
-
 from quest.plugins import ProviderBase, SingleFileServiceBase
 from quest import util
 from ulmo.usgs import ned
@@ -22,26 +18,26 @@ class UsgsNedServiceBase(SingleFileServiceBase):
         'elevation': 'elevation'
     }
 
-    def get_features(self, **kwargs):
+    def search_catalog(self, **kwargs):
         service = self._description
-        features = util.to_geodataframe(
+        catalog_entries = util.to_geodataframe(
             ned.get_raster_availability(service, (-180, -90, 180, 90))
         )
-        if features.empty:
-            return features
+        if catalog_entries.empty:
+            return catalog_entries
 
-        features['parameters'] = 'elevation'
-        features['filename'] = features['download url'].apply(lambda x: x.split('/')[-1])
-        features['reserved'] = features.apply(
+        catalog_entries['parameters'] = 'elevation'
+        catalog_entries['filename'] = catalog_entries['download url'].apply(lambda x: x.split('/')[-1])
+        catalog_entries['reserved'] = catalog_entries.apply(
             lambda x: {'download_url': x['download url'],
                        'filename': x['filename'],
                        'file_format': 'raster-gdal',
                        'extract_from_zip': '.img',
                        }, axis=1)
 
-        features.drop(labels=['filename', 'download url', 'format'], axis=1, inplace=True)
+        catalog_entries.drop(labels=['filename', 'download url', 'format'], axis=1, inplace=True)
 
-        return features.rename(columns={'name': 'display_name'})
+        return catalog_entries.rename(columns={'name': 'display_name'})
 
 
 class UsgsNedServiceAlaska(UsgsNedServiceBase):

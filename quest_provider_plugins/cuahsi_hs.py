@@ -2,7 +2,7 @@ from quest.plugins import ProviderBase, SingleFileServiceBase, PublishBase
 from hs_restclient import HydroShare, HydroShareAuthBasic
 from quest.database.database import get_db, db_session
 from quest.api.metadata import get_metadata
-from quest.util import param_util, listify
+from quest.util import param_util, listify, log
 from shapely.geometry import Point, box
 from quest.static import ServiceType
 from getpass import getpass
@@ -17,7 +17,7 @@ class HSServiceBase(SingleFileServiceBase):
     def hs(self):
         return self.provider.get_hs()
 
-    def get_features(self, **kwargs):
+    def search_catalog(self, **kwargs):
         raise NotImplementedError()
 
 
@@ -35,7 +35,7 @@ class HSGeoService(HSServiceBase):
     ]
     _parameter_map = {}
 
-    def get_features(self, **kwargs):
+    def search_catalog(self, **kwargs):
 
         results = list(self.hs.resources(coverage_type="box", north="90", south="-90", east="180", west="-180"))
 
@@ -47,25 +47,25 @@ class HSGeoService(HSServiceBase):
         if len(results2) == 0:
             raise ValueError("There is no resources with coverages in HydroShare Repository.")
 
-        features = pd.DataFrame(results2)
-        idx = features['coverages'].apply(lambda x: len([c for c in x if c['type'] != 'period']) > 0)
-        features = features[idx]
+        catalog_entries = pd.DataFrame(results2)
+        idx = catalog_entries['coverages'].apply(lambda x: len([c for c in x if c['type'] != 'period']) > 0)
+        catalog_entries = catalog_entries[idx]
 
-        features['geometry'] = features['coverages'].apply(self.parse_coverages)
-        features['service_id'] = features['resource_id'].apply(str)
-        features.index = features['service_id']
-        features.rename(columns={
+        catalog_entries['geometry'] = catalog_entries['coverages'].apply(self.parse_coverages)
+        catalog_entries['service_id'] = catalog_entries['resource_id'].apply(str)
+        catalog_entries.index = catalog_entries['service_id']
+        catalog_entries.rename(columns={
             'resource_title': 'display_name',
             'bag_url': 'download url'
         }, inplace=True)
-        features['filename'] = features['download url'].apply(lambda x: x.split('/')[-1])
-        features['reserved'] = features.apply(
+        catalog_entries['filename'] = catalog_entries['download url'].apply(lambda x: x.split('/')[-1])
+        catalog_entries['reserved'] = catalog_entries.apply(
             lambda x: {'download_url': x['download url'],
                        'filename': x['filename'],
                        'file_format': 'zip',
                        }, axis=1)
 
-        return features
+        return catalog_entries
 
     def parse_coverages(self, resource_row):
         geometry = None
@@ -91,23 +91,23 @@ class HSNormService(HSServiceBase):
     unmapped_parameters_available = True
     _parameter_map = {}
 
-    def get_features(self, **kwargs):
+    def search_catalog(self, **kwargs):
         results = list(self.hs.resources())
-        features = pd.DataFrame(results)
-        features['service_id'] = features['resource_id'].apply(str)
-        features.index = features['service_id']
-        features.rename(columns={
+        catalog_entries = pd.DataFrame(results)
+        catalog_entries['service_id'] = catalog_entries['resource_id'].apply(str)
+        catalog_entries.index = catalog_entries['service_id']
+        catalog_entries.rename(columns={
             'resource_title': 'display_name',
             'bag_url': 'download url'
         }, inplace=True)
-        features['filename'] = features['download url'].apply(lambda x: x.split('/')[-1])
-        features['reserved'] = features.apply(
+        catalog_entries['filename'] = catalog_entries['download url'].apply(lambda x: x.split('/')[-1])
+        catalog_entries['reserved'] = catalog_entries.apply(
             lambda x: {'download_url': x['download url'],
                        'filename': x['filename'],
                        'file_format': 'zip',
                        }, axis=1)
 
-        return features
+        return catalog_entries
 
 
 class HSPublisher(PublishBase):
@@ -293,7 +293,7 @@ class HSProvider(ProviderBase):
             return True
 
         except:
-            print("Either credentials invalid or unable to connect to {}.".format(self.name))
+            log.error("Either credentials invalid or unable to connect to {}.".format(self.name))
 
         return False
 

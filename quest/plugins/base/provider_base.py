@@ -9,7 +9,7 @@ from quest.util.log import logger
 from quest.database.database import get_db, db_session
 import json
 
-reserved_feature_fields = [
+reserved_catalog_entry_fields = [
     'name',
     'service',
     'service_id',
@@ -30,7 +30,7 @@ reserved_geometry_fields = [
     'bbox',
 ]
 
-reserved_feature_fields.extend(reserved_geometry_fields)
+reserved_catalog_entry_fields.extend(reserved_geometry_fields)
 
 
 class ProviderBase(metaclass=abc.ABCMeta):
@@ -92,101 +92,97 @@ class ProviderBase(metaclass=abc.ABCMeta):
         self._publishers = None
         self._credentials = None
 
-    def get_features(self, service, update_cache=False, **kwargs):
-        """Get Features associated with service.
+    def search_catalog(self, service, update_cache=False, **kwargs):
+        """Get catalog_entries associated with service.
 
         Take a series of query parameters and return a list of
         locations as a geojson python dictionary
         """
-        cache_file = os.path.join(util.get_cache_dir(self.name), service + '_features.p')
+        cache_file = os.path.join(util.get_cache_dir(self.name), service + '_catalog.p')
         if self.use_cache and not update_cache:
             try:
-                features = pd.read_pickle(cache_file)
-                self._label_features(features, service)
+                catalog_entries = pd.read_pickle(cache_file)
+                self._label_entries(catalog_entries, service)
 
                 # convert to GeoPandas GeoDataFrame
-                features = gpd.GeoDataFrame(features, geometry='geometry')
+                catalog_entries = gpd.GeoDataFrame(catalog_entries, geometry='geometry')
 
-                return features
+                return catalog_entries
             except Exception as e:
                 logger.info(e)
                 logger.info('updating cache')
 
-        # get features from service
-        features = self.services[service].get_features(**kwargs)
+        catalog_entries = self.services[service].search_catalog(**kwargs)
 
         # convert geometry into shapely objects
-        if 'bbox' in features.columns:
-            features['geometry'] = features['bbox'].apply(lambda row: box(*[float(x) for x in row]))
-            del features['bbox']
+        if 'bbox' in catalog_entries.columns:
+            catalog_entries['geometry'] = catalog_entries['bbox'].apply(lambda row: box(*[float(x) for x in row]))
+            del catalog_entries['bbox']
 
-        if {'latitude', 'longitude'}.issubset(features.columns):
+        if {'latitude', 'longitude'}.issubset(catalog_entries.columns):
             fn = lambda row: Point((
                                     float(row['longitude']),
                                     float(row['latitude'])
                                     ))
-            features['geometry'] = features.apply(fn, axis=1)
-            del features['latitude']
-            del features['longitude']
+            catalog_entries['geometry'] = catalog_entries.apply(fn, axis=1)
+            del catalog_entries['latitude']
+            del catalog_entries['longitude']
 
-        if {'geom_type', 'latitudes', 'logitudes'}.issubset(features.columns):
+        if {'geom_type', 'latitudes', 'logitudes'}.issubset(catalog_entries.columns):
             # TODO handle this case or remove from reserved fields and docs
             pass
             # del features['geom_type']
             # del features['latitude']
             # del features['longitude']
 
-        if 'geometry' in features.columns:
-            features['geometry'].apply(shape)
+        if 'geometry' in catalog_entries.columns:
+            catalog_entries['geometry'].apply(shape)
 
-        # if no geometry fields are found then this is a geotypical feature
-        if 'geometry' not in features.columns:
-            features['geometry'] = None
+        if 'geometry' not in catalog_entries.columns:
+            catalog_entries['geometry'] = None
 
         # add defaults values
-        if 'display_name' not in features.columns:
-            features['display_name'] = features.index
+        if 'display_name' not in catalog_entries.columns:
+            catalog_entries['display_name'] = catalog_entries.index
 
-        if 'description' not in features.columns:
-            features['description'] = ''
+        if 'description' not in catalog_entries.columns:
+            catalog_entries['description'] = ''
 
         # merge extra data columns/fields into metadata as a dictionary
-        extra_fields = list(set(features.columns.tolist()) - set(reserved_feature_fields))
+        extra_fields = list(set(catalog_entries.columns.tolist()) - set(reserved_catalog_entry_fields))
         # change NaN to None so it can be JSON serialized properly
-        features['metadata'] = [{k: None if v != v else v for k, v in record.items()}
-                                for record in features[extra_fields].to_dict(orient='records')]
-        features.drop(extra_fields, axis=1, inplace=True)
-        columns = list(set(features.columns.tolist()).intersection(reserved_geometry_fields))
-        features.drop(columns, axis=1, inplace=True)
+        catalog_entries['metadata'] = [{k: None if v != v else v for k, v in record.items()}
+                                for record in catalog_entries[extra_fields].to_dict(orient='records')]
+        catalog_entries.drop(extra_fields, axis=1, inplace=True)
+        columns = list(set(catalog_entries.columns.tolist()).intersection(reserved_geometry_fields))
+        catalog_entries.drop(columns, axis=1, inplace=True)
 
-        params = self.get_parameters(service, features)
+        params = self.get_parameters(service=service, catalog_ids=catalog_entries)
         if isinstance(params, pd.DataFrame):
             groups = params.groupby('service_id').groups
-            features['parameters'] = features.index.map(lambda x: ','.join(filter(None, params.loc[groups[x]]['parameter'].tolist())) if x in groups.keys() else '')
-            # features['parameter_codes'] = features.index.map(lambda x: ','.join(filter(None, params.loc[groups[x]]['_parameter_code'].tolist())) if x in groups.keys() else '')
+            catalog_entries['parameters'] = catalog_entries.index.map(lambda x: ','.join(filter(None, params.loc[groups[x]]['parameter'].tolist())) if x in groups.keys() else '')
         else:
-            features['parameters'] = ','.join(params['parameters'])
-            # features['parameter_codes'] = ','.join(params['parameter_codes'])
+            catalog_entries['parameters'] = ','.join(params['parameters'])
 
         if self.use_cache:
             # write to cache_file
             os.makedirs(os.path.split(cache_file)[0], exist_ok=True)
-            features.to_pickle(cache_file)
+            catalog_entries.to_pickle(cache_file)
 
-        self._label_features(features, service)
+        self._label_catalog_entries(catalog_entries, service)
 
         # convert to GeoPandas GeoDataFrame
-        features = gpd.GeoDataFrame(features, geometry='geometry')
+        catalog_entries = gpd.GeoDataFrame(catalog_entries, geometry='geometry')
 
-        return features
+        return catalog_entries
 
-    def _label_features(self, features, service):
-        features['service'] = util.construct_service_uri(self.name, service)
-        if 'service_id' not in features:
-            features['service_id'] = features.index
-        features['service_id'] = features['service_id'].apply(str)
-        features.index = features['service'] + '/' + features['service_id']
-        features['name'] = features.index
+    def _label_catalog_entries(self, catalog_entries, service):
+        catalog_entries['service'] = util.construct_service_uri(self.name, service)
+        if 'service_id' not in catalog_entries:
+            catalog_entries['service_id'] = catalog_entries.index
+        catalog_entries['service_id'] = catalog_entries['service_id'].apply(str)
+        catalog_entries.index = catalog_entries['service'] + '/' + catalog_entries['service_id']
+        catalog_entries['name'] = catalog_entries.index
 
     def get_tags(self, service, update_cache=False):
         cache_file = os.path.join(util.get_cache_dir(self.name), service + '_tags.p')
@@ -198,8 +194,8 @@ class ProviderBase(metaclass=abc.ABCMeta):
             except:
                 logger.info('updating tag cache')
 
-        features = self.get_features(service=service, update_cache=update_cache)
-        metadata = pd.DataFrame(list(features.metadata))
+        catalog_entries = self.search_catalog(service=service, update_cache=update_cache)
+        metadata = pd.DataFrame(list(catalog_entries.metadata))
 
         # drop metadata fields that are unusable as tag fields
         metadata.drop(labels=['location'], axis=1, inplace=True, errors='ignore')
@@ -263,15 +259,15 @@ class ProviderBase(metaclass=abc.ABCMeta):
     def get_publishers(self):
         return {k: v.metadata for k, v in self.publishers.items()}
 
-    def get_parameters(self, service, features=None):
-        return self.services[service].get_parameters(features=features)
+    def get_parameters(self, service, catalog_ids=None):
+        return self.services[service].get_parameters(catalog_ids=catalog_ids)
 
-    def download(self, service, feature, file_path, dataset, **kwargs):
+    def download(self, service, catalog_id, file_path, dataset, **kwargs):
         """
         needs to return dictionary
         eg. {'path': /path/to/dir/or/file, 'format': 'raster'}
         """
-        return self.services[service].download(feature, file_path, dataset, **kwargs)
+        return self.services[service].download(catalog_id, file_path, dataset, **kwargs)
 
     def get_download_options(self, service, fmt):
         """

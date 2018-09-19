@@ -1,23 +1,15 @@
-import os
 import pytest
 from types import ModuleType
 
 from pandas import DataFrame
 
-from data import DOWNLOAD_OPTIONS_FROM_ALL_SERVICES, SERVICE, FEATURE, DATASET, DATASET_METADATA
+from data import DOWNLOAD_OPTIONS_FROM_ALL_SERVICES, SERVICE, CATALOG_ENTRY, DATASET, DATASET_METADATA
 
+from quest.static import DatasetStatus
 
 ACTIVE_PROJECT = 'test_data'
 
 pytestmark = pytest.mark.usefixtures('reset_projects_dir', 'set_active_project')
-
-
-@pytest.fixture
-def dataset_save_path(api, reset_projects_dir):
-    save_path = os.path.join(reset_projects_dir['BASE_DIR'], 'projects/test_data/col1/usgs-nwis/iv/df5c3df3229441fa9c779443f03635e7.h5')
-    api.update_metadata(uris=DATASET, quest_metadata={'file_path': save_path})
-
-    return save_path
 
 
 def test_download_datasets():
@@ -72,11 +64,6 @@ def test_download_options(api, reset_settings):
     expected = {SERVICE: DOWNLOAD_OPTIONS_FROM_ALL_SERVICES[SERVICE]}
     assert actual == expected
 
-    # test get download options from feature
-    actual = api.get_download_options(FEATURE)
-    expected = {FEATURE: DOWNLOAD_OPTIONS_FROM_ALL_SERVICES[SERVICE]}
-    assert actual == expected
-
     # test get download options from dataset
     actual = api.get_download_options(DATASET)
     expected = {DATASET: DOWNLOAD_OPTIONS_FROM_ALL_SERVICES[SERVICE]}
@@ -96,7 +83,7 @@ def test_get_datasets(api, dataset_save_path):
     actual = api.get_datasets(expand=True)
     expected = {DATASET: DATASET_METADATA}
     expected[DATASET].update({'file_path': dataset_save_path})
-    assert expected[DATASET]['feature'] == actual[DATASET]['feature']
+    assert expected[DATASET]['catalog_entry'] == actual[DATASET]['catalog_entry']
     assert expected[DATASET]['name'] == actual[DATASET]['name']
     # assert actual == expected
     if isinstance(api, ModuleType):  # i.e. not using the RPC server
@@ -112,12 +99,11 @@ def test_get_datasets(api, dataset_save_path):
 
 
 def test_get_datasets_with_query(api):
-    datasets = api.get_datasets(queries=['status == "downloaded" or status == "filter applied"'])
+    datasets = api.get_datasets(
+        queries=['status == "{}" or status == "{}"'.format(DatasetStatus.DOWNLOADED, DatasetStatus.DERIVED)]
+    )
     expected = 1
     assert len(datasets) == expected
-
-    # datasets = api.get_datasets(queries=['file_path != None'])
-    # assert len(datasets) == expected
 
 
 def test_new_dataset(api):
@@ -129,7 +115,7 @@ def test_new_dataset(api):
     Returns:
         uid of dataset
     """
-    new_dataset = api.new_dataset(FEATURE)
+    new_dataset = api.new_dataset(CATALOG_ENTRY, 'col1')
     datasets = api.get_datasets()
     try:
         # test number of datasets
@@ -157,38 +143,31 @@ def test_stage_for_download(api):
     """
 
     # test stage new dataset
-    new_dataset = api.new_dataset(FEATURE)
+    new_dataset = api.new_dataset(CATALOG_ENTRY, 'col1')
     try:
         api.stage_for_download(new_dataset)
         metadata = api.get_metadata(uris=new_dataset)
-        assert metadata[new_dataset]['status'] == 'staged for download'
+        assert metadata[new_dataset]['status'] == DatasetStatus.STAGED
 
         # test set download_options
         download_options = {'parameter': 'streamflow'}
         api.stage_for_download(new_dataset, options=download_options)
         metadata = api.get_metadata(uris=new_dataset)
         assert metadata[new_dataset]['options'] == download_options
-        assert metadata[new_dataset]['status'] == 'staged for download'
+        assert metadata[new_dataset]['status'] == DatasetStatus.STAGED
     finally:
         api.delete(new_dataset)
 
-    # test stage new dataset from feature
-    new_dataset = api.stage_for_download(FEATURE)[0]
-    try:
-        metadata = api.get_metadata(uris=new_dataset)
-        assert metadata[new_dataset]['status'] == 'staged for download'
-    finally:
-        api.delete(new_dataset)
-
-    # test stage list of datasets/features
+    # test stage list of datasets
     download_options = {'parameter': 'streamflow'}
-    new_dataset = api.new_dataset(FEATURE)
-    new_datasets = api.stage_for_download([FEATURE, new_dataset], options=download_options)
+    new_dataset = api.new_dataset(CATALOG_ENTRY, 'col1')
+    new_dataset2 = api.new_dataset(CATALOG_ENTRY, 'col1')
+    new_datasets = api.stage_for_download([new_dataset, new_dataset2], options=download_options)
     try:
         metadata = api.get_metadata(uris=new_datasets)
         for dataset, metadata in metadata.items():
             assert metadata['options'] == download_options
-            assert metadata['status'] == 'staged for download'
+            assert metadata['status'] == DatasetStatus.STAGED
 
         # test different download options
         download_options = [{'parameter': 'streamflow'}, {'parameter': 'water_temperature:daily:mean'}]
@@ -196,7 +175,7 @@ def test_stage_for_download(api):
         metadata = api.get_metadata(uris=new_datasets)
         for i, dataset in enumerate(new_datasets):
             assert metadata[dataset]['options'] == download_options[i]
-            assert metadata[dataset]['status'] == 'staged for download'
+            assert metadata[dataset]['status'] == DatasetStatus.STAGED
     finally:
         api.delete(new_datasets)
 
@@ -233,11 +212,11 @@ def test_visualize_dataset(api):
 def test_visualize_dataset_options(api, dataset_save_path):
     """Return visualization available options for dataset."""
     expected = {'type': 'object',
-                'properties': {'end': {'default': '2017-01-02 05:00:00',
+                'properties': {'end': {'default': '2018-09-15 16:00:00',
                                        'type': 'string',
                                        'description': 'end date'
                                        },
-                               'start': {'default': '2017-01-01 05:00:00',
+                               'start': {'default': '2018-08-15 16:00:00',
                                          'type': 'string',
                                          'description': 'start date'
                                          }

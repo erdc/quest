@@ -17,7 +17,7 @@ class UsgsNlcdServiceBase(SingleFileServiceBase):
         'landcover': 'landcover'
     }
 
-    def get_features(self, **kwargs):
+    def search_catalog(self, **kwargs):
         base_url = 'https://www.sciencebase.gov/catalog/items'
         params = [
             ('filter', 'tags!=tree canopy'),
@@ -30,34 +30,34 @@ class UsgsNlcdServiceBase(SingleFileServiceBase):
         ]
 
         r = requests.get(base_url, params=params)
-        features = pd.DataFrame(r.json()['items'])
-        features = features.loc[~features.title.str.contains('Imperv')]
-        features = features.loc[~features.title.str.contains('by State')]
-        features = features.loc[~features.title.str.contains('Tree Canopy')]
-        features['geometry'] = features['spatial'].apply(_bbox2poly)
-        features['download_url'] = features.webLinks.apply(_parse_links)
-        features['filename'] = features['download_url'].str.rsplit('/', n=1, expand=True)[1]
-        features['reserved'] = features.apply(
+        catalog_entries = pd.DataFrame(r.json()['items'])
+        catalog_entries = catalog_entries.loc[~catalog_entries.title.str.contains('Imperv')]
+        catalog_entries = catalog_entries.loc[~catalog_entries.title.str.contains('by State')]
+        catalog_entries = catalog_entries.loc[~catalog_entries.title.str.contains('Tree Canopy')]
+        catalog_entries['geometry'] = catalog_entries['spatial'].apply(_bbox2poly)
+        catalog_entries['download_url'] = catalog_entries.webLinks.apply(_parse_links)
+        catalog_entries['filename'] = catalog_entries['download_url'].str.rsplit('/', n=1, expand=True)[1]
+        catalog_entries['reserved'] = catalog_entries.apply(
             lambda x: {'download_url': x['download_url'],
                        'filename': x['filename'],
                        'file_format': 'raster-gdal',
                        'extract_from_zip': '.tif',
                        }, axis=1)
 
-        features['parameters'] = 'landcover'
-        features.rename(columns={'id': 'service_id', 'title': 'display_name'},
+        catalog_entries['parameters'] = 'landcover'
+        catalog_entries.rename(columns={'id': 'service_id', 'title': 'display_name'},
                         inplace=True)
-        features.index = features['service_id']
+        catalog_entries.index = catalog_entries['service_id']
 
         # remove extra fields. nested dicts can cause problems
-        del features['relatedItems']
-        del features['webLinks']
-        del features['spatial']
-        del features['link']
-        del features['download_url']
-        del features['filename']
+        del catalog_entries['relatedItems']
+        del catalog_entries['webLinks']
+        del catalog_entries['spatial']
+        del catalog_entries['link']
+        del catalog_entries['download_url']
+        del catalog_entries['filename']
 
-        return features
+        return catalog_entries
 
 
 class UsgsNlcdService2001(UsgsNlcdServiceBase):
