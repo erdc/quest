@@ -299,7 +299,7 @@ SERVICES_FEATURE_COUNT = [
     ('svc://noaa-coast:ndbc', 1136, 100),
     ('svc://usgs-ned:1-arc-second', 3644, 100),
     ('svc://usgs-ned:13-arc-second', 1245, 100),
-    ('svc://usgs-ned:19-arc-second', 8358, 100),
+    ('svc://usgs-ned:19-arc-second', 7764, 100),
     ('svc://usgs-ned:alaska-2-arc-second', 503, 50),
     ('svc://usgs-nlcd:2001', 147, 100),
     ('svc://usgs-nlcd:2006', 131, 100),
