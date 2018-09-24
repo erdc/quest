@@ -289,7 +289,7 @@ DOWNLOAD_OPTIONS_FROM_ALL_SERVICES = {
 }
 
 
-SERVICES_FEATURE_COUNT = [
+SERVICES_CATALOG_COUNT = [
     # ('svc://nasa:srtm-3-arc-second', 14297, 1000),
     # ('svc://nasa:srtm-30-arc-second', 27, 10),
     ('svc://noaa-ncdc:ghcn-daily', 104126, 5000),
@@ -299,18 +299,20 @@ SERVICES_FEATURE_COUNT = [
     ('svc://noaa-coast:ndbc', 1136, 100),
     ('svc://usgs-ned:1-arc-second', 3644, 100),
     ('svc://usgs-ned:13-arc-second', 1245, 100),
-    ('svc://usgs-ned:19-arc-second', 8358, 100),
+    # ('svc://usgs-ned:19-arc-second', 8358, 100),  #  As of Sept 2018 this service is no longer consistent
     ('svc://usgs-ned:alaska-2-arc-second', 503, 50),
     ('svc://usgs-nlcd:2001', 147, 100),
     ('svc://usgs-nlcd:2006', 131, 100),
     ('svc://usgs-nlcd:2011', 203, 100),
     ('svc://usgs-nwis:dv', 36368, 1000),
     ('svc://usgs-nwis:iv', 19615, 1000),
-
+    ('svc://wmts:seamless_imagery', 1, 1),
+    ('svc://cuahsi-hydroshare:hs_geo', 1090, 1000),
+    ('svc://cuahsi-hydroshare:hs_norm', 2331, 1000),
 ]
 
 
-CACHED_SERVICES = [s[0] for s in SERVICES_FEATURE_COUNT]
+CACHED_SERVICES = [s[0] for s in SERVICES_CATALOG_COUNT]
 
 ALL_SERVICES = sorted(DOWNLOAD_OPTIONS_FROM_ALL_SERVICES.keys())
 
@@ -335,7 +337,7 @@ DATASET_METADATA = {
     'metadata': {}
 }
 
-SERVICE_FEATURE_DOWNLOAD_OPTIONS = [
+SERVICE_DOWNLOAD_OPTIONS = [
     # ('svc://nasa:srtm-3-arc-second/G1034711987-LPDAAC_ECS' , None),
     # ('svc://nasa:srtm-30-arc-second/G1005651728-LPDAAC_ECS', None),
     ('svc://noaa-ncdc:ghcn-daily/ACW00011604', {'parameter': 'air_temperature:daily:total', 'start': '1949-01-01', 'end': '1949-01-02'}),

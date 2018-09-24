@@ -26,15 +26,15 @@ if cname not in quest.api.get_collections():
 # single file downloads
 services = ['svc://usgs-ned:1-arc-second']
 filters = {'bbox': bbox}
-features = quest.api.get_features(services, filters=filters)
-features = quest.api.add_features(cname, features)
-elevation_rasters = quest.api.stage_for_download(features)
+catalog_entries = quest.api.search_catalog(services, filters=filters)
+datasets = quest.api.add_datasets(cname, catalog_entries)
+elevation_rasters = quest.api.stage_for_download(datasets)
 
 
 services = ['svc://usgs-nlcd:2006']
-features = quest.api.get_features(services, filters=filters)
-features = quest.api.add_features(cname, features)
-landcover_rasters = quest.api.stage_for_download(features)
+catalog_entries = quest.api.search_catalog(services, filters=filters)
+datasets = quest.api.add_datasets(cname, catalog_entries)
+landcover_rasters = quest.api.stage_for_download(datasets)
 
 status = quest.api.download_datasets(elevation_rasters+landcover_rasters)
 

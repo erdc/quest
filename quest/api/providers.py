@@ -9,18 +9,20 @@ import requests
 import os
 
 
-def get_providers(expand=None):
+def get_providers(expand=None, update_cache=False):
     """Return list of Providers.
 
     Args:
-         expand (bool, Optional, Default=None):
+        expand (bool, Optional, Default=None):
             include providers' details and format as dict
+        update_cache (bool, Optional, Default=False):
+            reload the list of providers
     Returns:
-        providers (list or dict,Default=list):
+        providers (list or dict, Default=list):
             list of all available providers
 
     """
-    providers = load_providers()
+    providers = load_providers(update_cache=update_cache)
     p = {k: v.metadata for k, v in providers.items()}
     if not expand:
         p = sorted(p.keys())
@@ -94,7 +96,7 @@ def get_publishers(expand=None, publisher_type=None):
     return publishers
 
 
-def add_provider(uri):
+def add_user_provider(uri):
     """Add a custom web service created from a file or http folder.
 
     Converts a local/network or http folder that contains a quest.yml
@@ -134,7 +136,7 @@ def add_provider(uri):
     return msg
 
 
-def delete_provider(uri):
+def delete_user_provider(uri):
     """Remove 'user' service.
 
     Args:

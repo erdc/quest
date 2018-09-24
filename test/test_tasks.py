@@ -2,7 +2,6 @@ from time import sleep
 from quest.api.tasks import add_async
 import pytest
 import quest
-from types import ModuleType
 
 skip_tasks = pytest.mark.skipif(
     pytest.config.getoption("--skip-tasks"),
@@ -42,6 +41,7 @@ def wait_until_done(api):
     return
 
 
+@skip_tasks
 def test_launch_tasks(api, task_cleanup):
     test_tasks = [
         api.long_process(1.011, 'first', async_tasks=True),
@@ -49,17 +49,15 @@ def test_launch_tasks(api, task_cleanup):
         api.long_process(1.013, 'third', async_tasks=True),
         ]
 
-    if isinstance(api, ModuleType):  # i.e. not using the RPC server
-        tasks = api.get_tasks(as_dataframe=True)
-        assert sorted(test_tasks) == sorted(tasks.index.values)
-    else:
-        tasks = api.get_tasks()
-        assert sorted(test_tasks) == sorted(tasks)
+    tasks = api.get_tasks(as_dataframe=True)
+    assert sorted(test_tasks) == sorted(tasks.index.values)
     assert len(tasks) == 3
 
     wait_until_done(api)
     for task, delay, msg in zip(test_tasks, [1.011, 1.012, 1.013], ['first', 'second', 'third']):
-        assert {'delay': delay, 'msg': msg} == api.get_task(task)['result']
+        task = api.get_task(task)
+        assert 'finished' == task['status']
+        assert {'delay': delay, 'msg': msg} == task['result']
 
 
 @skip_tasks
@@ -113,11 +111,12 @@ def test_task_with_exception(api, task_cleanup):
         ]
 
     tasks = api.get_tasks(as_dataframe=False)
-    assert len(tasks) == 3
+    assert len(tasks) == len(test_tasks)
     wait_until_done(api)
     assert len(api.get_tasks(filters={'status': 'error'})) == 1
 
 
+@skip_tasks
 def test_get_tasks(api, task_cleanup):
     test_tasks = [
         api.long_process(1.041, 'first', async_tasks=True),

@@ -3,6 +3,7 @@ from quest.database.database import select_catalog_entries
 from quest.static import ServiceType
 import pandas as pd
 
+
 class QuestCatalogService(SingleFileServiceBase):
     service_name = 'quest'
     display_name = 'Quest Catalog Service'
@@ -29,3 +30,4 @@ class QuestCatalogProvider(ProviderBase):
     description = 'Services avaliable through the Quest catalog database.'
     organization_name = 'Quest'
     name = 'quest'
+    use_cache = False

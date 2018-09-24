@@ -2,7 +2,6 @@ import os
 import shutil
 from ..util.log import logger
 from quest.database.database import get_db, db_session, select_datasets
-from ..static import DatasetStatus
 from .projects import _get_project_dir
 from .collections import get_collections
 from .metadata import get_metadata, update_metadata

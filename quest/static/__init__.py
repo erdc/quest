@@ -22,6 +22,13 @@ class GeomType:
     POLYGON = 'Polygon'
 
 
+class UriType:
+    COLLECTION = 'collections'
+    DATASET = 'datasets'
+    SERVICE = 'services'
+    PUBLISHER = 'publishers'
+
+
 class DataType:
     TIMESERIES = 'timeseries'
     RASTER = 'raster'

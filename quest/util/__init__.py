@@ -1,8 +1,8 @@
-# noqa: F401
+# flake8: noqa
 from .misc import *
 from .io import read_yaml, write_yaml
 from .config import get_settings, save_settings, update_settings, update_settings_from_file
 from .log import logger, log_to_console, log_to_file
 from . import param_util as param
-from .param_util import format_json_options, NamedString, Service
+from .param_util import format_json_options, NamedString, ServiceSelector, PublisherSelector
 from .units import unit_registry, unit_list

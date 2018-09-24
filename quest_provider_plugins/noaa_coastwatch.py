@@ -1,15 +1,14 @@
 """QUEST wrapper for NCDC GHCN and GSOD Services."""
+import os
 
-from quest.plugins import ProviderBase, TimePeriodServiceBase, load_plugins
-# For python 2 compatibility
-from future.standard_library import install_aliases
-from urllib.parse import quote, urlencode
-from urllib.error import HTTPError
-from quest.util.log import logger
 import pandas as pd
 import param
-import os
-install_aliases()
+from urllib.parse import quote, urlencode
+from urllib.error import HTTPError
+
+from quest.plugins import ProviderBase, TimePeriodServiceBase, load_plugins
+from quest.util.log import logger
+
 
 class NoaaServiceBase(TimePeriodServiceBase):
     BASE_URL = 'http://coastwatch.pfeg.noaa.gov/erddap/tabledap/'
@@ -41,8 +40,8 @@ class NoaaServiceBase(TimePeriodServiceBase):
         # TODO drop duplicates?
     
     @property
-    def feature(self):
-        return self._feature
+    def catalog_id(self):
+        return self._catalog_id
 
     @property
     def parameter_code(self):
@@ -61,15 +60,15 @@ class NoaaServiceBase(TimePeriodServiceBase):
 
         return pmap
 
-    def download(self, feature, file_path, dataset, **kwargs):
+    def download(self, catalog_id, file_path, dataset, **kwargs):
         p = param.ParamOverrides(self, kwargs)
         self.parameter = p.parameter
         self.end = pd.to_datetime(p.end)
         self.start = pd.to_datetime(p.start)
-        self._feature = feature
+        self._catalog_id = catalog_id
 
         if dataset is None:
-            dataset = 'station-' + feature
+            dataset = 'station-' + catalog_id
 
         try:
             url = self.url
@@ -94,7 +93,7 @@ class NoaaServiceBase(TimePeriodServiceBase):
                 'datatype': 'timeseries',
                 'parameter': p.parameter,
                 'unit': units[self.parameter_code],
-                'service_id': 'svc://noaa:{}/{}'.format(self.service_name, feature)
+                'service_id': 'svc://noaa:{}/{}'.format(self.service_name, catalog_id)
             }
 
             # save data to disk
@@ -124,10 +123,12 @@ class NoaaServiceBase(TimePeriodServiceBase):
         if variables is not None and query:
             variables += '&'
 
-        url_selector = '{dataset_id}.{file_type}?{variables}{query}'.format(dataset_id=dataset_id,
-                                                                              file_type=file_type,
-                                                                              variables=variables,
-                                                                              query=query)
+        url_selector = '{dataset_id}.{file_type}?{variables}{query}'.format(
+            dataset_id=dataset_id,
+            file_type=file_type,
+            variables=variables,
+            query=query
+        )
 
         return self.BASE_URL + url_selector
 
@@ -159,7 +160,12 @@ class NoaaServiceNDBC(NoaaServiceBase):
 
     _dataset_id = 'cwwcNDBCMet'
         
-    parameter = param.ObjectSelector(default=None, doc='parameter', precedence=1, objects=sorted(_parameter_map.values()))
+    parameter = param.ObjectSelector(
+        default=None,
+        doc='parameter',
+        precedence=1,
+        objects=sorted(_parameter_map.values())
+    )
 
     @property
     def url(self):
@@ -167,7 +173,7 @@ class NoaaServiceNDBC(NoaaServiceBase):
         variables = 'time', self.parameter_code
 
         return self._format_url(dataset_id=self._dataset_id, variables=variables,
-                                station=self.feature, start_time=self.start, end_time=self.end)
+                                station=self.catalog_id, start_time=self.start, end_time=self.end)
 
     def search_catalog(self, **kwargs):
         variables = 'station', 'longitude', 'latitude'
@@ -226,7 +232,12 @@ class NoaaServiceCoopsMet(NoaaServiceBase):
         'BP': 'MBP'
          }
 
-    parameter = param.ObjectSelector(default=None, doc='parameter', precedence=1, objects=sorted(_parameter_map.values()))
+    parameter = param.ObjectSelector(
+        default=None,
+        doc='parameter',
+        precedence=1,
+        objects=sorted(_parameter_map.values())
+    )
 
     @property
     def url(self):
@@ -236,12 +247,12 @@ class NoaaServiceCoopsMet(NoaaServiceBase):
         variables = 'time', self.parameter_code
 
         return self._format_url(dataset_id=dataset_id, variables=variables,
-                                stationID=self.feature, start_time=self.start, end_time=self.end)
+                                stationID=self.catalog_id, start_time=self.start, end_time=self.end)
 
     def search_catalog(self, **kwargs):
         # hard coding for now
         dataset_services = ['nosCoopsCA', 'nosCoopsMW', 'nosCoopsMRF', 'nosCoopsMV', 'nosCoopsMC',
-                       'nosCoopsMAT', 'nosCoopsMRH', 'nosCoopsMWT', 'nosCoopsMBP']
+                            'nosCoopsMAT', 'nosCoopsMRH', 'nosCoopsMWT', 'nosCoopsMBP']
         variables = ['stationID', 'longitude', 'latitude']
 
         # coops_url = [self.BASE_URL + '{}.csvp?stationID%2Clongitude%2Clatitude'.format(id) for id in dataset_Ids]
@@ -300,10 +311,30 @@ class NoaaServiceCoopsWater(NoaaServiceBase):
         'STND': 'Station Datum'
     }
 
-    parameter = param.ObjectSelector(default=None, doc='parameter', precedence=1, objects=sorted(_parameter_map.values()))
-    quality = param.ObjectSelector(default='R', doc='quality', precedence=4, objects=['Preliminary', 'Verified', 'R'])
-    interval = param.ObjectSelector(default='6', doc='time interval', precedence=5, objects=['6', '60'])
-    datum = param.ObjectSelector(default='Mean Lower_Low Water', precedence=6, doc='datum', objects=sorted(_datum_map.values()))
+    parameter = param.ObjectSelector(
+        default=None,
+        doc='parameter',
+        precedence=1,
+        objects=sorted(_parameter_map.values())
+    )
+    quality = param.ObjectSelector(
+        default='R',
+        doc='quality',
+        precedence=4,
+        objects=['Preliminary', 'Verified', 'R']
+    )
+    interval = param.ObjectSelector(
+        default='6',
+        doc='time interval',
+        precedence=5,
+        objects=['6', '60']
+    )
+    datum = param.ObjectSelector(
+        default='Mean Lower_Low Water',
+        precedence=6,
+        doc='datum',
+        objects=sorted(_datum_map.values())
+    )
 
     @property
     def url(self):
@@ -315,13 +346,13 @@ class NoaaServiceCoopsWater(NoaaServiceBase):
         variables = 'time', self.parameter_code
 
         return self._format_url(dataset_id=dataset_id, variables=variables,
-                                stationID=self.feature, datum=datum,
+                                stationID=self.catalog_id, datum=datum,
                                 start_time=self.start, end_time=self.end)
 
     def search_catalog(self, **kwargs):
         # hard coding for now
         dataset_services = ['nosCoopsWLV6', 'nosCoopsWLR6', 'nosCoopsWLTP6', 'nosCoopsWLV60',
-                       'nosCoopsWLVHL', 'nosCoopsWLTP60', 'nosCoopsWLTPHL']
+                            'nosCoopsWLVHL', 'nosCoopsWLTP60', 'nosCoopsWLTPHL']
 
         variables = 'stationID', 'longitude', 'latitude'
 

@@ -1,11 +1,13 @@
 """io plugin for timeseries datasets."""
 
 from quest.plugins import IoBase
+from quest.util import convert_nodata_to_nans
 import os
 import subprocess
 import rasterio
 import xarray as xr
 import numpy as np
+
 
 
 class RasterGdal(IoBase):
@@ -17,18 +19,18 @@ class RasterGdal(IoBase):
         self.description = 'IO for raster datasets using xarray or rasterio/gdal.'
         self.iotype = 'raster'
 
-    def open(self, path, fmt, with_nodata=True):
+    def open(self, path, fmt, with_nodata=False, isel_band=None):
         "Open raster and return in requested format"
-        raster_data = self.read(path)
 
         if fmt is None or fmt.lower() == 'xarray':
-            xarr = xr.open_rasterio(path, parse_coordinates=True).isel(band=0)
+            xarr = xr.open_rasterio(path, parse_coordinates=True)
+            if isel_band is not None:
+                xarr = xarr.isel(band=0)
             if with_nodata:
-                nodata_attr = [k for k in xarr.attrs.keys() if k.lower().startswith('nodata')][0]
-                nodata = xarr.attrs[nodata_attr]
-                xarr.values[xarr.values == nodata] = np.nan
+                xarr = convert_nodata_to_nans(xarr)
             return xarr
 
+        raster_data = self.read(path)
         if fmt.lower() == 'rasterio':
             return raster_data
 

@@ -1,12 +1,9 @@
-import os
-
 import numpy as np
 import param
 
 from quest.plugins import ToolBase
 from quest import util
-from quest.api import get_metadata, new_dataset, update_metadata, open_dataset
-from quest.api.projects import active_db
+from quest.api import get_metadata, update_metadata, open_dataset
 
 from .whitebox_utils import wbt, points_to_shp, raster_to_polygons
 
@@ -33,29 +30,19 @@ class WBTFillDepressions(ToolBase):
         dataset = self.dataset
 
         orig_metadata = get_metadata(dataset)[dataset]
-        collection_name = orig_metadata['collection']
         elev_file = orig_metadata['file_path']
 
-        new_dset = new_dataset(
-            catalog_entry=orig_metadata['catalog_entry'],
-            source='derived',
-            # display_name=self.display_name,
-            description=self.description
+        new_dset, file_path, catalog_entry = self._create_new_dataset(
+            old_dataset=dataset,
+            ext='.tif'
         )
 
-        self.set_display_name(new_dset)
-        prj = os.path.dirname(active_db())
-        dst = os.path.join(prj, collection_name, new_dset)
-        os.makedirs(dst, exist_ok=True)
-        self.file_path = os.path.join(dst, new_dset + '.tiff')
-
-        wbt.fill_depressions(elev_file, output=self.file_path)
+        wbt.fill_depressions(elev_file, output=file_path)
 
         quest_metadata = {
             'parameter': 'streams',
             'datatype': orig_metadata['datatype'],
             'file_format': orig_metadata['file_format'],
-            'file_path': self.file_path,
         }
 
         update_metadata(new_dset, quest_metadata=quest_metadata)
@@ -91,6 +78,7 @@ class WBTExtractStreamsWorkflow(ToolBase):
 
     flow_accumulation = None
 
+    @classmethod
     def set_threshold_bounds(cls):
         if cls.dataset:
             orig_metadata = get_metadata(cls.dataset)[cls.dataset]
@@ -115,41 +103,28 @@ class WBTExtractStreamsWorkflow(ToolBase):
         # get metadata, path etc from dataset
 
         orig_metadata = get_metadata(dataset)[dataset]
-        collection_name = orig_metadata['collection']
         elev_file = orig_metadata['file_path']
 
-        new_dset = new_dataset(
-            catalog_entry=orig_metadata['catalog_entry'],
-            source='derived',
-            # display_name=self.display_name,
-            description=self.description
+        new_dset, file_path, catalog_entry = self._create_new_dataset(
+            old_dataset=dataset,
+            ext='.tif',
+            dataset_metadata={
+                'parameter': 'streams',
+                'datatype': orig_metadata['datatype'],
+                'file_format': orig_metadata['file_format'],
+            }
         )
-
-        self.set_display_name(new_dset)
-
-        prj = os.path.dirname(active_db())
-        dst = os.path.join(prj, collection_name, new_dset)
-        util.mkdir_if_doesnt_exist(dst)
-        self.file_path = os.path.join(dst, new_dset + '.tiff')
 
         fa = self.flow_accumulation if self.flow_accumulation is not None else wbt.d_inf_flow_accumulation(elev_file)
         # fa = wbt.d8_flow_accumulation(fill)
         wbt.extract_streams(
             flow_accum=fa,
             threshold=self.stream_threshold,
-            output=self.file_path,
+            output=file_path,
         )
 
-        quest_metadata = {
-            'parameter': 'streams',
-            'datatype': orig_metadata['datatype'],
-            'file_format': orig_metadata['file_format'],
-            'file_path': self.file_path,
-        }
-
-        update_metadata(new_dset, quest_metadata=quest_metadata)
-
         return {'datasets': new_dset}
+
 
 class WBTWatershedDelineationWorkflow(ToolBase):
     _name = 'wbt-watershed-delineation-workflow'
@@ -175,15 +150,15 @@ class WBTWatershedDelineationWorkflow(ToolBase):
         filters={'datatype': 'raster'},
     )
 
-    outlet_features = util.param.FeatureSelector(
+    outlets = util.param.CatalogEntrySelector(
         default=None,
-        doc="""Point feature to use for the outlet.""",
+        doc="""Point geometry to use for the outlet.""",
         filters={'geom_type': 'point'},
     )
 
     snap_distance = param.Number(
         default=0,
-        bounds=(0,1000),  # TODO is there a way to not have an upper bound?
+        bounds=(0, 1000),  # TODO is there a way to not have an upper bound?
         doc="""snap distance in map units. If 0 no snapping will be performed.""",
     )
 
@@ -203,27 +178,22 @@ class WBTWatershedDelineationWorkflow(ToolBase):
         # get metadata, path etc from dataset
 
         orig_metadata = get_metadata(dataset)[dataset]
-        collection_name = orig_metadata['collection']
         elev_file = orig_metadata['file_path']
 
         try:
-            original_outlets = [f['geometry'] for f in get_metadata(self.outlet_features)]
+            original_outlets = [f['geometry'] for f in get_metadata(self.outlets)]
         except:
-            original_outlets = self.outlet_features
+            original_outlets = self.outlets
 
-        new_dset = new_dataset(
-            catalog_entry=orig_metadata['catalog_entry'],
-            source='derived',
-            # display_name=self.display_name,
-            description=self.description
+        new_dset, file_path, catalog_entry = self._create_new_dataset(
+            old_dataset=dataset,
+            ext='.tif',
+            dataset_metadata={
+                'parameter': 'watershed_boundary',
+                'datatype': orig_metadata['datatype'],
+                'file_format': orig_metadata['file_format'],
+            }
         )
-
-        self.set_display_name(new_dset)
-
-        prj = os.path.dirname(active_db())
-        dst = os.path.join(prj, collection_name, new_dset)
-        os.makedirs(dst, exist_ok=True)
-        self.file_path = os.path.join(dst, new_dset + '.tiff')
 
         d8 = wbt.d8_pointer(elev_file)
         point_shp = points_to_shp(original_outlets)
@@ -238,7 +208,7 @@ class WBTWatershedDelineationWorkflow(ToolBase):
             if self.algorithm == 'nearest-stream':
                 st = self.streams_dataset
                 if st:
-                    st = open_dataset(st)
+                    st = open_dataset(st, with_nodata=True, isel_band=0)
                 else:
                     fa = wbt.d_inf_flow_accumulation(elev_file)
                     st = wbt.extract_streams(fa, threshold=.1)
@@ -258,18 +228,18 @@ class WBTWatershedDelineationWorkflow(ToolBase):
         wbt.watershed(
             d8_pntr=d8,
             pour_pts=point_shp,
-            output=self.file_path,
+            output=file_path,
         )
 
-        new_catalog_entries = raster_to_polygons(self.file_path)
+        new_catalog_entries = raster_to_polygons(file_path)
 
         quest_metadata = {
             'parameter': 'streams',
             'datatype': orig_metadata['datatype'],
             'file_format': orig_metadata['file_format'],
-            'file_path': self.file_path,
+            'file_path': file_path,
         }
 
         update_metadata(new_dset, quest_metadata=quest_metadata)
 
-        return {'datasets': new_dset, 'catalog_entries': [new_catalog_entries, snapped_outlets]}
+        return {'datasets': new_dset, 'catalog_entries': [new_catalog_entries, snapped_outlets, catalog_entry]}

@@ -3,6 +3,7 @@ from hs_restclient import HydroShare, HydroShareAuthBasic
 from quest.database.database import get_db, db_session
 from quest.api.metadata import get_metadata
 from quest.util import param_util, listify, log
+from quest.static import DatasetStatus
 from shapely.geometry import Point, box
 from quest.static import ServiceType
 from getpass import getpass
@@ -24,7 +25,7 @@ class HSServiceBase(SingleFileServiceBase):
 class HSGeoService(HSServiceBase):
     service_name = 'hs_geo'
     display_name = 'HydroShare Geo Service'
-    description = 'HydroShare is a cuahsi repository fpr geo-discrete resources.'
+    description = 'HydroShare geo-discrete resources.'
     service_type = ServiceType.GEO_DISCRETE
     unmapped_parameters_available = True
     geom_type = 'Point'
@@ -37,35 +38,20 @@ class HSGeoService(HSServiceBase):
 
     def search_catalog(self, **kwargs):
 
-        results = list(self.hs.resources(coverage_type="box", north="90", south="-90", east="180", west="-180"))
+        catalog = self.provider.search_catalog('hs_norm')
+        metadata = pd.DataFrame(catalog.metadata.tolist(), index=catalog.index)
+        catalog = pd.concat([catalog, metadata], axis=1)
+        del catalog['metadata']
 
-        if len(results) == 0:
-            raise ValueError('No resource available from HydroShare.')
+        idx = catalog['coverages'].apply(lambda x: x == x and len([c for c in x if c['type'] != 'period']) > 0)
+        catalog = catalog[idx]
 
-        results2 = [item for item in results if len(item['coverages']) != 0]
-
-        if len(results2) == 0:
+        if len(catalog) == 0:
             raise ValueError("There is no resources with coverages in HydroShare Repository.")
 
-        catalog_entries = pd.DataFrame(results2)
-        idx = catalog_entries['coverages'].apply(lambda x: len([c for c in x if c['type'] != 'period']) > 0)
-        catalog_entries = catalog_entries[idx]
+        catalog['geometry'] = catalog['coverages'].apply(self.parse_coverages)
 
-        catalog_entries['geometry'] = catalog_entries['coverages'].apply(self.parse_coverages)
-        catalog_entries['service_id'] = catalog_entries['resource_id'].apply(str)
-        catalog_entries.index = catalog_entries['service_id']
-        catalog_entries.rename(columns={
-            'resource_title': 'display_name',
-            'bag_url': 'download url'
-        }, inplace=True)
-        catalog_entries['filename'] = catalog_entries['download url'].apply(lambda x: x.split('/')[-1])
-        catalog_entries['reserved'] = catalog_entries.apply(
-            lambda x: {'download_url': x['download url'],
-                       'filename': x['filename'],
-                       'file_format': 'zip',
-                       }, axis=1)
-
-        return catalog_entries
+        return catalog
 
     def parse_coverages(self, resource_row):
         geometry = None
@@ -91,8 +77,16 @@ class HSNormService(HSServiceBase):
     unmapped_parameters_available = True
     _parameter_map = {}
 
+    def get_hs_resources(self, start=0, count=100):
+        print('Downloading HS resources from {:d} to {:d}.'.format(start, start + count))
+        r = list(self.hs.resources(start=start, count=count))
+        if len(r) == count:
+            nr = self.get_hs_resources(start + count)
+            r.extend(nr)
+        return r
+
     def search_catalog(self, **kwargs):
-        results = list(self.hs.resources())
+        results = list(self.get_hs_resources())
         catalog_entries = pd.DataFrame(results)
         catalog_entries['service_id'] = catalog_entries['resource_id'].apply(str)
         catalog_entries.index = catalog_entries['service_id']
@@ -133,7 +127,12 @@ class HSPublisher(PublishBase):
     title = param.String(default="", doc="", precedence=2)
     abstract = param.String(default="", doc="", precedence=3)
     keywords = param.List(default=None, doc="", precedence=4)
-    dataset = param_util.DatasetListSelector(default=(), queries=['status == "downloaded" or status == "filter applied"'], doc="", precedence=5)
+    datasets = param_util.DatasetListSelector(
+        default=(),
+        queries=['status == "{}" or status == "{}"'.format(DatasetStatus.DOWNLOADED, DatasetStatus.DERIVED)],
+        doc="",
+        precedence=5
+    )
 
     @property
     def hs(self):
@@ -149,7 +148,7 @@ class HSPublisher(PublishBase):
         else:
             resource_type = self._resource_type_map[p.resource_type]
 
-        datasets = listify(p.dataset)
+        datasets = listify(p.datasets)
 
         extension_dict = {
             'GeographicFeatureResource': ['.zip', '.shp', '.shx', '.dbf', '.prj', '.sbx', '.sbn', '.cpg', '.xml',
@@ -237,8 +236,8 @@ class HSProvider(ProviderBase):
     service_list = [HSGeoService, HSNormService]
     publisher_list = [HSPublisher]
     display_name = 'HydroShare Provider'
-    description = 'Services avaliable through the live HydroShare Server.'
-    organization_name = 'Cuahsi'
+    description = 'Services available through the live HydroShare Server.'
+    organization_name = 'CUAHSI'
     name = 'cuahsi-hydroshare'
 
     @property

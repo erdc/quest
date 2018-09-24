@@ -4,20 +4,20 @@ This module defines the Python API for the Environmental Simulator Data
 Services Library.
 """
 
-__version__ = '2.3'
+_version__ = '3.0'
 
 # __all__ needed for autodoc to work
 
 __all__ = (
     'add_datasets',
     'add_project',
-    'add_provider',
+    'add_user_provider',
     'authenticate_provider',
     'cancel_tasks',
     'copy',
     'delete',
     'delete_project',
-    'delete_provider',
+    'delete_user_provider',
     'download',
     'download_datasets',
     'get_download_options',
@@ -25,6 +25,7 @@ __all__ = (
     'get_api_version',
     'get_auth_status',
     'get_collections',
+    'get_data',
     'get_datasets',
     'get_mapped_parameters',
     'get_metadata',
@@ -34,6 +35,7 @@ __all__ = (
     'get_providers',
     'get_publishers',
     'get_quest_version',
+    'get_seamless_data',
     'get_services',
     'get_settings',
     'get_tags',
@@ -143,8 +145,8 @@ from .providers import (
     get_providers,
     get_publishers,
     get_services,
-    add_provider,
-    delete_provider,
+    add_user_provider,
+    delete_user_provider,
     get_auth_status,
     authenticate_provider,
     unauthenticate_provider,
@@ -156,4 +158,9 @@ from .tasks import (
     get_tasks,
     cancel_tasks,
     remove_tasks,
+)
+
+from .workflows import (
+    get_data,
+    get_seamless_data,
 )

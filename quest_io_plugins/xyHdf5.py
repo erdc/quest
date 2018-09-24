@@ -1,9 +1,11 @@
 import json
 import os
+
 import pandas as pd
 import matplotlib.pyplot as plt
 
 from quest.plugins import IoBase
+from quest.util import setattr_on_dataframe
 from quest.util.log import logger
 
 
@@ -20,8 +22,7 @@ class XYHdf5(IoBase):
 
         with pd.HDFStore(path) as h5store:
             dataframe = h5store.get('dataframe')
-            dataframe.metadata = h5store.get_storer('dataframe').attrs.metadata
-
+            setattr_on_dataframe(dataframe, 'metadata', h5store.get_storer('dataframe').attrs.metadata)
         return dataframe
 
     def write(self, file_path, dataframe, metadata):

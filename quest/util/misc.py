@@ -1,17 +1,21 @@
-from geojson import LineString, Point, Polygon, Feature, FeatureCollection, MultiPolygon
-from .config import get_settings
+import os
+import re
+import warnings
 from uuid import uuid4, UUID
 
 import shapely.geometry
 import geopandas as gpd
 import pandas as pd
-import os
-import re
+import numpy as np
+from geojson import LineString, Point, Polygon, Feature, FeatureCollection, MultiPolygon
 
 try:
     import simplejson as json
 except ImportError:
     import json
+
+from .config import get_settings
+from ..static import UriType
 
 
 def _abs_path(path, mkdir=True):
@@ -118,16 +122,16 @@ def classify_uris(uris, grouped=True, as_dataframe=True, require_same_type=False
     uris = listify(uris)
 
     df = pd.DataFrame(uris, columns=['uri'])
-    df['type'] = 'collections'
+    df['type'] = UriType.COLLECTION
 
     uuid_idx = df['uri'].apply(is_uuid)
     service_idx = df['uri'].str.startswith('svc://')
     publish_idx = df['uri'].str.startswith('pub://')
     dataset_idx = uuid_idx & df['uri'].str.startswith('d')
 
-    df['type'][service_idx] = 'services'
-    df['type'][publish_idx] = 'publishers'
-    df['type'][dataset_idx] = 'datasets'
+    df['type'][service_idx] = UriType.SERVICE
+    df['type'][publish_idx] = UriType.PUBLISHER
+    df['type'][dataset_idx] = UriType.DATASET
     df.set_index('uri', drop=False, inplace=True)
 
     grouped_df = df.groupby('type')
@@ -172,6 +176,24 @@ def construct_service_uri(provider, service, catalog_id=None):
         uri = '{}/{}'.format(uri, catalog_id)
 
     return uri
+
+
+def convert_nodata_to_nans(xarr):
+    """
+
+    Args:
+        xarr:
+
+    Returns:
+
+    """
+    nodata_attr = [k for k in xarr.attrs.keys() if k.lower().startswith('nodata')][0]
+    nodata = xarr.attrs[nodata_attr]
+    if nodata:
+        if str(xarr.dtype).startswith('int') or str(xarr.dtype).startswith('uint'):
+            xarr.values = xarr.values.astype(np.float32)
+        xarr.values[xarr.values == nodata] = np.nan
+    return xarr
 
 
 def get_cache_dir(service=None):
@@ -263,8 +285,10 @@ def listify(liststr, delimiter=','):
     if liststr is None:
         return None
 
-    if isinstance(liststr, dict) or isinstance(liststr, list):
+    if isinstance(liststr, (tuple, list, set, dict)):
         return liststr
+    elif isinstance(liststr, str):
+        return [s.strip() for s in liststr.split(delimiter)]
     else:
         return [liststr]
 
@@ -287,6 +311,12 @@ def parse_service_uri(uri):
     provider, service = (svc.split(':') + [None])[:2]
 
     return provider, service, catalog_id
+
+
+def setattr_on_dataframe(df, attr, value, warnings_filter='ignore'):
+    with warnings.catch_warnings():
+        warnings.simplefilter(warnings_filter)
+        setattr(df, attr, value)
 
 
 def to_geodataframe(feature_collection):

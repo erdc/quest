@@ -1,9 +1,7 @@
 from quest.plugins import ToolBase
-from quest.api import get_metadata, new_dataset, update_metadata
-from quest.static import DatasetStatus
+from quest.api import get_metadata
 from quest import util
 from quest.plugins import load_plugins
-import os
 
 
 class TsBase(ToolBase):
@@ -21,32 +19,7 @@ class TsBase(ToolBase):
                                          filters={'datatype': 'timeseries'},
                                          )
 
-    def register(self, name=None):
-        """Register Timeseries
-
-        """
-        # self.name = name
-        self.metadata = {
-            'group': 'Timeseries',
-            'operates_on': {
-                'datatype': ['timeseries'],
-                'geotype': None,
-                'parameters': None,
-            },
-            'produces': {
-                'datatype': ['timeseries'],
-                'geotype': None,
-                'parameters': None,
-            },
-        }
-
     def _run_tool(self):
-
-        # if len(datasets) > 1:
-        #     raise NotImplementedError('This filter can only be applied to a single dataset')
-
-        # dataset = datasets[0]
-
         dataset = self.dataset
 
         io = load_plugins('io', 'timeseries-hdf5')['timeseries-hdf5']
@@ -59,39 +32,25 @@ class TsBase(ToolBase):
         # run filter
         new_df = self._run(df)
 
+
         # setup new dataset
         new_metadata = {
             'parameter': new_df.metadata.get('parameter'),
             'unit': new_df.metadata.get('unit'),
             'datatype': orig_metadata['datatype'],
             'file_format': orig_metadata['file_format'],
-            'options': self.set_options,
-            'status': DatasetStatus.DERIVED,
-            'message': 'TS Tool Run'
         }
 
-        new_dset = new_dataset(orig_metadata['catalog_entry'],
-                               source='derived',
-                               # display_name=self.display_name,
-                               description=self.description,
-                               )
-
-        self.set_display_name(new_dset)
+        new_dset, file_path, catalog_entry = self._create_new_dataset(
+            old_dataset=dataset,
+            ext='.h5',
+            dataset_metadata=new_metadata,
+        )
 
         # save dataframe
-        file_path = os.path.split(orig_metadata['file_path'])[0]
-        file_path = os.path.join(file_path, new_dset)
         io.write(file_path, new_df, new_metadata)
 
-        new_metadata.update({'file_path': file_path})
-        update_metadata(new_dset, quest_metadata=new_metadata)
-
         return {'datasets': new_dset}
-
-    # def apply_filter_options(self, fmt, **kwargs):
-    #     schema = {}
-    #
-    #     return schema
 
     def _run(self, df):
         raise NotImplementedError

@@ -10,6 +10,7 @@
 name: quest
 
 channels:
+    - pyviz/label/dev
     - conda-forge
 
 dependencies:
@@ -26,12 +27,11 @@ dependencies:
     - pandas<=0.22.0
     - geopandas
     - jinja2
-    - jupyter
     - matplotlib
     - numpy
     - param
     - pint
-    - pony<=0.7.1
+    - pony
     - psutil
     - pyyaml
     - rasterio
@@ -41,8 +41,10 @@ dependencies:
     - werkzeug
 
     # test dependencies
+    - pytest-runner
     - pytest-cov
     - coveralls
+    - nbval
 
     # docs dependencies
     - sphinx
@@ -54,3 +56,12 @@ dependencies:
     - pillow
     - requests
     - whitebox_tools
+
+    # notebook examples dependencies
+    - jupyter
+    - holoviews
+    - geoviews
+    - hvplot
+    - paramnb
+    - parambokeh
+    - cartopy

@@ -23,8 +23,9 @@ matrix:
 cache:
   directories:
     - $TRAVIS_BUILD_DIR/quest_test_cache
+    - $HOME/Quest
 
-# commands to install ulmo
+# commands to install quest
 install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
       OS_VERSION="Linux";
@@ -51,13 +52,14 @@ install:
   - conda list
   - export QUEST_CACHE_DIR=$TRAVIS_BUILD_DIR/quest_test_cache
   - export COVERAGE=$HOME/miniconda/envs/test-environment/lib/python$PYTHON_VERSION/site-packages/quest
+  - python -c "import quest; quest.api.update_settings(dict(CACHE_DIR='$QUEST_CACHE_DIR')); quest.api.save_settings()"
 
 # command to run tests
 script:
   - if [[ "$TRAVIS_EVENT_TYPE" == "cron" ]]; then
-      pytest test --cov=$COVERAGE -s -vv --update-cache --test-download;
+      pytest --cov=$COVERAGE -vv --update-cache --test-download;
     else
-      pytest test --cov=$COVERAGE -s -vv;
+      pytest --cov=$COVERAGE -vv;
     fi
 
 
