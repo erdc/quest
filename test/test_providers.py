@@ -37,7 +37,7 @@ def test_get_services(api):
 @pytest.mark.parametrize('catalog_entry, options', SERVICE_DOWNLOAD_OPTIONS)
 def test_download(api, catalog_entry, options):
     api.new_collection('test')
-    d = api.add_datasets('test', catalog_entry)
-    api.stage_for_download(d, options=options)[0]
+    d = api.add_datasets('test', catalog_entry)[0]
+    api.stage_for_download(d, options=options)
     result = api.download_datasets(d, raise_on_error=True)
     assert result[d] == 'downloaded'
