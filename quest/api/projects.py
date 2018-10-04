@@ -1,10 +1,10 @@
-"""API functions related to Projects."""
 import os
-import pandas as pd
 import shutil
-from ..util.log import logger
-from .. import util
-from quest.database.database import db_session, get_db, init_db
+
+import pandas as pd
+
+from ..util import logger, get_projects_dir, read_yaml, write_yaml
+from ..database.database import db_session, get_db, init_db
 
 
 PROJECT_DB_FILE = 'metadata.db'
@@ -115,7 +115,7 @@ def delete_project(name):
 
     folder = projects[name]['folder']
     if not os.path.isabs(folder):
-        path = os.path.join(util.get_projects_dir(), folder)
+        path = os.path.join(get_projects_dir(), folder)
     else:
         path = folder
     if os.path.exists(path):
@@ -134,7 +134,7 @@ def get_active_project():
 
     """
     path = _get_projects_index_file()
-    contents = util.read_yaml(path)
+    contents = read_yaml(path)
     default_project = contents.get('active_project')
     if default_project is None:
         projects = contents.get('projects') or _create_default_project()
@@ -143,7 +143,7 @@ def get_active_project():
             'active_project': default_project,
             'projects': projects
         })
-        util.write_yaml(path, contents)
+        write_yaml(path, contents)
     return default_project
 
 
@@ -169,7 +169,7 @@ def get_projects(expand=False, as_dataframe=False):
     for name, project in _load_projects().items():
         path = project['folder']
         if not os.path.isabs(path):
-            path = os.path.join(util.get_projects_dir(), path)
+            path = os.path.join(get_projects_dir(), path)
 
         data = _load_project(name)
         data.update({
@@ -242,11 +242,11 @@ def set_active_project(name):
 
     """
     path = _get_projects_index_file()
-    contents = util.read_yaml(path)
+    contents = read_yaml(path)
     if name not in contents['projects'].keys():
         raise ValueError('Project %s does not exist' % name)
     contents.update({'active_project': name})
-    util.write_yaml(path, contents)
+    write_yaml(path, contents)
     get_db(active_db(), reconnect=True)  # change active database
     return name
 
@@ -268,7 +268,7 @@ def _new_project(name, display_name=None, description=None, metadata=None, folde
         metadata = {}
 
     if not os.path.isabs(folder):
-        path = os.path.join(util.get_projects_dir(), folder)
+        path = os.path.join(get_projects_dir(), folder)
     else:
         path = folder
 
@@ -307,7 +307,7 @@ def _load_project(name):
 def _load_projects():
     """load list of collections."""
     path = _get_projects_index_file()
-    projects = util.read_yaml(path).get('projects')
+    projects = read_yaml(path).get('projects')
     if not projects:
         projects = _create_default_project()
 
@@ -317,9 +317,9 @@ def _load_projects():
 def _write_projects(projects):
     """write list of collections to file."""
     path = _get_projects_index_file()
-    contents = util.read_yaml(path)
+    contents = read_yaml(path)
     contents.update({'projects': projects})
-    util.write_yaml(path, contents)
+    write_yaml(path, contents)
 
 
 def _get_project_dir():
@@ -333,10 +333,10 @@ def _get_project_db(name):
 
     path = projects[name]['folder']
     if not os.path.isabs(path):
-        path = os.path.join(util.get_projects_dir(), path)
+        path = os.path.join(get_projects_dir(), path)
 
     return os.path.join(path, PROJECT_DB_FILE)
 
 
 def _get_projects_index_file():
-    return os.path.join(util.get_projects_dir(), PROJECT_INDEX_FILE)
+    return os.path.join(get_projects_dir(), PROJECT_INDEX_FILE)

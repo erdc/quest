@@ -42,3 +42,9 @@ class DatasetSource:
     DERIVED = 'derived'
     WEB_SERVICE = 'download'
     USER = 'user-created'
+
+
+class PluginType:
+    IO = 'io'
+    TOOL = 'tool'
+    PROVIDER = 'provider'

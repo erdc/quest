@@ -1,13 +1,13 @@
-"""providers based on www.sciencebase.gov."""
-
-import pandas as pd
 import requests
-from quest.plugins import ProviderBase, SingleFileServiceBase
+import pandas as pd
+
 from quest import util
+from quest.static import ServiceType, DatasetSource
+from quest.plugins import ProviderBase, SingleFileServiceBase
 
 
 class UsgsNlcdServiceBase(SingleFileServiceBase):
-    service_type = 'geo-discrete'
+    service_type = ServiceType.GEO_DISCRETE
     unmapped_parameters_available = False
     geom_type = 'polygon'
     datatype = 'discrete-raster'
@@ -110,4 +110,4 @@ def _bbox2poly(bbox):
 
 
 def _parse_links(links):
-    return [link['uri'] for link in links if link['type'] == 'download'][0]
+    return [link['uri'] for link in links if link['type'] == DatasetSource.WEB_SERVICE][0]

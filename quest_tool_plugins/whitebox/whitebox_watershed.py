@@ -1,8 +1,9 @@
-import numpy as np
 import param
+import numpy as np
 
-from quest.plugins import ToolBase
 from quest import util
+from quest.plugins import ToolBase
+from quest.static import DataType, UriType, GeomType
 from quest.api import get_metadata, update_metadata, open_dataset
 
 from .whitebox_utils import wbt, points_to_shp, raster_to_polygons
@@ -12,18 +13,18 @@ class WBTFillDepressions(ToolBase):
     _name = 'wbt-fill-depressions'
 
     # metadata attributes
-    group = 'raster'
-    operates_on_datatype = ['raster']
+    group = DataType.RASTER
+    operates_on_datatype = [DataType.RASTER]
     operates_on_geotype = None
     operates_on_parameters = None
-    produces_datatype = ['raster']
+    produces_datatype = [DataType.RASTER]
     produces_geotype = None
     produces_parameters = None
 
     dataset = util.param.DatasetSelector(
         default=None,
         doc="""Dataset to run tool on.""",
-        filters={'datatype': 'raster'},
+        filters={'datatype': DataType.RASTER},
     )
 
     def _run_tool(self):
@@ -47,7 +48,7 @@ class WBTFillDepressions(ToolBase):
 
         update_metadata(new_dset, quest_metadata=quest_metadata)
 
-        return {'datasets': new_dset}
+        return {UriType.DATASET: new_dset}
 
 
 class WBTExtractStreamsWorkflow(ToolBase):
@@ -56,18 +57,18 @@ class WBTExtractStreamsWorkflow(ToolBase):
     _name = 'wbt-extract-streams-workflow'
 
     # metadata attributes
-    group = 'raster'
-    operates_on_datatype = ['raster']
+    group = DataType.RASTER
+    operates_on_datatype = [DataType.RASTER]
     operates_on_geotype = None
     operates_on_parameters = None
-    produces_datatype = ['raster']
+    produces_datatype = [DataType.RASTER]
     produces_geotype = None
     produces_parameters = None
 
     dataset = util.param.DatasetSelector(
         default=None,
         doc="""Dataset to run tool on.""",
-        filters={'datatype': 'raster'},
+        filters={'datatype': DataType.RASTER},
     )
 
     stream_threshold = param.Number(
@@ -123,37 +124,37 @@ class WBTExtractStreamsWorkflow(ToolBase):
             output=file_path,
         )
 
-        return {'datasets': new_dset}
+        return {UriType.DATASET: new_dset}
 
 
 class WBTWatershedDelineationWorkflow(ToolBase):
     _name = 'wbt-watershed-delineation-workflow'
 
     # metadata attributes
-    group = 'raster'
-    operates_on_datatype = ['raster']
+    group = DataType.RASTER
+    operates_on_datatype = [DataType.RASTER]
     operates_on_geotype = None
     operates_on_parameters = None
-    produces_datatype = ['raster']
+    produces_datatype = [DataType.RASTER]
     produces_geotype = None
     produces_parameters = None
 
     elevation_dataset = util.param.DatasetSelector(
         default=None,
         doc="""Dataset to run tool on.""",
-        filters={'datatype': 'raster'},
+        filters={'datatype': DataType.RASTER},
     )
 
     streams_dataset = util.param.DatasetSelector(
         default=None,
         doc="""Dataset to run tool on.""",
-        filters={'datatype': 'raster'},
+        filters={'datatype': DataType.RASTER},
     )
 
     outlets = util.param.CatalogEntrySelector(
         default=None,
         doc="""Point geometry to use for the outlet.""",
-        filters={'geom_type': 'point'},
+        filters={'geom_type': GeomType.POINT},
     )
 
     snap_distance = param.Number(
@@ -242,4 +243,4 @@ class WBTWatershedDelineationWorkflow(ToolBase):
 
         update_metadata(new_dset, quest_metadata=quest_metadata)
 
-        return {'datasets': new_dset, 'catalog_entries': [new_catalog_entries, snapped_outlets, catalog_entry]}
+        return {UriType.DATASET: new_dset, 'catalog_entries': [new_catalog_entries, snapped_outlets, catalog_entry]}

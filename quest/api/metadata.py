@@ -1,13 +1,8 @@
-"""API functions related to metadata.
-
-get/update metadata for projects/collections/datasets.
-"""
-
 import pandas as pd
 
-from .. import util
-from .. import plugins
 from ..static import UriType
+from ..plugins import load_providers
+from ..util import classify_uris, construct_service_uri, parse_service_uri
 from ..database import get_db, db_session, select_collections, select_datasets
 
 
@@ -25,7 +20,7 @@ def get_metadata(uris, as_dataframe=False):
             metadata at each uri keyed on uris
     """
     # group uris by type
-    grouped_uris = util.classify_uris(uris)
+    grouped_uris = classify_uris(uris)
     # handle case when no uris are passed in
     if not any(grouped_uris):
         metadata = pd.DataFrame()
@@ -36,17 +31,17 @@ def get_metadata(uris, as_dataframe=False):
     metadata = []
 
     # get metadata for service type uris
-    if 'services' in grouped_uris.groups.keys():
-        svc_df = grouped_uris.get_group('services')
-        svc_df[['provider', 'service', 'catalog_id']] = svc_df['uri'].apply(util.parse_service_uri).apply(pd.Series)
+    if UriType.SERVICE in grouped_uris.groups.keys():
+        svc_df = grouped_uris.get_group(UriType.SERVICE)
+        svc_df[['provider', 'service', 'catalog_id']] = svc_df['uri'].apply(parse_service_uri).apply(pd.Series)
 
         for (provider, service), grp in svc_df.groupby(['provider', 'service']):
 
-            provider_plugin = plugins.load_providers()[provider]
+            provider_plugin = load_providers()[provider]
 
             if not grp.query('catalog_id != catalog_id').empty:
                 service_metadata = provider_plugin.get_services()[service]
-                index = util.construct_service_uri(provider, service)
+                index = construct_service_uri(provider, service)
                 metadata.append(pd.DataFrame(service_metadata, index=[index]))
 
             selected_catalog_entries = grp.query('catalog_id == catalog_id').uri.tolist()
@@ -55,27 +50,27 @@ def get_metadata(uris, as_dataframe=False):
                 catalog_entries = catalog_entries.loc[selected_catalog_entries]
                 metadata.append(catalog_entries)
 
-    if 'publishers' in grouped_uris.groups.keys():
-        svc_df = grouped_uris.get_group('publishers')
-        svc_df[['provider', 'publish', 'catalog_id']] = svc_df['uri'].apply(util.parse_service_uri).apply(pd.Series)
+    if UriType.PUBLISHER in grouped_uris.groups.keys():
+        svc_df = grouped_uris.get_group(UriType.PUBLISHER)
+        svc_df[['provider', 'publish', 'catalog_id']] = svc_df['uri'].apply(parse_service_uri).apply(pd.Series)
 
         for (provider, publisher), grp in svc_df.groupby(['provider', 'publish']):
-            provider_plugin = plugins.load_providers()[provider]
+            provider_plugin = load_providers()[provider]
             publisher_metadata = provider_plugin.get_publishers()[publisher]
-            index = util.construct_service_uri(provider, publisher)
+            index = construct_service_uri(provider, publisher)
             metadata.append(pd.DataFrame(publisher_metadata, index=[index]))
 
-    if 'collections' in grouped_uris.groups.keys():
+    if UriType.COLLECTION in grouped_uris.groups.keys():
         # get metadata for collections
-        tmp_df = grouped_uris.get_group('collections')
+        tmp_df = grouped_uris.get_group(UriType.COLLECTION)
         collections = select_collections(lambda c: c.name in tmp_df['uri'].tolist())
         collections = pd.DataFrame(collections)
         collections.set_index('name', inplace=True, drop=False)
 
         metadata.append(collections)
 
-    if 'datasets' in grouped_uris.groups.keys():
-        tmp_df = grouped_uris.get_group('datasets')
+    if UriType.DATASET in grouped_uris.groups.keys():
+        tmp_df = grouped_uris.get_group(UriType.DATASET)
         datasets = select_datasets(lambda c: c.name in tmp_df['uri'].tolist())
         datasets = pd.DataFrame(datasets)
         datasets.set_index('name', inplace=True, drop=False)
@@ -116,10 +111,7 @@ def update_metadata(uris, display_name=None, description=None,
     }
 
     # group uris by type
-    grouped_uris = util.classify_uris(uris,
-                                      as_dataframe=True,
-                                      exclude=[UriType.PUBLISHER],
-                                      require_same_type=True)
+    grouped_uris = classify_uris(uris, as_dataframe=True, exclude=[UriType.PUBLISHER], require_same_type=True)
     resource = list(grouped_uris.groups.keys())[0]
     uris = grouped_uris.get_group(resource)
     get_db_entity = get_db_entity_funcs[resource]
@@ -153,9 +145,7 @@ def update_metadata(uris, display_name=None, description=None,
         metadata = [metadata]
         quest_metadata = [quest_metadata]
 
-    for uri, name, desc, meta, quest_meta in zip(uris, display_name,
-                                               description, metadata,
-                                               quest_metadata):
+    for uri, name, desc, meta, quest_meta in zip(uris, display_name, description, metadata, quest_metadata):
         if quest_meta is None:
             quest_meta = {}
 

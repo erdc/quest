@@ -1,9 +1,10 @@
+import param
+import girder_client
+
+from quest.util import param_util, log
+from quest.api.metadata import get_metadata
 from quest.plugins import ProviderBase, PublishBase
 from quest.database.database import get_db, db_session
-from quest.api.metadata import get_metadata
-from quest.util import param_util, log
-import girder_client
-import param
 
 # There is no service base fore the Live Girder Server due to the general layout of how
 # the folders and files are layed out. It would be super difficult to look through

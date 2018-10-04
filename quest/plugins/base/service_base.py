@@ -2,13 +2,13 @@ import json
 import os
 import pickle
 
-import geopandas as gpd
-import pandas as pd
-import param
 import ulmo
+import param
+import pandas as pd
+import geopandas as gpd
 from shapely.geometry import box, Point
 
-from ... import util
+from quest import util
 
 
 reserved_catalog_entry_fields = [
@@ -362,7 +362,7 @@ class SingleFileServiceBase(ServiceBase):
         else:
             zip_path = os.path.join(path, 'zip', filename)
             ulmo.util.download_if_new(url, zip_path, check_modified=check_modified)
-            util.logger.info('... ... zipfile saved at %s' % zip_path)
+            logger.info('... ... zipfile saved at %s' % zip_path)
             tile_path = ulmo.util.extract_from_zip(zip_path, tile_path, tile_fmt)
 
         return tile_path

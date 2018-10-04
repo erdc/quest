@@ -1,15 +1,16 @@
-from quest.plugins import ProviderBase, SingleFileServiceBase, PublishBase
+import os
+import param
+
+import pandas as pd
+from getpass import getpass
+from shapely.geometry import Point, box
 from hs_restclient import HydroShare, HydroShareAuthBasic
-from quest.database.database import get_db, db_session
+from quest.plugins import ProviderBase, SingleFileServiceBase, PublishBase
+
 from quest.api.metadata import get_metadata
 from quest.util import param_util, listify, log
-from quest.static import DatasetStatus
-from shapely.geometry import Point, box
-from quest.static import ServiceType
-from getpass import getpass
-import pandas as pd
-import param
-import os
+from quest.database.database import get_db, db_session
+from quest.static import DatasetStatus, ServiceType, GeomType
 
 
 class HSServiceBase(SingleFileServiceBase):
@@ -28,7 +29,7 @@ class HSGeoService(HSServiceBase):
     description = 'HydroShare geo-discrete resources.'
     service_type = ServiceType.GEO_DISCRETE
     unmapped_parameters_available = True
-    geom_type = 'Point'
+    geom_type = GeomType.POINT
     datatype = 'zip'
     geographical_areas = ['Worldwide']
     bounding_boxes = [

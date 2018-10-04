@@ -1,8 +1,10 @@
-"""API functions related to Parameters."""
-import pandas as pd
-from .providers import get_services
 import os
-from .. import util
+
+import pandas as pd
+
+from .providers import get_services
+from ..util import parse_service_uri, get_cache_dir
+from ..plugins import load_providers
 
 
 def get_mapped_parameters():
@@ -35,7 +37,7 @@ def get_parameters(service_uri, update_cache=False):
 
 
     """
-    provider, service, catalog_id = util.parse_service_uri(service_uri)
+    provider, service, catalog_id = parse_service_uri(service_uri)
     parameters = _read_cached_parameters(provider, service, update_cache=update_cache)
 
     if isinstance(parameters, pd.DataFrame) and catalog_id:
@@ -62,7 +64,7 @@ def delete_parameter():
 
 def _read_cached_parameters(provider, service, update_cache=False):
     """read cached parameters."""
-    cache_file = os.path.join(util.get_cache_dir(), provider, service + '_parameters.h5')
+    cache_file = os.path.join(get_cache_dir(), provider, service + '_parameters.h5')
     if update_cache:
         return _get_parameters(provider, service, cache_file)
 
@@ -75,7 +77,7 @@ def _read_cached_parameters(provider, service, update_cache=False):
 
 
 def _get_parameters(provider, service, cache_file):
-    driver = util.load_providers()[provider]
+    driver = load_providers()[provider]
     parameters = driver.get_parameters(service)
     os.makedirs(os.path.split(cache_file)[0], exist_ok=True)
     if isinstance(parameters, pd.DataFrame):

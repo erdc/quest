@@ -1,10 +1,10 @@
-import abc
 import os
+import abc
 
 import param
 
-from ...static import DatasetStatus, DatasetSource
 from ...util import listify, format_json_options, uuid
+from ...static import DatasetStatus, DatasetSource, UriType
 
 
 class ToolBase(param.ParameterizedFunction):
@@ -72,7 +72,7 @@ class ToolBase(param.ParameterizedFunction):
 
         self._set_options = options or dict(self.get_param_values())
         result = self._run_tool()
-        datasets = listify(result.get('datasets', []))
+        datasets = listify(result.get(UriType.DATASET, []))
         catalog_entries = listify(result.get('catalog_entries', []))
         for dataset in datasets:
             update_metadata(dataset, quest_metadata={

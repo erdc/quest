@@ -1,12 +1,14 @@
-from concurrent.futures import CancelledError
-from functools import wraps
-from distributed import Client, LocalCluster
+import sys
 import psutil
+
 import pandas as pd
 from tornado import gen
-import sys
-from ..util import listify
-from ..util.log import logger
+from functools import wraps
+from distributed import Client, LocalCluster
+from concurrent.futures import CancelledError
+
+from ..static import DatasetStatus
+from ..util import listify, logger
 
 _cluster = None
 tasks = {}
@@ -44,7 +46,7 @@ def add_async(f):
                 'fn': f.__name__,
                 'args': args,
                 'kwargs': kwargs,
-                'status': 'pending',
+                'status': DatasetStatus.PENDING,
                 'result': None,
             }
             return future.key
@@ -60,7 +62,7 @@ def get_pending_tasks(**kwargs):
     (filters={}, expand=None, as_dataframe=None, with_future=None)
 
     """
-    filters = {'status': 'pending'}
+    filters = {'status': DatasetStatus.PENDING}
     if 'filters' in kwargs:
         kwargs['filters'].update(filters)
     else:
@@ -169,9 +171,9 @@ def remove_tasks(task_ids=None, status=None):
     else:
         status = ['cancelled', 'finished', 'lost', 'error']
 
-    if 'pending' in status:
+    if DatasetStatus.PENDING in status:
         logger.error('cannot remove pending tasks, please cancel them first')
-        status.remove('pending')
+        status.remove(DatasetStatus.PENDING)
 
     task_list = get_tasks(filters={'status': status, 'task_ids': task_ids})
 

@@ -1,4 +1,3 @@
-"""API functions related to versions."""
 import quest
 
 

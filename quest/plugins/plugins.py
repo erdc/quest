@@ -1,33 +1,37 @@
-from .base import ProviderBase, IoBase, ToolBase
-from ..util import listify, get_settings
 import importlib
 import inspect
 import pkgutil
 import logging
+
+from .base import ProviderBase, IoBase, ToolBase
+from ..static import PluginType
+from ..util import listify, get_settings
+
+
 logger = logging.getLogger('quest')
 
 plugin_instances = {
-    'provider': None,
-    'io': None,
-    'tool': None,
+    PluginType.PROVIDER: None,
+    PluginType.IO: None,
+    PluginType.TOOL: None,
 }
 
 plugin_namespaces = {
-    'provider': 'quest_provider_plugins',
-    'io': 'quest_io_plugins',
-    'tool': 'quest_tool_plugins',
+    PluginType.PROVIDER: 'quest_provider_plugins',
+    PluginType.IO: 'quest_io_plugins',
+    PluginType.TOOL: 'quest_tool_plugins',
 }
 
 plugin_base_classes = {
-    'provider': ProviderBase,
-    'io': IoBase,
-    'tool': ToolBase,
+    PluginType.PROVIDER: ProviderBase,
+    PluginType.IO: IoBase,
+    PluginType.TOOL: ToolBase,
 }
 
 plugin_instantiate_funcs = {
-    'provider': lambda x: x(),
-    'io': lambda x: x(),
-    'tool': lambda x: x.instance(),
+    PluginType.PROVIDER: lambda x: x(),
+    PluginType.IO: lambda x: x(),
+    PluginType.TOOL: lambda x: x.instance(),
 }
 
 
@@ -109,8 +113,8 @@ def load_providers(update_cache=False):
 
     settings = get_settings()
 
-    if update_cache or plugin_instances['provider'] is None:
-        providers = load_plugins('provider', update_cache=True)
+    if update_cache or plugin_instances[PluginType.PROVIDER] is None:
+        providers = load_plugins(PluginType.PROVIDER, update_cache=True)
         if len(settings.get('USER_SERVICES', [])) > 0:
             from quest.plugins import user_provider
             for uri in settings.get('USER_SERVICES', []):
@@ -122,8 +126,8 @@ def load_providers(update_cache=False):
                                  'due to the following exception: \n\t{} {}.'
                                  .format('user', uri, e.__class__.__name__, str(e)))
 
-        plugin_instances['provider'] = providers
+        plugin_instances[PluginType.PROVIDER] = providers
     else:
-        providers = plugin_instances['provider']
+        providers = plugin_instances[PluginType.PROVIDER]
 
     return providers

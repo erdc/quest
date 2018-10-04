@@ -1,19 +1,21 @@
-from quest.plugins import ToolBase
-from quest import util
-from quest.api import get_metadata, update_metadata
-import rasterio
-import rasterio.merge
-import rasterio.mask
-from shapely.geometry import box
-from fiona.crs import from_epsg
-import geopandas as gpd
 import param
+import rasterio
+import rasterio.mask
+import rasterio.merge
+import geopandas as gpd
+from fiona.crs import from_epsg
+from shapely.geometry import box
+
+from quest import util
+from quest.plugins import ToolBase
+from quest.static import DataType, UriType
+from quest.api import get_metadata, update_metadata
 
 
 class RstMerge(ToolBase):
     _name = 'raster-merge'
     group = 'Multi-dataset'
-    operates_on_datatype = ['raster','discrete-raster']
+    operates_on_datatype = [DataType.RASTER, 'discrete-raster']
 
     datasets = util.param.DatasetListSelector(default=None,
                                               doc="""Dataset to run tool on.""",
@@ -94,4 +96,4 @@ class RstMerge(ToolBase):
             geometry = util.bbox2poly(f.bounds.left, f.bounds.bottom, f.bounds.right, f.bounds.top, as_shapely=True)
         update_metadata(catalog_entry, quest_metadata={'geometry': geometry.to_wkt()})
 
-        return {'datasets': new_dset, 'catalog_entries': catalog_entry}
+        return {UriType.DATASET: new_dset, 'catalog_entries': catalog_entry}

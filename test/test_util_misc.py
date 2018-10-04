@@ -67,13 +67,13 @@ def test_bbox2poly():
                                                   [-160.0, 20.0],
                                                   [-160.0, -20.0],
                                                   [-180, -20.0]],
-                                  "type": "Polygon"},
+                                  "type": quest.static.GeomType.POLYGON},
                                  {"coordinates": [[160.0, -20.0],
                                                   [160.0, 20.0],
                                                   [180, 20.0],
                                                   [180, -20.0],
                                                   [160.0, -20.0]],
-                                  "type": "Polygon"}],
+                                  "type": quest.static.GeomType.POLYGON}],
                     "type": "MultiPolygon"}
 
     poly = quest.util.bbox2poly(*bbox, as_shapely=True)
@@ -91,7 +91,7 @@ def test_bbox2poly():
                                     [10.0, 10.0],
                                     [10.0, -10.0],
                                     [-10.0, -10.0]],
-                    'type': 'Polygon'}
+                    'type': quest.static.GeomType.POLYGON}
 
     bbox = 160, -20, 200, 20
 
@@ -103,13 +103,13 @@ def test_bbox2poly():
                                                   [180, 20.0],
                                                   [180, -20.0],
                                                   [160.0, -20.0]],
-                                  'type': 'Polygon'},
+                                  'type': quest.static.GeomType.POLYGON},
                                  {'coordinates': [[-180, -20.0],
                                                   [-180, 20.0],
                                                   [-160.0, 20.0],
                                                   [-160.0, -20.0],
                                                   [-180, -20.0]],
-                                  'type': 'Polygon'}],
+                                  'type': quest.static.GeomType.POLYGON}],
                     'type': 'MultiPolygon'}
 
     poly = quest.util.bbox2poly(*bbox)

@@ -1,13 +1,12 @@
-"""io plugin for timeseries datasets."""
-
-from quest.plugins import IoBase
-from quest.util import convert_nodata_to_nans
 import os
 import subprocess
+
 import rasterio
 import xarray as xr
-import numpy as np
 
+from quest.plugins import IoBase
+from quest.static import DataType
+from quest.util import convert_nodata_to_nans
 
 
 class RasterGdal(IoBase):
@@ -17,7 +16,7 @@ class RasterGdal(IoBase):
     def register(self):
         "Register plugin by setting description and io type."
         self.description = 'IO for raster datasets using xarray or rasterio/gdal.'
-        self.iotype = 'raster'
+        self.iotype = DataType.RASTER
 
     def open(self, path, fmt, with_nodata=False, isel_band=None):
         "Open raster and return in requested format"

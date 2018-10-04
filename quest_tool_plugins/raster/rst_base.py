@@ -1,26 +1,24 @@
-"""Functions required run raster filters"""
-
 import rasterio
 
-from quest.plugins import ToolBase
 from quest import util
+from quest.plugins import ToolBase
 from quest.api import get_metadata
-
+from quest.static import DataType, UriType
 
 
 class RstBase(ToolBase):
     # metadata attributes
-    group = 'raster'
-    operates_on_datatype = ['raster']
+    group = DataType.RASTER
+    operates_on_datatype = [DataType.RASTER]
     operates_on_geotype = None
     operates_on_parameters = None
-    produces_datatype = ['raster']
+    produces_datatype = [DataType.RASTER]
     produces_geotype = None
     produces_parameters = None
 
     dataset = util.param.DatasetSelector(default=None,
                                          doc="""Dataset to apply filter to.""",
-                                         filters={'datatype': 'raster'},
+                                         filters={'datatype': DataType.RASTER},
                                          )
 
     def _run_tool(self):
@@ -55,7 +53,7 @@ class RstBase(ToolBase):
         with rasterio.open(file_path, "w", **out_meta) as dest:
             dest.write(out_image)
 
-        return {'datasets': new_dset, 'catalog_entries': catalog_entry}
+        return {UriType.DATASET: new_dset, 'catalog_entries': catalog_entry}
 
     def _run(self, df, orig_metadata):
         raise NotImplementedError

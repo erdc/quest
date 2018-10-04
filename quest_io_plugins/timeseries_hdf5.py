@@ -1,7 +1,6 @@
-"""io plugin for timeseries datasets."""
-
 import json
 
+from quest.static import DataType
 from quest_io_plugins.xyHdf5 import XYHdf5
 
 
@@ -12,7 +11,7 @@ class TsHdf5(XYHdf5):
     def register(self):
         "Register plugin by setting description and io type."
         self.description = 'HDF5 IO for Timeseries datasets'
-        self.iotype = 'timeseries'
+        self.iotype = DataType.TIMESERIES
 
     def open(self, path, fmt=None):
         dataframe = self.read(path)

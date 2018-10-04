@@ -5,8 +5,8 @@ from .datasets import stage_for_download, download_datasets, open_dataset
 from .catalog import search_catalog, add_datasets
 from .tools import run_tool
 from ..database import get_db, db_session
-from ..static import DatasetStatus
 from ..util import logger as log
+from ..static import DatasetStatus, UriType
 
 
 def get_data(
@@ -168,7 +168,7 @@ def get_seamless_data(
     )
 
     tool_name = 'raster-merge'
-    tool_options = {'bbox': bbox, 'datasets': datasets}
+    tool_options = {'bbox': bbox, UriType.DATASET: datasets}
     merged_dataset = None
     if use_cache:
         merged_dataset = _get_cached_derived_data(tool_name, tool_options)
@@ -181,7 +181,7 @@ def get_seamless_data(
             name=tool_name,
             options=tool_options,
             as_open_datasets=as_open_dataset,
-        )['datasets']
+        )[UriType.DATASET]
 
     # update_metadata(uris=merged_dataset, display_name=dataset_name)
     # delete the original individual tiles

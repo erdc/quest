@@ -1,8 +1,9 @@
+from quest import util
 from quest.plugins import ToolBase
 from quest.api import get_metadata
-from quest import util
-from quest.util import setattr_on_dataframe
+from quest.static import DataType, UriType
 from quest.plugins import load_plugins
+from quest.util import setattr_on_dataframe
 
 
 class TsFlowDuration(ToolBase):
@@ -11,7 +12,7 @@ class TsFlowDuration(ToolBase):
 
     dataset = util.param.DatasetSelector(default=None,
                                          doc="""Dataset to apply filter to.""",
-                                         filters={'datatype': 'timeseries'},
+                                         filters={'datatype': DataType.TIMESERIES},
                                          )
 
     def _run_tool(self):
@@ -60,4 +61,4 @@ class TsFlowDuration(ToolBase):
         output = load_plugins('io', 'xy-hdf5')['xy-hdf5']
         output.write(file_path, new_df, new_metadata)
 
-        return {'datasets': new_dset, 'catalog_entries': catalog_entry}
+        return {UriType.DATASET: new_dset, 'catalog_entries': catalog_entry}

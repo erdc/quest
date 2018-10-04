@@ -1,8 +1,10 @@
-from quest.database.database import get_db, db_session
-from quest.util import log
-from getpass import getpass
-import pandas as pd
 import requests
+import pandas as pd
+from getpass import getpass
+
+from quest.util import log
+from quest.database.database import get_db, db_session
+from quest.static import ServiceType, GeomType, DataType
 
 collections_url = 'https://cmr.earthdata.nasa.gov/search/collections.json?short_name=%s'
 
@@ -12,10 +14,10 @@ raise ValueError('This Plugin is disabled')
 
 
 class NasaServiceBase(SingleFileServiceBase):
-    service_type = 'geo-discrete'
+    service_type = ServiceType.GEO_DISCRETE
     unmapped_parameters_available = False
-    geom_type = 'Point'
-    datatype = 'timeseries'
+    geom_type = GeomType.POINT
+    datatype = DataType.TIMESERIES
     geographical_areas = ['Worldwide']
     _parameter_map = {
         'elevation': 'elevation'

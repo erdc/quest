@@ -1,8 +1,8 @@
-import logging
 import os
 import shutil
 import tempfile
 import warnings
+import logging
 from time import time
 
 import pytest

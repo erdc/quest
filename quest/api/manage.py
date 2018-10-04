@@ -1,12 +1,13 @@
 import os
 import shutil
-from ..util.log import logger
-from quest.database.database import get_db, db_session, select_datasets
+
+from .tasks import add_async
 from .projects import _get_project_dir
 from .collections import get_collections
 from .metadata import get_metadata, update_metadata
-from .tasks import add_async
-from .. import util
+from ..static import UriType, DatasetSource
+from ..util import logger, classify_uris, uuid, parse_service_uri
+from ..database.database import get_db, db_session, select_datasets
 
 
 @add_async
@@ -30,16 +31,16 @@ def delete(uris):
         return True
 
     # group uris by type
-    grouped_uris = util.classify_uris(uris,
-                                      as_dataframe=False,
-                                      exclude=['services', 'publishers'],
-                                      require_same_type=True)
+    grouped_uris = classify_uris(uris,
+                                 as_dataframe=False,
+                                 exclude=[UriType.SERVICE, UriType.PUBLISHER],
+                                 require_same_type=True)
     resource = list(grouped_uris)[0]
     uris = grouped_uris[resource]
 
     db = get_db()
     for uri in uris:
-        if resource == 'collections':
+        if resource == UriType.COLLECTION:
             if uri not in get_collections():
                 logger.error('Collection does not exist: %s', uri)
                 raise ValueError('Collection does not exists')
@@ -56,15 +57,15 @@ def delete(uris):
                 logger.info('deleting all data under path: %s' % path)
                 shutil.rmtree(path)
 
-        if resource == 'datasets':
+        if resource == UriType.DATASET:
             with db_session:
                 dataset = db.Dataset[uri]
 
-                if dataset.source == 'derived':
+                if dataset.source == DatasetSource.DERIVED:
                     catalog_entry_datasets = select_datasets(lambda d: d.catalog_entry == dataset.catalog_entry)
 
                     if len(catalog_entry_datasets) == 1:
-                        _, _, catalog_id = util.parse_service_uri(dataset.catalog_entry)
+                        _, _, catalog_id = parse_service_uri(dataset.catalog_entry)
                         db.QuestCatalog[catalog_id].delete()
 
                 try:
@@ -83,10 +84,10 @@ def move(uris, destination_collection, as_dataframe=None, expand=None):
     if not uris:                                                                                                                        
         return {}                                                                                                                       
 
-    grouped_uris = util.classify_uris(uris,
-                                      as_dataframe=False,
-                                      exclude=['services', 'publishers', 'collections'],
-                                      require_same_type=True)
+    grouped_uris = classify_uris(uris,
+                                 as_dataframe=False,
+                                 exclude=[UriType.SERVICE, UriType.PUBLISHER, UriType.COLLECTION],
+                                 require_same_type=True)
     resource = list(grouped_uris)[0]                                                                                                    
     uris = grouped_uris[resource]                                                                                                       
     project_path = _get_project_dir()                                                                                                   
@@ -95,7 +96,7 @@ def move(uris, destination_collection, as_dataframe=None, expand=None):
     new_datasets = []
 
     for uri in uris:
-        if resource == 'datasets':                                                                                                      
+        if resource == UriType.DATASET:
             dataset_metadata = get_metadata(uri)[uri]                                                                                   
             collection_path = os.path.join(project_path, dataset_metadata['collection'])
             _move_dataset(dataset_metadata, collection_path, destination_collection_path)
@@ -117,10 +118,10 @@ def copy(uris, destination_collection, as_dataframe=None, expand=None):
     if not uris:                                                                                                                        
         return {}                                                                                                                       
 
-    grouped_uris = util.classify_uris(uris,
-                                      as_dataframe=False,
-                                      exclude=['services', 'publishers', 'collections'],
-                                      require_same_type=True)
+    grouped_uris = classify_uris(uris,
+                                 as_dataframe=False,
+                                 exclude=[UriType.SERVICE, UriType.PUBLISHER, UriType.COLLECTION],
+                                 require_same_type=True)
     resource = list(grouped_uris)[0]                                                                                                    
     uris = grouped_uris[resource]                                                                                                       
     project_path = _get_project_dir()                                                                                                   
@@ -129,7 +130,7 @@ def copy(uris, destination_collection, as_dataframe=None, expand=None):
     new_datasets = []
 
     for uri in uris:
-        if resource == 'datasets':                                                                                                      
+        if resource == UriType.DATASET:
             dataset_metadata = get_metadata(uri)[uri]                                                                                   
             collection_path = os.path.join(project_path, dataset_metadata['collection'])
 
@@ -146,7 +147,7 @@ def copy(uris, destination_collection, as_dataframe=None, expand=None):
 
 
 def _copy_dataset(dataset_metadata, collection_path, destination_collection_path):
-    new_name = util.uuid('dataset')
+    new_name = uuid('dataset')
     db = get_db()
     with db_session:
         db_metadata = db.Dataset[dataset_metadata['name']].to_dict()
