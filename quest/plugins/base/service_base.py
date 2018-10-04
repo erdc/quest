@@ -362,7 +362,7 @@ class SingleFileServiceBase(ServiceBase):
         else:
             zip_path = os.path.join(path, 'zip', filename)
             ulmo.util.download_if_new(url, zip_path, check_modified=check_modified)
-            logger.info('... ... zipfile saved at %s' % zip_path)
+            util.logger.info('... ... zipfile saved at %s' % zip_path)
             tile_path = ulmo.util.extract_from_zip(zip_path, tile_path, tile_fmt)
 
         return tile_path

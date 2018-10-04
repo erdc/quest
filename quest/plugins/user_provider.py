@@ -57,7 +57,8 @@ def get_user_service_base():
                     fnames = self.dataset_mapping[self.parameter]
                 fnames = [f.replace('<feature>', catalog_id) for f in listify(fnames)]
             else:
-                fnames = self.catalog_entries.loc[catalog_id]['_download_url']  # TODO where does self.catalog_entries get initialized?
+                fnames = self.catalog_entries.loc[catalog_id]['_download_url']
+                # TODO where does self.catalog_entries get initialized?
 
             final_path = []
             for src, file_name in zip(self._get_paths(fnames), fnames):
@@ -123,9 +124,12 @@ def get_user_service_base():
                         for line in f:
                             catalog_id, x1, y1, x2, y2 = line.split()
                             properties = {}
-                            polys.append(Feature(geometry=bbox2poly(x1, y1, x2, y2, as_geojson=True), properties=properties, id=catalog_id))
+                            polys.append(Feature(geometry=bbox2poly(x1, y1, x2, y2,
+                                                 as_geojson=True),
+                                                 properties=properties,
+                                                 id=catalog_id))
                         catalog_entries = FeatureCollection(polys)
-                        catalog_entries = util.to_geodataframe(catalog_entries)
+                        catalog_entries = to_geodataframe(catalog_entries)
 
                     if fmt.lower() == 'mbr-csv':
                         # TODO merge this with the above,
@@ -136,7 +140,10 @@ def get_user_service_base():
                             catalog_id, y1, x1, y2, x2 = line.split(',')
                             catalog_id = catalog_id.split('.')[0]
                             properties = {}
-                            polys.append(Feature(geometry=bbox2poly(x1, y1, x2, y2, as_geojson=True), properties=properties, id=catalog_id))
+                            polys.append(Feature(geometry=bbox2poly(x1, y1, x2, y2,
+                                                 as_geojson=True),
+                                                 properties=properties,
+                                                 id=catalog_id))
                         catalog_entries = FeatureCollection(polys)
                         catalog_entries = to_geodataframe(catalog_entries)
 
@@ -145,7 +152,8 @@ def get_user_service_base():
                         # assuming ISEP if a geotypical service for now.
                         catalog_entries = pd.read_json(p)
                         catalog_entries.rename(columns={'_id': 'service_id'}, inplace=True)
-                        catalog_entries['download_url'] = catalog_entries['files'].apply(lambda x: os.path.join(x[0].get('file location'), x[0].get('file name')))
+                        catalog_entries['download_url'] = catalog_entries['files'].apply(
+                            lambda x: os.path.join(x[0].get('file location'), x[0].get('file name')))
                         # remove leading slash from file path
                         catalog_entries['download_url'] = catalog_entries['download_url'].str.lstrip('/')
                         catalog_entries['parameters'] = 'met'
