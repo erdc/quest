@@ -277,12 +277,15 @@ class WMTSImageryService(SingleFileServiceBase):
             raise ValueError("{} tiles were requested, which exceeds the maximum tile limit of {}. "
                              "Either increase the tile limit (max_tiles) or decrease the zoom level."
                              .format(total_number_of_tiles, max_tiles))
+        else:
+            print("There are " + str(total_number_of_tiles) + " to download.")
 
         # calculate full image height and width (count is calculated on the first time in the loop)
         height = number_of_y_tiles * TILE_SIZE
         width = number_of_x_tiles * TILE_SIZE
         full_image = None
 
+        counter = 0
         for x, y in product(x_range, y_range):
             internet_status = requests.Session()
             retries = Retry(total=10, backoff_factor=0.1, status_forcelist=[500, 502, 503, 504])
