@@ -4,7 +4,7 @@ This module defines the Python API for the Environmental Simulator Data
 Services Library.
 """
 
-_version__ = '3.0'
+__version__ = '3.0.a1'
 
 # __all__ needed for autodoc to work
 
