@@ -275,7 +275,10 @@ class WMTSImageryService(SingleFileServiceBase):
                              "Either increase the tile limit (max_tiles) or decrease the zoom level."
                              .format(total_number_of_tiles, max_tiles))
 
-        stitched_image = Image.new('RGB', (number_of_x_tiles * TILE_SIZE, number_of_y_tiles * TILE_SIZE))
+        count = 4
+        height = number_of_y_tiles * TILE_SIZE
+        width = number_of_x_tiles * TILE_SIZE
+        full_image = np.empty([count, height, width], dtype=np.uint8)
 
         for x, y in product(x_range, y_range):
             internet_status = requests.Session()
@@ -286,18 +289,17 @@ class WMTSImageryService(SingleFileServiceBase):
                 internet_status.mount('http://', HTTPAdapter(max_retries=retries))
             output_feedback = internet_status.get(url.format(Z=zoom_level, X=x, Y=y), verify=True)
             if output_feedback.status_code == 200:
-                incoming_image = Image.open(BytesIO(output_feedback.content))
-                x_pixel = (x - xmin) * TILE_SIZE
-                y_pixel = (y - ymin) * TILE_SIZE
-                stitched_image.paste(im=incoming_image, box=(x_pixel, y_pixel))
-                incoming_image.close()
+                image = imread(BytesIO(output_feedback.content))
+                image = np.moveaxis(image, -1, 0)  # move the bands from the last axis to the first.
+                x_pixel_min, x_pixel_max = (x - xmin) * TILE_SIZE, (x - xmin + 1) * TILE_SIZE
+                y_pixel_min, y_pixel_max = (y - ymin) * TILE_SIZE, (y - ymin + 1) * TILE_SIZE
+                full_image[:, y_pixel_min:y_pixel_max, x_pixel_min:x_pixel_max] = image
 
         if crop_bbox:
-            stitched_image = stitched_image.crop(box=crop_bbox)
-        image_array = np.array(stitched_image)
-        stitched_image.close()
+            xmin, ymin, xmax, ymax = crop_bbox
+            cropped_image = full_image[:, ymin:ymax, xmin:xmax]
 
-        return image_array
+        return cropped_image
 
     @staticmethod
     def _write_image_to_tif(array, bbox, file_path):
@@ -311,14 +313,17 @@ class WMTSImageryService(SingleFileServiceBase):
             file_path (string, required):
                 file path to save the GeoTiff to
         """
-        image_array = np.moveaxis(array, -1, 0)  # move the bands from the last axis to the first.
-        count, height, width = image_array.shape
+        bbox = np.array(bbox).reshape(2, 2)
+        bbox = ccrs.GOOGLE_MERCATOR.transform_points(ccrs.PlateCarree(), bbox[:, 0], bbox[:, 1]).reshape(6)
+        bbox = bbox[0], bbox[1], bbox[3], bbox[4]
+        count, height, width = array.shape
+        indexes = list(range(1, count + 1))
         transform = rasterio.transform.from_bounds(*bbox, width=width, height=height)
         crs = rasterio.crs.CRS.from_epsg(WMTS_EPSG)
         with rasterio.open(file_path, 'w', driver='GTiff', height=height,
-                           width=width, count=count, dtype=image_array.dtype,
+                           width=width, count=count, dtype=array.dtype,
                            crs=crs, transform=transform) as dst:
-            dst.write(image_array, indexes=[1, 2, 3])
+            dst.write(array, indexes=indexes)
 
 
 class WMTSImageryProvider(ProviderBase):
