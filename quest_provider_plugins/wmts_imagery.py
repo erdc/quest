@@ -1,20 +1,23 @@
-from quest.plugins import ProviderBase, SingleFileServiceBase
-from quest.util import listify
-from requests.packages.urllib3.util.retry import Retry
-from requests.adapters import HTTPAdapter
-from quest.static import ServiceType
-from shapely.geometry import box
-from itertools import product
-from io import BytesIO
-from PIL import Image
-import pandas as pd
-import numpy as np
-import requests
-import rasterio
 import logging
-import param
 import math
 import os
+from io import BytesIO
+from itertools import product
+
+import cartopy.crs as ccrs
+import numpy as np
+import pandas as pd
+import param
+import requests
+import rasterio
+from imageio import imread
+from quest.static import ServiceType
+from requests.packages.urllib3.util.retry import Retry
+from requests.adapters import HTTPAdapter
+from shapely.geometry import box
+
+from quest.plugins import ProviderBase, SingleFileServiceBase
+from quest.util import listify
 
 TILE_SIZE = 256
 MAX_ZOOM = 19
