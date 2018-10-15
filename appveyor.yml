@@ -18,10 +18,8 @@ platform:
 
 build: false
 
-
 install:
   # Install miniconda using a powershell script.
-  - "set PATH=%MINICONDA%;%MINICONDA%\\Scripts;%PATH%"
   - conda config --set always_yes yes --set changeps1 no
   - conda update -q conda
   - conda info -a
