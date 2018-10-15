@@ -71,7 +71,7 @@ def get_or_generate_test_cache(update=False, skip=False):
 
 
 @pytest.fixture(scope='session')
-def get_base_dir(request, pytestconfig):
+def get_base_dir(request):
     base_dir_obj = tempfile.TemporaryDirectory()
     base_dir = base_dir_obj.name
     update_cache = pytestconfig.getoption('--update-cache')
