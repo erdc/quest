@@ -17,9 +17,6 @@ warnings.filterwarnings('ignore', "Pandas doesn't allow columns to be created vi
 
 def pytest_addoption(parser):
     parser.addoption('--update-cache', action='store_true')
-    parser.addoption('--skip-slow', action='store_true')
-    parser.addoption('--skip-tasks', action='store_true')
-    parser.addoption('--test-download', action='store_true')
 
 
 def pytest_generate_tests(metafunc):
@@ -77,8 +74,8 @@ def get_or_generate_test_cache(update=False, skip=False):
 def get_base_dir(request, pytestconfig):
     base_dir_obj = tempfile.TemporaryDirectory()
     base_dir = base_dir_obj.name
-    update_cache = request.config.getoption('--update-cache')
-    skip_cache = request.config.getoption('--skip-slow')
+    update_cache = pytestconfig.getoption('--update-cache')
+    skip_cache = pytestconfig.getoption('-m').find('not slow') > -1
     test_cache_dir = get_or_generate_test_cache(update_cache, skip_cache)
     os.mkdir(os.path.join(base_dir, '.cache'))
     os.symlink(test_cache_dir, os.path.join(base_dir, '.cache', 'test_cache'))

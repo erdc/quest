@@ -3,10 +3,6 @@ from quest.api.tasks import add_async
 import pytest
 import quest
 
-skip_tasks = pytest.mark.skipif(
-    pytest.config.getoption("--skip-tasks"),
-    reason="--skip-tasks option was set"
-)
 
 @pytest.fixture
 def task_cleanup(api, request):
@@ -41,7 +37,7 @@ def wait_until_done(api):
     return
 
 
-@skip_tasks
+@pytest.mark.tasks
 def test_launch_tasks(api, task_cleanup):
     test_tasks = [
         api.long_process(1.011, 'first', async_tasks=True),
@@ -60,7 +56,7 @@ def test_launch_tasks(api, task_cleanup):
         assert {'delay': delay, 'msg': msg} == task['result']
 
 
-@skip_tasks
+@pytest.mark.tasks
 def test_add_remove_tasks(api, task_cleanup):
     test_tasks = [
         api.long_process(1.021, 'first', async_tasks=True),
@@ -102,7 +98,7 @@ def test_add_remove_tasks(api, task_cleanup):
     assert len(api.get_tasks()) == 0
 
 
-@skip_tasks
+@pytest.mark.tasks
 def test_task_with_exception(api, task_cleanup):
     test_tasks = [
         api.long_process(1.031, 'first', async_tasks=True),
@@ -116,7 +112,7 @@ def test_task_with_exception(api, task_cleanup):
     assert len(api.get_tasks(filters={'status': 'error'})) == 1
 
 
-@skip_tasks
+@pytest.mark.tasks
 def test_get_tasks(api, task_cleanup):
     test_tasks = [
         api.long_process(1.041, 'first', async_tasks=True),
