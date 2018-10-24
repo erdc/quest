@@ -6,6 +6,7 @@ from .catalog import search_catalog, add_datasets
 from .tools import run_tool
 from ..database import get_db, db_session
 from ..static import DatasetStatus
+from ..util import logger as log
 
 
 def get_data(
@@ -43,6 +44,9 @@ def get_data(
         filters=search_filters,
     )
 
+    if not catalog_entries:
+        log.warn('Search was empty. No datasets will be downloaded.')
+
     # Ensure number of features is reasonable before downloading
     if len(catalog_entries) > max_catalog_entries:
         raise RuntimeError('The number of service features found was {} which exceeds the `max_features` of {}.'
@@ -65,8 +69,12 @@ def get_data(
 
         stage_for_download(uris=datasets, options=download_options)
 
-        # download the staged datasets (if as_open_datasets is True then raise any errors)
-        download_datasets(datasets=datasets, raise_on_error=as_open_datasets)
+        # download the staged datasets
+        for dataset in datasets:
+            try:
+                download_datasets(datasets=dataset, raise_on_error=True)
+            except Exception as e:
+                log.exception('The following error was raised while downloading dataset {}'.format(dataset), exc_info=e)
 
     datasets.extend(cached_datasets)
 

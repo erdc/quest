@@ -278,10 +278,10 @@ class WMTSImageryService(SingleFileServiceBase):
                              "Either increase the tile limit (max_tiles) or decrease the zoom level."
                              .format(total_number_of_tiles, max_tiles))
 
-        count = 4
+        # calculate full image height and width (count is calculated on the first time in the loop)
         height = number_of_y_tiles * TILE_SIZE
         width = number_of_x_tiles * TILE_SIZE
-        full_image = np.empty([count, height, width], dtype=np.uint8)
+        full_image = None
 
         for x, y in product(x_range, y_range):
             internet_status = requests.Session()
@@ -294,8 +294,15 @@ class WMTSImageryService(SingleFileServiceBase):
             if output_feedback.status_code == 200:
                 image = imread(BytesIO(output_feedback.content))
                 image = np.moveaxis(image, -1, 0)  # move the bands from the last axis to the first.
+
                 x_pixel_min, x_pixel_max = (x - xmin) * TILE_SIZE, (x - xmin + 1) * TILE_SIZE
                 y_pixel_min, y_pixel_max = (y - ymin) * TILE_SIZE, (y - ymin + 1) * TILE_SIZE
+
+                # initialize full image on first loop
+                if full_image is None:
+                    count, _, _ = image.shape
+                    full_image = np.empty([count, height, width], dtype=np.uint8)
+
                 full_image[:, y_pixel_min:y_pixel_max, x_pixel_min:x_pixel_max] = image
 
         if crop_bbox:
