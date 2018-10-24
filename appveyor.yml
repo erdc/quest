@@ -35,4 +35,4 @@ install:
   - python -c "import quest; quest.api.update_settings(dict(CACHE_DIR='%QUEST_CACHE_DIR%')); quest.api.save_settings()"
 
 test_script:
-  - python -m pytest -vv --nbval-lax examples\notebooks\
+  - python -m pytest -vv
