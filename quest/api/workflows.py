@@ -171,8 +171,6 @@ def _get_cached_data(catalog_entries, download_options, collection=None):
                                      d.status == DatasetStatus.DOWNLOADED and
                                      d.options == download_options
                                      )
-        # # the last part of the query is not working for some reason so instead:
-        # datasets = [d for d in datasets if d.options == download_options]
         if collection is not None:
             datasets = [d for d in datasets if d.collection.name == collection]
 
