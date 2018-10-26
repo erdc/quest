@@ -17,6 +17,7 @@ def get_data(
         use_cache=True,
         max_catalog_entries=10,
         as_open_datasets=True,
+        raise_on_error=False,
 ):
     """
     Downloads data from source uri and adds to a quest collection.
@@ -29,6 +30,7 @@ def get_data(
         use_cache:
         max_catalog_entries:
         as_open_datasets:
+        raise_on_error:
 
     Returns:
          the quest dataset name, or an python data structure if open_dataset=True.
@@ -75,6 +77,8 @@ def get_data(
                 download_datasets(datasets=dataset, raise_on_error=True)
             except Exception as e:
                 log.exception('The following error was raised while downloading dataset {}'.format(dataset), exc_info=e)
+                if raise_on_error:
+                    raise e
 
     datasets.extend(cached_datasets)
 
