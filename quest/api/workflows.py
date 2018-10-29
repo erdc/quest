@@ -23,14 +23,26 @@ def get_data(
     Downloads data from source uri and adds to a quest collection.
 
     Args:
-        service_uri:
-        search_filters:
-        download_options:
-        collection_name:
-        use_cache:
-        max_catalog_entries:
-        as_open_datasets:
-        raise_on_error:
+        service_uri (string, required):
+            uri for service to get data from
+        search_filters (dict, required):
+            dictionary of search filters to filter the catalog search (see docs for quest.api.search_catalog)
+        download_options (dict or Parameterized, optional, default=None):
+            dictionary or Parameterized object with download options for service
+            (see docs for quest.api.download_datasets)
+        collection_name (string, optional, default='default'):
+            name of collection to add downloaded data to. If collection doesn't exist it will be created.
+        use_cache (bool, optional, default=True):
+            if True then previously downloaded datasets with the same download options will be returned
+            rather than downloading new datasets
+        max_catalog_entries (int, optional, default=10):
+            the maximum number of datasets to allow in the search. If exceeded a Runtime error is raised.
+        as_open_datasets (bool, optional, default=False):
+            if True return datasets as Python data structures rather than as dataset ids
+            (see docs for quest.api.open_dataset)
+        raise_on_error (bool, optional, default=False):
+            if True then raise an exception if no datasets are returned in the search,
+            or if there is an error while downloading any of the datasets.
 
     Returns:
          the quest dataset name, or an python data structure if open_dataset=True.
@@ -100,6 +112,8 @@ def get_seamless_data(
         use_cache=True,
         max_catalog_entries=10,
         as_open_dataset=True,
+        raise_on_error=False,
+
 ):
     """
     Downloads raster data from source uri and adds to a quest collection.
@@ -108,14 +122,29 @@ def get_seamless_data(
     tool to merge the tiles into a single raster.
 
     Args:
-        service_uri:
-        bbox:
-        search_filters:
-        download_options:
-        collection_name:
-        use_cache:
-        max_catalog_entries:
-        as_open_dataset:
+        service_uri (string, required):
+            uri for service to get data from
+        bbox (list, required):
+            list of lat/lon coordinates representing the bounds of the data in for form
+            [lon_min, lat_min, lon_max, lat_max].
+        search_filters (dict, required):
+            dictionary of search filters to filter the catalog search (see docs for quest.api.search_catalog)
+        download_options (dict or Parameterized, optional, default=None):
+            dictionary or Parameterized object with download options for service
+            (see docs for quest.api.download_datasets)
+        collection_name (string, optional, default='default'):
+            name of collection to add downloaded data to. If collection doesn't exist it will be created.
+        use_cache (bool, optional, default=True):
+            if True then previously downloaded datasets with the same download options will be returned
+            rather than downloading new datasets
+        max_catalog_entries (int, optional, default=10):
+            the maximum number of datasets to allow in the search. If exceeded a Runtime error is raised.
+        as_open_dataset (bool, optional, default=False):
+            if True return dataset as Python data structure rather than as a dataset id
+            (see docs for quest.api.open_dataset)
+        raise_on_error (bool, optional, default=False):
+            if True then raise an exception if no datasets are returned in the search,
+            or if there is an error while downloading.
 
     Returns:
         the quest dataset name.
@@ -135,6 +164,7 @@ def get_seamless_data(
         use_cache=use_cache,
         max_catalog_entries=max_catalog_entries,
         as_open_datasets=False,
+        raise_on_error=raise_on_error,
     )
 
     tool_name = 'raster-merge'
@@ -162,14 +192,18 @@ def get_seamless_data(
 
 def _get_cached_data(catalog_entries, download_options, collection=None):
     """Returns datasets that have been successfully downloaded
-    where `feature` and `options` match `collection_features` and `download_options`.
+    where `catalog_entry` and `options` match `catalog_entries` and `download_options`.
 
     Args:
-        collection_features:
-        download_options:
+        catalog_entries (list, required):
+            list of catalog_entry ids to check for matching downloaded data
+        download_options (dict, required):
+            dictionary of download options to match against previously downloaded data
+        collection (string, optional, default=None):
+            Optionally only match cached data from within given collection.
 
     Returns:
-
+        a dictionary of dataset ids mapped to provided catalog entries
     """
 
     db = get_db()
@@ -185,13 +219,17 @@ def _get_cached_data(catalog_entries, download_options, collection=None):
 
 
 def _get_cached_derived_data(tool_name, tool_options):
-    """
+    """Returns datasets that have been generated by Quest tools where `tool_applied` and `tool_options`
+     match the arguments `tool_name` and `tool_options`.
 
     Args:
-        tool_name:
-        tool_options:
+        tool_name (string, required):
+            name of quest tool that was run to generate data
+        tool_options (dict, required):
+            dictionary of tool options used to generate data
 
     Returns:
+        a list of dataset ids that have matached arguments or None
 
     """
     options = {
@@ -206,13 +244,14 @@ def _get_cached_derived_data(tool_name, tool_options):
 
 
 def _is_tile_service(service_uri):
-    """
+    """Checks that `service_uri` is a data service that provides tiled raster data.
 
     Args:
-        service_uri:
+        service_uri (string, required):
+            string of a service to verify that it provides tiles
 
     Returns:
-
+        True if service provides tiles, False otherwise
     """
     # TODO check to make sure the service provides raster tiles that can be merged.
     return True
