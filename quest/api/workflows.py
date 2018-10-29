@@ -48,7 +48,8 @@ def get_data(
 
     if not catalog_entries:
         log.warn('Search was empty. No datasets will be downloaded.')
-        raise RuntimeError('Search was empty. No datasets will be downloaded.')
+        if raise_on_error:
+            raise RuntimeError('Search was empty. No datasets will be downloaded.')
 
     # Ensure number of features is reasonable before downloading
     if len(catalog_entries) > max_catalog_entries:
@@ -66,9 +67,6 @@ def get_data(
         matched = _get_cached_data(catalog_entries, download_options, collection_name)
         catalog_entries = set(catalog_entries) - set(matched.keys())
         cached_datasets = list(matched.values())
-
-    if len(catalog_entries) + len(cached_datasets) < num_entries:
-        raise RuntimeError('There was an error finding cached data:\n{}\n{}', catalog_entries, cached_datasets)
 
     # add the selected features to a quest collection
     if catalog_entries:
