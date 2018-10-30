@@ -4,11 +4,6 @@ import pytest
 import os
 
 
-test_download = pytest.mark.skipif(
-    not pytest.config.getoption("--test-download"),
-    reason="--test-download option was not set"
-)
-
 pytestmark = pytest.mark.usefixtures('reset_projects_dir')
 
 
@@ -33,11 +28,11 @@ def test_get_services(api):
     assert sorted(api.get_services()) == ALL_SERVICES
 
 
-@test_download
+@pytest.mark.download
 @pytest.mark.parametrize('catalog_entry, options', SERVICE_DOWNLOAD_OPTIONS)
 def test_download(api, catalog_entry, options):
     api.new_collection('test')
-    d = api.add_datasets('test', catalog_entry)
-    api.stage_for_download(d, options=options)[0]
+    d = api.add_datasets('test', catalog_entry)[0]
+    api.stage_for_download(d, options=options)
     result = api.download_datasets(d, raise_on_error=True)
     assert result[d] == 'downloaded'

@@ -89,7 +89,7 @@ class NwisServiceBase(TimePeriodServiceBase):
 
         sites = {k: v for d in sites for k, v in d.items()}
         df = pd.DataFrame.from_dict(sites, orient='index')
-        # df['_geom_type'] = 'Point'
+
         for col in ['latitude', 'longitude']:
             df[col] = df['location'].apply(lambda x: float(x[col]))
 
@@ -98,8 +98,6 @@ class NwisServiceBase(TimePeriodServiceBase):
                     'name': 'display_name',
 
                     }, inplace=True)
-
-        # df['_geom_coords'] = list(zip(df['_longitude'], df['_latitude']))
         return df
 
     def get_parameters(self, catalog_ids=None):

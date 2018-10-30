@@ -154,7 +154,7 @@ class ServiceBase(param.Parameterized):  # TODO can I make this an abc and have 
 
         if {'latitude', 'longitude'}.issubset(catalog_entries.columns):
             def fn(row):
-                Point((
+                return Point((
                     float(row['longitude']),
                     float(row['latitude'])
                 ))

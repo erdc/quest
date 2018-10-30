@@ -20,6 +20,7 @@ class TsFlowDuration(ToolBase):
 
         input_ts = load_plugins('io', 'timeseries-hdf5')['timeseries-hdf5']
         orig_metadata = get_metadata(dataset)[dataset]
+        parameter = orig_metadata['parameter']
         if orig_metadata['file_path'] is None:
             raise IOError('No data file available for this dataset')
 
@@ -32,10 +33,10 @@ class TsFlowDuration(ToolBase):
         metadata = df.metadata
         if 'file_path' in metadata:
             del metadata['file_path']
-        df.sort_values(['streamflow'], ascending=False, na_position='last', inplace=True)
-        df['Rank'] = df['streamflow'].rank(method='min', ascending=False)
+        df.sort_values([parameter], ascending=False, na_position='last', inplace=True)
+        df['Rank'] = df[parameter].rank(method='min', ascending=False)
         df.dropna(inplace=True)
-        df['Percent Exceeded'] = (df['Rank'] / (df['streamflow'].count() + 1)) * 100
+        df['Percent Exceeded'] = (df['Rank'] / (df[parameter].count() + 1)) * 100
         df.index = df['Percent Exceeded']
 
         setattr_on_dataframe(df, 'metadata', metadata)

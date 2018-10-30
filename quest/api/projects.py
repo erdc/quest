@@ -221,9 +221,10 @@ def remove_project(name):
         if active is None:
             logger.info('All projects have been removed. Re-adding "default" project.')
             projects = get_projects()
-        else:
-            logger.info('changing active project from {} to {}'.format(name, active))
-            set_active_project(active)
+            active = 'default'
+
+        logger.info('changing active project from {} to {}'.format(name, active))
+        set_active_project(active)
 
     return projects
 

@@ -57,9 +57,9 @@ install:
 # command to run tests
 script:
   - if [[ "$TRAVIS_EVENT_TYPE" == "cron" ]]; then
-      pytest --cov=$COVERAGE -vv --update-cache --test-download;
+      pytest --cov=$COVERAGE -vv --update-cache --nbval-lax examples/notebooks -m "";
     else
-      pytest --cov=$COVERAGE -vv;
+      pytest --cov=$COVERAGE -vv --nbval-lax examples/notebooks;
     fi
 
 

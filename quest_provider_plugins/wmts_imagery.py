@@ -1,20 +1,23 @@
-from quest.plugins import ProviderBase, SingleFileServiceBase
-from quest.util import listify
-from requests.packages.urllib3.util.retry import Retry
-from requests.adapters import HTTPAdapter
-from quest.static import ServiceType
-from shapely.geometry import box
-from itertools import product
-from io import BytesIO
-from PIL import Image
-import pandas as pd
-import numpy as np
-import requests
-import rasterio
 import logging
-import param
 import math
 import os
+from io import BytesIO
+from itertools import product
+
+import cartopy.crs as ccrs
+import numpy as np
+import pandas as pd
+import param
+import requests
+import rasterio
+from imageio import imread
+from quest.static import ServiceType
+from requests.packages.urllib3.util.retry import Retry
+from requests.adapters import HTTPAdapter
+from shapely.geometry import box
+
+from quest.plugins import ProviderBase, SingleFileServiceBase
+from quest.util import listify
 
 TILE_SIZE = 256
 MAX_ZOOM = 19
@@ -275,7 +278,10 @@ class WMTSImageryService(SingleFileServiceBase):
                              "Either increase the tile limit (max_tiles) or decrease the zoom level."
                              .format(total_number_of_tiles, max_tiles))
 
-        stitched_image = Image.new('RGB', (number_of_x_tiles * TILE_SIZE, number_of_y_tiles * TILE_SIZE))
+        # calculate full image height and width (count is calculated on the first time in the loop)
+        height = number_of_y_tiles * TILE_SIZE
+        width = number_of_x_tiles * TILE_SIZE
+        full_image = None
 
         for x, y in product(x_range, y_range):
             internet_status = requests.Session()
@@ -286,18 +292,24 @@ class WMTSImageryService(SingleFileServiceBase):
                 internet_status.mount('http://', HTTPAdapter(max_retries=retries))
             output_feedback = internet_status.get(url.format(Z=zoom_level, X=x, Y=y), verify=True)
             if output_feedback.status_code == 200:
-                incoming_image = Image.open(BytesIO(output_feedback.content))
-                x_pixel = (x - xmin) * TILE_SIZE
-                y_pixel = (y - ymin) * TILE_SIZE
-                stitched_image.paste(im=incoming_image, box=(x_pixel, y_pixel))
-                incoming_image.close()
+                image = imread(BytesIO(output_feedback.content))
+                image = np.moveaxis(image, -1, 0)  # move the bands from the last axis to the first.
+
+                x_pixel_min, x_pixel_max = (x - xmin) * TILE_SIZE, (x - xmin + 1) * TILE_SIZE
+                y_pixel_min, y_pixel_max = (y - ymin) * TILE_SIZE, (y - ymin + 1) * TILE_SIZE
+
+                # initialize full image on first loop
+                if full_image is None:
+                    count, _, _ = image.shape
+                    full_image = np.empty([count, height, width], dtype=np.uint8)
+
+                full_image[:, y_pixel_min:y_pixel_max, x_pixel_min:x_pixel_max] = image
 
         if crop_bbox:
-            stitched_image = stitched_image.crop(box=crop_bbox)
-        image_array = np.array(stitched_image)
-        stitched_image.close()
+            xmin, ymin, xmax, ymax = crop_bbox
+            cropped_image = full_image[:, ymin:ymax, xmin:xmax]
 
-        return image_array
+        return cropped_image
 
     @staticmethod
     def _write_image_to_tif(array, bbox, file_path):
@@ -311,14 +323,17 @@ class WMTSImageryService(SingleFileServiceBase):
             file_path (string, required):
                 file path to save the GeoTiff to
         """
-        image_array = np.moveaxis(array, -1, 0)  # move the bands from the last axis to the first.
-        count, height, width = image_array.shape
+        bbox = np.array(bbox).reshape(2, 2)
+        bbox = ccrs.GOOGLE_MERCATOR.transform_points(ccrs.PlateCarree(), bbox[:, 0], bbox[:, 1]).reshape(6)
+        bbox = bbox[0], bbox[1], bbox[3], bbox[4]
+        count, height, width = array.shape
+        indexes = list(range(1, count + 1))
         transform = rasterio.transform.from_bounds(*bbox, width=width, height=height)
         crs = rasterio.crs.CRS.from_epsg(WMTS_EPSG)
         with rasterio.open(file_path, 'w', driver='GTiff', height=height,
-                           width=width, count=count, dtype=image_array.dtype,
+                           width=width, count=count, dtype=array.dtype,
                            crs=crs, transform=transform) as dst:
-            dst.write(image_array, indexes=[1, 2, 3])
+            dst.write(array, indexes=indexes)
 
 
 class WMTSImageryProvider(ProviderBase):

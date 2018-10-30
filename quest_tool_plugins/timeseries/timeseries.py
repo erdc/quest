@@ -3,7 +3,7 @@
 """
 import param
 
-from quest.util import setattr_on_dataframe
+from quest.util import setattr_on_dataframe, unit_list, unit_registry
 
 from .ts_base import TsBase
 
@@ -17,7 +17,7 @@ periods = {
 
 class TsRemoveOutliers(TsBase):
     _name = 'ts-remove-outliers'
-    sigma = param.Number(doc="values greater than (sigma * std deviation) from median will be filtered out")
+    sigma = param.Number(default=1, doc="values greater than (sigma * std deviation) from median will be filtered out")
 
     def _run(self, df):
         metadata = df.metadata
@@ -43,36 +43,36 @@ class TsRemoveOutliers(TsBase):
         return df
 
 
-# class TsUnitConversion(TsBase):
-#     _name = 'ts-unit-conversion'
-#     to_units = param.ObjectSelector(default=None,
-#                                     doc="""Units of the resulting dataset.""",
-#                                     objects=unit_list()
-#                                     )
-#
-#     def _run(self, df):
-#         if self.to_units is None:
-#             raise ValueError('To_units cannot be None')
-#
-#         metadata = df.metadata
-#         if 'file_path' in metadata:
-#             del metadata['file_path']
-#
-#         reg = unit_registry()
-#         from_units = metadata['unit']
-#         if '/' in from_units and '/' not in self.to_units:
-#             beg = from_units.find('/')
-#             end = len(from_units)
-#             default_time = from_units[beg:end]
-#             to_units = self.to_units + default_time
-#         else:
-#             to_units = self.to_units
-#         conversion = reg.convert(1, src=from_units, dst=to_units)
-#         df[df.columns[1]] = df[df.columns[1]] * conversion
-#         metadata.update({'unit': to_units})
-#         setattr_on_dataframe(df, 'metadata', metadata)
-#
-#         return df
+class TsUnitConversion:  # (TsBase): TODO: Fix this to allow for multi-dimensional units
+    _name = 'ts-unit-conversion'
+    to_units = param.ObjectSelector(default=None,
+                                    doc="""Units of the resulting dataset.""",
+                                    objects=unit_list()
+                                    )
+
+    def _run(self, df):
+        if self.to_units is None:
+            raise ValueError('To_units cannot be None')
+
+        metadata = df.metadata
+        if 'file_path' in metadata:
+            del metadata['file_path']
+
+        reg = unit_registry()
+        from_units = metadata['unit']
+        if '/' in from_units and '/' not in self.to_units:
+            beg = from_units.find('/')
+            end = len(from_units)
+            default_time = from_units[beg:end]
+            to_units = self.to_units + default_time
+        else:
+            to_units = self.to_units
+        conversion = reg.convert(1, src=from_units, dst=to_units)
+        df[df.columns[1]] = df[df.columns[1]] * conversion
+        metadata.update({'unit': to_units})
+        setattr_on_dataframe(df, 'metadata', metadata)
+
+        return df
 
 
 class TsResample(TsBase):

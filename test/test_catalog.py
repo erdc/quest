@@ -2,11 +2,6 @@ import pytest
 
 from data import SERVICES_CATALOG_COUNT, CACHED_SERVICES
 
-slow = pytest.mark.skipif(
-    pytest.config.getoption("--skip-slow"),
-    reason="--skip-slow option was set"
-)
-
 ACTIVE_PROJECT = 'project1'
 
 pytestmark = pytest.mark.usefixtures('reset_projects_dir', 'set_active_project')
@@ -23,7 +18,7 @@ def catalog_entry(request):
     return request.param
 
 
-@slow
+@pytest.mark.slow
 def test_add_datasets(api, catalog_entry):
     b = api.add_datasets('col1', catalog_entry)
     c = api.get_datasets(filters={'collection': 'col1'})
@@ -31,7 +26,7 @@ def test_add_datasets(api, catalog_entry):
     assert b == c
 
 
-@slow
+@pytest.mark.slow
 @pytest.mark.parametrize("service, expected, tolerance", SERVICES_CATALOG_COUNT)
 def test_search_catalog_from_service(api, service, expected, tolerance):
     catalog_entries = api.search_catalog(service)
@@ -39,7 +34,7 @@ def test_search_catalog_from_service(api, service, expected, tolerance):
     assert abs(len(catalog_entries) - expected) < tolerance
 
 
-@slow
+@pytest.mark.slow
 def test_search_catalog_with_search_term(api):
     catalog_entries = api.search_catalog('svc://noaa-ncdc:ghcn-daily', filters={'search_terms': ['ZI']})
     expected = 270
@@ -47,7 +42,7 @@ def test_search_catalog_with_search_term(api):
     assert abs(len(catalog_entries) - expected) < tolerance
 
 
-@slow
+@pytest.mark.slow
 def test_search_catalog_with_tag(api):
     catalog_entries = api.search_catalog('svc://noaa-ncdc:ghcn-daily', filters={'country': 'ZI'})
     expected = 20
@@ -55,7 +50,7 @@ def test_search_catalog_with_tag(api):
     assert abs(len(catalog_entries) - expected) < tolerance
 
 
-@slow
+@pytest.mark.slow
 def test_search_catalog_with_query(api):
     catalog_entries = api.search_catalog('svc://noaa-ncdc:ghcn-daily',
                                 queries=["display_name == 'DALGARANGA' or display_name == 'TARDIE STATION'"])
@@ -86,7 +81,7 @@ def test_delete_derived_dataset(api):
     assert c in api.get_metadata(c)
 
 
-@slow
+@pytest.mark.slow
 @pytest.mark.parametrize('service', CACHED_SERVICES)
 def test_get_tags(api, service):
     tags = api.get_tags(service)

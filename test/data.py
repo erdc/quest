@@ -305,7 +305,7 @@ SERVICES_CATALOG_COUNT = [
     ('svc://usgs-nlcd:2006', 131, 100),
     ('svc://usgs-nlcd:2011', 203, 100),
     ('svc://usgs-nwis:dv', 36368, 1000),
-    ('svc://usgs-nwis:iv', 19615, 1000),
+    ('svc://usgs-nwis:iv', 20412, 1000),
     ('svc://wmts:seamless_imagery', 1, 1),
     ('svc://cuahsi-hydroshare:hs_geo', 1090, 1000),
     ('svc://cuahsi-hydroshare:hs_norm', 2331, 1000),
