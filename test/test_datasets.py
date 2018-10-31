@@ -80,7 +80,6 @@ def test_new_dataset(api):
     new_dataset = api.new_dataset(CATALOG_ENTRY, 'col1')
     datasets = api.get_datasets()
     try:
-        # test number of datasets
         actual = len(datasets)
         expected = 2
         assert actual == expected
