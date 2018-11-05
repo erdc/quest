@@ -243,4 +243,4 @@ class WBTWatershedDelineationWorkflow(ToolBase):
 
         update_metadata(new_dset, quest_metadata=quest_metadata)
 
-        return {UriType.DATASET: new_dset, 'catalog_entries': [new_catalog_entries, snapped_outlets, catalog_entry]}
+        return {'datasets': new_dset, 'catalog_entries': [new_catalog_entries, snapped_outlets, catalog_entry]}
