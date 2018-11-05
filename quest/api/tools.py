@@ -94,7 +94,7 @@ def run_tool(name, options=None, as_dataframe=None, expand=None, as_open_dataset
     plugin = load_plugins(PluginType.TOOL, name)[name]
     result = plugin.run_tool(**options)
 
-    new_datasets = result.get(UriType.DATASET, [])
+    new_datasets = result.get('datasets', [])
     new_catalog_entries = result.get('catalog_entries', [])
 
     if expand or as_dataframe:
