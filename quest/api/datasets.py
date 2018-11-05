@@ -426,7 +426,7 @@ def visualize_dataset(dataset, update_cache=False, **kwargs):
     if title is None:
         title = dataset
 
-    if static.DataType.TIMESERIES in file_format:
+    if 'timeseries' in file_format:
         visualization_path = io.visualize(path, title=title, **kwargs)
     else:
         visualization_path = io.visualize(path, **kwargs)
