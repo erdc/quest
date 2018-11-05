@@ -13,7 +13,7 @@ class WBTFillDepressions(ToolBase):
     _name = 'wbt-fill-depressions'
 
     # metadata attributes
-    group = DataType.RASTER
+    group = 'raster'
     operates_on_datatype = [DataType.RASTER]
     operates_on_geotype = None
     operates_on_parameters = None
