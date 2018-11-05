@@ -9,7 +9,7 @@ def test_get_quest_dir(reset_projects_dir):
 
 def test_get_cache_data_dir(reset_projects_dir):
     part_1 = quest.util.get_cache_dir()
-    part_2 = os.path.join(reset_projects_dir['BASE_DIR'], os.path.join('.cache', 'test_cache'))
+    expected = os.path.join(reset_projects_dir['BASE_DIR'], os.path.join('.cache', 'test_cache'))
     assert actual == expected
 
     folder_obj = tempfile.TemporaryDirectory()
