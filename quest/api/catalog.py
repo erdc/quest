@@ -141,8 +141,10 @@ def search_catalog(uris=None, expand=False, as_dataframe=False, as_geojson=False
                 catalog_entries = catalog_entries[idx]
 
             elif k == 'search_terms':
-                idx = np.column_stack([catalog_entries[col].apply(str).str.contains(search_term, na=False)
-                                       for col, search_term in itertools.product(catalog_entries.columns, v)]).any(axis=1)
+                idx = np.column_stack([
+                    catalog_entries[col].apply(str).str.contains(search_term, na=False)
+                    for col, search_term in itertools.product(catalog_entries.columns, v)
+                ]).any(axis=1)
                 catalog_entries = catalog_entries[idx]
 
             else:
