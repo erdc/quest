@@ -32,6 +32,7 @@ def test_search_catalog_with_no_uris(api):
     assert catalog_entries == []
 
 
+
 def test_search_catalog_with_collection(api):
     api.set_active_project('test_data')
     catalog_entries = api.search_catalog('col1')
