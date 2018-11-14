@@ -51,7 +51,7 @@ class TsBase(ToolBase):
         # save dataframe
         io.write(file_path, new_df, new_metadata)
 
-        return {UriType.DATASET: new_dset}
+        return {'datasets': new_dset}
 
     def _run(self, df):
         raise NotImplementedError

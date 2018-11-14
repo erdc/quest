@@ -48,7 +48,7 @@ class WBTFillDepressions(ToolBase):
 
         update_metadata(new_dset, quest_metadata=quest_metadata)
 
-        return {UriType.DATASET: new_dset}
+        return {'datasets': new_dset}
 
 
 class WBTExtractStreamsWorkflow(ToolBase):
@@ -57,7 +57,7 @@ class WBTExtractStreamsWorkflow(ToolBase):
     _name = 'wbt-extract-streams-workflow'
 
     # metadata attributes
-    group = DataType.RASTER
+    group = 'raster'
     operates_on_datatype = [DataType.RASTER]
     operates_on_geotype = None
     operates_on_parameters = None
@@ -124,14 +124,14 @@ class WBTExtractStreamsWorkflow(ToolBase):
             output=file_path,
         )
 
-        return {UriType.DATASET: new_dset}
+        return {'datasets': new_dset}
 
 
 class WBTWatershedDelineationWorkflow(ToolBase):
     _name = 'wbt-watershed-delineation-workflow'
 
     # metadata attributes
-    group = DataType.RASTER
+    group = 'raster'
     operates_on_datatype = [DataType.RASTER]
     operates_on_geotype = None
     operates_on_parameters = None

@@ -16,7 +16,7 @@ class RasterGdal(IoBase):
     def register(self):
         "Register plugin by setting description and io type."
         self.description = 'IO for raster datasets using xarray or rasterio/gdal.'
-        self.iotype = DataType.RASTER
+        self.iotype = 'raster'
 
     def open(self, path, fmt, with_nodata=False, isel_band=None):
         "Open raster and return in requested format"

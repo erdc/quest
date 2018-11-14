@@ -72,7 +72,7 @@ class ToolBase(param.ParameterizedFunction):
 
         self._set_options = options or dict(self.get_param_values())
         result = self._run_tool()
-        datasets = listify(result.get(UriType.DATASET, []))
+        datasets = listify(result.get('datasets', []))
         catalog_entries = listify(result.get('catalog_entries', []))
         for dataset in datasets:
             update_metadata(dataset, quest_metadata={

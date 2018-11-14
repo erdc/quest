@@ -61,4 +61,4 @@ class TsFlowDuration(ToolBase):
         output = load_plugins('io', 'xy-hdf5')['xy-hdf5']
         output.write(file_path, new_df, new_metadata)
 
-        return {UriType.DATASET: new_dset, 'catalog_entries': catalog_entry}
+        return {'datasets': new_dset, 'catalog_entries': catalog_entry}

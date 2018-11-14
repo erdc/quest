@@ -105,10 +105,10 @@ def run_tool(name, options=None, as_dataframe=None, expand=None, as_open_dataset
             new_datasets = list(new_datasets.to_dict(orient='index').values())
             new_catalog_entries = to_geojson(new_catalog_entries)['catalog_entries']
 
-    result.update({UriType.DATASET: new_datasets, 'catalog_entries': new_catalog_entries})
+    result.update({'datasets': new_datasets, 'catalog_entries': new_catalog_entries})
 
     if as_open_datasets:
-        result[UriType.DATASET] = [open_dataset(dataset) for dataset in result[UriType.DATASET]]
+        result['datasets'] = [open_dataset(dataset) for dataset in result['datasets']]
 
     return result
 

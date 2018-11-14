@@ -86,7 +86,7 @@ class NwisServiceBase(TimePeriodServiceBase):
 
     def search_catalog(self, **kwargs):
         func = partial(_nwis_catalog_entries, service=self.service_name)
-        with concurrent.futures.ProcessPoolExecutor(max_workers=None) as executor:
+        with concurrent.futures.ProcessPoolExecutor() as executor:
             sites = executor.map(func, _states())
 
         sites = {k: v for d in sites for k, v in d.items()}

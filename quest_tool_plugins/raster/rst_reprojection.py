@@ -56,4 +56,4 @@ class RstReprojection(ToolBase):
             geometry = util.bbox2poly(f.bounds.left, f.bounds.bottom, f.bounds.right, f.bounds.top, as_shapely=True)
         update_metadata(catalog_entry, quest_metadata={'geometry': geometry.to_wkt()})
 
-        return {UriType.DATASET: new_dset, 'catalog_entries': catalog_entry}
+        return {'datasets': new_dset, 'catalog_entries': catalog_entry}

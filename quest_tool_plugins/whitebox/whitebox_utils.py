@@ -117,7 +117,7 @@ def get_output_path(row):
 def classify_output(doc):
     """Determine the type of output for an argument based on the docstring.
     """
-    if doc.find(DataType.RASTER) > 0 or doc.find('colour') > 0:
+    if doc.find('raster') > 0 or doc.find('colour') > 0:
         return 'tif'
     if doc.find('HTML') > 0:
         return 'html'

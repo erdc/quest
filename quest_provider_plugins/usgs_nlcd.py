@@ -100,4 +100,4 @@ def _bbox2poly(bbox):
 
 
 def _parse_links(links):
-    return [link['uri'] for link in links if link['type'] == DatasetSource.WEB_SERVICE][0]
+    return [link['uri'] for link in links if link['type'] == 'download'][0]

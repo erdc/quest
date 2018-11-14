@@ -44,9 +44,9 @@ def get_user_service_base():
                 self.service_folder = self.service_folder[0]
             self.catalog_file = service_data['features']['file']
             self.catalog_file_format = service_data['features']['format']
-            self.datasets_mapping = service_data[UriType.DATASET]['mapping']
-            self.datasets_save_folder = service_data[UriType.DATASET]['save_folder']
-            self.datasets_metadata = service_data[UriType.DATASET].get('metadata', None)
+            self.datasets_mapping = service_data['datasets']['mapping']
+            self.datasets_save_folder = service_data['datasets']['save_folder']
+            self.datasets_metadata = service_data['datasets'].get('metadata', None)
 
             return self
 
@@ -216,7 +216,7 @@ class UserProvider(ProviderBase):
                                                                  provider=self,
                                                                  uri=self.uri,
                                                                  is_remote=self.is_remote)
-                          for name, data in provider_data[UriType.SERVICE].items()}
+                          for name, data in provider_data['services'].items()}
 
     def _get_path(self, filename):
         uri = self.uri

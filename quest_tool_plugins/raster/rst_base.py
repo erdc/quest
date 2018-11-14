@@ -8,7 +8,7 @@ from quest.static import DataType, UriType
 
 class RstBase(ToolBase):
     # metadata attributes
-    group = DataType.RASTER
+    group = 'raster'
     operates_on_datatype = [DataType.RASTER]
     operates_on_geotype = None
     operates_on_parameters = None
@@ -53,7 +53,7 @@ class RstBase(ToolBase):
         with rasterio.open(file_path, "w", **out_meta) as dest:
             dest.write(out_image)
 
-        return {UriType.DATASET: new_dset, 'catalog_entries': catalog_entry}
+        return {'datasets': new_dset, 'catalog_entries': catalog_entry}
 
     def _run(self, df, orig_metadata):
         raise NotImplementedError

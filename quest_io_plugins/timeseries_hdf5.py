@@ -11,7 +11,7 @@ class TsHdf5(XYHdf5):
     def register(self):
         "Register plugin by setting description and io type."
         self.description = 'HDF5 IO for Timeseries datasets'
-        self.iotype = DataType.TIMESERIES
+        self.iotype = 'timeseries'
 
     def open(self, path, fmt=None):
         dataframe = self.read(path)
