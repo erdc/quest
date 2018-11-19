@@ -1,13 +1,13 @@
-"""QUEST wrapper for NCDC GHCN and GSOD Services."""
 import os
 
-import pandas as pd
 import param
-from urllib.parse import quote, urlencode
+import pandas as pd
 from urllib.error import HTTPError
+from urllib.parse import quote, urlencode
 
-from quest.plugins import ProviderBase, TimePeriodServiceBase, load_plugins
 from quest.util.log import logger
+from quest.static import ServiceType, GeomType, DataType
+from quest.plugins import ProviderBase, TimePeriodServiceBase, load_plugins
 
 
 class NoaaServiceBase(TimePeriodServiceBase):
@@ -90,7 +90,7 @@ class NoaaServiceBase(TimePeriodServiceBase):
             metadata = {
                 'file_path': file_path,
                 'file_format': 'timeseries-hdf5',
-                'datatype': 'timeseries',
+                'datatype': DataType.TIMESERIES,
                 'parameter': p.parameter,
                 'unit': units[self.parameter_code],
                 'service_id': 'svc://noaa:{}/{}'.format(self.service_name, catalog_id)
@@ -137,10 +137,10 @@ class NoaaServiceNDBC(NoaaServiceBase):
     service_name = 'ndbc'
     display_name = 'NOAA National Data Buoy Center'
     description = 'NDBC Standard Meteorological Buoy Data'
-    service_type = 'geo-discrete'
+    service_type = ServiceType.GEO_DISCRETE
     unmapped_parameters_available = True
-    geom_type = 'Point'
-    datatype = 'timeseries'
+    geom_type = GeomType.POINT
+    datatype = DataType.TIMESERIES
     geographical_areas = ['Worldwide']
     bounding_boxes = [
         [-177.75, -27.705, 179.001, 71.758],
@@ -195,10 +195,10 @@ class NoaaServiceCoopsMet(NoaaServiceBase):
     service_name = 'coops-meteorological'
     display_name = 'NOAA COOPS Met'
     description = 'Center for Operational Oceanographic Products and Services'
-    service_type = 'geo-discrete'
+    service_type = ServiceType.GEO_DISCRETE
     unmapped_parameters_available = True
-    geom_type = 'Point'
-    datatype = 'timeseries'
+    geom_type = GeomType.POINT
+    datatype = DataType.TIMESERIES
     geographical_areas = ['Worldwide']
     bounding_boxes = [
         [-180, -90, 180, 90],
@@ -277,10 +277,10 @@ class NoaaServiceCoopsWater(NoaaServiceBase):
     service_name = 'coops-water'
     display_name = 'NOAA COOPS Water'
     description = 'Center for Operational Oceanographic Products and Services'
-    service_type = 'geo-discrete'
+    service_type = ServiceType.GEO_DISCRETE
     unmapped_parameters_available = True
-    geom_type = 'Point'
-    datatype = 'timeseries'
+    geom_type = GeomType.POINT
+    datatype = DataType.TIMESERIES
     geographical_areas = ['Worldwide']
     bounding_boxes = [
         [-180, -90, 180, 90],

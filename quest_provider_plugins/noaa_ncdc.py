@@ -1,10 +1,12 @@
-from quest.plugins import ProviderBase, TimePeriodServiceBase, load_plugins
-from ulmo.ncdc import ghcn_daily, gsod
-import pandas as pd
-import param
 import os
 
-# from ulmo.ncdc.ghcn_daily.core import _get_inventory as _get_ghcn_inventory
+import param
+import pandas as pd
+from ulmo.ncdc import ghcn_daily, gsod
+
+from quest.static import ServiceType, GeomType, DataType
+from quest.plugins import ProviderBase, TimePeriodServiceBase, load_plugins
+
 
 BASE_PATH = 'ncdc'
 
@@ -92,7 +94,7 @@ class NcdcServiceBase(TimePeriodServiceBase):
         metadata = {
             'file_path': file_path,
             'file_format': 'timeseries-hdf5',
-            'datatype': 'timeseries',
+            'datatype': DataType.TIMESERIES,
             'parameter': self.parameter,
             'unit': self._unit_map[self.parameter],
             'service_id': 'svc://ncdc:{}/{}'.format(self.service_name, catalog_id)
@@ -110,10 +112,10 @@ class NcdcServiceGhcnDaily(NcdcServiceBase):
     service_name = 'ghcn-daily'
     display_name = 'NCDC GHCN Daily'
     description = 'Daily Meteorologic Data from the Global Historic Climate Network'
-    service_type = 'geo-discrete'
+    service_type = ServiceType.GEO_DISCRETE
     unmapped_parameters_available = True
-    geom_type = 'Point'
-    datatype = 'timeseries'
+    geom_type = GeomType.POINT
+    datatype = DataType.TIMESERIES
     geographical_areas = ['Worldwide']
     bounding_boxes = [
         [-180, -90, 180, 90],
@@ -162,10 +164,10 @@ class NcdcServiceGsod(NcdcServiceBase):
     service_name = 'gsod'
     display_name = 'NCDC GSOD'
     description = 'Daily Meteorologic Data from the Global Summary of the Day'
-    service_type = 'geo-discrete'
+    service_type = ServiceType.GEO_DISCRETE
     unmapped_parameters_available = True
-    geom_type = 'Point'
-    datatype = 'timeseries'
+    geom_type = GeomType.POINT
+    datatype = DataType.TIMESERIES
     geographical_areas = ['Worldwide']
     bounding_boxes = [
         [-180, -90, 180, 90]

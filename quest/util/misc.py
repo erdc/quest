@@ -26,8 +26,9 @@ def _abs_path(path, mkdir=True):
         path (string): A string that is a filename.
         mkdir (bool): A boolean if the user wants to create the directory.
     Returns:
-        A string of an absolute path with a file from somwhere with in the Quest directory.
+        A string of an absolute path with a file from somewhere with in the Quest directory.
     """
+
     if not os.path.isabs(path):
         path = os.path.join(get_quest_dir(), path)
 
@@ -207,6 +208,7 @@ def get_cache_dir(service=None):
     """
     settings = get_settings()
     path = _abs_path(settings['CACHE_DIR'])
+
     if service is not None:
         path = os.path.join(path, service)
 

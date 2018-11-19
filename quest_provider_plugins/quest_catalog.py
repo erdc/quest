@@ -1,7 +1,8 @@
-from quest.plugins import ProviderBase, SingleFileServiceBase
-from quest.database.database import select_catalog_entries
-from quest.static import ServiceType
 import pandas as pd
+
+from quest.static import ServiceType, GeomType
+from quest.database.database import select_catalog_entries
+from quest.plugins import ProviderBase, SingleFileServiceBase
 
 
 class QuestCatalogService(SingleFileServiceBase):
@@ -10,7 +11,7 @@ class QuestCatalogService(SingleFileServiceBase):
     description = 'Quest Catalog uses a database for derived datasets from Quest.'
     service_type = ServiceType.GEO_DISCRETE
     unmapped_parameters_available = True
-    geom_type = ['Point', 'Line', 'Polygon']
+    geom_type = [GeomType.POINT, GeomType.LINE, GeomType.POLYGON]
     datatype = None
     geographical_areas = ['Worldwide']
     bounding_boxes = [

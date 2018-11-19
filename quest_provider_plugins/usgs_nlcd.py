@@ -1,13 +1,13 @@
-"""providers based on www.sciencebase.gov."""
-
-import pandas as pd
 import requests
-from quest.plugins import ProviderBase, SingleFileServiceBase
+import pandas as pd
+
 from quest import util
+from quest.static import ServiceType, DatasetSource
+from quest.plugins import ProviderBase, SingleFileServiceBase
 
 
 class UsgsNlcdServiceBase(SingleFileServiceBase):
-    service_type = 'geo-discrete'
+    service_type = ServiceType.GEO_DISCRETE
     unmapped_parameters_available = False
     geom_type = 'polygon'
     datatype = 'discrete-raster'
@@ -85,17 +85,7 @@ class UsgsNlcdProvider(ProviderBase):
     service_list = [UsgsNlcdService2001, UsgsNlcdService2006, UsgsNlcdService2011]
     display_name = 'National Land Cover Database'
     description = 'The National Land Cover Database products are created through a cooperative project conducted by ' \
-                  'the Multi-Resolution Land Characteristics (MRLC) Consortium. The MRLC Consortium is a partnership ' \
-                  'of federal agencies (www.mrlc.gov), consisting of ' \
-                  'the U.S. Geological Survey (USGS), ' \
-                  'the National Oceanic and Atmospheric Administration (NOAA), ' \
-                  'the U.S. Environmental Protection Agency (EPA), ' \
-                  'the U.S. Department of Agriculture -Forest Service (USDA-FS), ' \
-                  'the National Park Service (NPS), ' \
-                  'the U.S. Fish and Wildlife Service (FWS), ' \
-                  'the Bureau of Land Management (BLM), and ' \
-                  'the USDA Natural Resources Conservation Service (NRCS).'
-    organization_name = 'United States Geological Survey'
+                  'the Multi-Resolution Land Characteristics (MRLC) Consortium.'
     organization_abbr = 'USGS'
     name = 'usgs-nlcd'
 

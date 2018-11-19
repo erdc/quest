@@ -8,7 +8,9 @@ def test_get_quest_dir(reset_projects_dir):
 
 
 def test_get_cache_data_dir(reset_projects_dir):
-    assert quest.util.get_cache_dir() == os.path.join(reset_projects_dir['BASE_DIR'], os.path.join('.cache', 'test_cache'))
+    actual = quest.util.get_cache_dir()
+    expected = os.path.join(reset_projects_dir['BASE_DIR'], os.path.join('.cache', 'test_cache'))
+    assert actual == expected
 
     folder_obj = tempfile.TemporaryDirectory()
     folder = folder_obj.name
@@ -67,13 +69,13 @@ def test_bbox2poly():
                                                   [-160.0, 20.0],
                                                   [-160.0, -20.0],
                                                   [-180, -20.0]],
-                                  "type": "Polygon"},
+                                  "type": quest.static.GeomType.POLYGON},
                                  {"coordinates": [[160.0, -20.0],
                                                   [160.0, 20.0],
                                                   [180, 20.0],
                                                   [180, -20.0],
                                                   [160.0, -20.0]],
-                                  "type": "Polygon"}],
+                                  "type": quest.static.GeomType.POLYGON}],
                     "type": "MultiPolygon"}
 
     poly = quest.util.bbox2poly(*bbox, as_shapely=True)
@@ -91,7 +93,7 @@ def test_bbox2poly():
                                     [10.0, 10.0],
                                     [10.0, -10.0],
                                     [-10.0, -10.0]],
-                    'type': 'Polygon'}
+                    'type': quest.static.GeomType.POLYGON}
 
     bbox = 160, -20, 200, 20
 
@@ -103,13 +105,13 @@ def test_bbox2poly():
                                                   [180, 20.0],
                                                   [180, -20.0],
                                                   [160.0, -20.0]],
-                                  'type': 'Polygon'},
+                                  'type': quest.static.GeomType.POLYGON},
                                  {'coordinates': [[-180, -20.0],
                                                   [-180, 20.0],
                                                   [-160.0, 20.0],
                                                   [-160.0, -20.0],
                                                   [-180, -20.0]],
-                                  'type': 'Polygon'}],
+                                  'type': quest.static.GeomType.POLYGON}],
                     'type': 'MultiPolygon'}
 
     poly = quest.util.bbox2poly(*bbox)

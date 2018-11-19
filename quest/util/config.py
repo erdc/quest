@@ -1,11 +1,9 @@
-"""Module wide settings.
-
-"""
-import logging
-import yaml
 import os
+import yaml
+import logging
 
 from ..database import get_db
+
 
 log = logging.getLogger(__name__)
 

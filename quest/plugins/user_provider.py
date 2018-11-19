@@ -1,15 +1,18 @@
-from geojson import Feature, FeatureCollection, Polygon
-from quest.plugins.base import ProviderBase, ServiceBase
-from io import StringIO
-from quest import util
-import pandas as pd
+import os
+import shutil
+
+import yaml
+import param
+import geojson
 import requests
 import warnings
-import geojson
-import shutil
-import param
-import yaml
-import os
+import pandas as pd
+from io import StringIO
+from geojson import Feature, FeatureCollection
+
+from ..static import UriType
+from ..plugins.base import ProviderBase, ServiceBase
+from ..util import listify, to_geodataframe, bbox2poly, is_remote_uri
 
 
 def get_user_service_base():
@@ -19,7 +22,7 @@ def get_user_service_base():
 
         @classmethod
         def instance(cls, service_name, service_data, provider, uri, is_remote):
-            parameters = util.listify(service_data['metadata'].pop('parameters'))
+            parameters = listify(service_data['metadata'].pop('parameters'))
 
             if len(parameters) > 1:
                 cls.params()['parameter'].objects = sorted(parameters)
@@ -34,7 +37,7 @@ def get_user_service_base():
             self._parameter_map = {p: p for p in parameters}
             for k, v in service_data['metadata'].items():
                 setattr(self, k, v)
-            self.service_folder = util.listify(service_data['service_folder'])
+            self.service_folder = listify(service_data['service_folder'])
             if len(self.service_folder) > 1:
                 raise ValueError()  # Now only supporting one service folder
             else:
@@ -52,9 +55,10 @@ def get_user_service_base():
                 fnames = self.datasets_mapping
                 if isinstance(self.datasets_mapping, dict):
                     fnames = self.dataset_mapping[self.parameter]
-                fnames = [f.replace('<feature>', catalog_id) for f in util.listify(fnames)]
+                fnames = [f.replace('<feature>', catalog_id) for f in listify(fnames)]
             else:
-                fnames = self.catalog_entries.loc[catalog_id]['_download_url']  # TODO where does self.catalog_entries get initialized?
+                fnames = self.catalog_entries.loc[catalog_id]['_download_url']
+                # TODO where does self.catalog_entries get initialized?
 
             final_path = []
             for src, file_name in zip(self._get_paths(fnames), fnames):
@@ -105,11 +109,11 @@ def get_user_service_base():
 
             all_catalog_entries = []
 
-            for p in util.listify(paths):
+            for p in listify(paths):
                 with uri_open(p, self.is_remote) as f:
                     if fmt.lower() == 'geojson':
                         catalog_entries = geojson.load(f)
-                        catalog_entries = util.to_geodataframe(catalog_entries)
+                        catalog_entries = to_geodataframe(catalog_entries)
 
                     if fmt.lower() == 'mbr':
                         # TODO creating FeatureCollection not needed anymore
@@ -120,9 +124,12 @@ def get_user_service_base():
                         for line in f:
                             catalog_id, x1, y1, x2, y2 = line.split()
                             properties = {}
-                            polys.append(Feature(geometry=util.bbox2poly(x1, y1, x2, y2, as_geojson=True), properties=properties, id=catalog_id))
+                            polys.append(Feature(geometry=bbox2poly(x1, y1, x2, y2,
+                                                 as_geojson=True),
+                                                 properties=properties,
+                                                 id=catalog_id))
                         catalog_entries = FeatureCollection(polys)
-                        catalog_entries = util.to_geodataframe(catalog_entries)
+                        catalog_entries = to_geodataframe(catalog_entries)
 
                     if fmt.lower() == 'mbr-csv':
                         # TODO merge this with the above,
@@ -133,16 +140,20 @@ def get_user_service_base():
                             catalog_id, y1, x1, y2, x2 = line.split(',')
                             catalog_id = catalog_id.split('.')[0]
                             properties = {}
-                            polys.append(Feature(geometry=util.bbox2poly(x1, y1, x2, y2, as_geojson=True), properties=properties, id=catalog_id))
+                            polys.append(Feature(geometry=bbox2poly(x1, y1, x2, y2,
+                                                 as_geojson=True),
+                                                 properties=properties,
+                                                 id=catalog_id))
                         catalog_entries = FeatureCollection(polys)
-                        catalog_entries = util.to_geodataframe(catalog_entries)
+                        catalog_entries = to_geodataframe(catalog_entries)
 
                     if fmt.lower() == 'isep-json':
                         # uses exported json file from ISEP DataBase
                         # assuming ISEP if a geotypical service for now.
                         catalog_entries = pd.read_json(p)
                         catalog_entries.rename(columns={'_id': 'service_id'}, inplace=True)
-                        catalog_entries['download_url'] = catalog_entries['files'].apply(lambda x: os.path.join(x[0].get('file location'), x[0].get('file name')))
+                        catalog_entries['download_url'] = catalog_entries['files'].apply(
+                            lambda x: os.path.join(x[0].get('file location'), x[0].get('file name')))
                         # remove leading slash from file path
                         catalog_entries['download_url'] = catalog_entries['download_url'].str.lstrip('/')
                         catalog_entries['parameters'] = 'met'
@@ -160,7 +171,7 @@ def get_user_service_base():
         def _get_paths(self, filenames):
             folder = self.service_folder
             paths = list()
-            for filename in util.listify(filenames):
+            for filename in listify(filenames):
                 if self.uri.startswith('http'):
                     paths.append(self.uri.rstrip('/') + '/{}/{}'.format(folder, filename))
                 else:
@@ -180,7 +191,7 @@ class UserProvider(ProviderBase):
     def __init__(self, uri, name=None, use_cache=True, update_frequency='M'):
         super(UserProvider, self).__init__(name=name, use_cache=use_cache, update_frequency=update_frequency)
         self.uri = uri
-        self.is_remote = util.is_remote_uri(uri)
+        self.is_remote = is_remote_uri(uri)
         self._register()
 
     @property

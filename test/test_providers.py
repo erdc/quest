@@ -1,7 +1,11 @@
-from data import ALL_SERVICES, SERVICE_DOWNLOAD_OPTIONS
-from conftest import FILES_DIR
-import pytest
 import os
+
+import pytest
+
+from conftest import FILES_DIR
+from quest.static import DatasetStatus
+from data import ALL_SERVICES, SERVICE_DOWNLOAD_OPTIONS
+
 
 
 pytestmark = pytest.mark.usefixtures('reset_projects_dir')
@@ -35,4 +39,4 @@ def test_download(api, catalog_entry, options):
     d = api.add_datasets('test', catalog_entry)[0]
     api.stage_for_download(d, options=options)
     result = api.download_datasets(d, raise_on_error=True)
-    assert result[d] == 'downloaded'
+    assert result[d[0]] == DatasetStatus.DOWNLOADED

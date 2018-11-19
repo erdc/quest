@@ -1,4 +1,3 @@
-"""io utilities."""
 import os
 import yaml
 

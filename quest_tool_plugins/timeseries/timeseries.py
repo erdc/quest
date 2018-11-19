@@ -1,6 +1,3 @@
-"""Timeseries Tools
-
-"""
 import param
 
 from quest.util import setattr_on_dataframe, unit_list, unit_registry

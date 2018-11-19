@@ -1,5 +1,6 @@
-from quest.util.param_util import format_json_options
 import param
+
+from ...util.param_util import format_json_options
 
 
 class PublishBase(param.Parameterized):

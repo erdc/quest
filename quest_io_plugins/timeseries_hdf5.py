@@ -1,7 +1,6 @@
-"""io plugin for timeseries datasets."""
-
 import json
 
+from quest.static import DataType
 from quest_io_plugins.xyHdf5 import XYHdf5
 
 

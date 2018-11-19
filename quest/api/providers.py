@@ -1,12 +1,9 @@
-"""API functions related to Services.
-
-Providers are inferred by aggregating information from service plugins.
-"""
-from ..util import save_settings, get_settings, update_settings, parse_service_uri
-from quest.database.database import get_db, db_session
-from ..plugins import load_providers
-import requests
 import os
+import requests
+
+from ..plugins import load_providers
+from ..database.database import get_db, db_session
+from ..util import save_settings, get_settings, update_settings, parse_service_uri
 
 
 def get_providers(expand=None, update_cache=False):

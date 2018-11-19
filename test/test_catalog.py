@@ -1,5 +1,6 @@
 import pytest
 
+from quest.static import GeomType
 from data import SERVICES_CATALOG_COUNT, CACHED_SERVICES
 
 ACTIVE_PROJECT = 'project1'
@@ -60,12 +61,12 @@ def test_search_catalog_with_query(api):
 
 
 def test_new_catalog_entry(api):
-    c = api.new_catalog_entry(geom_type='Point', geom_coords=[-94.2, 23.4])
+    c = api.new_catalog_entry(geom_type=GeomType.POINT, geom_coords=[-94.2, 23.4])
     assert c in api.get_metadata(c)
 
 
 def test_delete_catalog_entry(api):
-    c = api.new_catalog_entry(geom_type='Point', geom_coords=[-94.2, 23.4])
+    c = api.new_catalog_entry(geom_type=GeomType.POINT, geom_coords=[-94.2, 23.4])
     d = api.new_dataset(collection='col1', catalog_entry=c, source='derived')
     api.delete(d)
     assert d not in api.get_datasets()
@@ -74,7 +75,7 @@ def test_delete_catalog_entry(api):
 
 
 def test_delete_derived_dataset(api):
-    c = api.new_catalog_entry(geom_type='Point', geom_coords=[-94.2, 23.4])
+    c = api.new_catalog_entry(geom_type=GeomType.POINT, geom_coords=[-94.2, 23.4])
     d = api.add_datasets(collection='col1', catalog_entries=[c, c])
     api.delete(d[0])
     assert d[0] not in api.get_datasets()

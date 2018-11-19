@@ -1,13 +1,12 @@
-"""io plugin for timeseries datasets."""
-
-from quest.plugins import IoBase
-from quest.util import convert_nodata_to_nans
 import os
 import subprocess
+
 import rasterio
 import xarray as xr
-import numpy as np
 
+from quest.plugins import IoBase
+from quest.static import DataType
+from quest.util import convert_nodata_to_nans
 
 
 class RasterGdal(IoBase):

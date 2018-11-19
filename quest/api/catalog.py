@@ -1,18 +1,18 @@
 import json
 import itertools
+
 import pandas as pd
 import numpy as np
 import geojson
 from shapely.geometry import shape
 
-from .. import util
-from .. import plugins
-from quest.database.database import get_db, db_session
-from .datasets import new_dataset
-from .metadata import get_metadata
-from ..util import construct_service_uri
 from .tasks import add_async
+from .metadata import get_metadata
+from .datasets import new_dataset
+from .. import util
+from ..plugins import load_providers
 from ..static import DatasetSource, UriType
+from ..database.database import get_db, db_session
 
 
 @add_async
@@ -83,14 +83,14 @@ def search_catalog(uris=None, expand=False, as_dataframe=False, as_geojson=False
 
     grouped_uris = util.classify_uris(uris, as_dataframe=False, exclude=[UriType.DATASET, UriType.COLLECTION])
 
-    services = grouped_uris.get('services') or []
+    services = grouped_uris.get(UriType.SERVICE) or []
 
     all_datasets = []
 
     filters = filters or dict()
     for name in services:
         provider, service, _ = util.parse_service_uri(name)
-        provider_plugin = plugins.load_providers()[provider]
+        provider_plugin = load_providers()[provider]
         tmp_datasets = provider_plugin.search_catalog(service, update_cache=update_cache, **filters)
         all_datasets.append(tmp_datasets)
 
@@ -202,7 +202,7 @@ def get_tags(service_uris, update_cache=False, filter=None, as_count=False):
 
     for service in services:
         provider, service, _ = util.parse_service_uri(service)
-        provider_plugin = plugins.load_providers()[provider]
+        provider_plugin = load_providers()[provider]
         service_tags = provider_plugin.get_tags(service, update_cache=update_cache)
         tags.update(service_tags)
 
@@ -261,4 +261,4 @@ def new_catalog_entry(geometry=None, geom_type=None, geom_coords=None, metadata=
     with db_session:
         db.QuestCatalog(**data)
 
-    return construct_service_uri('quest', 'quest', catalog_id)
+    return util.construct_service_uri('quest', 'quest', catalog_id)

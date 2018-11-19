@@ -1,10 +1,10 @@
-import abc
 import os
+import abc
 
 import param
 
-from ...static import DatasetStatus, DatasetSource
 from ...util import listify, format_json_options, uuid
+from ...static import DatasetStatus, DatasetSource, UriType
 
 
 class ToolBase(param.ParameterizedFunction):

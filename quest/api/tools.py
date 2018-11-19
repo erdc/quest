@@ -1,14 +1,11 @@
-"""API functions related to data Tools.
-
-This will eventually hold filter related functionality
-"""
 import param
 
-from .. import util
-from ..plugins.plugins import load_plugins
 from .datasets import open_dataset
 from .metadata import get_metadata
 from .tasks import add_async
+from ..util import to_geojson
+from ..static import UriType, PluginType
+from ..plugins.plugins import load_plugins
 
 
 def get_tools(filters=None, expand=False, **kwargs):
@@ -36,7 +33,7 @@ def get_tools(filters=None, expand=False, **kwargs):
             all available tools
 
     """
-    avail = [dict(name=k, **v.metadata) for k, v in load_plugins('tool').items()]
+    avail = [dict(name=k, **v.metadata) for k, v in load_plugins(PluginType.TOOL).items()]
 
     if filters is not None:
         for k, v in filters.items():
@@ -94,7 +91,7 @@ def run_tool(name, options=None, as_dataframe=None, expand=None, as_open_dataset
     options = options or dict()
     options.update(kwargs)
 
-    plugin = load_plugins('tool', name)[name]
+    plugin = load_plugins(PluginType.TOOL, name)[name]
     result = plugin.run_tool(**options)
 
     new_datasets = result.get('datasets', [])
@@ -106,7 +103,7 @@ def run_tool(name, options=None, as_dataframe=None, expand=None, as_open_dataset
 
         if expand:
             new_datasets = list(new_datasets.to_dict(orient='index').values())
-            new_catalog_entries = util.to_geojson(new_catalog_entries)['catalog_entries']
+            new_catalog_entries = to_geojson(new_catalog_entries)['catalog_entries']
 
     result.update({'datasets': new_datasets, 'catalog_entries': new_catalog_entries})
 
@@ -130,5 +127,5 @@ def get_tool_options(name, fmt='json', **kwargs):
         tool options (json scheme):
             tool options that can be applied when calling quest.api.run_filter
     """
-    plugin = load_plugins('tool', name)[name]
+    plugin = load_plugins(PluginType.TOOL, name)[name]
     return plugin.get_tool_options(fmt, **kwargs)

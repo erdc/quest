@@ -5,8 +5,8 @@ from .datasets import stage_for_download, download_datasets, open_dataset
 from .catalog import search_catalog, add_datasets
 from .tools import run_tool
 from ..database import get_db, db_session
-from ..static import DatasetStatus
 from ..util import logger as log
+from ..static import DatasetStatus, UriType
 
 
 def get_data(

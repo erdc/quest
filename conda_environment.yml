@@ -41,6 +41,7 @@ dependencies:
     - werkzeug
 
     # test dependencies
+    - pytest=3.7.4
     - pytest-runner
     - pytest-cov
     - coveralls

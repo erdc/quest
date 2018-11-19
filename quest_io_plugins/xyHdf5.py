@@ -1,12 +1,12 @@
-import json
 import os
+import json
 
 import pandas as pd
 import matplotlib.pyplot as plt
 
 from quest.plugins import IoBase
-from quest.util import setattr_on_dataframe
 from quest.util.log import logger
+from quest.util import setattr_on_dataframe
 
 
 class XYHdf5(IoBase):

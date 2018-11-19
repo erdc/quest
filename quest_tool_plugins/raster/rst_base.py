@@ -1,26 +1,24 @@
-"""Functions required run raster filters"""
-
 import rasterio
 
-from quest.plugins import ToolBase
 from quest import util
+from quest.plugins import ToolBase
 from quest.api import get_metadata
-
+from quest.static import DataType, UriType
 
 
 class RstBase(ToolBase):
     # metadata attributes
     group = 'raster'
-    operates_on_datatype = ['raster']
+    operates_on_datatype = [DataType.RASTER]
     operates_on_geotype = None
     operates_on_parameters = None
-    produces_datatype = ['raster']
+    produces_datatype = [DataType.RASTER]
     produces_geotype = None
     produces_parameters = None
 
     dataset = util.param.DatasetSelector(default=None,
                                          doc="""Dataset to apply filter to.""",
-                                         filters={'datatype': 'raster'},
+                                         filters={'datatype': DataType.RASTER},
                                          )
 
     def _run_tool(self):

@@ -1,19 +1,21 @@
-import logging
 import os
-import inspect
 import re
 import time
+import logging
+import inspect
 from functools import wraps
 
-import whitebox_tools
 import rasterio
-import xarray as xr
 import numpy as np
+import xarray as xr
 import pandas as pd
+import whitebox_tools
 import geopandas as gpd
 from shapely.geometry import Point, shape
 
+from quest.static import DataType
 from quest.util import listify, convert_nodata_to_nans
+
 
 whitebox_log = logging.getLogger('whitebox')
 whitebox_log.addHandler(logging.NullHandler())

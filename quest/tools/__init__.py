@@ -1,9 +1,10 @@
 import sys
 
+from ..static import PluginType
 from ..plugins import load_plugins
 
 
-tools = load_plugins('tool')
+tools = load_plugins(PluginType.TOOL)
 
 
 def codify(name):

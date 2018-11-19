@@ -1,17 +1,21 @@
-from quest.plugins import ProviderBase, SingleFileServiceBase
-from quest import util
-from ulmo.usgs import ned
 import os
+
+from ulmo.usgs import ned
+
+from quest import util
+from quest.static import ServiceType, DataType, GeomType
+from quest.plugins import ProviderBase, SingleFileServiceBase
+
 
 DEFAULT_FILE_PATH = os.path.join('usgs','ned')
 CACHE_FILE = 'ned_%s_metadata.json'
 
 
 class UsgsNedServiceBase(SingleFileServiceBase):
-    service_type = 'geo-discrete'
+    service_type = ServiceType.GEO_DISCRETE
     unmapped_parameters_available = False
-    geom_type = 'polygon'
-    datatype = 'raster'
+    geom_type = GeomType.POLYGON
+    datatype = DataType.RASTER
     geographical_areas = ['Alaska', 'USA', 'Hawaii']
     bounding_boxes = [[-180, -90, 180, 90]]
     _parameter_map = {

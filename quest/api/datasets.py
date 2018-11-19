@@ -1,14 +1,16 @@
-from quest.database.database import get_db, db_session, select_datasets
-from ..plugins import load_providers, load_plugins, list_plugins
-from ..util import logger, parse_service_uri, listify, uuid, is_uuid, classify_uris
+import os
+
+import param
+import pandas as pd
+
+from .tasks import add_async
+from .projects import _get_project_dir
 from .collections import get_collections
 from .metadata import get_metadata, update_metadata
-from .projects import _get_project_dir
-from quest.static import DatasetStatus, DatasetSource
-from .tasks import add_async
-import pandas as pd
-import param
-import os
+from .. import util
+from .. import static
+from ..plugins import load_providers, load_plugins, list_plugins
+from ..database.database import get_db, db_session, select_datasets
 
 
 @add_async
@@ -37,7 +39,7 @@ def download(catalog_entry, file_path, dataset=None, **kwargs):
     if file_path is None:
         pass
 
-    provider, service, catalog_id = parse_service_uri(service_uri)
+    provider, service, catalog_id = util.parse_service_uri(service_uri)
     provider_plugin = load_providers()[provider]
     data = provider_plugin.download(service=service, catalog_id=catalog_id,
                                     file_path=file_path, dataset=dataset, **kwargs)
@@ -50,7 +52,7 @@ def publish(publisher_uri, options=None, **kwargs):
         options = dict(options.get_param_values())
     options = options or dict()
     options.update(kwargs)
-    provider, publisher, _ = parse_service_uri(publisher_uri)
+    provider, publisher, _ = util.parse_service_uri(publisher_uri)
     provider_plugin = load_providers()[provider]
     data = provider_plugin.publish(publisher=publisher, **options)
     return data
@@ -77,7 +79,7 @@ def download_datasets(datasets, raise_on_error=False):
         return
 
     # filter out non download datasets
-    datasets = datasets[datasets['source'] == DatasetSource.WEB_SERVICE]
+    datasets = datasets[datasets['source'] == static.DatasetSource.WEB_SERVICE]
 
     db = get_db()
     project_path = _get_project_dir()
@@ -86,7 +88,7 @@ def download_datasets(datasets, raise_on_error=False):
         collection_path = os.path.join(project_path, dataset['collection'])
         catalog_entry = dataset["catalog_entry"]
         try:
-            update_metadata(idx, quest_metadata={'status': DatasetStatus.PENDING})
+            update_metadata(idx, quest_metadata={'status': static.DatasetStatus.PENDING})
             kwargs = dataset['options'] or dict()
             all_metadata = download(catalog_entry,
                                     file_path=collection_path,
@@ -95,7 +97,7 @@ def download_datasets(datasets, raise_on_error=False):
             metadata = all_metadata.pop('metadata', None)
             quest_metadata = all_metadata
             quest_metadata.update({
-                'status': DatasetStatus.DOWNLOADED,
+                'status': static.DatasetStatus.DOWNLOADED,
                 'message': 'success',
                 })
         except Exception as e:
@@ -103,7 +105,7 @@ def download_datasets(datasets, raise_on_error=False):
                 raise
 
             quest_metadata = {
-                'status': DatasetStatus.FAILED_DOWNLOAD,
+                'status': static.DatasetStatus.FAILED_DOWNLOAD,
                 'message': str(e),
                 }
 
@@ -135,18 +137,18 @@ def get_download_options(uris, fmt='json'):
             download options that can be specified when calling
             quest.api.stage_for_download or quest.api.download
     """
-    uris = listify(uris)
-    grouped_uris = classify_uris(uris, as_dataframe=False, exclude=['collections'])
+    uris = util.listify(uris)
+    grouped_uris = util.classify_uris(uris, as_dataframe=False, exclude=['collections'])
 
-    services = grouped_uris.get('services') or []
-    datasets = grouped_uris.get('datasets') or []
+    services = grouped_uris.get(static.UriType.SERVICE) or []
+    datasets = grouped_uris.get(static.UriType.DATASET) or []
 
     service_uris = {s: s for s in services}
     service_uris.update({dataset: get_metadata(dataset)[dataset]['catalog_entry'] for dataset in datasets})
 
     options = {}
     for uri, service_uri in service_uris.items():
-        provider, service, _ = parse_service_uri(service_uri)
+        provider, service, _ = util.parse_service_uri(service_uri)
         provider_plugin = load_providers()[provider]
         options[uri] = provider_plugin.get_download_options(service, fmt)
 
@@ -154,11 +156,11 @@ def get_download_options(uris, fmt='json'):
 
 
 def get_publish_options(publish_uri, fmt='json'):
-    uris = listify(publish_uri)
+    uris = util.listify(publish_uri)
     options = {}
     for uri in uris:
         publish_uri = uri
-        provider, publisher, _ = parse_service_uri(publish_uri)
+        provider, publisher, _ = util.parse_service_uri(publish_uri)
         provider_plugin = load_providers()[provider]
         options[uri] = provider_plugin.publish_options(publisher, fmt)
 
@@ -198,7 +200,7 @@ def get_datasets(expand=None, filters=None, queries=None, as_dataframe=None):
     if filters is not None:
         for k, v in filters.items():
             if k not in datasets.keys():
-                logger.warning('filter field {} not found, continuing'.format(k))
+                util.logger.warning('filter field {} not found, continuing'.format(k))
                 continue
 
             datasets = datasets.loc[datasets[k] == v]
@@ -253,11 +255,11 @@ def new_dataset(catalog_entry, collection, source=None, display_name=None,
     except IndexError:
         raise ValueError('Entry {} dose not exist'.format(catalog_entry))
 
-    name = name or uuid('dataset')
-    assert name.startswith('d') and is_uuid(name)
+    name = name or util.uuid('dataset')
+    assert name.startswith('d') and util.is_uuid(name)
 
     if source is None:
-        source = DatasetSource.USER
+        source = static.DatasetSource.USER
 
     if display_name is None:
         display_name = name
@@ -275,8 +277,8 @@ def new_dataset(catalog_entry, collection, source=None, display_name=None,
         'file_path': file_path,
         'metadata': metadata,
     }
-    if source == DatasetSource.WEB_SERVICE:
-        quest_metadata.update({'status': DatasetStatus.NOT_STAGED})
+    if source == static.DatasetSource.WEB_SERVICE:
+        quest_metadata.update({'status': static.DatasetStatus.NOT_STAGED})
 
     db = get_db()
     with db_session:
@@ -301,7 +303,7 @@ def stage_for_download(uris, options=None):
         uris (list):
             staged dataset uids
     """
-    uris = listify(uris)
+    uris = util.listify(uris)
     display_name = None
     datasets = []
 
@@ -323,13 +325,13 @@ def stage_for_download(uris, options=None):
 
         if dataset_metadata['display_name'] == dataset_uri:
             catalog_entry = dataset_metadata['catalog_entry']
-            provider, service, _ = parse_service_uri(catalog_entry)
+            provider, service, _ = util.parse_service_uri(catalog_entry)
             display_name = '{0}-{1}-{2}'.format(provider, parameter_name, dataset_uri[:7])
 
         quest_metadata = {
             'display_name': display_name or dataset_metadata['display_name'],
             'options': kwargs,
-            'status': DatasetStatus.STAGED,
+            'status': static.DatasetStatus.STAGED,
             'parameter': parameter
         }
 
@@ -376,10 +378,10 @@ def open_dataset(dataset, fmt=None, **kwargs):
     if path is None:
         raise ValueError('No dataset file found')
 
-    if file_format not in list_plugins('io'):
+    if file_format not in list_plugins(static.PluginType.IO):
         raise ValueError('No reader available for: %s' % file_format)
 
-    io = load_plugins('io', file_format)[file_format]
+    io = load_plugins(static.PluginType.IO, file_format)[file_format]
     return io.open(path, fmt=fmt, **kwargs)
 
 
@@ -415,10 +417,10 @@ def visualize_dataset(dataset, update_cache=False, **kwargs):
     if path is None:
             raise ValueError('No dataset file found')
 
-    if file_format not in list_plugins('io'):
+    if file_format not in list_plugins(static.PluginType.IO):
             raise ValueError('No reader available for: %s' % file_format)
 
-    io = load_plugins('io', file_format)[file_format]
+    io = load_plugins(static.PluginType.IO, file_format)[file_format]
 
     title = m.get('display_name')
     if title is None:
@@ -455,9 +457,9 @@ def get_visualization_options(dataset, fmt='json'):
     if path is None:
         raise ValueError('No dataset file found')
 
-    if file_format not in list_plugins('io'):
+    if file_format not in list_plugins(static.PluginType.IO):
         raise ValueError('No reader available for: %s' % file_format)
 
-    io = load_plugins('io', file_format)[file_format]
+    io = load_plugins(static.PluginType.IO, file_format)[file_format]
 
     return io.visualize_options(path, fmt)

@@ -352,6 +352,6 @@ SERVICE_DOWNLOAD_OPTIONS = [
     ('svc://usgs-nlcd:2001/5a1c65a5e4b09fc93dd648f1', None),
     ('svc://usgs-nlcd:2006/5a1c35b6e4b09fc93dd64011', None),
     ('svc://usgs-nlcd:2011/5a1c31abe4b09fc93dd6381c', None),
-    ('svc://usgs-nwis:dv/01010000', {'parameter': 'streamflow:mean:daily', 'start': '2016-01-01', 'end': '2016-01-02'}),
     ('svc://usgs-nwis:iv/01010000', {'parameter': 'gage_height', 'start': '2016-01-01', 'end': '2016-01-02'}),
+    ('svc://usgs-nwis:dv/01010000', {'parameter': 'streamflow:mean:daily', 'start': '2016-01-01', 'end': '2016-01-02'}),
 ]
