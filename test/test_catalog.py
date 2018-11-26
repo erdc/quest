@@ -27,6 +27,16 @@ def test_add_datasets(api, catalog_entry):
     assert b == c
 
 
+def test_search_catalog_with_no_uris(api):
+    catalog_entries = api.search_catalog()
+    assert catalog_entries == []
+
+
+def test_search_catalog_with_collection(api):
+    api.set_active_project('test_data')
+    catalog_entries = api.search_catalog('col1')
+    assert catalog_entries == ['svc://usgs-nwis:iv/01516350']
+
 @pytest.mark.slow
 @pytest.mark.parametrize("service, expected, tolerance", SERVICES_CATALOG_COUNT)
 def test_search_catalog_from_service(api, service, expected, tolerance):
