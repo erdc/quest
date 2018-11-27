@@ -1,5 +1,5 @@
 conda:
-    file: py3_conda_environment.yml
+    file: conda_environment.yml
 python:
     version: 3
     pip_install: true
