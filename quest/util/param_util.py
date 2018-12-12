@@ -8,6 +8,13 @@ class NamedString(str):
         self.name = name
         return self
 
+    def __copy__(self):
+        return type(self)(self, self.name)
+
+    def __deepcopy__(self, memodict={}):
+        return self.__copy__()
+
+
 
 class DatasetSelector(param.ObjectSelector):
     __slots__ = ['filters', 'queries']
