@@ -2,20 +2,6 @@ import param
 import quest
 
 
-class NamedString(str):
-    def __new__(cls, string, name):
-        self = str.__new__(cls, string)
-        self.name = name
-        return self
-
-    def __copy__(self):
-        return type(self)(self, self.name)
-
-    def __deepcopy__(self, memodict={}):
-        return self.__copy__()
-
-
-
 class DatasetSelector(param.ObjectSelector):
     __slots__ = ['filters', 'queries']
 
@@ -31,7 +17,7 @@ class DatasetSelector(param.ObjectSelector):
             queries=self.queries,
             expand=True
         )
-        return [NamedString(k, v['display_name']) for k, v in datasets.items()]
+        return {v['display_name']: k for k, v in datasets.items()}
 
     def get_range(self):
         self.objects = self.datasets
@@ -54,7 +40,7 @@ class CatalogEntrySelector(param.ObjectSelector):
             queries=self.queries,
             expand=True
         )
-        return [NamedString(k, v['display_name']) for k, v in catalog_entries.items()]
+        return {v['display_name']: k for k, v in catalog_entries.items()}
 
     def get_range(self):
         self.objects = self.catalog_entries
@@ -76,7 +62,7 @@ class DatasetListSelector(param.ListSelector):
             queries=self.queries,
             expand=True
         )
-        return [NamedString(k, v['display_name']) for k, v in datasets.items()]
+        return {v['display_name']: k for k, v in datasets.items()}
 
     def get_range(self):
         self.objects = self.datasets
