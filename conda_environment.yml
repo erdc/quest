@@ -29,7 +29,7 @@ dependencies:
     - jinja2
     - matplotlib
     - numpy
-    - param
+    - param>=1.8.1
     - pint
     - pony
     - psutil

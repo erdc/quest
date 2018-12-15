@@ -1,88 +1,73 @@
 import param
 import quest
+from abc import ABCMeta, abstractmethod
 
 
-class NamedString(str):
-    def __new__(cls, string, name):
-        self = str.__new__(cls, string)
-        self.name = name
-        return self
+class AbstractParameterized(param.parameterized.ParameterMetaclass, ABCMeta): pass
 
 
-class DatasetSelector(param.ObjectSelector):
+class QuestSelector(param.ObjectSelector, metaclass=AbstractParameterized):
     __slots__ = ['filters', 'queries']
 
     def __init__(self, filters=None, queries=None, **params):
         self.filters = filters
         self.queries = queries
-        super(DatasetSelector, self).__init__(**params)
+        params['check_on_set'] = False
+        super(QuestSelector, self).__init__(**params)
 
     @property
-    def datasets(self):
+    @abstractmethod
+    def quest_entities(self):
+        pass
+
+    def get_range(self):
+        self.names = self.quest_entities
+        self.objects = list(self.names.values())
+        return super(QuestSelector, self).get_range()
+
+
+class DatasetSelector(QuestSelector):
+    @property
+    def quest_entities(self):
         datasets = quest.api.get_datasets(
             filters=self.filters,
             queries=self.queries,
             expand=True
         )
-        return [NamedString(k, v['display_name']) for k, v in datasets.items()]
-
-    def get_range(self):
-        self.objects = self.datasets
-        return super(DatasetSelector, self).get_range()
+        return {v['display_name']: k for k, v in datasets.items()}
 
 
-class CatalogEntrySelector(param.ObjectSelector):
-    __slots__ = ['filters', 'queries']
-
-    def __init__(self, filters=None, queries=None, **params):
-        self.filters = filters
-        self.queries = queries
-        super(CatalogEntrySelector, self).__init__(**params)
-
+class CatalogEntrySelector(QuestSelector):
     @property
-    def catalog_entries(self):
+    def quest_entities(self):
         catalog_entries = quest.api.search_catalog(
             quest.api.get_collections(),
             filters=self.filters,
             queries=self.queries,
             expand=True
         )
-        return [NamedString(k, v['display_name']) for k, v in catalog_entries.items()]
-
-    def get_range(self):
-        self.objects = self.catalog_entries
-        return super(CatalogEntrySelector, self).get_range()
+        return {v['display_name']: k for k, v in catalog_entries.items()}
 
 
-class DatasetListSelector(param.ListSelector):
-    __slots__ = ['filters', 'queries']
-
-    def __init__(self, filters=None, queries=None, **params):
-        self.filters = filters
-        self.queries = queries
-        super(DatasetListSelector, self).__init__(**params)
-
+class DatasetListSelector(QuestSelector, param.ListSelector):
     @property
-    def datasets(self):
+    def quest_entities(self):
         datasets = quest.api.get_datasets(
             filters=self.filters,
             queries=self.queries,
             expand=True
         )
-        return [NamedString(k, v['display_name']) for k, v in datasets.items()]
-
-    def get_range(self):
-        self.objects = self.datasets
-        return super(DatasetListSelector, self).get_range()
+        return {v['display_name']: k for k, v in datasets.items()}
 
 
 class ServiceSelector(param.Parameterized):
     service = param.ObjectSelector(default=None, objects=[])
 
     def __init__(self, parameter=None, service_type=None, default=None):
-        services = quest.api.get_services(parameter=parameter, service_type=service_type)
+        services = quest.api.get_services(parameter=parameter, service_type=service_type, expand=True)
         service_param = self.params()['service']
-        service_param.objects = services
+        service_param.names = {v['display_name']: k for k, v in services.items()}
+        service_param.objects = list(service_param.names.values())
         service_param.default = default or services[0]
         super().__init__(name='')
 
@@ -91,9 +76,10 @@ class PublisherSelector(param.Parameterized):
     publisher = param.ObjectSelector(default=None, objects=[])
 
     def __init__(self, default=None):
-        publishers = quest.api.get_publishers()
+        publishers = quest.api.get_publishers(expand=True)
         publisher_param = self.params()['publisher']
-        publisher_param.objects = publishers
+        publisher_param.names = {v['display_name']: k for k, v in publishers.items()}
+        publisher_param.objects = list(publisher_param.names.values())
         publisher_param.default = default or publishers[0]
         super().__init__(name='')
 
