@@ -39,4 +39,4 @@ def test_download(api, catalog_entry, options):
     d = api.add_datasets('test', catalog_entry)[0]
     api.stage_for_download(d, options=options)
     result = api.download_datasets(d, raise_on_error=True)
-    assert result[d[0]] == DatasetStatus.DOWNLOADED
+    assert result[d] == DatasetStatus.DOWNLOADED
