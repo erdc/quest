@@ -13,9 +13,35 @@
 # serve to show the default.
 
 import sys
-import os
-import shlex
 import sphinx_rtd_theme
+from unittest.mock import MagicMock
+
+
+class Mock(MagicMock):
+    @classmethod
+    def __getattr__(cls, name):
+        return MagicMock()
+
+
+MOCK_MODULES = [
+    'shapely',
+    'shapely.geometry',
+    'shapely.wkt',
+    'geojson',
+    'numpy',
+    'pandas',
+    'geopandas',
+    'ulmo',
+    'distributed',
+    'tornado',
+    'yaml',
+    'pony',
+    'pony.orm',
+    'param',
+    'pint',
+    'psutil',
+]
+sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
