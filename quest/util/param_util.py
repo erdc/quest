@@ -1,6 +1,7 @@
 import param
 import quest
 from abc import ABCMeta, abstractmethod
+from functools import partial
 
 
 class AbstractParameterized(param.parameterized.ParameterMetaclass, ABCMeta): pass
@@ -60,28 +61,91 @@ class DatasetListSelector(QuestSelector, param.ListSelector):
         return {v['display_name']: k for k, v in datasets.items()}
 
 
-class ServiceSelector(param.Parameterized):
-    service = param.ObjectSelector(default=None, objects=[])
+# class ServiceSelector(param.Parameterized):
+#     service = param.ObjectSelector(default=None, objects=[])
+#
+#     def __init__(self, parameter=None, service_type=None, default=None):
+#         services = quest.api.get_services(parameter=parameter, service_type=service_type, expand=True)
+#         service_param = self.params()['service']
+#         service_param.names = {v['display_name']: k for k, v in services.items()}
+#         service_param.objects = list(service_param.names.values())
+#         service_param.default = default or services[0]
+#         super().__init__(name='')
+#
+#
+# class PublisherSelector(param.Parameterized):
+#     publisher = param.ObjectSelector(default=None, objects=[])
+#
+#     def __init__(self, default=None):
+#         publishers = quest.api.get_publishers(expand=True)
+#         publisher_param = self.params()['publisher']
+#         publisher_param.names = {v['display_name']: k for k, v in publishers.items()}
+#         publisher_param.objects = list(publisher_param.names.values())
+#         publisher_param.default = default or publishers[0]
+#         super().__init__(name='')
+#
+#
+# class ProviderSelector(param.Parameterized):
+#     provider = param.ObjectSelector(default=None, objects=[])
+#
+#     def __init__(self, default=None):
+#         providers = quest.api.get_providers(expand=True)
+#         provider_param = self.params()['provider']
+#         provider_param.names = {v['display_name']: k for k, v in providers.items()}
+#         provider_param.objects = list(provider_param.names.values())
+#         provider_param.default = default or providers[0]
+#         super().__init__(name='')
 
-    def __init__(self, parameter=None, service_type=None, default=None):
-        services = quest.api.get_services(parameter=parameter, service_type=service_type, expand=True)
-        service_param = self.params()['service']
-        service_param.names = {v['display_name']: k for k, v in services.items()}
-        service_param.objects = list(service_param.names.values())
-        service_param.default = default or services[0]
-        super().__init__(name='')
+
+class AbstractQuestSelectorParameterized(param.parameterized.ParameterizedMetaclass, ABCMeta): pass
 
 
-class PublisherSelector(param.Parameterized):
-    publisher = param.ObjectSelector(default=None, objects=[])
+class QuestEntitySelector(param.Parameterized, metaclass=AbstractQuestSelectorParameterized):
+    value = param.ObjectSelector(default=None, objects=[])
+
+    @property
+    @abstractmethod
+    def get_quest_entities(self):
+        return None
 
     def __init__(self, default=None):
-        publishers = quest.api.get_publishers(expand=True)
-        publisher_param = self.params()['publisher']
-        publisher_param.names = {v['display_name']: k for k, v in publishers.items()}
-        publisher_param.objects = list(publisher_param.names.values())
-        publisher_param.default = default or publishers[0]
+        entities = self.get_quest_entities()
+        entity_param = self.params()['value']
+        entity_param.names = {v['display_name']: k for k, v in entities.items()}
+        entity_param.objects = list(entity_param.names.values())
+        entity_param.default = default or entity_param.objects[0]
         super().__init__(name='')
+
+
+class ProviderSelector(QuestEntitySelector):
+
+    @property
+    def get_quest_entities(self):
+        return partial(quest.api.get_providers, expand=True)
+
+
+class PublisherSelector(QuestEntitySelector):
+    @property
+    def get_quest_entities(self):
+        return partial(quest.api.get_publishers, expand=True)
+
+
+class ServiceSelector(QuestEntitySelector):
+
+    @property
+    def get_quest_entities(self):
+        return partial(quest.api.get_services, parameter=self.parameter, service_type=self.service_type, expand=True)
+
+    def __init__(self, parameter=None, service_type=None, default=None):
+        self.parameter = parameter
+        self.service_type = service_type
+        super().__init__(default=default)
+
+
+class ParameterSelector(QuestEntitySelector):
+    @property
+    def get_quest_entities(self):
+        return lambda: {p: {'display_name': p} for p in quest.api.get_mapped_parameters()}
 
 
 # PARM to JSON functions

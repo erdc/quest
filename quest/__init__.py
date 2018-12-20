@@ -14,5 +14,7 @@ warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 from . import api  # NOQA
 from . import tools  # NOQA
 
+
+
 # set version number
-__version__ = pbr.version.VersionInfo('quest').version_string_with_vcs()
+__version__ = pbr.version.VersionInfo('erdc-quest').version_string_with_vcs()
