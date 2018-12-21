@@ -1,6 +1,7 @@
 import logging
-import appdirs
 import os
+
+from .config import _default_quest_dir
 
 
 logger = logging.getLogger('quest')
@@ -11,8 +12,7 @@ null_handler.setFormatter(formatter)
 logger.addHandler(null_handler)
 logger.propagate = False
 
-default_log_dir = appdirs.user_log_dir('quest', 'erdc')
-default_log_file = os.path.join(default_log_dir, 'quest.log')
+default_log_file = os.path.join(_default_quest_dir(), 'quest.log')
 
 
 def log_to_file(status=True, filename=default_log_file, log_level=None):

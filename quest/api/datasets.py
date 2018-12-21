@@ -66,7 +66,7 @@ def download_datasets(datasets, raise_on_error=False):
             datasets to download
         raise_on_error (bool, Optional, Default=False):
             if True, if an error occurs raise an exception
-        async: (bool, Optional, Default=False)
+        async (bool, Optional, Default=False):
             if True, download in background
 
     Returns:
@@ -289,10 +289,10 @@ def new_dataset(catalog_entry, collection, source=None, display_name=None,
 
 def stage_for_download(uris, options=None):
     """Apply download options before downloading
+
     Args:
         uris (string or list, Required):
             uris of datasets to stage for download
-
         options (dict or list of dicts, Optional, Default=None):
             options to be passed to quest.api.download function specified for each dataset
 

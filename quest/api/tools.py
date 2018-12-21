@@ -4,24 +4,25 @@ from .datasets import open_dataset
 from .metadata import get_metadata
 from .tasks import add_async
 from ..util import to_geojson
-from ..static import UriType, PluginType
+from ..static import PluginType
 from ..plugins.plugins import load_plugins
 
 
 def get_tools(filters=None, expand=False, **kwargs):
-
     """List available tool plugins
 
     Args:
         filters (dict, Optional, Default=None):
-            filter the list of filters by one or more of the available filters
-            available filters:
-                    dataset (string, Optional):
-                    group (string, Optional)
-                    geotype (string, Optional)
-                    datatype (string, Optional)
-                    parameter (string, Optional)
-            if a dataset filter is used, all other filters are overridden and set from the dataset's metadata.
+            filter the list of tools by one or more of the available filters
+
+            Available Filters:
+                * `dataset`
+                * `group`
+                * `geotype`
+                * `datatype`
+                * `parameter`
+
+            Note: If a dataset filter is used, all other filters are overridden and set from the dataset's metadata.
         expand (bool, Optional, Default=None):
             if True, return details of the filters as a dict
         kwargs:

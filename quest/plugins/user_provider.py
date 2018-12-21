@@ -207,7 +207,7 @@ class UserProvider(ProviderBase):
 
         config_file = self._get_path('quest.yml')
         with uri_open(config_file, self.is_remote) as yml:
-            provider_data = yaml.load(yml)
+            provider_data = yaml.safe_load(yml)
         self.name = 'user-' + provider_data['name']
         self._metadata = provider_data['metadata']
         self._metadata['service_uri'] = self.uri

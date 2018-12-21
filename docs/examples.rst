@@ -4,8 +4,6 @@ Quest Examples
 .. toctree::
    :maxdepth: 2
 
-   examples
-
 
 Project Management
 ------------------

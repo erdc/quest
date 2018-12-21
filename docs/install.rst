@@ -47,8 +47,8 @@ Conda Install
 
             python setup.py develop
 
-    Optional
-    ........
+Optional
+........
 
     d. Run tests::
 
