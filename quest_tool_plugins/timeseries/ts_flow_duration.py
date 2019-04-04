@@ -9,6 +9,12 @@ from quest.util import setattr_on_dataframe
 class TsFlowDuration(ToolBase):
     _name = 'flow-duration'
     group = 'Timeseries'
+    operates_on_datatype = [DataType.TIMESERIES]
+    operates_on_geotype = None
+    operates_on_parameters = ['streamflow']
+    produces_datatype = None
+    produces_geotype = None
+    produces_parameters = None
 
     dataset = util.param.DatasetSelector(default=None,
                                          doc="""Dataset to apply filter to.""",

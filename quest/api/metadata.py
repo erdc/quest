@@ -101,7 +101,7 @@ def update_metadata(uris, display_name=None, description=None,
             metadata used by QUEST
     Returns:
         metadata (dict):
-            metadata at each uri keyed on uris
+            metadata of each uri keyed on uris
     """
     db = get_db()
     get_db_entity_funcs = {

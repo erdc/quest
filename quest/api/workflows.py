@@ -1,8 +1,8 @@
 import param
 
 from .collections import get_collections, new_collection
-from .datasets import stage_for_download, download_datasets, open_dataset, get_datasets
-from .catalog import search_catalog, add_datasets
+from .datasets import stage_for_download, download_datasets, open_dataset, get_datasets, add_datasets
+from .catalog import search_catalog
 from .metadata import get_metadata
 from .tools import run_tool
 from ..database import get_db, db_session

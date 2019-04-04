@@ -4,7 +4,7 @@ import abc
 import param
 
 from ...util import listify, format_json_options, uuid
-from ...static import DatasetStatus, DatasetSource, UriType
+from ...static import DatasetStatus, DatasetSource
 
 
 class ToolBase(param.ParameterizedFunction):

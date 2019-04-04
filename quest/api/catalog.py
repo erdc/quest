@@ -8,39 +8,10 @@ from shapely.geometry import shape
 
 from .tasks import add_async
 from .metadata import get_metadata
-from .datasets import new_dataset
 from .. import util
 from ..plugins import load_providers
-from ..static import DatasetSource, UriType
+from ..static import UriType
 from ..database.database import get_db, db_session, select_datasets
-
-
-@add_async
-def add_datasets(collection, catalog_entries):
-    """
-
-    Args:
-        collection (string, Required):
-            name of collection
-        catalog_entries (string, comma separated strings,list of strings, or pandas DataFrame, Required):
-            list of ? to add to the collection.
-
-    Returns:
-        uris (list):
-            uris of ?
-    """
-    if not isinstance(catalog_entries, pd.DataFrame):
-        entries = get_metadata(catalog_entries, as_dataframe=True)
-
-    uris = []
-    for _, data in entries.iterrows():
-        source = DatasetSource.WEB_SERVICE
-        if 'quest' in data['service']:
-            source = DatasetSource.DERIVED
-        uri = new_dataset(collection=collection, catalog_entry=data.to_frame().transpose(), source=source)
-        uris.append(uri)
-
-    return uris
 
 
 @add_async

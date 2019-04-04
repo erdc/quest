@@ -218,6 +218,34 @@ def get_datasets(expand=None, filters=None, queries=None, as_dataframe=None):
 
 
 @add_async
+def add_datasets(collection, catalog_entries):
+    """Adds new datasets (created from ``catalog_entries``) to ``collection``
+
+    Args:
+        collection (string, Required):
+            name of collection
+        catalog_entries (string, comma separated strings, list of strings, or :obj:`pandas.DataFrame`, Required):
+            list of catalog entry uris from which to create new datasets to add to the collection.
+
+    Returns:
+        uris (list):
+            uris of newly created datasets
+    """
+    if not isinstance(catalog_entries, pd.DataFrame):
+        entries = get_metadata(catalog_entries, as_dataframe=True)
+
+    uris = []
+    for _, data in entries.iterrows():
+        source = static.DatasetSource.WEB_SERVICE
+        if 'quest' in data['service']:
+            source = static.DatasetSource.DERIVED
+        uri = new_dataset(collection=collection, catalog_entry=data.to_frame().transpose(), source=source)
+        uris.append(uri)
+
+    return uris
+
+
+@add_async
 def new_dataset(catalog_entry, collection, source=None, display_name=None,
                 description=None, file_path=None, metadata=None, name=None):
     """Create a new dataset in a collection.

@@ -18,6 +18,7 @@ Quest can search for and download data from multiple web-based data providers. I
    install
    quickstart
    core_concepts
+   extending_quest
    api
    developers/index
 

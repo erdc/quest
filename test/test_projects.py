@@ -51,6 +51,14 @@ def test_get_projects_as_dataframe(api, reset_projects_dir):
     assert df.shape[0] == reset_projects_dir['NUMBER_OF_PROJECTS']
 
 
+def test_update_project_metadata(api, reset_projects_dir):
+    p = api.update_project_metadata(ACTIVE_PROJECT, display_name='test', description='test', metadata={'test': 'test'})
+    assert isinstance(p, dict)
+    assert p['display_name'] == 'test'
+    assert p['description'] == 'test'
+    assert p['metadata'] == {'test': 'test'}
+
+
 def test_default_project(api, ):
     c = api.get_projects()
     assert 'default' in c

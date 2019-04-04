@@ -55,14 +55,14 @@ Quest facilitates transforming data through the use of `tools`_. Some examples o
 
 Tools
 ^^^^^
-Quest ``tools`` are a way to perform some kind of operation on data. It is important to note that a ``tool`` will never perform "in-place" changes the datasets that it operates on. This means that datasets that are passed to a ``tool`` will remain unchanged, and the ``tool`` will create new datasets that have the transformed data. New ``tools`` can be added to Quest through `Tool Plugins`_.
+Quest ``tools`` are a way to perform some kind of operation on data. It is important to note that a ``tool`` will never perform "in-place" changes the datasets that it operates on. This means that datasets that are passed to a ``tool`` will remain unchanged, and the ``tool`` will create new datasets that have the transformed data. New ``tools`` can be added to Quest through :ref:`tool-plugins`.
 
 Tools define a set of options that a user must specify when using the tool.
 
 Data Repositories
 -----------------
 
-When Quest is used to search for data it searches among all of the data repositories or data `providers`_ that are registered with Quest. Similar to `Tools`_ `Providers`_ are added to Quest as plugins (see `Provider Plugins`_). `Providers` contain one or more `services`_. `Services`_ provide an interface for a single data product. Each service has a `catalog`_, which stores metadata about the datasets that are available from that service and is what enables Quest to search for data.
+When Quest is used to search for data it searches among all of the data repositories or data `providers`_ that are registered with Quest. Similar to `Tools`_ `Providers`_ are added to Quest as plugins (see :ref:`provider-plugins`). `Providers` contain one or more `services`_. `Services`_ provide an interface for a single data product. Each service has a `catalog`_, which stores metadata about the datasets that are available from that service and is what enables Quest to search for data.
 
 Providers
 ^^^^^^^^^
