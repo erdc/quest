@@ -203,7 +203,7 @@ def _get_pobj_default(pobj):
 
 def _param_to_json(pobj):
     schema = dict()
-    schema['name'] = pobj._attrib_name
+    schema['name'] = pobj.name
     schema['type'] = pobj.__class__.__name__
     schema['description'] = pobj.doc
     schema['default'] = _get_pobj_default(pobj)
@@ -217,7 +217,7 @@ def _param_to_json(pobj):
 
 def format_json_options(pobj):
     params = list(filter(lambda x: (x.precedence is None or x.precedence >= 0) and not x.constant
-                         and getattr(pobj, x._attrib_name) == x.default,  # Filter out parameters that are already set
+                         and getattr(pobj, x.name) == x.default,  # Filter out parameters that are already set
                          pobj.params().values()))
 
     if not params:
