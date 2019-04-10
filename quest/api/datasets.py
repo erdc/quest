@@ -58,21 +58,29 @@ def publish(publisher_uri, options=None, **kwargs):
     return data
 
 @add_async
-def download_datasets(datasets, raise_on_error=False):
-    """Download datasets that have been staged with stage_for_download.
+def download_datasets(datasets, options=None, raise_on_error=False):
+    """Download datasets and save them in the Quest project.
 
     Args:
         datasets (string or list, Required):
             datasets to download
+        options (dict, Optional, Default=None):
+            Dictionary of download options to stage the datasets with before downloading (see :func:`quest.api.stage_for_download`)
         raise_on_error (bool, Optional, Default=False):
             if True, if an error occurs raise an exception
         async (bool, Optional, Default=False):
             if True, download in background
 
+    Note:
+        If `options` are not provided then the `datasets` should already download options set by calling :func:`quest.api.stage_for_download`.
+
     Returns:
         status (dict):
             download status of datasets
     """
+    if options is not None:
+        datasets = stage_for_download(uris=datasets, options=options)
+
     datasets = get_metadata(datasets, as_dataframe=True)
 
     if datasets.empty:

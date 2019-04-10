@@ -32,16 +32,18 @@ def search_catalog(uris=None, expand=False, as_dataframe=False, as_geojson=False
             if True, update metadata cache
         filters (dict, Optional, Default=None):
             filter catalog_entries by one or more of the available filters
+
+            Note:
                 available filters:
                     * `bbox` (string, optional): filter catalog_entries by bounding box
-                    * `geom_type` (string, optional): filter catalog_entries by geom_type,
-                        i.e. point/line/polygon
+                    * `geom_type` (string, optional): filter catalog_entries by geom_type, i.e. point/line/polygon
                     * `parameter` (string, optional): filter catalog_entries by parameter
                     * `display_name` (string, optional):  filter catalog_entries by display_name
                     * `description` (string, optional): filter catalog_entries by description
                     * `search_terms` (list, optional): filter catalog_entries by search_terms
 
-            catalog_entries can also be filtered by any other metadata fields
+                catalog_entries can also be filtered by any other metadata fields
+
         queries(list, Optional, Default=None):
             list of string arguments to pass to pandas.DataFrame.query to filter the catalog_entries
 

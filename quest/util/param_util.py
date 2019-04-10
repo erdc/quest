@@ -101,16 +101,19 @@ class AbstractQuestSelectorParameterized(param.parameterized.ParameterizedMetacl
 
 
 class QuestEntitySelector(param.Parameterized, metaclass=AbstractQuestSelectorParameterized):
-    value = param.ObjectSelector(default=None, objects=[])
-
     @property
     @abstractmethod
     def get_quest_entities(self):
         return None
 
+    @property
+    @abstractmethod
+    def entity_name(self):
+        return None
+
     def __init__(self, default=None):
         entities = self.get_quest_entities()
-        entity_param = self.params()['value']
+        entity_param = self.params()[self.entity_name]
         entity_param.names = {v['display_name']: k for k, v in entities.items()}
         entity_param.objects = list(entity_param.names.values())
         entity_param.default = default or entity_param.objects[0]
@@ -118,6 +121,11 @@ class QuestEntitySelector(param.Parameterized, metaclass=AbstractQuestSelectorPa
 
 
 class ProviderSelector(QuestEntitySelector):
+    provider = param.ObjectSelector(default=None, objects=[])
+
+    @property
+    def entity_name(self):
+        return 'provider'
 
     @property
     def get_quest_entities(self):
@@ -125,12 +133,23 @@ class ProviderSelector(QuestEntitySelector):
 
 
 class PublisherSelector(QuestEntitySelector):
+    publisher = param.ObjectSelector(default=None, objects=[])
+
+    @property
+    def entity_name(self):
+        return 'publisher'
+
     @property
     def get_quest_entities(self):
         return partial(quest.api.get_publishers, expand=True)
 
 
 class ServiceSelector(QuestEntitySelector):
+    service = param.ObjectSelector(default=None, objects=[])
+
+    @property
+    def entity_name(self):
+        return 'service'
 
     @property
     def get_quest_entities(self):
@@ -143,9 +162,27 @@ class ServiceSelector(QuestEntitySelector):
 
 
 class ParameterSelector(QuestEntitySelector):
+    parameter = param.ObjectSelector(default=None, objects=[])
+
+    @property
+    def entity_name(self):
+        return 'parameter'
+
     @property
     def get_quest_entities(self):
         return lambda: {p: {'display_name': p} for p in quest.api.get_mapped_parameters()}
+
+
+class CollectionSelector(QuestEntitySelector):
+    collection = param.ObjectSelector(default=None, objects=[])
+
+    @property
+    def entity_name(self):
+        return 'collection'
+
+    @property
+    def get_quest_entities(self):
+        return partial(quest.api.get_collections, expand=True)
 
 
 # PARM to JSON functions

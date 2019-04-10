@@ -1,6 +1,6 @@
 import param
 
-from .collections import get_collections, new_collection
+from .collections import new_collection
 from .datasets import stage_for_download, download_datasets, open_dataset, get_datasets, add_datasets
 from .catalog import search_catalog
 from .metadata import get_metadata
@@ -12,7 +12,8 @@ from ..static import DatasetStatus
 
 def get_data(
         service_uri,
-        search_filters,
+        search_filters=None,
+        search_queries=None,
         download_options=None,
         collection_name='default',
         expand=False,
@@ -27,8 +28,12 @@ def get_data(
     Args:
         service_uri (string, required):
             uri for service to get data from
-        search_filters (dict, required):
-            dictionary of search filters to filter the catalog search (see docs for quest.api.search_catalog)
+        search_filters (dict, optional, default=None):
+            dictionary of search filters to filter the catalog search. At least one of `search_filters` or
+            `search_queries` should be specified. (see docs for :func:`quest.api.search_catalog`)
+        search_queries (list, optional, default=None):
+            list of string arguments to pass to :obj:`pandas.DataFrame.query` to filter the catalog search. At least one
+            of `search_filters` or `search_queries` should be specified. (see docs for :func:`quest.api.search_catalog`)
         download_options (dict or Parameterized, optional, default=None):
             dictionary or Parameterized object with download options for service
             (see docs for quest.api.download_datasets)
@@ -51,8 +56,7 @@ def get_data(
     Returns:
          the quest dataset name, or an python data structure if open_dataset=True.
     """
-    if collection_name not in get_collections():
-        new_collection(collection_name)
+    new_collection(collection_name, exists_ok=True)
 
     # download the features (i.e. locations) and metadata for the given web service
     # the first time this is run it will take longer since it downloads
@@ -60,6 +64,7 @@ def get_data(
     catalog_entries = search_catalog(
         uris=service_uri,
         filters=search_filters,
+        queries=search_queries,
     )
 
     if not catalog_entries:
@@ -112,6 +117,7 @@ def get_seamless_data(
         service_uri,
         bbox,
         search_filters=None,
+        search_queries=None,
         download_options=None,
         collection_name='default',
         expand=False,
@@ -133,8 +139,11 @@ def get_seamless_data(
         bbox (list, required):
             list of lat/lon coordinates representing the bounds of the data in for form
             [lon_min, lat_min, lon_max, lat_max].
-        search_filters (dict, required):
-            dictionary of search filters to filter the catalog search (see docs for quest.api.search_catalog)
+        search_filters (dict, optional, default=None):
+            dictionary of search filters to filter the catalog search (see docs for :func:`quest.api.search_catalog`)
+        search_queries (list, optional, default=None):
+            list of string arguments to pass to :obj:`pandas.DataFrame.query` to filter the catalog search
+            (see docs for :func:`quest.api.search_catalog`)
         download_options (dict or Parameterized, optional, default=None):
             dictionary or Parameterized object with download options for service
             (see docs for quest.api.download_datasets)
@@ -167,6 +176,7 @@ def get_seamless_data(
     datasets = get_data(
         service_uri=service_uri,
         search_filters=search_filters,
+        search_queries=search_queries,
         download_options=download_options,
         collection_name=collection_name,
         use_cache=use_cache,

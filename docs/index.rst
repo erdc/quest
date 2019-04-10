@@ -21,6 +21,7 @@ Quest can search for and download data from multiple web-based data providers. I
    extending_quest
    api
    developers/index
+   glossary
 
 Indices and tables
 ==================

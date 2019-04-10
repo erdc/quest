@@ -19,7 +19,7 @@ The simplest way to download some data is to use the :func:`quest.api.get_data` 
     In [2]: data = quest.api.get_data(
        ...:     collection_name='quick-start',
        ...:     service_uri='svc://usgs-nwis:iv',
-       ...:     search_filters={'bbox': [-91, 32.3, -90.8, 32.34]},
+       ...:     search_filters={'bbox': [-91, 32.25, -90.8, 32.4]},
        ...:     download_options={'parameter': 'streamflow'},
        ...: )[0]
 
