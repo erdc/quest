@@ -75,7 +75,7 @@ Tools define a set of options that a user must specify when using the tool.
 Data Repositories
 -----------------
 
-When Quest is used to search for data it searches among all of the data repositories or data `providers`_ that are registered with Quest. Similar to `Tools`_ `Providers`_ are added to Quest as plugins (see :ref:`provider-plugins`). `Providers` contain one or more `services`_. `Services`_ provide an interface for a single data product. Each service has a :ref:`core-concepts-catalogs`, which stores metadata about the datasets that are available from that service and is what enables Quest to search for data.
+When Quest is used to search for data it searches among all of the data repositories or data `providers`_ that are registered with Quest. Similar to `Tools`_ `Providers`_ are added to Quest as plugins (see :ref:`provider-plugins`). `Providers`_ contain one or more `services`_. `Services`_ provide an interface for a single data product. Each service has a :ref:`core-concepts-catalogs`, which stores metadata about the datasets that are available from that service and is what enables Quest to search for data.
 
 .. _core-concepts-providers:
 
