@@ -34,7 +34,7 @@ def get_collections(expand=False, as_dataframe=False):
     return collections
 
 
-def new_collection(name, display_name=None, description=None, metadata=None):
+def new_collection(name, display_name=None, description=None, metadata=None, exists_ok=False):
     """Create a new collection.
 
     Create a new collection by creating a new folder in project directory
@@ -42,21 +42,31 @@ def new_collection(name, display_name=None, description=None, metadata=None):
 
     Args:
         name (string, Required):
-            Name of the collection used in all quest function calls,must be unique. Will also be the folder name of the collection
+            Name of the collection used in all quest function calls,must be unique.
+            Will also be the folder name of the collection
         display_name (string, Optional, Default=None):
             display name for collection
         description (string, Optional, Default=None):
             description of collection
         metadata (dict, Optional, Default=None):
             user defined metadata
+        exists_ok (bool, Optional, Default=False):
+            If True then ``ValueError`` is not raised if the collection already exits. Rather the metadata of the
+            existing colleciton is returned.
 
     Returns:
-        collection (dict)
+        dict:
             details of the newly created collection
+
+    Raises:
+        ValueError:
+            If collection with ``name`` already exists.
     """
     name = name.lower()
     collections = _load_collections()
     if name in collections:
+        if exists_ok:
+            return _load_collection(name)
         raise ValueError('Collection %s already exists' % name)
 
     if display_name is None:

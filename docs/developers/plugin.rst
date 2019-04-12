@@ -60,21 +60,21 @@ A data service plugin must subclass the ``ServiceBase`` class (or one of it's su
 
 The content of ``ExampleServiceBase`` has not yet been fully implemented. The above example simply illustrates the structure. All of the attributes and methods shown in the ``ExampleServiceBase`` will need to be implemented either in this class directly or in the services that subclass this base class. The specifics of how this are done will be different for each plugin, but the next step, `3. Service Classes`_ will demonstrate one way to do it.
 
-.. tip::
 
-    Specialized Service Base Subclasses
+Specialized Service Base Subclasses
+...................................
 
-    There are a couple of special cases that apply to services from various providers. To allow all of these services to use the same codebase a couple of other base classes are available that can be used in place of the ``ServiceBase``.
+There are a couple of special cases that apply to services from various providers. To allow all of these services to use the same codebase a couple of other base classes are available that can be used in place of the ``ServiceBase``.
 
-    TimePeriodServiceBase
-    ~~~~~~~~~~~~~~~~~~~~~
+TimePeriodServiceBase
+~~~~~~~~~~~~~~~~~~~~~
 
-    This base class simply adds two parameters, a `start` and `end` date to represent the time period for the data being requested (see `d. Specify the Download Options`_).
+This base class simply adds two parameters, a `start` and `end` date to represent the time period for the data being requested (see `d. Specify the Download Options`_).
 
-    SingleFileServiceBase
-    ~~~~~~~~~~~~~~~~~~~~~
+SingleFileServiceBase
+~~~~~~~~~~~~~~~~~~~~~
 
-    This base class implements the `download` method for services where there is simply a download url that links to a single zip file that contains the data.
+This base class implements the `download` method for services where there is simply a download url that links to a single zip file that contains the data.
 
 3. Service Classes
 ------------------
@@ -189,7 +189,7 @@ d. Specify the Download Options
 ...............................
 Data sources's APIs often allow various options to be specified to determine what data to download, what format it should be in, etc.
 
-The download options that are needed for each service are defined using the Python library `Param (https://ioam.github.io/param/)`_. This library enables parameters to have features like type and range checking, documentation strings, default values, etc. Refer to the `Param documentation (https://ioam.github.io/param/)`_ for more information.
+The download options that are needed for each service are defined using the Python library `Param <https://ioam.github.io/param/>`_. This library enables parameters to have features like type and range checking, documentation strings, default values, etc. Refer to the `Param documentation <https://ioam.github.io/param/>`_ for more information.
 
 
 .. todo::

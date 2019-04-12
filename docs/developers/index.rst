@@ -1,5 +1,5 @@
-Quest Developer Documentation
-=============================
+Developer Documentation
+=======================
 
 This documentation is geared toward those wanting to contribute to the Quest source code.
 

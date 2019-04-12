@@ -94,13 +94,13 @@ def get_tasks(filters=None, expand=None, as_dataframe=None, with_future=None):
         filters (dict, Optional, Default=None):
             filter tasks by one or more of the available filters
                 available filters:
-                    `task_ids` (str or list): task id or list of task ids
-                    `status` (str or list): single status or list of statuses. Must be subset of
+                    * `task_ids` (str or list): task id or list of task ids
+                    * `status` (str or list): single status or list of statuses. Must be subset of
                         ['pending', 'cancelled', 'finished', 'lost', 'error']
-                    `fn` (str): name of the function a task was assigned
-                    `args` (list): list of arguments that were passed to the task function
-                    `kwargs` (dict): dictionary of keyword arguments that were passed to the task function
-                    'result' (object): result of the task function
+                    * `fn` (str): name of the function a task was assigned
+                    * `args` (list): list of arguments that were passed to the task function
+                    * `kwargs` (dict): dictionary of keyword arguments that were passed to the task function
+                    * `result` (object): result of the task function
         expand (bool, Optional, Default=None):
             include details of tasks and format as a dict
         as_dataframe (bool, Optional, Default=None):
@@ -156,10 +156,15 @@ def remove_tasks(task_ids=None, status=None):
 
     Args:
         task_ids (string or list, Optional, Default=None):
-            tasks with this id(s) will be removed
+            tasks with specified id(s) will be removed
         status (string or list, Optional, Default=None):
-            tasks with this status(es) will be removed
-            NOTE: 'pending' is not a valid option and will be ignored,
+            tasks with specified status(es) will be removed. Valid statuses are:
+                * `cancelled`
+                * `finished`
+                * `lost`
+                * `error`
+
+            NOTE: `pending` is not a valid option and will be ignored,
                 since pending tasks must be canceled before they can be removed.
 
         If no status is specified, remove tasks with

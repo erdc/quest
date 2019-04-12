@@ -4,7 +4,7 @@ This module defines the Python API for the Environmental Simulator Data
 Services Library.
 """
 
-__version__ = '3.0.a1'
+__version__ = '3.1.0'
 
 # __all__ needed for autodoc to work
 
@@ -61,6 +61,7 @@ __all__ = (
     'stage_for_download',
     'unauthenticate_provider',
     'update_metadata',
+    'update_project_metadata',
     'update_settings',
     'update_settings_from_file',
     'visualize_dataset',
@@ -91,6 +92,7 @@ from .datasets import (
     get_download_options,
     get_publish_options,
     get_datasets,
+    add_datasets,
     new_dataset,
     open_dataset,
     stage_for_download,
@@ -105,7 +107,6 @@ from .manage import (
 )
 
 from .catalog import (
-    add_datasets,
     search_catalog,
     get_tags,
     new_catalog_entry,
@@ -133,6 +134,7 @@ from .parameters import (
 from .projects import (
     add_project,
     new_project,
+    update_project_metadata,
     delete_project,
     get_projects,
     get_active_project,

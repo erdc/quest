@@ -58,21 +58,29 @@ def publish(publisher_uri, options=None, **kwargs):
     return data
 
 @add_async
-def download_datasets(datasets, raise_on_error=False):
-    """Download datasets that have been staged with stage_for_download.
+def download_datasets(datasets, options=None, raise_on_error=False):
+    """Download datasets and save them in the Quest project.
 
     Args:
         datasets (string or list, Required):
             datasets to download
+        options (dict, Optional, Default=None):
+            Dictionary of download options to stage the datasets with before downloading (see :func:`quest.api.stage_for_download`)
         raise_on_error (bool, Optional, Default=False):
             if True, if an error occurs raise an exception
-        async: (bool, Optional, Default=False)
+        async (bool, Optional, Default=False):
             if True, download in background
+
+    Note:
+        If `options` are not provided then the `datasets` should already download options set by calling :func:`quest.api.stage_for_download`.
 
     Returns:
         status (dict):
             download status of datasets
     """
+    if options is not None:
+        datasets = stage_for_download(uris=datasets, options=options)
+
     datasets = get_metadata(datasets, as_dataframe=True)
 
     if datasets.empty:
@@ -218,6 +226,34 @@ def get_datasets(expand=None, filters=None, queries=None, as_dataframe=None):
 
 
 @add_async
+def add_datasets(collection, catalog_entries):
+    """Adds new datasets (created from ``catalog_entries``) to ``collection``
+
+    Args:
+        collection (string, Required):
+            name of collection
+        catalog_entries (string, comma separated strings, list of strings, or :obj:`pandas.DataFrame`, Required):
+            list of catalog entry uris from which to create new datasets to add to the collection.
+
+    Returns:
+        uris (list):
+            uris of newly created datasets
+    """
+    if not isinstance(catalog_entries, pd.DataFrame):
+        entries = get_metadata(catalog_entries, as_dataframe=True)
+
+    uris = []
+    for _, data in entries.iterrows():
+        source = static.DatasetSource.WEB_SERVICE
+        if 'quest' in data['service']:
+            source = static.DatasetSource.DERIVED
+        uri = new_dataset(collection=collection, catalog_entry=data.to_frame().transpose(), source=source)
+        uris.append(uri)
+
+    return uris
+
+
+@add_async
 def new_dataset(catalog_entry, collection, source=None, display_name=None,
                 description=None, file_path=None, metadata=None, name=None):
     """Create a new dataset in a collection.
@@ -289,10 +325,10 @@ def new_dataset(catalog_entry, collection, source=None, display_name=None,
 
 def stage_for_download(uris, options=None):
     """Apply download options before downloading
+
     Args:
         uris (string or list, Required):
             uris of datasets to stage for download
-
         options (dict or list of dicts, Optional, Default=None):
             options to be passed to quest.api.download function specified for each dataset
 

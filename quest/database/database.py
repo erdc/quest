@@ -14,7 +14,7 @@ def define_models(db):
         description = orm.Optional(str)
         created_at = orm.Required(datetime, default=datetime.now())
         updated_at = orm.Optional(datetime)
-        metadata = orm.Optional(orm.Json)
+        metadata = orm.Optional(orm.Json, nullable=True)
 
     class Collection(db.Entity):
         name = orm.PrimaryKey(str)
@@ -22,7 +22,7 @@ def define_models(db):
         description = orm.Optional(str)
         created_at = orm.Required(datetime, default=datetime.now())
         updated_at = orm.Optional(datetime)
-        metadata = orm.Optional(orm.Json)
+        metadata = orm.Optional(orm.Json, nullable=True)
 
         # setup relationships
         datasets = orm.Set('Dataset')
@@ -32,16 +32,16 @@ def define_models(db):
         display_name = orm.Optional(str)
         description = orm.Optional(str, nullable=True)
         created_at = orm.Required(datetime, default=datetime.now())
-        metadata = orm.Optional(orm.Json)
+        metadata = orm.Optional(orm.Json, nullable=True)
         updated_at = orm.Optional(datetime)
 
         # dataset - metadata
-        parameter = orm.Optional(orm.Json)
+        parameter = orm.Optional(orm.Json, nullable=True)
         unit = orm.Optional(str)
         datatype = orm.Optional(str)
         file_format = orm.Optional(str)
         source = orm.Optional(str)
-        options = orm.Optional(orm.Json)
+        options = orm.Optional(orm.Json, nullable=True)
         status = orm.Optional(str)
         message = orm.Optional(str)
         file_path = orm.Optional(str, nullable=True)
@@ -60,8 +60,8 @@ def define_models(db):
         service_id = orm.PrimaryKey(str)
         created_at = orm.Required(datetime, default=datetime.now())
         updated_at = orm.Optional(datetime)
-        metadata = orm.Optional(orm.Json)
-        geometry = orm.Optional(orm.Json)
+        metadata = orm.Optional(orm.Json, nullable=True)
+        geometry = orm.Optional(orm.Json, nullable=True)
 
 
 def get_db(dbpath=None, reconnect=False):

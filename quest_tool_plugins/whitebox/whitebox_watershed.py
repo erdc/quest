@@ -87,7 +87,7 @@ class WBTExtractStreamsWorkflow(ToolBase):
             fa = cls.flow_accumulation = wbt.d_inf_flow_accumulation(elev_file)
             amax = np.nanmax(fa) * .5
             amin = np.nanmean(fa)
-            threshold = cls.params()['stream_threshold']
+            threshold = cls.param['stream_threshold']
             threshold.bounds = (amin, amax)
             threshold.default = amax * 0.1
 

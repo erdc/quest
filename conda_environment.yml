@@ -17,14 +17,14 @@ dependencies:
 
     # core dependencies
     - geojson
-    - pandas<=0.22.0
+    - pandas
     - geopandas
     - numpy
-    - param>=1.8.1
+    - param>=1.9.0
     - pint
     - pony
     - pyyaml
-    - ulmo>=0.8.3.2
+    - ulmo>=0.8.5
 
     # task dependencies
     - tornado
@@ -44,11 +44,11 @@ dependencies:
 
     # notebook examples dependencies
     - jupyter
-    - pyviz/label/dev::holoviews
-    - pyviz/label/dev::geoviews
+    - holoviews
+    - geoviews
     - hvplot
     - paramnb
-    - parambokeh
+    - pyviz::panel
 
     # test dependencies
     - pytest

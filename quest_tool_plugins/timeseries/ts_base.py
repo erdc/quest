@@ -2,7 +2,8 @@ from quest import util
 from quest.plugins import ToolBase
 from quest.api import get_metadata
 from quest.plugins import load_plugins
-from quest.static import UriType, DataType
+from quest.static import DataType
+import pandas as pd
 
 
 class TsBase(ToolBase):
@@ -29,6 +30,7 @@ class TsBase(ToolBase):
             raise IOError('No data file available for this dataset')
 
         df = io.read(orig_metadata['file_path'])
+        df.index = pd.to_datetime(df.index)
 
         # run filter
         new_df = self._run(df)

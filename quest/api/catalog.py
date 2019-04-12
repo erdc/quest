@@ -8,39 +8,10 @@ from shapely.geometry import shape
 
 from .tasks import add_async
 from .metadata import get_metadata
-from .datasets import new_dataset
 from .. import util
 from ..plugins import load_providers
-from ..static import DatasetSource, UriType
+from ..static import UriType
 from ..database.database import get_db, db_session, select_datasets
-
-
-@add_async
-def add_datasets(collection, catalog_entries):
-    """
-
-    Args:
-        collection (string, Required):
-            name of collection
-        catalog_entries (string, comma separated strings,list of strings, or pandas DataFrame, Required):
-            list of ? to add to the collection.
-
-    Returns:
-        uris (list):
-            uris of ?
-    """
-    if not isinstance(catalog_entries, pd.DataFrame):
-        entries = get_metadata(catalog_entries, as_dataframe=True)
-
-    uris = []
-    for _, data in entries.iterrows():
-        source = DatasetSource.WEB_SERVICE
-        if 'quest' in data['service']:
-            source = DatasetSource.DERIVED
-        uri = new_dataset(collection=collection, catalog_entry=data.to_frame().transpose(), source=source)
-        uris.append(uri)
-
-    return uris
 
 
 @add_async
@@ -61,16 +32,18 @@ def search_catalog(uris=None, expand=False, as_dataframe=False, as_geojson=False
             if True, update metadata cache
         filters (dict, Optional, Default=None):
             filter catalog_entries by one or more of the available filters
-                available filters:
-                    bbox (string, optional): filter catalog_entries by bounding box
-                    geom_type (string, optional): filter catalog_entries by geom_type,
-                        i.e. point/line/polygon
-                    parameter (string, optional): filter catalog_entries by parameter
-                    display_name (string, optional):  filter catalog_entries by display_name
-                    description (string, optional): filter catalog_entries by description
-                    search_terms (list, optional): filter catalog_entries by search_terms
 
-            catalog_entries can also be filtered by any other metadata fields
+            Note:
+                available filters:
+                    * `bbox` (string, optional): filter catalog_entries by bounding box
+                    * `geom_type` (string, optional): filter catalog_entries by geom_type, i.e. point/line/polygon
+                    * `parameter` (string, optional): filter catalog_entries by parameter
+                    * `display_name` (string, optional):  filter catalog_entries by display_name
+                    * `description` (string, optional): filter catalog_entries by description
+                    * `search_terms` (list, optional): filter catalog_entries by search_terms
+
+                catalog_entries can also be filtered by any other metadata fields
+
         queries(list, Optional, Default=None):
             list of string arguments to pass to pandas.DataFrame.query to filter the catalog_entries
 
@@ -197,11 +170,10 @@ def get_tags(service_uris, update_cache=False, filter=None, as_count=False):
             if True, return dictionary with the number of values rather than a list of possible values
 
     Returns:
-    --------
         tags (dict):
-         dict keyed by tag name and list of possible values
+            dict keyed by tag name and list of possible values
 
-         Note: nested dicts are parsed out as a multi-index tag where keys for nested dicts are joined with ':'.
+        Note: nested dicts are parsed out as a multi-index tag where keys for nested dicts are joined with ':'.
     """
     # group uris by type
     grouped_uris = util.classify_uris(

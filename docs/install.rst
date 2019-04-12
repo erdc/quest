@@ -12,15 +12,15 @@ Install Released Conda Package
 
     a. Install Quest into new environment::
 
-        conda create -n quest -c conda-forge -c erdc quest
+        conda create -n quest -c conda-forge quest
 
     b. Install Quest into existing environment::
 
-        conda install -c erdc -c conda-forge quest
+        conda install -c conda-forge quest
 
     .. note::
 
-        Becuase of incompatibilities with the dependencies between conda-forge and the defaults channel, the environment must have been created with conda-forge.
+        Because of incompatibilities with the dependencies between conda-forge and the defaults channel, the environment must have been created with conda-forge.
 
 3.  Refer to :doc:`quickstart` for more help getting started with Quest.
 
@@ -31,45 +31,22 @@ Install from Source
 
     git clone https://github.com/erdc/quest.git
 
-2. Install the dependencies using conda or pip (conda is recommended):
-
-Conda Install
-~~~~~~~~~~~~~
+2. Install the dependencies using conda:
 
     a. Install `Miniconda <http://conda.io/miniconda.html>`_ [or `Anaconda <http://continuum.io/downloads>`_ although Miniconda is preferred] for your OS.
 
     b. Create new environment with dependenciest::
 
-            conda env create -n quest --file py3_conda_environment.yml
-            source activate quest  # (use 'activate quest' on windows)
+            conda env create -n quest --file conda_environment.yml
+            conda activate quest
 
     c. Install Quest in develop mode::
 
             python setup.py develop
 
-    Optional
-    ........
+Optional
+........
 
     d. Run tests::
 
-        python setup.py test
-
-
-Pip Installation
-~~~~~~~~~~~~~~~~~~~~
-
-    .. warning::
-
-        Some of the Python dependencies (e.g. gdal and numpy) have system dependencies that must be installed before they can be installed from pip.
-
-    a. Install pip requirements. From the base directory type::
-
-        pip install -r pip_requirements.txt
-
-    b. Install Quest in develop mode::
-
-        python setup.py develop
-
-    .. note::
-
-        `python setup.py install` and `python setup.py develop` have issues installing numpy correctly on osx.
+        pytest

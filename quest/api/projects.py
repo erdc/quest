@@ -1,5 +1,6 @@
 import os
 import shutil
+from datetime import datetime
 
 import pandas as pd
 
@@ -183,6 +184,42 @@ def get_projects(expand=False, as_dataframe=False):
         projects = pd.DataFrame.from_dict(projects, orient='index')
 
     return projects
+
+
+def update_project_metadata(name, display_name=None, description=None, metadata=None):
+    """Updates a project's metadata
+
+    Args:
+        name (string, required):
+            name of project to update
+        display_name (string, optional, default=None):
+            new display name for the project. If None then the display name will not be modified.
+        description (string, optional, default=None:
+            new description for the project. If None then the description will not be modified.
+        metadata (dict, optional, default=None):
+            new metadata dict with which to update the project's current metadata. If None then the metadata will not be modified.
+    Returns:
+        dict:
+            dictionary of updated metadata for project
+
+    """
+    metadata_to_update = dict()
+
+    if display_name is not None:
+        metadata_to_update['display_name'] = display_name
+    if description is not None:
+        metadata_to_update['description'] = description
+    if metadata is not None:
+        metadata_to_update['metadata'] = metadata
+    metadata_to_update['updated_at'] = datetime.now()
+
+    db = init_db(_get_project_db(name))
+    with db_session:
+        project = db.Project.get()
+        project.set(**metadata_to_update)
+    db.disconnect()
+
+    return get_projects(expand=True)[name]
 
 
 def remove_project(name):

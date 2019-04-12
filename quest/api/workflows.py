@@ -1,19 +1,22 @@
 import param
 
-from .collections import get_collections, new_collection
-from .datasets import stage_for_download, download_datasets, open_dataset
-from .catalog import search_catalog, add_datasets
+from .collections import new_collection
+from .datasets import stage_for_download, download_datasets, open_dataset, get_datasets, add_datasets
+from .catalog import search_catalog
+from .metadata import get_metadata
 from .tools import run_tool
 from ..database import get_db, db_session
 from ..util import logger as log
-from ..static import DatasetStatus, UriType
+from ..static import DatasetStatus
 
 
 def get_data(
         service_uri,
-        search_filters,
+        search_filters=None,
+        search_queries=None,
         download_options=None,
         collection_name='default',
+        expand=False,
         use_cache=True,
         max_catalog_entries=10,
         as_open_datasets=True,
@@ -25,13 +28,19 @@ def get_data(
     Args:
         service_uri (string, required):
             uri for service to get data from
-        search_filters (dict, required):
-            dictionary of search filters to filter the catalog search (see docs for quest.api.search_catalog)
+        search_filters (dict, optional, default=None):
+            dictionary of search filters to filter the catalog search. At least one of `search_filters` or
+            `search_queries` should be specified. (see docs for :func:`quest.api.search_catalog`)
+        search_queries (list, optional, default=None):
+            list of string arguments to pass to :obj:`pandas.DataFrame.query` to filter the catalog search. At least one
+            of `search_filters` or `search_queries` should be specified. (see docs for :func:`quest.api.search_catalog`)
         download_options (dict or Parameterized, optional, default=None):
             dictionary or Parameterized object with download options for service
             (see docs for quest.api.download_datasets)
         collection_name (string, optional, default='default'):
             name of collection to add downloaded data to. If collection doesn't exist it will be created.
+        expand (bool, optional, default=False):
+            include dataset details and format as dict
         use_cache (bool, optional, default=True):
             if True then previously downloaded datasets with the same download options will be returned
             rather than downloading new datasets
@@ -47,8 +56,7 @@ def get_data(
     Returns:
          the quest dataset name, or an python data structure if open_dataset=True.
     """
-    if collection_name not in get_collections():
-        new_collection(collection_name)
+    new_collection(collection_name, exists_ok=True)
 
     # download the features (i.e. locations) and metadata for the given web service
     # the first time this is run it will take longer since it downloads
@@ -56,6 +64,7 @@ def get_data(
     catalog_entries = search_catalog(
         uris=service_uri,
         filters=search_filters,
+        queries=search_queries,
     )
 
     if not catalog_entries:
@@ -73,7 +82,6 @@ def get_data(
 
     datasets = list()
     cached_datasets = list()
-    num_entries = len(catalog_entries)
 
     if use_cache:
         matched = _get_cached_data(catalog_entries, download_options, collection_name)
@@ -99,6 +107,8 @@ def get_data(
 
     if as_open_datasets:
         datasets = [open_dataset(dataset) for dataset in datasets]
+    elif expand:
+        datasets = list(get_datasets(expand=True, queries=[f'name in {datasets}']).values())
 
     return datasets
 
@@ -107,8 +117,10 @@ def get_seamless_data(
         service_uri,
         bbox,
         search_filters=None,
+        search_queries=None,
         download_options=None,
         collection_name='default',
+        expand=False,
         use_cache=True,
         max_catalog_entries=10,
         as_open_dataset=True,
@@ -127,13 +139,18 @@ def get_seamless_data(
         bbox (list, required):
             list of lat/lon coordinates representing the bounds of the data in for form
             [lon_min, lat_min, lon_max, lat_max].
-        search_filters (dict, required):
-            dictionary of search filters to filter the catalog search (see docs for quest.api.search_catalog)
+        search_filters (dict, optional, default=None):
+            dictionary of search filters to filter the catalog search (see docs for :func:`quest.api.search_catalog`)
+        search_queries (list, optional, default=None):
+            list of string arguments to pass to :obj:`pandas.DataFrame.query` to filter the catalog search
+            (see docs for :func:`quest.api.search_catalog`)
         download_options (dict or Parameterized, optional, default=None):
             dictionary or Parameterized object with download options for service
             (see docs for quest.api.download_datasets)
         collection_name (string, optional, default='default'):
             name of collection to add downloaded data to. If collection doesn't exist it will be created.
+        expand (bool, optional, default=False):
+            include dataset details and format as dict
         use_cache (bool, optional, default=True):
             if True then previously downloaded datasets with the same download options will be returned
             rather than downloading new datasets
@@ -159,6 +176,7 @@ def get_seamless_data(
     datasets = get_data(
         service_uri=service_uri,
         search_filters=search_filters,
+        search_queries=search_queries,
         download_options=download_options,
         collection_name=collection_name,
         use_cache=use_cache,
@@ -166,6 +184,10 @@ def get_seamless_data(
         as_open_datasets=False,
         raise_on_error=raise_on_error,
     )
+
+    if not datasets:
+        # Don't try to merge an empty list of datasets
+        return None
 
     tool_name = 'raster-merge'
     tool_options = {'bbox': bbox, 'datasets': datasets}
@@ -183,11 +205,11 @@ def get_seamless_data(
             as_open_datasets=as_open_dataset,
         )['datasets']
 
-    # update_metadata(uris=merged_dataset, display_name=dataset_name)
-    # delete the original individual tiles
-    # delete(datasets)
+    dataset = merged_dataset[0]
+    if expand and not as_open_dataset:
+        dataset = get_metadata(dataset)[dataset]
 
-    return merged_dataset[0]
+    return dataset
 
 
 def _get_cached_data(catalog_entries, download_options, collection=None):
@@ -205,13 +227,13 @@ def _get_cached_data(catalog_entries, download_options, collection=None):
     Returns:
         a dictionary of dataset ids mapped to provided catalog entries
     """
-
     db = get_db()
     with db_session:
-        datasets = db.Dataset.select(lambda d: d.catalog_entry in catalog_entries and
-                                     d.status == DatasetStatus.DOWNLOADED and
-                                     d.options == download_options
-                                     )
+        # NOTE: d.options will not evaluate to None in the lambda expression. It therefore must be compared
+        # outside of it.
+        datasets = [d for d in db.Dataset.select(
+            lambda d: d.catalog_entry in catalog_entries and d.status == DatasetStatus.DOWNLOADED
+        ) if d.options == download_options]
         if collection is not None:
             datasets = [d for d in datasets if d.collection.name == collection]
 
@@ -238,9 +260,9 @@ def _get_cached_derived_data(tool_name, tool_options):
     }
     db = get_db()
     with db_session:
-        datasets = db.Dataset.select(lambda d: d.options == options)
+        datasets = [d.name for d in db.Dataset.select() if d.options == options] or None
 
-    return [d.name for d in datasets] or None
+    return datasets
 
 
 def _is_tile_service(service_uri):

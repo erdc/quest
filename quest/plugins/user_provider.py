@@ -10,7 +10,6 @@ import pandas as pd
 from io import StringIO
 from geojson import Feature, FeatureCollection
 
-from ..static import UriType
 from ..plugins.base import ProviderBase, ServiceBase
 from ..util import listify, to_geodataframe, bbox2poly, is_remote_uri
 
@@ -22,12 +21,9 @@ def get_user_service_base():
 
         @classmethod
         def instance(cls, service_name, service_data, provider, uri, is_remote):
-            parameters = listify(service_data['metadata'].pop('parameters'))
-
-            if len(parameters) > 1:
-                cls.params()['parameter'].objects = sorted(parameters)
-            else:
-                cls.params()['parameter'] = param.String(default=parameters[0], doc="""parameter""", constant=True)
+            parameters = sorted(listify(service_data['metadata'].pop('parameters')))
+            cls.param.parameter.objects = parameters
+            cls.param.parameter.default = parameters[0]
 
             self = UserServiceBase(name=service_name, provider=provider)
             self.service_name = service_name
@@ -207,7 +203,7 @@ class UserProvider(ProviderBase):
 
         config_file = self._get_path('quest.yml')
         with uri_open(config_file, self.is_remote) as yml:
-            provider_data = yaml.load(yml)
+            provider_data = yaml.safe_load(yml)
         self.name = 'user-' + provider_data['name']
         self._metadata = provider_data['metadata']
         self._metadata['service_uri'] = self.uri

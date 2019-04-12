@@ -36,16 +36,16 @@ Any settings that are not set explicitly are given default values
 
 Description of Settings:
 
-======================= ======================================================================= ====================================
-Variable Name           Description                                                             Default
------------------------ ----------------------------------------------------------------------- ------------------------------------
-QUEST_BASE_DIR            Base directory to save quest data/metadata                                determined by appdirs python package
+========================= ======================================================================= ====================================
+Variable Name             Description                                                             Default
+------------------------- ----------------------------------------------------------------------- ------------------------------------
+QUEST_BASE_DIR            Base directory to save quest data/metadata                              determined by appdirs python package
 QUEST_CACHE_DIR           Location to save cached data/metadata                                   QUEST_BASE_DIR/cache/
 QUEST_PROJECT_FILE        Name of project metadata file                                           quest_project.yml
 QUEST_PROJECTS_INDEX_FILE Name of projects index file listing available projects and their paths  quest_projects_index.yml
-QUEST_CONFIG_FILE         Name of quest_config file that these settings are saved in                quest_config.yml
-QUEST_USER_SERVICES       list of web/file uris to user defined Quest services                      None
-======================= ======================================================================= ====================================
+QUEST_CONFIG_FILE         Name of quest_config file that these settings are saved in              quest_config.yml
+QUEST_USER_SERVICES       list of web/file uris to user defined Quest services                    None
+========================= ======================================================================= ====================================
 
 You can add any extra settings needed by a plugin here as well using the keyword:arg structure.
 
