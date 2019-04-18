@@ -16,8 +16,6 @@ import sys
 import sphinx_rtd_theme
 from unittest.mock import MagicMock
 
-import quest
-
 
 class Mock(MagicMock):
     @classmethod
@@ -90,9 +88,9 @@ author = u'Environmental Simulator Team'
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
-#
-# The short X.Y version.
 
+import quest
+# The short X.Y version.
 version = quest.__version__
 # The full version, including alpha/beta/rc tags.
 release = version
