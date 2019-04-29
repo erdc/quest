@@ -292,7 +292,7 @@ DOWNLOAD_OPTIONS_FROM_ALL_SERVICES = {
 SERVICES_CATALOG_COUNT = [
     # ('svc://nasa:srtm-3-arc-second', 14297, 1000),
     # ('svc://nasa:srtm-30-arc-second', 27, 10),
-    ('svc://noaa-ncdc:ghcn-daily', 104126, 5000),
+    ('svc://noaa-ncdc:ghcn-daily', 113948, 5000),
     ('svc://noaa-ncdc:gsod', 28754, 1500),
     ('svc://noaa-coast:coops-meteorological', 375, 50),
     ('svc://noaa-coast:coops-water', 234, 50),

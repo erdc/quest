@@ -48,7 +48,7 @@ def test_search_catalog_from_service(api, service, expected, tolerance):
 @pytest.mark.slow
 def test_search_catalog_with_search_term(api):
     catalog_entries = api.search_catalog('svc://noaa-ncdc:ghcn-daily', filters={'search_terms': ['ZI']})
-    expected = 270
+    expected = 342
     tolerance = 10
     assert abs(len(catalog_entries) - expected) < tolerance
 
