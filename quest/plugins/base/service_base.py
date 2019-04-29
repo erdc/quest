@@ -187,10 +187,7 @@ class ServiceBase(param.Parameterized):  # TODO can I make this an abc and have 
         # merge extra data columns/fields into metadata as a dictionary
         extra_fields = list(set(catalog_entries.columns.tolist()) - set(reserved_catalog_entry_fields))
         # change NaN to None so it can be JSON serialized properly
-        catalog_entries['metadata'] = [
-            {k: None if v != v else v for k, v in record.items()}
-            for record in catalog_entries[extra_fields].to_dict(orient='records')
-        ]
+        catalog_entries['metadata'] = json.loads(catalog_entries[extra_fields].to_json(orient='records'))
         catalog_entries.drop(extra_fields, axis=1, inplace=True)
         columns = list(set(catalog_entries.columns.tolist()).intersection(reserved_geometry_fields))
         catalog_entries.drop(columns, axis=1, inplace=True)

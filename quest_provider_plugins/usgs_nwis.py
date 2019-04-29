@@ -223,7 +223,7 @@ def _states():
 
 
 def _parse_rdb(url, index=None):
-    df = pd.read_table(url, comment='#')
+    df = pd.read_csv(url, sep='\t', comment='#')
     if index is not None:
         df.index = df[index]
 
