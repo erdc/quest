@@ -1,6 +1,7 @@
+import json
 from quest import util
 from quest.plugins import ToolBase
-from quest.api import get_metadata
+from quest.api import get_metadata, update_metadata
 from quest.plugins import load_plugins
 from quest.static import DataType
 import pandas as pd
@@ -37,18 +38,20 @@ class TsBase(ToolBase):
 
 
         # setup new dataset
+        new_dset, file_path, catalog_entry = self._create_new_dataset(
+            old_dataset=dataset,
+            ext='.h5'
+        )
+
         new_metadata = {
             'parameter': new_df.metadata.get('parameter'),
             'unit': new_df.metadata.get('unit'),
             'datatype': orig_metadata['datatype'],
             'file_format': orig_metadata['file_format'],
+            'intake_plugin': orig_metadata['intake_plugin'],
+            'intake_args': json.dumps([file_path]),
         }
-
-        new_dset, file_path, catalog_entry = self._create_new_dataset(
-            old_dataset=dataset,
-            ext='.h5',
-            dataset_metadata=new_metadata,
-        )
+        update_metadata(new_dset, quest_metadata=new_metadata)
 
         # save dataframe
         io.write(file_path, new_df, new_metadata)

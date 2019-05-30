@@ -46,6 +46,8 @@ def define_models(db):
         message = orm.Optional(str)
         file_path = orm.Optional(str, nullable=True)
         visualization_path = orm.Optional(str)
+        intake_plugin = orm.Optional(str)
+        intake_args = orm.Optional(str)
 
         # setup relationships
         collection = orm.Required(Collection)

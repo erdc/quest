@@ -1,4 +1,12 @@
 import os
+import json
+
+from ulmo.usgs import ned
+
+from quest import util
+from quest.static import ServiceType, DataType, GeomType
+from quest.plugins import ProviderBase, SingleFileServiceBase
+
 
 from ulmo.usgs import ned
 
@@ -21,6 +29,12 @@ class UsgsNedServiceBase(SingleFileServiceBase):
     _parameter_map = {
         'elevation': 'elevation'
     }
+
+    def download(self, catalog_id, file_path, dataset, **kwargs):
+        # Call the base to download, but then update the dictionary with intake info
+        metadata = super().download(catalog_id, file_path, dataset, **kwargs)
+        metadata.update({'intake_plugin': 'rasterio', 'intake_args': json.dumps([file_path, {}])})
+        return metadata
 
     def search_catalog(self, **kwargs):
         service = self._description

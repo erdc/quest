@@ -1,3 +1,4 @@
+import json
 import param
 import rasterio
 import rasterio.mask
@@ -42,18 +43,20 @@ class RstMerge(ToolBase):
             if get_metadata(dataset)[dataset]['unit'] != orig_metadata['unit']:
                 raise ValueError('Units must match for all datasets')
 
+        new_dset, file_path, catalog_entry = self._create_new_dataset(
+            old_dataset=datasets[0],
+            ext='.tif'
+        )
+
         new_metadata = {
             'parameter': orig_metadata['parameter'],
             'datatype': orig_metadata['datatype'],
             'file_format': orig_metadata['file_format'],
+            'intake_plugin': orig_metadata['intake_plugin'],
+            'intake_args': json.dumps([file_path, {}]),
             'unit': orig_metadata['unit'],
         }
-
-        new_dset, file_path, catalog_entry = self._create_new_dataset(
-            old_dataset=datasets[0],
-            ext='.tif',
-            dataset_metadata=new_metadata,
-        )
+        update_metadata(new_dset, quest_metadata=new_metadata)
 
         open_datasets = [rasterio.open(d) for d in raster_files]
         profile = open_datasets[0].profile

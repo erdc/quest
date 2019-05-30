@@ -1,4 +1,5 @@
 import os
+import json
 
 import param
 import pandas as pd
@@ -6,7 +7,6 @@ from ulmo.ncdc import ghcn_daily, gsod
 
 from quest.static import ServiceType, GeomType, DataType
 from quest.plugins import ProviderBase, TimePeriodServiceBase, load_plugins
-
 
 BASE_PATH = 'ncdc'
 
@@ -26,7 +26,7 @@ class NcdcServiceBase(TimePeriodServiceBase):
             'geographical_areas': self.geographical_areas,
             'bounding_boxes': self.bounding_boxes
         }
-    
+
     @property
     def parameters(self):
         return {
@@ -95,6 +95,8 @@ class NcdcServiceBase(TimePeriodServiceBase):
             'file_path': file_path,
             'file_format': 'timeseries-hdf5',
             'datatype': DataType.TIMESERIES,
+            'intake_plugin': 'quest_timeseries_hdf5',
+            'intake_args': json.dumps([file_path]),
             'parameter': self.parameter,
             'unit': self._unit_map[self.parameter],
             'service_id': 'svc://ncdc:{}/{}'.format(self.service_name, catalog_id)

@@ -11,6 +11,7 @@ from .. import util
 from .. import static
 from ..plugins import load_providers, load_plugins, list_plugins
 from ..database.database import get_db, db_session, select_datasets
+import json
 
 
 @add_async
@@ -410,6 +411,14 @@ def open_dataset(dataset, fmt=None, **kwargs):
     m = get_metadata(dataset).get(dataset)
     file_format = m.get('file_format')
     path = m.get('file_path')
+    intake_plugin = m.get('intake_plugin')
+    required = []
+    args = m.get('intake_args')
+    if len(args.strip()):
+        # Get args from json if available
+        required = json.loads(m.get('intake_args'))
+    else:
+        raise ValueError('No intake plugin found')
 
     if path is None:
         raise ValueError('No dataset file found')
@@ -417,9 +426,15 @@ def open_dataset(dataset, fmt=None, **kwargs):
     if file_format not in list_plugins(static.PluginType.IO):
         raise ValueError('No reader available for: %s' % file_format)
 
-    io = load_plugins(static.PluginType.IO, file_format)[file_format]
-    return io.open(path, fmt=fmt, **kwargs)
+    # Use intake plugin to open
+    if intake_plugin:
+        # New code, with 'intake_plugin' added to the local .db
+        plugin_name = 'open_' + intake_plugin
 
+        module = __import__('intake')
+        func = getattr(module, plugin_name)
+        source = func(*required, **kwargs)
+        return source.read()
 
 @add_async
 def visualize_dataset(dataset, update_cache=False, **kwargs):

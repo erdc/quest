@@ -10,6 +10,7 @@ import pandas as pd
 import param
 import requests
 import rasterio
+import json
 from imageio import imread
 from quest.static import ServiceType
 from requests.packages.urllib3.util.retry import Retry
@@ -92,6 +93,8 @@ class WMTSImageryService(SingleFileServiceBase):
             'metadata': {'bbox': adjusted_bbox},
             'file_path': file_path,
             'file_format': 'raster-gdal',
+            'intake_plugin': 'rasterio',
+            'intake_args': json.dumps([file_path, {}]),
             'datatype': 'image',
         }
 

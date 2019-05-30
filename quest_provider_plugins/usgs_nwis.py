@@ -8,6 +8,7 @@ from functools import partial
 
 from quest import util
 from quest.static import ServiceType, GeomType, DataType
+import json
 from quest.plugins import ProviderBase, TimePeriodServiceBase, load_plugins
 
 
@@ -70,6 +71,8 @@ class NwisServiceBase(TimePeriodServiceBase):
             'name': dataset,
             'metadata': data,
             'file_path': file_path,
+            'intake_plugin': 'quest_timeseries_hdf5',
+            'intake_args': json.dumps([file_path]),
             'file_format': 'timeseries-hdf5',
             'datatype': DataType.TIMESERIES,
             'parameter': parameter,

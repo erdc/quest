@@ -1,3 +1,4 @@
+import json
 import param
 import rasterio
 import subprocess
@@ -35,17 +36,19 @@ class RstReprojection(ToolBase):
 
         dst_crs = self.new_crs
 
+        new_dset, file_path, catalog_entry = self._create_new_dataset(
+            old_dataset=dataset,
+            ext='.tif'
+        )
+
         new_metadata = {
             'parameter': orig_metadata['parameter'],
             'datatype': orig_metadata['datatype'],
             'file_format': orig_metadata['file_format'],
+            'intake_plugin': orig_metadata['intake_plugin'],
+            'intake_args': json.dumps([file_path, {}]),
         }
-
-        new_dset, file_path, catalog_entry = self._create_new_dataset(
-            old_dataset=dataset,
-            ext='.tif',
-            dataset_metadata=new_metadata,
-        )
+        update_metadata(new_dset, quest_metadata=new_metadata)
 
         # run filter
         with rasterio.open(src_path) as src:
